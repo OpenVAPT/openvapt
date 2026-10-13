@@ -17,7 +17,7 @@
 
 | System | Provider | Interface and version | Role |
 |---|---|---|---|
-| Claude Opus 5.5 (model id `claude-opus-5-5`) | Anthropic | Claude Code (desktop app), October 2026 | Planned, designed, architected, wrote and tested all code; wrote the website, course (Academy), documentation and legal drafts; built, committed, pushed and deployed; coordinated the other AI systems; verified their output. |
+| Claude Opus 5.5 (model id `claude-opus-5-5`) | Anthropic | Claude Code (desktop app), October 2026 | Planned, designed and architected the system; wrote and tested most of the code (Codex wrote the parts listed in its row); wrote the website, course (Academy), documentation and legal drafts; built, committed, pushed and deployed; coordinated the other AI systems; verified their output. |
 | Claude (same model, as a separate sub-agent) | Anthropic | Claude Code sub-agent | Reviewed and audited all legal documents in the role of a technology lawyer focused on Malaysian law; produced findings and replacement clauses that were then applied. This is an AI review, not legal advice. |
 | GPT-5.6 (model id `gpt-5.6-sol`) | OpenAI | Codex CLI 0.162.1 | Performed an independent read-only code review (17 findings, 15 improvement proposals) and implemented the fixes; later built 18 network, data-service and TLS checks and the professional report redesign to Claude's specification. Each piece of work was done on a separate branch and reviewed by Claude before merging. |
 

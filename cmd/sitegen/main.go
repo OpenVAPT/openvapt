@@ -27,6 +27,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -509,9 +510,16 @@ func chartData(cs []*check.Check) map[string]any {
 		"cis": cisNV, "csf": toNV(csf, func(k string) string { return k + " " + csfNames[k] })}
 }
 
+// cisKey extracts the control number from "CIS 12 ..." for numeric sorting.
 func cisKey(name string) int {
-	var n int
-	fmt.Sscanf(strings.TrimPrefix(name, "CIS "), "%d", &n)
+	f := strings.Fields(strings.TrimPrefix(name, "CIS "))
+	if len(f) == 0 {
+		return 0
+	}
+	n, err := strconv.Atoi(f[0])
+	if err != nil {
+		return 0
+	}
 	return n
 }
 
