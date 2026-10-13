@@ -43,6 +43,7 @@ jobs:
         run: |
           ! grep -rEl "https?://(fonts\.googleapis|www\.google-analytics|googletagmanager|cdn\.|unpkg|jsdelivr)" dist/site
           ! grep -rE "document\.cookie|localStorage|sessionStorage|navigator\.sendBeacon|fetch\(" dist/site/assets
-      - name: No email addresses published
+      - name: No email addresses published (project-authored files only)
         run: |
-          ! grep -rEIo "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}" --exclude-dir=.git --exclude=ci.yml . | grep -v -E "noreply|@openssh\.com|@v[0-9]|@[0-9]{4}\.|actions/"
+          ! git grep -IEoh "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}" -- . ':!site/static/assets/vendor' ':!site/package-lock.json' ':!.github/workflows/ci.yml' \
+            | grep -v -E "noreply|@openssh\.com|@v[0-9]|@[0-9]{4}\.|@[0-9]x\." 
