@@ -7,6 +7,16 @@ name: release
 # built here from public OSV and CISA KEV data. Because the snapshot changes
 # the binary, the full test suite, lab proof and installer test run again on
 # exactly what ships, and the snapshot's checksum is stated in the notes.
+#
+# Job graph (P-01, reproducible double build):
+#   snapshot  unprivileged: builds the vulnerability snapshot once and hands it
+#             over as an artifact, so both builds embed identical data
+#   build     unprivileged, twice (two separate runners, matrix 1 and 2): each
+#             checks out the same commit, embeds the same snapshot, runs the
+#             tests and the installer test, and builds with -trimpath,
+#             -buildvcs=false and CGO_ENABLED=0 (Makefile)
+#   publish   privileged: refuses to publish unless both builds produced the
+#             same bytes, then signs, attests and publishes build 1
 on:
   workflow_call:
     inputs:
@@ -19,10 +29,11 @@ on:
 permissions:
   contents: read
 jobs:
-  # Unprivileged: runs the build, tests and third-party build tools with a
-  # read-only token and no OIDC, and hands the result over as an artifact.
-  build:
+  # Unprivileged: read-only token, no OIDC. Decides whether the release already
+  # exists and builds the snapshot that both builds embed.
+  snapshot:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     outputs:
@@ -61,14 +72,20 @@ jobs:
             echo "::error::release $TAG is an unpublished draft left by an earlier run. With the owner's approval, delete it (gh release delete $TAG) and re-run."
             exit 1
           fi
+          # Tags are annotated: the ref points at a tag object, which points
+          # at the commit.
           target=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq .object.sha)
+          if [ "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq .object.type)" = "tag" ]; then
+            target=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$target" --jq .object.sha)
+          fi
           if [ "$target" != "$COMMIT" ]; then echo "release $TAG exists at $target, not $COMMIT"; exit 1; fi
           # Every expected asset must be present, and match SHA256SUMS, or
           # record must not run on this release.
           assets=$(gh release view "$TAG" --json assets -q '.assets[].name')
           missing=""
           for a in openvapt_linux_amd64 openvapt_linux_arm64 openvapt_linux_amd64.sigstore.json openvapt_linux_arm64.sigstore.json \
-                   SHA256SUMS sbom.cdx.json GO_VERSION.txt "openvapt-${TAG}-vulndb-snapshot.json.gz" "openvapt-${TAG}-source.tar.gz"; do
+                   SHA256SUMS SHA256SUMS.sigstore.json sbom.cdx.json sbom.cdx.json.sigstore.json GO_VERSION.txt \
+                   "openvapt-${TAG}-vulndb-snapshot.json.gz" "openvapt-${TAG}-vulndb-snapshot.json.gz.sigstore.json" "openvapt-${TAG}-source.tar.gz"; do
             echo "$assets" | grep -qxF "$a" || missing="$missing $a"
           done
           if [ -n "$missing" ]; then echo "release $TAG is incomplete, missing:$missing"; exit 1; fi
@@ -82,39 +99,101 @@ jobs:
           go run ./cmd/vulndbgen -out internal/vulndb/data/snapshot.json.gz \
             -ecosystems "Debian:11,Debian:12,Debian:13,Ubuntu:20.04:LTS,Ubuntu:22.04:LTS,Ubuntu:24.04:LTS,AlmaLinux:8,AlmaLinux:9,Rocky Linux:8,Rocky Linux:9,Packagist,npm" \
             -packages docs/vulndb-packages.txt
-      - name: Test exactly what ships (snapshot included)
+          sha256sum internal/vulndb/data/snapshot.json.gz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: steps.existing.outputs.exists == 'false'
+        with:
+          name: vulndb-${{ inputs.tag }}
+          path: internal/vulndb/data/snapshot.json.gz
+          if-no-files-found: error
+          retention-days: 3
+
+  # Unprivileged, run twice on separate runners: runs the build, tests and
+  # third-party build tools with a read-only token and no OIDC, and hands the
+  # result over as an artifact. publish compares the two results.
+  build:
+    needs: snapshot
+    if: needs.snapshot.outputs.exists == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: true
+      matrix:
+        builder: [1, 2]
+    env:
+      TAG: ${{ inputs.tag }}
+      COMMIT: ${{ inputs.commit }}
+    steps:
+      - name: Validate inputs
         run: |
+          echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' || { echo "bad tag $TAG"; exit 1; }
+          echo "$COMMIT" | grep -Eq '^[0-9a-f]{40}$' || { echo "bad commit $COMMIT"; exit 1; }
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ inputs.commit }}
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: vulndb-${{ inputs.tag }}
+          path: internal/vulndb/data
+      - name: Test exactly what ships (snapshot included)
+        run: |
+          set -eu
+          test -s internal/vulndb/data/snapshot.json.gz
+          sha256sum internal/vulndb/data/snapshot.json.gz
           go vet ./...
           go test -race ./...
-      - name: Build
-        if: steps.existing.outputs.exists == 'false'
+      - name: Build, reproducible (-trimpath, -buildvcs=false, CGO_ENABLED=0, fixed ldflags)
         run: make release VERSION="$TAG" COMMIT="$COMMIT"
       - name: Installer end to end on the release binaries
-        if: steps.existing.outputs.exists == 'false'
         run: |
           set -eu
           rel="$RUNNER_TEMP/rel/download/$TAG"; mkdir -p "$rel"
           cp dist/release/openvapt_linux_* dist/release/SHA256SUMS "$rel/"
           OPENVAPT_ALLOW_FILE=1 OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel" sh scripts/install.sh --version "$TAG" --dir "$RUNNER_TEMP/bin"
           "$RUNNER_TEMP/bin/openvapt" version | grep -F "$TAG"
-      - name: Snapshot, source archive, SBOM and checksums
-        if: steps.existing.outputs.exists == 'false'
+      - name: Snapshot, source archive, SBOM, release notes and checksums
         run: |
           set -eu
           cp internal/vulndb/data/snapshot.json.gz "dist/release/openvapt-${TAG}-vulndb-snapshot.json.gz"
           git archive --format=tar.gz --prefix="openvapt-${TAG}/" -o "dist/release/openvapt-${TAG}-source.tar.gz" "$COMMIT"
-          go run github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@v1.8.0 app -main cmd/openvapt -output dist/release/sbom.cdx.json
+          # The SBOM names the main component by the tag. The tag is created
+          # by publish, after this job, so a local tag (never pushed: this
+          # checkout has no credentials) gives cyclonedx-gomod the version.
+          git tag "$TAG" "$COMMIT"
+          # Built for the host, then run with the shipped build constraints
+          # (go run would cross-compile the tool itself). No licence
+          # detection: the detector mislabels the project's own licence.
+          GOBIN="$RUNNER_TEMP/bin" go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@v1.8.0
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 "$RUNNER_TEMP/bin/cyclonedx-gomod" app \
+            -json -std -main cmd/openvapt -output dist/release/sbom.cdx.json
+          python3 - "$TAG" dist/release/sbom.cdx.json <<'PY'
+          import json, sys
+          tag, path = sys.argv[1], sys.argv[2]
+          bom = json.load(open(path))
+          assert bom.get("bomFormat") == "CycloneDX", "not a CycloneDX JSON SBOM"
+          main = bom["metadata"]["component"]
+          assert main.get("version") == tag, f"SBOM main component version {main.get('version')!r} is not {tag!r}"
+          print("SBOM ok:", main.get("name"), main.get("version"), "components:", len(bom.get("components", [])))
+          PY
           go version > dist/release/GO_VERSION.txt
-          cp CHANGELOG.md "$RUNNER_TEMP/CHANGELOG.md"
+          # Release notes: only the [Unreleased] section of CHANGELOG.md, which
+          # the record job then renames to this version (keep-a-changelog).
+          go run ./cmd/channel notes > dist/release/RELEASE_NOTES.md
           cd dist/release
           rm -f SHA256SUMS
           sha256sum openvapt_linux_* openvapt-*-source.tar.gz openvapt-*-vulndb-snapshot.json.gz sbom.cdx.json GO_VERSION.txt > SHA256SUMS
-          cp "$RUNNER_TEMP/CHANGELOG.md" CHANGELOG.md
+          cat SHA256SUMS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: steps.existing.outputs.exists == 'false'
         with:
-          name: release-${{ inputs.tag }}
+          name: release-${{ inputs.tag }}-${{ matrix.builder }}
           path: dist/release/
           if-no-files-found: error
           retention-days: 3
@@ -122,9 +201,10 @@ jobs:
   # Privileged: signs, attests and publishes. It runs no repository or
   # third-party build code, only cosign, the attestation action and gh.
   publish:
-    needs: build
-    if: needs.build.outputs.exists == 'false'
+    needs: [snapshot, build]
+    if: needs.snapshot.outputs.exists == 'false'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
       id-token: write   # keyless Sigstore signing
@@ -140,26 +220,79 @@ jobs:
           echo "$COMMIT" | grep -Eq '^[0-9a-f]{40}$' || { echo "bad commit $COMMIT"; exit 1; }
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: release-${{ inputs.tag }}
+          name: release-${{ inputs.tag }}-1
           path: dist/release
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release-${{ inputs.tag }}-2
+          path: build2
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: vulndb-${{ inputs.tag }}
+          path: snapshot
+      - name: Both builds must be identical (reproducible double build)
+        run: |
+          set -eu
+          # Binaries, Go version and the embedded snapshot must match byte for
+          # byte between the two runners and the shared snapshot artifact. The
+          # SBOM carries a timestamp and serial number, so it is not compared.
+          for f in openvapt_linux_amd64 openvapt_linux_arm64 GO_VERSION.txt "openvapt-${TAG}-vulndb-snapshot.json.gz"; do
+            a=$(sha256sum "dist/release/$f" | cut -d' ' -f1)
+            b=$(sha256sum "build2/$f" | cut -d' ' -f1)
+            [ "$a" = "$b" ] || { echo "::error::$f differs between build 1 ($a) and build 2 ($b); not publishing"; exit 1; }
+            echo "$a  $f  (both builds)"
+          done
+          s=$(sha256sum snapshot/snapshot.json.gz | cut -d' ' -f1)
+          [ "$s" = "$(sha256sum "dist/release/openvapt-${TAG}-vulndb-snapshot.json.gz" | cut -d' ' -f1)" ] || { echo "::error::shipped snapshot differs from the snapshot artifact"; exit 1; }
+          # The binary digests build 2 recorded must agree with build 1's SHA256SUMS.
+          grep -E ' openvapt_linux_' build2/SHA256SUMS | sort > "$RUNNER_TEMP/sums2"
+          grep -E ' openvapt_linux_' dist/release/SHA256SUMS | sort > "$RUNNER_TEMP/sums1"
+          diff "$RUNNER_TEMP/sums1" "$RUNNER_TEMP/sums2"
       - name: Re-verify the build output against SHA256SUMS
         run: |
           set -eu
-          mv dist/release/CHANGELOG.md CHANGELOG.md
+          mv dist/release/RELEASE_NOTES.md RELEASE_NOTES.md
           cd dist/release
           sha256sum -c --strict SHA256SUMS
           for f in *; do grep -q "  $f\$" SHA256SUMS || [ "$f" = SHA256SUMS ] || { echo "unexpected file $f"; exit 1; }; done
       - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
-      - name: Sign
+      - name: Sign the binaries, SHA256SUMS, the vulnerability snapshot and the SBOM
         run: |
           set -eu
           cd dist/release
-          for f in openvapt_linux_*; do cosign sign-blob --yes --bundle "$f.sigstore.json" "$f"; done
+          for f in openvapt_linux_amd64 openvapt_linux_arm64 SHA256SUMS sbom.cdx.json "openvapt-${TAG}-vulndb-snapshot.json.gz"; do
+            cosign sign-blob --yes --bundle "$f.sigstore.json" "$f"
+          done
       - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: |
             dist/release/openvapt_linux_amd64
             dist/release/openvapt_linux_arm64
+            dist/release/SHA256SUMS
+            dist/release/sbom.cdx.json
+            dist/release/openvapt-${{ inputs.tag }}-vulndb-snapshot.json.gz
+      - name: Annotated tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          if gh api "repos/$GH_REPO/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            # Left by an interrupted earlier run: accept it only if it points at this commit.
+            obj=$(gh api "repos/$GH_REPO/git/ref/tags/$TAG" --jq .object.sha)
+            if [ "$(gh api "repos/$GH_REPO/git/ref/tags/$TAG" --jq .object.type)" = "tag" ]; then
+              obj=$(gh api "repos/$GH_REPO/git/tags/$obj" --jq .object.sha)
+            fi
+            [ "$obj" = "$COMMIT" ] || { echo "::error::tag $TAG already exists at $obj, not $COMMIT"; exit 1; }
+            echo "tag $TAG already points at $COMMIT"; exit 0
+          fi
+          tag_sha=$(gh api "repos/$GH_REPO/git/tags" \
+            -f tag="$TAG" -f object="$COMMIT" -f type=commit \
+            -f message="OpenVAPT $TAG at commit $COMMIT, published by release.yml after every channel gate passed (release/channels.json)." \
+            -f 'tagger[name]=OpenVAPT Release Agent' \
+            -f 'tagger[email]=41898282+github-actions[bot]@users.noreply.github.com' \
+            -f "tagger[date]=$(date -u +%Y-%m-%dT%H:%M:%SZ)" --jq .sha)
+          gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$TAG" -f sha="$tag_sha" >/dev/null
+          echo "created annotated tag $TAG ($tag_sha) at $COMMIT"
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -173,19 +306,23 @@ jobs:
           {
             echo "$kind"; echo
             echo "Promoted through the OpenVAPT release channels after every gate passed on commit $COMMIT; evidence: release/channels.json."
-            echo "The binaries are that commit plus the vulnerability snapshot built at release time from public OSV and CISA KEV data (sha256 $snap); the full tests and the installer test ran again on exactly these binaries."
-            echo "Verify before use: SHA256SUMS, Sigstore bundles, build provenance and SBOM are attached."
-            echo; cat CHANGELOG.md
+            echo "The binaries are that commit plus the vulnerability snapshot built at release time from public OSV and CISA KEV data (sha256 $snap); the full tests and the installer test ran again on exactly these binaries, and two separate builds of the same source produced identical bytes."
+            echo
+            echo "Verify before use: \`gh attestation verify openvapt_linux_amd64 --repo $GH_REPO\` (or arm64), \`cosign verify-blob --bundle SHA256SUMS.sigstore.json --certificate-identity-regexp '^https://github.com/$GH_REPO/.github/workflows/release.yml@refs/heads/main$' --certificate-oidc-issuer https://token.actions.githubusercontent.com SHA256SUMS\`, then \`sha256sum -c SHA256SUMS\`. Sigstore bundles cover both binaries, SHA256SUMS, the SBOM and the vulnerability snapshot."
+            echo
+            echo "## Changes in $TAG"; echo
+            cat RELEASE_NOTES.md
           } > notes.md
           # Created as a draft, so nobody sees a release with missing
           # assets; checked complete and verified, then published.
           # shellcheck disable=SC2086
-          gh release create "$TAG" --draft --title "OpenVAPT $TAG" --notes-file notes.md --target "$COMMIT" $pre
+          gh release create "$TAG" --draft --title "OpenVAPT $TAG" --notes-file notes.md --verify-tag $pre
           for f in dist/release/*; do gh release upload "$TAG" "$f"; done
           d="$RUNNER_TEMP/published"; mkdir -p "$d"
           gh release download "$TAG" -D "$d"
           for a in openvapt_linux_amd64 openvapt_linux_arm64 openvapt_linux_amd64.sigstore.json openvapt_linux_arm64.sigstore.json \
-                   SHA256SUMS sbom.cdx.json GO_VERSION.txt "openvapt-${TAG}-vulndb-snapshot.json.gz" "openvapt-${TAG}-source.tar.gz"; do
+                   SHA256SUMS SHA256SUMS.sigstore.json sbom.cdx.json sbom.cdx.json.sigstore.json GO_VERSION.txt \
+                   "openvapt-${TAG}-vulndb-snapshot.json.gz" "openvapt-${TAG}-vulndb-snapshot.json.gz.sigstore.json" "openvapt-${TAG}-source.tar.gz"; do
             test -s "$d/$a" || { echo "draft $TAG is missing $a; left as draft"; exit 1; }
           done
           (cd "$d" && sha256sum -c --strict SHA256SUMS)
