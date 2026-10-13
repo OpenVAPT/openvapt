@@ -72,6 +72,9 @@ func apply(f *sys.Fake, fx []Fixture) *sys.Fake {
 	if f.TLSResp == nil {
 		f.TLSResp = map[string]sys.TLSInfo{}
 	}
+	if f.TLSCipherResp == nil {
+		f.TLSCipherResp = map[string]sys.TLSInfo{}
+	}
 	for _, x := range fx {
 		x(f)
 	}

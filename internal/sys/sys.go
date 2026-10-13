@@ -11,6 +11,8 @@ package sys
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -47,14 +49,17 @@ type HTTPResponse struct {
 
 // TLSInfo describes the result of one TLS handshake.
 type TLSInfo struct {
-	Version    uint16
-	Cipher     uint16
-	NotAfter   time.Time
-	Subject    string
-	DNSNames   []string
-	SelfSigned bool
-	Trusted    bool
-	TrustError string
+	Version            uint16
+	Cipher             uint16
+	NotAfter           time.Time
+	Subject            string
+	DNSNames           []string
+	SelfSigned         bool
+	Trusted            bool
+	TrustError         string
+	PublicKeyAlgorithm string
+	PublicKeyBits      int
+	SignatureAlgorithm string
 }
 
 type ReadResult struct {
@@ -82,6 +87,7 @@ type System interface {
 	// TLS performs a handshake with 127.0.0.1:port using serverName as SNI,
 	// limited to the given protocol version range.
 	TLS(ctx context.Context, port, serverName string, minV, maxV uint16) (TLSInfo, error)
+	TLSWithCiphers(ctx context.Context, port, serverName string, cipherSuites []uint16) (TLSInfo, error)
 }
 
 // ErrNotAllowed is returned for a command that is not on the allow-list.
@@ -296,6 +302,14 @@ func (l *Live) HTTP(ctx context.Context, scheme, vhost, path string) (HTTPRespon
 }
 
 func (l *Live) TLS(ctx context.Context, port, serverName string, minV, maxV uint16) (TLSInfo, error) {
+	return l.tls(ctx, port, serverName, minV, maxV, nil)
+}
+
+func (l *Live) TLSWithCiphers(ctx context.Context, port, serverName string, cipherSuites []uint16) (TLSInfo, error) {
+	return l.tls(ctx, port, serverName, tls.VersionTLS12, tls.VersionTLS12, cipherSuites)
+}
+
+func (l *Live) tls(ctx context.Context, port, serverName string, minV, maxV uint16, cipherSuites []uint16) (TLSInfo, error) {
 	d := scope.Dialer{Timeout: 5 * time.Second}
 	raw, err := d.DialContext(ctx, "tcp", "127.0.0.1:"+port)
 	if err != nil {
@@ -303,7 +317,7 @@ func (l *Live) TLS(ctx context.Context, port, serverName string, minV, maxV uint
 	}
 	defer raw.Close()
 	_ = raw.SetDeadline(time.Now().Add(8 * time.Second))
-	cfg := &tls.Config{ServerName: serverName, InsecureSkipVerify: true, MinVersion: minV, MaxVersion: maxV} // #nosec G402 -- deliberately probes weak or invalid TLS on 127.0.0.1
+	cfg := &tls.Config{ServerName: serverName, InsecureSkipVerify: true, MinVersion: minV, MaxVersion: maxV, CipherSuites: cipherSuites} // #nosec G402 -- deliberately probes weak or invalid TLS on 127.0.0.1
 	conn := tls.Client(raw, cfg)
 	if err := conn.HandshakeContext(ctx); err != nil {
 		return TLSInfo{}, err
@@ -314,6 +328,14 @@ func (l *Live) TLS(ctx context.Context, port, serverName string, minV, maxV uint
 		c := st.PeerCertificates[0]
 		info.NotAfter = c.NotAfter
 		info.Subject = c.Subject.CommonName
+		info.PublicKeyAlgorithm = c.PublicKeyAlgorithm.String()
+		info.SignatureAlgorithm = c.SignatureAlgorithm.String()
+		switch k := c.PublicKey.(type) {
+		case *rsa.PublicKey:
+			info.PublicKeyBits = k.N.BitLen()
+		case *ecdsa.PublicKey:
+			info.PublicKeyBits = k.Curve.Params().BitSize
+		}
 		info.DNSNames = c.DNSNames
 		info.SelfSigned = c.Issuer.String() == c.Subject.String()
 		roots, rootErr := x509.SystemCertPool()

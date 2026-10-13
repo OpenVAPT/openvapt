@@ -15,6 +15,7 @@ func TestAllowList(t *testing.T) {
 		{"php", "-r", "echo ini_get('x'); system('id');"}, {"sh", "-c", "id"},
 		{"php", "-r", "echo ini_get('x').file_get_contents('/etc/shadow');"},
 		{"apt-get", "-s", "upgrade", "-o", "APT::Update::Pre-Invoke::=id"}, {"iptables", "-S", "--wait"},
+		{"ip6tables", "-S", "--wait"}, {"nft", "list", "ruleset", "extra"},
 		{"systemctl", "is-active", "--all"}, {"systemctl", "is-active", "../bad"}, {"sshd", "-T", "-C", "user=root,host=x,addr=203.0.113.1"},
 	}
 	for _, c := range ok {

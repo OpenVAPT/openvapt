@@ -39,7 +39,7 @@ func (r *Report) SARIF() ([]byte, error) {
 			ID: f.ID, Name: f.Title,
 			ShortDescription: msg{f.Summary}, FullDescription: msg{f.Rationale},
 			Help: msg{f.Fix}, HelpURI: "https://openvapt.com/checks/" + f.ID + ".html",
-			Properties: map[string]any{"security-severity": sevScore(f.Severity), "tags": append(append([]string{"security"}, f.Standards.CWE...), f.Standards.OWASP...)},
+			Properties: map[string]any{"security-severity": sevScore(f.Severity), "category": f.Category, "effort": f.Effort, "tags": append(append([]string{"security"}, f.Standards.CWE...), f.Standards.OWASP...)},
 		})
 		for _, res := range f.Results {
 			if res.Status != check.Fail && res.Status != check.Incomplete && res.Status != check.Error {

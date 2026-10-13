@@ -54,6 +54,43 @@ func TestRenderersEscapeHostileValues(t *testing.T) {
 	if json.Unmarshal(s, &doc) != nil || !strings.Contains(string(s), "Incomplete") {
 		t.Fatal("invalid SARIF or missing incomplete result")
 	}
+	for _, section := range []string{"Executive Summary", "Risk Heat Map", "Compliance Coverage", "Prioritised Remediation Plan", "Coverage Gaps", "Methodology", "Limitations"} {
+		if !strings.Contains(md, section) || !strings.Contains(string(h), section) {
+			t.Errorf("missing report section %q", section)
+		}
+	}
+}
+
+func TestJSONAndSARIFIncludeCategoryAndEffort(t *testing.T) {
+	r := hostileReport()
+	r.Findings[0].Category = check.CatNetwork
+	r.Findings[0].Effort = check.EffortLow
+	j, _ := r.JSON()
+	s, _ := r.SARIF()
+	for name, data := range map[string][]byte{"json": j, "sarif": s} {
+		if !strings.Contains(string(data), `"category"`) || !strings.Contains(string(data), `"effort"`) {
+			t.Errorf("%s omitted category or effort", name)
+		}
+	}
+}
+
+func TestLoadMigratesSchemaTwo(t *testing.T) {
+	r := hostileReport()
+	r.Schema = "openvapt.report/2"
+	r.Findings[0].Category = ""
+	r.Findings[0].Effort = ""
+	b, _ := json.Marshal(r)
+	p := filepath.Join(t.TempDir(), "old.json")
+	if err := os.WriteFile(p, b, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Load(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Schema != SchemaVersion || got.Findings[0].Category == "" || got.Findings[0].Effort == "" {
+		t.Fatalf("migration failed: %+v", got.Findings[0])
+	}
 }
 
 func TestWriteAllRejectsSymlinksAndExistingFiles(t *testing.T) {

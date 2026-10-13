@@ -24,6 +24,17 @@ func Load(path string) (*Report, error) {
 	if err := json.Unmarshal(b, &r); err != nil {
 		return nil, fmt.Errorf("%s is not an OpenVAPT report: %w", path, err)
 	}
+	if r.Schema == "openvapt.report/2" {
+		for i := range r.Findings {
+			if r.Findings[i].Category == "" {
+				r.Findings[i].Category = check.CatConfig
+			}
+			if r.Findings[i].Effort == "" {
+				r.Findings[i].Effort = check.EffortMedium
+			}
+		}
+		r.Schema = SchemaVersion
+	}
 	if r.Schema != SchemaVersion {
 		return nil, fmt.Errorf("%s has schema %q, expected %q", path, r.Schema, SchemaVersion)
 	}
@@ -107,14 +118,31 @@ func (r *Report) Markdown() string {
 	fmt.Fprintf(&b, "> %s\n\n", r.Disclaimer)
 	fmt.Fprintf(&b, "| Item | Value |\n|---|---|\n| Host | %s |\n| Operating System | %s |\n| Scan Time (UTC) | %s |\n| Run As Root | %v |\n| Tool | %s %s (%s) |\n\n",
 		mdTable(r.Scan.Host), mdTable(r.Scan.OS), r.Scan.Started.Format("2006-01-02 15:04:05"), r.Scan.AsRoot, mdTable(r.Tool.Name), mdTable(r.Tool.Version), mdTable(short(r.Tool.Commit)))
-	fmt.Fprintf(&b, "## Summary\n\n| Critical | High | Medium | Low | Passed | Incomplete | Skipped | Errors |\n|---|---|---|---|---|---|---|---|\n| %d | %d | %d | %d | %d | %d | %d | %d |\n\n",
+	fmt.Fprintf(&b, "## Executive Summary\n\n%s\n\n| Critical | High | Medium | Low | Passed | Incomplete | Skipped | Errors |\n|---|---|---|---|---|---|---|---|\n| %d | %d | %d | %d | %d | %d | %d | %d |\n\n",
+		mdText(r.Posture()),
 		s.Critical, s.High, s.Medium, s.Low, s.Passed, s.Incomplete, s.Skipped, s.Errors)
+	fmt.Fprintf(&b, "### Top 5 Risks\n\n| ID | Risk | Severity | Category |\n|---|---|---|---|\n")
+	for _, f := range r.TopRisks() {
+		fmt.Fprintf(&b, "| %s | %s | %s | %s |\n", mdTable(f.ID), mdTable(f.Title), mdTable(f.Severity), mdTable(string(f.Category)))
+	}
+	fmt.Fprintf(&b, "\n## Risk Heat Map\n\n| Category | Critical | High | Medium | Low | Info |\n|---|---|---|---|---|---|\n")
+	for _, x := range r.HeatMap() {
+		fmt.Fprintf(&b, "| %s | %d | %d | %d | %d | %d |\n", mdTable(x.Category), x.Critical, x.High, x.Medium, x.Low, x.Info)
+	}
+	fmt.Fprintf(&b, "\n## Compliance Coverage\n\nCoverage is a mapping of automated checks, not certification of compliance.\n\n| Framework | Control or Category | Checks Run | Failed | Passed |\n|---|---|---|---|---|\n")
+	for _, x := range r.ComplianceCoverage() {
+		fmt.Fprintf(&b, "| %s | %s | %d | %d | %d |\n", mdTable(x.Framework), mdTable(x.Control), x.Checks, x.Failed, x.Passed)
+	}
+	fmt.Fprintf(&b, "\n## Prioritised Remediation Plan\n\nHigh-severity, low-effort quick wins appear first.\n\n")
+	for i, f := range r.RemediationPlan() {
+		fmt.Fprintf(&b, "%d. **%s - %s** (%s severity, %s effort)\n   %s\n", i+1, mdText(f.ID), mdText(f.Title), mdText(f.Severity), mdText(string(f.Effort)), mdText(f.Fix))
+	}
 	fmt.Fprintf(&b, "## Findings\n\n")
 	for _, f := range r.Findings {
 		if f.Status != string(check.Fail) {
 			continue
 		}
-		fmt.Fprintf(&b, "### [%s] %s (%s)\n\n%s\n\n**Why it matters:** %s\n\n", strings.ToUpper(mdText(f.Severity)), mdText(f.Title), mdText(f.ID), mdText(f.Summary), mdText(f.Rationale))
+		fmt.Fprintf(&b, "### [%s] %s (%s)\n\nCategory: %s. Effort: %s.\n\n%s\n\n**Why it matters:** %s\n\n", strings.ToUpper(mdText(f.Severity)), mdText(f.Title), mdText(f.ID), mdText(string(f.Category)), mdText(string(f.Effort)), mdText(f.Summary), mdText(f.Rationale))
 		for _, res := range f.Results {
 			if res.Status != check.Fail {
 				continue
