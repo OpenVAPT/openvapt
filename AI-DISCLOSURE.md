@@ -21,6 +21,8 @@
 | Claude (same model, as a separate sub-agent) | Anthropic | Claude Code sub-agent | Reviewed and audited all legal documents in the role of a technology lawyer focused on Malaysian law; produced findings and replacement clauses that were then applied. This is an AI review, not legal advice. |
 | GPT-5.6 (model id `gpt-5.6-sol`) | OpenAI | Codex CLI 0.162.1 | Performed an independent read-only code review (17 findings, 15 improvement proposals) and implemented the fixes; later built 18 network, data-service and TLS checks and the professional report redesign to Claude's specification. Each piece of work was done on a separate branch and reviewed by Claude before merging. |
 
+| GPT-6 (model id `gpt-6-sol`) | OpenAI | Codex CLI 0.162.1 | Built the offline vulnerability matching engine (version comparison, inventory, matching, generator, four checks) to Claude's specification, on a separate branch. Claude reviewed it and corrected a factual error in the test data before merging. |
+
 The OpenAI Codex CLI is also configured on the owner's computer for image generation, but no AI-generated images are used in OpenVAPT. The logo (`site/static/assets/icon.svg`) is a small SVG written by Claude.
 
 ## What This Means for You

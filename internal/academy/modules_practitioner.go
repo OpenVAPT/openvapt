@@ -298,4 +298,38 @@ var practitioner = []Module{
 		},
 		Refs: []Ref{{"NIST SP 800-190, Application Container Security Guide", "https://csrc.nist.gov/pubs/sp/800/190/final"}, {"OWASP Docker Security Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html"}, {"Kubernetes, Kubelet authentication and authorization", "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/"}},
 	},
+	{
+		ID: "P10", Title: "Vulnerability Management: CVE, OSV and Known Exploited Vulnerabilities", Level: Practitioner, Minutes: 25,
+		Summary: "How known vulnerabilities are matched to installed software, why version comparison is subtle, and how to prioritise with the CISA Known Exploited Vulnerabilities list.",
+		Objectives: []string{
+			"Explain how a package inventory is matched against vulnerability data.",
+			"Explain why Debian, RPM and semantic versions must be compared with their own rules.",
+			"Prioritise findings using severity and known exploitation.",
+		},
+		Sections: []Section{
+			{"From Inventory to Advisory", []string{
+				"Vulnerability matching starts with an inventory: the installed operating system packages (from dpkg or rpm) and the libraries a web application ships (from lock files such as composer.lock or package-lock.json). Each item is compared with advisories that state which versions are affected and which version fixes the problem.",
+				"OSV (osv.dev) publishes advisories in one open format for many ecosystems, including Debian, Ubuntu, AlmaLinux, Rocky Linux, Packagist and npm. Distributions often backport fixes without changing the upstream version number, which is why matching must use the distribution's own advisory data and exact package versions.",
+			}},
+			{"Comparing Versions Correctly", []string{
+				"Version strings are not simple numbers. In Debian versions an epoch (1:) outranks everything, a tilde sorts before anything (1.0~rc1 comes before 1.0), and the revision after the last hyphen counts too. RPM has its own rules, including a caret for post-release snapshots. A tool that compares versions naively reports false positives and, worse, false negatives.",
+			}},
+			{"Prioritising", []string{
+				"Severity alone is a poor queue. The CISA Known Exploited Vulnerabilities catalogue lists flaws attackers are known to use in practice; those should be fixed first. Offline data also ages: a snapshot from months ago cannot know about last week's vulnerabilities, so every report states the snapshot date.",
+			}},
+		},
+		KeyTerms:      []string{"CVE", "CVSS", "Patch Management", "Software Inventory", "Known Exploited Vulnerability"},
+		RelatedChecks: []string{"HOST-CVE-", "WEB-CVE-"},
+		Lab: []string{
+			"Run: openvapt vulndb and note the snapshot date and whether it is test data.",
+			"Run: openvapt demo --only HOST-CVE-,WEB-CVE- --out p10 and read how each finding names the installed and fixed version.",
+			"Read internal/vulndb/review_test.go and explain why 1.0~rc1 is older than 1.0.",
+		},
+		Quiz: []Question{
+			{"Why can't versions be compared as plain numbers?", []string{"Because ecosystems such as Debian and RPM have their own rules, such as epochs and tilde pre-releases", "Because versions are secret", "Because numbers are too large"}, 0, "Each ecosystem defines its own ordering rules."},
+			{"Which findings should usually be fixed first?", []string{"Low severity", "Vulnerabilities listed as known exploited by CISA", "Informational findings"}, 1, "Known exploitation is strong evidence of real risk."},
+			{"Why does every report state the snapshot date?", []string{"For decoration", "Because offline data cannot include vulnerabilities published after it was built", "Because the law requires it"}, 1, "Old data misses newer vulnerabilities."},
+		},
+		Refs: []Ref{{"OSV, Open Source Vulnerability format and database", "https://osv.dev/"}, {"CISA Known Exploited Vulnerabilities Catalog", "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"}, {"Debian Policy Manual, Version numbering", "https://www.debian.org/doc/debian-policy/ch-controlfields.html#version"}},
+	},
 }

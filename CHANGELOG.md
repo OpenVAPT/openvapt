@@ -4,6 +4,10 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Vulnerability Management and Containers
+- Offline vulnerability matching: HOST-CVE-001 to 003 and WEB-CVE-001, Debian and RPM version comparison, inventory of OS packages and web libraries, release-time snapshot from OSV and CISA KEV (OpenAI Codex, GPT-6; reviewed and corrected by Claude).
+- Docker and Kubernetes host checks HOST-CTR-001 to 004 and HOST-K8S-001 to 003; Academy modules P9 and P10 (Claude).
+
 ### Redesign to Professional Standards
 - Control-category framework: every check belongs to one of ten categories mapped to CIS Controls v8 and NIST CSF 2.0, with a remediation effort and OWASP WSTG ids where applicable (Claude).
 - 123 checks (from 58): 47 server and web checks by Claude; 18 network, data-service and TLS checks by OpenAI Codex.
