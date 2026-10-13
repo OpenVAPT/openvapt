@@ -34,6 +34,12 @@ func (r *Report) HTML() ([]byte, error) {
 		},
 		"join":  strings.Join,
 		"short": short,
+		"catName": func(c check.Category) string {
+			if n := check.CategoryByID(c).Name; n != "" {
+				return n
+			}
+			return string(c)
+		},
 		"title": func(v any) string {
 			s := fmt.Sprint(v)
 			if s == "" {

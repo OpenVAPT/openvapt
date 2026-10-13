@@ -56,7 +56,7 @@ a{color:var(--accent)}ul{padding-left:20px}
 
 <h3>Top 5 Risks</h3>
 <table><tr><th>ID</th><th>Risk</th><th>Severity</th><th>Category</th></tr>
-{{range .TopRisks}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{title .Category}}</td></tr>{{end}}
+{{range .TopRisks}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{catName .Category}}</td></tr>{{end}}
 </table>
 
 <h2>Risk Heat Map</h2>
@@ -86,7 +86,7 @@ a{color:var(--accent)}ul{padding-left:20px}
 <dt>Fix</dt><dd>{{.Fix}}</dd>
 <dt>Verify</dt><dd><code>{{.Verify}}</code></dd>
 <dt>CVSS v3.1</dt><dd><code>{{.CVSS}}</code></dd>
-<dt>Category</dt><dd>{{title .Category}}</dd>
+<dt>Category</dt><dd>{{catName .Category}}</dd>
 <dt>Effort</dt><dd>{{title .Effort}}</dd>
 {{if .Standards.CWE}}<dt>Standards</dt><dd>{{join .Standards.CWE ", "}}{{if .Standards.OWASP}}, OWASP {{join .Standards.OWASP ", "}}{{end}}{{if .Standards.ASVS}}, ASVS {{join .Standards.ASVS ", "}}{{end}}{{if .Standards.NIST}}, NIST 800-53 {{join .Standards.NIST ", "}}{{end}}</dd>{{end}}
 <dt>References</dt><dd>{{range .Refs}}<a href="{{.URL}}" rel="noreferrer">{{.Title}}</a><br>{{end}}</dd>
@@ -105,7 +105,7 @@ a{color:var(--accent)}ul{padding-left:20px}
 <h2>All Checks</h2>
 <table>
 <tr><th>ID</th><th>Title</th><th>Category</th><th>Effort</th><th>Severity</th><th>Status</th></tr>
-{{range .Findings}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td>{{title .Category}}</td><td>{{title .Effort}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{title .Status}}</td></tr>
+{{range .Findings}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td>{{catName .Category}}</td><td>{{title .Effort}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{title .Status}}</td></tr>
 {{end}}</table>
 
 <h2>Methodology</h2>
