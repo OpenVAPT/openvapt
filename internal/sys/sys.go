@@ -38,6 +38,9 @@ type FileInfo struct {
 	GID   int
 	Size  int64
 	IsDir bool
+	// ModTime is the last modification time, or the zero time when the
+	// system cannot provide one (in-memory fakes without a time).
+	ModTime time.Time
 }
 
 // HTTPResponse is a trimmed HTTP response. Bodies are capped at 64 KiB.

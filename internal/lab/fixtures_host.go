@@ -28,7 +28,9 @@ func init() {
 		f.Files["/etc/login.defs"] = "ENCRYPT_METHOD MD5\nPASS_MAX_DAYS 90\nPASS_MIN_DAYS 0\nPASS_WARN_AGE 3\nUMASK 022\n"
 		f.Files["/etc/passwd"] += "daemon:x:1:1:daemon:/usr/sbin:/bin/bash\n+::::::\n"
 		f.Files["/etc/shadow"] += "olduser:$1$saltsalt$abcdefghijklmnopqrstuv:19000:0:99999:7:::\n"
-		f.Files["/etc/group"] = "root:x:0:\ndocker:x:999:deploy\n"
+		if _, ok := f.Files["/etc/group"]; !ok { // the container and application fixtures supply a fuller group file
+			f.Files["/etc/group"] = "root:x:0:\ndocker:x:999:deploy\n"
+		}
 		f.Files["/etc/security/pwquality.conf"] = "minlen = 8\n"
 		f.Files["/etc/pam.d/common-auth"] = "auth [success=1 default=ignore] pam_unix.so nullok\nauth requisite pam_deny.so\n"
 		f.Infos["/home/deploy/.netrc"] = sys.FileInfo{Path: "/home/deploy/.netrc", Mode: 0o644}
@@ -54,7 +56,9 @@ func init() {
 		}
 	}, func(f *sys.Fake) {
 		f.Files["/etc/login.defs"] = "ENCRYPT_METHOD YESCRYPT\nPASS_MAX_DAYS 365\nPASS_MIN_DAYS 1\nPASS_WARN_AGE 7\nUMASK 027\n"
-		f.Files["/etc/group"] = "root:x:0:\ndocker:x:999:\n"
+		if _, ok := f.Files["/etc/group"]; !ok {
+			f.Files["/etc/group"] = "root:x:0:\ndocker:x:999:\n"
+		}
 		// Docker is installed (see the container fixtures) with an empty
 		// docker group and the socket at its default 660 root:docker.
 		f.Infos["/var/run/docker.sock"] = sys.FileInfo{Path: "/var/run/docker.sock", Mode: fs.ModeSocket | 0o660}

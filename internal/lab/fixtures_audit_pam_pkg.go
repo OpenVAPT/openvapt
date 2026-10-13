@@ -89,6 +89,7 @@ func init() {
 		f.Files["/etc/pam.d/su"] = "auth sufficient pam_rootok.so\nauth required pam_wheel.so use_uid group=sudo\n@include common-auth\n@include common-account\n@include common-session\n"
 		f.Files["/etc/default/useradd"] = "SHELL=/bin/bash\nINACTIVE=30\n"
 		f.Files["/etc/environment"] = "PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"\n"
+		f.Files["/root/.bashrc"] = "export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
 		f.Files["/etc/profile"] = "if [ \"${PS1-}\" ]; then\n  PS1='\\u@\\h:\\w\\$ '\nfi\n"
 		f.Files["/etc/profile.d/99-tmout.sh"] = "TMOUT=900\nreadonly TMOUT\nexport TMOUT\n"
 

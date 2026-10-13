@@ -79,6 +79,8 @@ var Publishers = []Publisher{
 	{"PHP Documentation", []string{"www.php.net"}, "The PHP manual is published under CC BY 3.0. Cited by title and link only.", ""},
 	{"Web Frameworks and Runtimes (Django, Flask, Werkzeug, Node.js, Express, Gunicorn)", []string{"docs.djangoproject.com", "flask.palletsprojects.com", "werkzeug.palletsprojects.com", "nodejs.org", "expressjs.com", "docs.gunicorn.org", "gunicorn.org"}, linkOnly, ""},
 	{"Content Management Systems (WordPress, Drupal, Joomla)", []string{"developer.wordpress.org", "www.drupal.org", "docs.joomla.org"}, linkOnly, ""},
+	{"Application Frameworks (Laravel, Symfony, Ruby on Rails, Spring Boot)", []string{"laravel.com", "symfony.com", "guides.rubyonrails.org", "docs.spring.io"}, linkOnly, ""},
+	{"Commerce and Publishing Platforms (Adobe Commerce, Ghost)", []string{"experienceleague.adobe.com", "ghost.org"}, linkOnly, ""},
 	{"Containers and Orchestration (Docker, Kubernetes)", []string{"docs.docker.com", "kubernetes.io"}, linkOnly, ""},
 	{"Prometheus (The Linux Foundation)", []string{"prometheus.io"}, linkOnly, ""},
 	{"Databases and Data Services (MySQL, PostgreSQL, MongoDB, Redis, Memcached, Elastic)", []string{"dev.mysql.com", "www.postgresql.org", "www.mongodb.com", "redis.io", "docs.memcached.org", "www.elastic.co"}, linkOnly, ""},
