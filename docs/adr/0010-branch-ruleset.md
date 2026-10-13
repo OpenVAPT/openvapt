@@ -1,4 +1,4 @@
-# ADR 0007: Protect the Main Branch With a Ruleset
+# ADR 0010: Protect the Main Branch With a Ruleset
 
 Status: Proposed (2026-10-14), applied only with the owner's approval in chat (AGENTS.md 3.10)
 

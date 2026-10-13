@@ -3,7 +3,7 @@
 # when the team exists and has write access: create the team "maintainers" in
 # the OpenVAPT organisation (Settings > Teams > New team, add the owner, give
 # it Write on this repository), then the ruleset may require a code owner
-# review for the paths below (docs/adr/0007-branch-ruleset.md).
+# review for the paths below (docs/adr/0010-branch-ruleset.md).
 # Until the team exists these lines resolve to nobody and do not block.
 
 # Release pipeline, channel gates and the evidence they trust

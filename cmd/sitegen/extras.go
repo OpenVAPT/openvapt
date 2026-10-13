@@ -208,7 +208,7 @@ func writeCatalogueJSON(cs []*check.Check) {
 const securityTxtPath = ".well-known/security.txt"
 
 func writeSecurityTxt() {
-	expires := built.AddDate(1, 0, 0).Format("2006-01-02T15:04:05Z")
+	expires := built.AddDate(0, 11, 0).Format("2006-01-02T15:04:05Z")
 	body := "# OpenVAPT security contact (RFC 9116). There is no email channel:\n" +
 		"# flaws in OpenVAPT or this website are reported through GitHub Private\n" +
 		"# Vulnerability Reporting, which keeps the report private until a fix is out.\n" +

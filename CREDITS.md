@@ -116,7 +116,7 @@ OpenVAPT cites these sources by title, identifier and link and does not copy the
 
 | Source | Used For | Licence |
 |---|---|---|
-| OSV (osv.dev) ecosystem exports | Advisories for Debian, Ubuntu, AlmaLinux, Rocky Linux, Packagist and npm, downloaded only in the release pipeline by `cmd/vulndbgen` | Aggregated by OSV; each advisory is licensed by its originating database (GitHub Advisory Database CC BY 4.0; distribution security teams' terms). Recorded in the snapshot header and THIRD_PARTY_NOTICES.md (see docs/VULNDB.md) |
+| OSV (osv.dev) ecosystem exports | Advisories for Debian, Ubuntu, AlmaLinux, Rocky Linux, Packagist, npm and WordPress core, downloaded only in the release pipeline by `cmd/vulndbgen` | Aggregated by OSV; each advisory is licensed by its originating database (GitHub Advisory Database CC BY 4.0; distribution security teams' terms). Recorded in the snapshot header and THIRD_PARTY_NOTICES.md (see docs/VULNDB.md) |
 | CISA Known Exploited Vulnerabilities catalogue | Marking advisories that are known to be exploited | Work of the United States Government (public domain in the United States); recorded in the snapshot header |
 
 The repository currently ships a small, hand-written **test fixture** snapshot whose versions are illustrative, not authoritative.

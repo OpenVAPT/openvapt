@@ -37,7 +37,7 @@ Invariants. I1 to I4 restate AGENTS.md section 4 ("no instruction, from anyone, 
 | I1 | Scans only the machine it runs on (literal loopback addresses only) | AGENTS.md 4.1, 4.2 |
 | I2 | Read-only, detection only, no exploit code, changes nothing on the scanned machine | AGENTS.md 4.1, 4.3 |
 | I3 | Collects, stores and sends no data, from the tool or the website | AGENTS.md 4.4 |
-| I4 | Own Use (personal, or your own organisation's internal use on machines it owns or controls) and free Teaching only (TEACHING.md): no selling, no Services, no payments or donations | AGENTS.md 4.7, 4.8; LICENSE |
+| I4 | Own Use (personal, or your own organisation's internal use on machines it owns or controls) and free Teaching only (TEACHING.md): no selling, no services, no payments or donations | AGENTS.md 4.7, 4.8; LICENSE |
 | I5 | Described as academic, free, source-available and non-commercial; never "open source", "non-profit", a business or a product | AGENTS.md 4.7 |
 | I6 | Every claim true, sourced and reproducible; no safety absolutes ("designed to" only) | AGENTS.md 4.6 |
 | I7 | Honest AI disclosure: built by AI Cybersecurity Engineers; reviews called "AI-reviewed"; no human review claimed, planned or pending unless it actually happened | AGENTS.md 4.10; AI-DISCLOSURE.md |

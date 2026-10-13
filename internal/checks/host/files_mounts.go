@@ -571,7 +571,7 @@ func init() {
 			if len(bad) > 0 {
 				return []check.Result{check.FailR("/etc/passwd", fmt.Sprintf("%d account file(s) have an unsafe owner or mode", len(bad)), bad...)}
 			}
-			return []check.Result{check.PassR("/etc/passwd", fmt.Sprintf("%d account file(s) are root-owned with safe modes", seen))}
+			return []check.Result{check.PassR("/etc/passwd", fmt.Sprintf("%d account file(s) are root-owned with the expected modes", seen))}
 		},
 	})
 }

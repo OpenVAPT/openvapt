@@ -8,7 +8,7 @@ permissions:
 jobs:
   test:
     # The check run is named "ci": the main branch ruleset requires it
-    # (docs/adr/0007-branch-ruleset.md).
+    # (docs/adr/0010-branch-ruleset.md).
     name: ci
     runs-on: ubuntu-latest
     timeout-minutes: 30
