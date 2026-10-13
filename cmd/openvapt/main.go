@@ -88,9 +88,22 @@ func main() {
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "openvapt:", err)
-		os.Exit(1)
+		code := 5
+		var ee *exitError
+		if errors.As(err, &ee) {
+			code = ee.code
+		}
+		os.Exit(code)
 	}
 }
+
+type exitError struct {
+	code int
+	err  error
+}
+
+func (e *exitError) Error() string { return e.err.Error() }
+func (e *exitError) Unwrap() error { return e.err }
 
 func usage(w io.Writer) {
 	fmt.Fprint(w, `OpenVAPT - academic, non-commercial, read-only vulnerability self-assessment for this machine only.
@@ -106,6 +119,9 @@ Usage:
   openvapt terms | version
 
 Run "openvapt scan -h" for scan flags. Nothing is ever sent off this machine.
+
+Exit Codes: 0 completed, 2 invalid arguments, 3 serious findings, 4 incomplete coverage,
+5 internal or scan error, 6 report write failure.
 `)
 }
 
@@ -136,7 +152,7 @@ func addScanFlags(fs *flag.FlagSet, f *scanFlags, defOut string) {
 func cmdScan(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("scan", flag.ExitOnError)
 	var f scanFlags
-	addScanFlags(fs, &f, "openvapt-report-"+time.Now().Format("20060102-150405"))
+	addScanFlags(fs, &f, "")
 	fs.BoolVar(&f.dryRun, "dry-run", false, "print every file, command and request the scan would use, then exit")
 	fs.BoolVar(&f.accept, "accept-terms", false, "confirm you have read and accept every acknowledgement in 'openvapt terms' (for automation)")
 	_ = fs.Parse(args)
@@ -194,9 +210,19 @@ func finish(r *report.Report, f scanFlags) error {
 			fmt.Fprintln(os.Stderr, "warning: report not signed:", err)
 		}
 	}
+	if f.out == "" {
+		dir, err := os.MkdirTemp(".", "openvapt-report-"+time.Now().Format("20060102-150405")+"-")
+		if err != nil {
+			return err
+		}
+		if err := os.Chmod(dir, 0o700); err != nil {
+			return err
+		}
+		f.out = dir
+	}
 	files, err := r.WriteAll(f.out, splitList(f.formats))
 	if err != nil {
-		return err
+		return &exitError{code: 6, err: err}
 	}
 	r.PrintSummary(os.Stdout)
 	if f.baseline != "" {
@@ -214,8 +240,14 @@ func finish(r *report.Report, f scanFlags) error {
 	if r.Integrity != nil && !f.quiet {
 		fmt.Printf("Signed with your local key %s. Anyone can check it with: openvapt verify report.json --key-id %s\n", r.Integrity.KeyID, r.Integrity.KeyID)
 	}
+	if r.Summary.Errors > 0 {
+		return &exitError{code: 5, err: errors.New("one or more checks ended with an internal error")}
+	}
+	if r.Summary.Incomplete > 0 {
+		return &exitError{code: 4, err: errors.New("scan coverage was incomplete")}
+	}
 	if r.Summary.Critical+r.Summary.High > 0 {
-		os.Exit(3) // non-zero for CI pipelines when serious findings exist
+		return &exitError{code: 3, err: errors.New("critical or high findings detected")}
 	}
 	return nil
 }

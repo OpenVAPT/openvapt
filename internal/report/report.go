@@ -13,7 +13,7 @@ import (
 )
 
 // SchemaVersion changes whenever the JSON shape changes incompatibly.
-const SchemaVersion = "openvapt.report/1"
+const SchemaVersion = "openvapt.report/2"
 
 type Report struct {
 	Schema      string     `json:"schema"`
@@ -46,15 +46,16 @@ type Scan struct {
 
 // Summary counts failed checks by severity, plus outcomes overall.
 type Summary struct {
-	Critical int `json:"critical"`
-	High     int `json:"high"`
-	Medium   int `json:"medium"`
-	Low      int `json:"low"`
-	Info     int `json:"info"`
-	Passed   int `json:"passed"`
-	Failed   int `json:"failed"`
-	Skipped  int `json:"skipped"`
-	Errors   int `json:"errors"`
+	Critical   int `json:"critical"`
+	High       int `json:"high"`
+	Medium     int `json:"medium"`
+	Low        int `json:"low"`
+	Info       int `json:"info"`
+	Passed     int `json:"passed"`
+	Failed     int `json:"failed"`
+	Skipped    int `json:"skipped"`
+	Errors     int `json:"errors"`
+	Incomplete int `json:"incomplete"`
 }
 
 // Finding is one check with its outcome on this machine.
@@ -105,6 +106,8 @@ func (r *Report) Summarise() {
 			s.Skipped++
 		case check.Error:
 			s.Errors++
+		case check.Incomplete:
+			s.Incomplete++
 		case check.Fail:
 			s.Failed++
 			switch check.Severity(f.Severity) {

@@ -42,7 +42,9 @@ a{color:var(--accent)}ul{padding-left:20px}
 <div class="stat"><b class="medium">{{.Summary.Medium}}</b><span>Medium</span></div>
 <div class="stat"><b class="low">{{.Summary.Low}}</b><span>Low</span></div>
 <div class="stat"><b class="pass">{{.Summary.Passed}}</b><span>Passed</span></div>
+<div class="stat"><b>{{.Summary.Incomplete}}</b><span>Incomplete</span></div>
 <div class="stat"><b>{{.Summary.Skipped}}</b><span>Skipped</span></div>
+<div class="stat"><b>{{.Summary.Errors}}</b><span>Errors</span></div>
 </div>
 <table>
 <tr><th>Scope</th><td>This machine only ({{.Scan.Checks}} checks{{if .Scan.Sites}}, sites: {{join .Scan.Sites ", "}}{{end}})</td></tr>
@@ -69,6 +71,12 @@ a{color:var(--accent)}ul{padding-left:20px}
 </article>
 {{end}}{{end}}
 {{if not $any}}<p>No check failed. This does not prove the machine is secure; see Limitations.</p>{{end}}
+
+<h2>Coverage Gaps</h2>
+<p>Incomplete, Error and Skipped checks did not establish that the affected area is secure. Review the reason and rerun with the required access or corrected configuration.</p>
+<table><tr><th>ID</th><th>Status</th><th>Affected Area and Reason</th></tr>
+{{range .Findings}}{{$f := .}}{{if coverage .}}{{range .Results}}<tr><td><code>{{$f.ID}}</code></td><td>{{title .Status}}</td><td><strong>{{.Target}}</strong>: {{.Message}}</td></tr>{{end}}{{end}}{{end}}
+</table>
 
 <h2>All Checks</h2>
 <table>

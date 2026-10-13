@@ -3,6 +3,7 @@ package report
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"html/template"
 	"strings"
 
@@ -19,6 +20,9 @@ func (r *Report) HTML() ([]byte, error) {
 	t, err := template.New("r").Funcs(template.FuncMap{
 		"upper":  strings.ToUpper,
 		"failed": func(f Finding) bool { return f.Status == string(check.Fail) },
+		"coverage": func(f Finding) bool {
+			return f.Status == string(check.Incomplete) || f.Status == string(check.Error) || f.Status == string(check.Skip)
+		},
 		"fails": func(rs []check.Result) []check.Result {
 			var out []check.Result
 			for _, x := range rs {
@@ -30,7 +34,8 @@ func (r *Report) HTML() ([]byte, error) {
 		},
 		"join":  strings.Join,
 		"short": short,
-		"title": func(s string) string {
+		"title": func(v any) string {
+			s := fmt.Sprint(v)
 			if s == "" {
 				return s
 			}

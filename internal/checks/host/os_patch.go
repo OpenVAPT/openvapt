@@ -17,7 +17,7 @@ import (
 var eol = map[string]string{
 	"ubuntu 16.04": "2021-04-30", "ubuntu 18.04": "2023-05-31", "ubuntu 20.04": "2025-05-31",
 	"ubuntu 22.04": "2027-06-01", "ubuntu 24.04": "2029-05-31", "ubuntu 23.10": "2024-07-11", "ubuntu 24.10": "2025-07-10", "ubuntu 25.04": "2026-01-15",
-	"debian 9": "2020-07-06", "debian 10": "2022-09-10", "debian 11": "2024-08-14", "debian 12": "2026-06-10", "debian 13": "2028-08-09",
+	"debian 9": "2022-06-30", "debian 10": "2024-06-30", "debian 11": "2026-08-31", "debian 12": "2028-06-30", "debian 13": "2030-06-30",
 	"centos 7": "2024-06-30", "centos 8": "2021-12-31",
 	"rhel 7": "2024-06-30", "rhel 8": "2029-05-31", "rhel 9": "2032-05-31",
 	"rocky 8": "2029-05-31", "rocky 9": "2032-05-31", "almalinux 8": "2029-03-01", "almalinux 9": "2032-05-31",
@@ -37,7 +37,7 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Checks whether the Linux distribution release still receives free security updates.",
 		Rationale: "Once a release reaches end of life, newly discovered vulnerabilities are never fixed. Every later CVE in the kernel, OpenSSL or the web server stays open forever.",
-		Detection: "Reads ID and VERSION_ID from /etc/os-release and looks them up in a dated table of vendor end-of-life dates (table date " + EOLTableDate + "). Releases within 90 days of end of life are reported as a warning.",
+		Detection: "Reads ID and VERSION_ID from /etc/os-release and looks them up in a dated table of free vendor security-support dates, including Debian LTS (table date " + EOLTableDate + "). Releases within 90 days of end of life are reported as a warning.",
 		Fix:       "Plan an upgrade to a supported release (for example do-release-upgrade on Ubuntu, or a fresh install and migration). Paid extended support (Ubuntu Pro, RHEL ELS) is an alternative while migrating.",
 		Verify:    "cat /etc/os-release  and compare with the vendor lifecycle page.",
 		Refs: []check.Ref{

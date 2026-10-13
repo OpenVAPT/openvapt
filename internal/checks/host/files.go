@@ -111,8 +111,9 @@ func init() {
 		Verify:    "find /etc -xdev -type f -perm -0002  should print nothing.",
 		Refs:      []check.Ref{refNIST800123},
 		Standards: check.Standards{CWE: []string{"CWE-732"}, NIST: []string{"AC-3", "CM-6"}, CISTopic: "File permissions: no world-writable files"},
-		Run: func(_ context.Context, s sys.System) []check.Result {
-			files, err := s.Walk("/etc", 20000)
+		Run: func(ctx context.Context, s sys.System) []check.Result {
+			walk, err := s.Walk(ctx, "/etc", 20000)
+			files := walk.Files
 			if err != nil && len(files) == 0 {
 				return []check.Result{check.ErrR("/etc", err)}
 			}
@@ -127,6 +128,9 @@ func init() {
 					bad = append(bad[:25], fmt.Sprintf("... and %d more", len(bad)-25))
 				}
 				return []check.Result{check.FailR("/etc", "World-writable files found", bad...)}
+			}
+			if !walk.Complete {
+				return []check.Result{check.IncompleteR("/etc", fmt.Sprintf("Filesystem walk was partial after %d files", len(files)))}
 			}
 			return []check.Result{check.PassR("/etc", fmt.Sprintf("No world-writable files among %d checked", len(files)))}
 		},
@@ -145,11 +149,15 @@ func init() {
 		Verify:    "find /tmp /home /var/www /opt /usr/local -xdev -perm /6000 -type f  should print nothing unexpected.",
 		Refs:      []check.Ref{{Title: "MITRE ATT&CK T1548.001, Setuid and Setgid", URL: "https://attack.mitre.org/techniques/T1548/001/"}},
 		Standards: check.Standards{CWE: []string{"CWE-250"}, NIST: []string{"CM-7", "AC-6"}, CISTopic: "Filesystem: audit SUID and SGID executables"},
-		Run: func(_ context.Context, s sys.System) []check.Result {
+		Run: func(ctx context.Context, s sys.System) []check.Result {
 			var bad []string
+			complete := true
 			for _, root := range []string{"/tmp", "/var/tmp", "/dev/shm", "/home", "/var/www", "/srv", "/opt", "/usr/local"} {
-				files, _ := s.Walk(root, 20000)
-				for _, f := range files {
+				walk, err := s.Walk(ctx, root, 20000)
+				if err != nil || !walk.Complete {
+					complete = false
+				}
+				for _, f := range walk.Files {
 					if f.Mode&(fs.ModeSetuid|fs.ModeSetgid) != 0 {
 						bad = append(bad, perm(f.Mode)+" "+f.Path)
 					}
@@ -157,6 +165,9 @@ func init() {
 			}
 			if len(bad) > 0 {
 				return []check.Result{check.FailR("filesystem", "SUID/SGID programs outside standard system paths", bad...)}
+			}
+			if !complete {
+				return []check.Result{check.IncompleteR("filesystem", "One or more filesystem walks were partial or unreadable")}
 			}
 			return []check.Result{check.PassR("filesystem", "No SUID/SGID programs in unusual locations")}
 		},

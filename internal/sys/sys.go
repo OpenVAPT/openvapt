@@ -12,6 +12,7 @@ package sys
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"io"
 	"io/fs"
@@ -19,6 +20,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -51,16 +53,27 @@ type TLSInfo struct {
 	Subject    string
 	DNSNames   []string
 	SelfSigned bool
+	Trusted    bool
+	TrustError string
+}
+
+type ReadResult struct {
+	Data     []byte
+	Complete bool
+}
+type WalkResult struct {
+	Files    []FileInfo
+	Complete bool
 }
 
 // System is the complete set of operations a check may perform.
 type System interface {
-	ReadFile(path string) ([]byte, error)
+	ReadFile(ctx context.Context, path string) (ReadResult, error)
 	Stat(path string) (FileInfo, error)
 	Glob(pattern string) ([]string, error)
 	// Walk lists regular files under root, at most maxFiles entries,
 	// without following symlinks.
-	Walk(root string, maxFiles int) ([]FileInfo, error)
+	Walk(ctx context.Context, root string, maxFiles int) (WalkResult, error)
 	// Run executes one allow-listed, read-only command.
 	Run(ctx context.Context, name string, args ...string) (string, error)
 	// HTTP fetches path from a vhost served by this machine, connecting to
@@ -86,7 +99,9 @@ var allowed = [][]string{
 	{"iptables", "-S"},
 	{"ip6tables", "-S"},
 	{"ufw", "status"},
+	{"ufw", "status", "verbose"},
 	{"firewall-cmd", "--state"},
+	{"firewall-cmd", "--get-active-zones"},
 	{"systemctl", "is-active"},
 	{"systemctl", "is-enabled"},
 	{"php", "-r"}, // only used with ini_get() expressions
@@ -97,8 +112,23 @@ var allowed = [][]string{
 // IsAllowed reports whether a command line matches the allow-list.
 func IsAllowed(name string, args []string) bool {
 	full := append([]string{name}, args...)
+	if name == "php" && len(args) == 2 && args[0] == "-r" {
+		return safePHP(args[1])
+	}
+	// sshd -T -C evaluates the configuration for a hypothetical connection; no
+	// connection is made. 192.0.2.1 is a reserved documentation address
+	// (RFC 5737) used only to evaluate Match rules for non-local clients.
+	if name == "sshd" && len(args) == 3 && args[0] == "-T" && args[1] == "-C" {
+		switch args[2] {
+		case "user=root,host=localhost,addr=127.0.0.1", "user=nobody,host=localhost,addr=127.0.0.1", "user=root,host=localhost,addr=192.0.2.1", "user=nobody,host=localhost,addr=192.0.2.1":
+			return true
+		}
+	}
+	if name == "systemctl" && len(args) == 2 && (args[0] == "is-active" || args[0] == "is-enabled") {
+		return validUnit(args[1])
+	}
 	for _, a := range allowed {
-		if len(full) < len(a) {
+		if len(full) != len(a) {
 			continue
 		}
 		match := true
@@ -118,19 +148,22 @@ func IsAllowed(name string, args []string) bool {
 	return false
 }
 
-// safePHP permits only expressions built from echo and ini_get, so the
-// php -r entry can never be used to run arbitrary code.
-func safePHP(expr string) bool {
-	for _, part := range strings.Split(expr, ";") {
-		p := strings.TrimSpace(part)
-		if p == "" {
-			continue
-		}
-		if !strings.HasPrefix(p, "echo ini_get('") {
+func validUnit(s string) bool {
+	if s == "" || strings.HasPrefix(s, "-") || strings.ContainsAny(s, "/ \t\r\n") {
+		return false
+	}
+	for _, r := range s {
+		if !(r == '.' || r == '@' || r == '_' || r == '-' || r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9') {
 			return false
 		}
 	}
-	return !strings.ContainsAny(expr, "`$")
+	return true
+}
+
+// safePHP permits only expressions built from echo and ini_get, so the
+// php -r entry can never be used to run arbitrary code.
+func safePHP(expr string) bool {
+	return regexp.MustCompile(`^(echo ini_get\('[A-Za-z0-9_.]+'\)(,"\\n")?;)+$`).MatchString(expr)
 }
 
 // Live is the real implementation used by "openvapt scan".
@@ -156,13 +189,24 @@ func NewLive() *Live {
 	}}
 }
 
-func (l *Live) ReadFile(path string) ([]byte, error) {
+func (l *Live) ReadFile(ctx context.Context, path string) (ReadResult, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return ReadResult{}, err
 	}
 	defer f.Close()
-	return io.ReadAll(io.LimitReader(f, 4<<20))
+	b, err := io.ReadAll(io.LimitReader(f, (4<<20)+1))
+	if err != nil {
+		return ReadResult{}, err
+	}
+	if err := ctx.Err(); err != nil {
+		return ReadResult{}, err
+	}
+	complete := len(b) <= 4<<20
+	if !complete {
+		b = b[:4<<20]
+	}
+	return ReadResult{Data: b, Complete: complete}, nil
 }
 
 func (l *Live) Stat(path string) (FileInfo, error) {
@@ -175,11 +219,16 @@ func (l *Live) Stat(path string) (FileInfo, error) {
 
 func (l *Live) Glob(pattern string) ([]string, error) { return filepath.Glob(pattern) }
 
-func (l *Live) Walk(root string, maxFiles int) ([]FileInfo, error) {
+func (l *Live) Walk(ctx context.Context, root string, maxFiles int) (WalkResult, error) {
 	var out []FileInfo
+	complete := true
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
+		if e := ctx.Err(); e != nil {
+			return e
+		}
 		if err != nil {
-			return nil // unreadable entries are skipped, not fatal
+			complete = false
+			return nil
 		}
 		if d.IsDir() && isPseudoFS(p) {
 			return filepath.SkipDir
@@ -189,13 +238,16 @@ func (l *Live) Walk(root string, maxFiles int) ([]FileInfo, error) {
 		}
 		if st, e := d.Info(); e == nil {
 			out = append(out, toInfo(p, st))
+		} else {
+			complete = false
 		}
 		if len(out) >= maxFiles {
+			complete = false
 			return filepath.SkipAll
 		}
 		return nil
 	})
-	return out, err
+	return WalkResult{Files: out, Complete: complete}, err
 }
 
 func isPseudoFS(p string) bool {
@@ -264,6 +316,20 @@ func (l *Live) TLS(ctx context.Context, port, serverName string, minV, maxV uint
 		info.Subject = c.Subject.CommonName
 		info.DNSNames = c.DNSNames
 		info.SelfSigned = c.Issuer.String() == c.Subject.String()
+		roots, rootErr := x509.SystemCertPool()
+		if rootErr == nil {
+			intermediates := x509.NewCertPool()
+			for _, cert := range st.PeerCertificates[1:] {
+				intermediates.AddCert(cert)
+			}
+			_, verifyErr := c.Verify(x509.VerifyOptions{DNSName: serverName, Roots: roots, Intermediates: intermediates})
+			info.Trusted = verifyErr == nil
+			if verifyErr != nil {
+				info.TrustError = verifyErr.Error()
+			}
+		} else {
+			info.TrustError = rootErr.Error()
+		}
 	}
 	return info, nil
 }

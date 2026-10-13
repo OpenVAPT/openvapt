@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/openvapt/openvapt/internal/check"
@@ -65,17 +66,26 @@ func init() {
 			var out []check.Result
 			for _, t := range targets {
 				target := t[1] + " on port " + t[0]
+				if _, err := s.TLS(ctx, t[0], t[1], tls.VersionTLS12, tls.VersionTLS13); err != nil {
+					out = append(out, check.IncompleteR(target, "Modern TLS handshake failed, so legacy protocol rejection could not be verified", err.Error()))
+					continue
+				}
 				var weak []string
+				uncertain := false
 				for _, v := range []struct {
 					n string
 					v uint16
 				}{{"TLS 1.0", tls.VersionTLS10}, {"TLS 1.1", tls.VersionTLS11}} {
 					if _, err := s.TLS(ctx, t[0], t[1], v.v, v.v); err == nil {
 						weak = append(weak, v.n+" accepted")
+					} else if ctx.Err() != nil || strings.Contains(strings.ToLower(err.Error()), "timeout") || strings.Contains(strings.ToLower(err.Error()), "connection reset") {
+						uncertain = true
 					}
 				}
 				if len(weak) > 0 {
 					out = append(out, check.FailR(target, "Deprecated TLS versions accepted", weak...))
+				} else if uncertain {
+					out = append(out, check.IncompleteR(target, "A legacy TLS probe ended without a protocol-rejection result"))
 				} else {
 					out = append(out, check.PassR(target, "TLS 1.0 and 1.1 refused"))
 				}
@@ -155,6 +165,8 @@ func init() {
 					out = append(out, check.FailR(t[1], "Certificate is self-signed", "subject "+info.Subject))
 				case !covers(info.DNSNames, t[1]):
 					out = append(out, check.FailR(t[1], "Certificate does not cover this site name", fmt.Sprintf("names %v", info.DNSNames)))
+				case !info.Trusted:
+					out = append(out, check.FailR(t[1], "Certificate chain is not trusted", info.TrustError))
 				default:
 					out = append(out, check.PassR(t[1], "Certificate is CA-issued and covers the site name"))
 				}

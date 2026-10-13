@@ -123,8 +123,10 @@ func statusRank(s string) int {
 		return 0
 	case check.Error:
 		return 1
-	case check.Pass:
+	case check.Incomplete:
 		return 2
+	case check.Pass:
+		return 3
 	default:
 		return 3
 	}
@@ -145,12 +147,8 @@ func runOne(parent context.Context, s sys.System, c *check.Check, timeout time.D
 			}
 		}
 	}()
-	done := make(chan []check.Result, 1)
-	go func() { done <- c.Run(ctx, s) }()
-	var res []check.Result
-	select {
-	case res = <-done:
-	case <-ctx.Done():
+	res := c.Run(ctx, s)
+	if ctx.Err() != nil {
 		res = []check.Result{{Status: check.Error, Target: c.ID, Message: "timed out after " + timeout.String()}}
 	}
 	for i := range res {
@@ -162,13 +160,13 @@ func runOne(parent context.Context, s sys.System, c *check.Check, timeout time.D
 	return f
 }
 
-// overall: any fail -> fail; else any error -> error; else any pass -> pass; else skip.
+// overall never lets a Pass hide incomplete coverage.
 func overall(rs []check.Result) check.Status {
 	has := map[check.Status]bool{}
 	for _, r := range rs {
 		has[r.Status] = true
 	}
-	for _, s := range []check.Status{check.Fail, check.Error, check.Pass} {
+	for _, s := range []check.Status{check.Fail, check.Error, check.Incomplete, check.Pass} {
 		if has[s] {
 			return s
 		}

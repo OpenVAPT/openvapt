@@ -62,6 +62,7 @@ func Vulnerable() *sys.Fake {
 			// 0.0.0.0 on 22, 80, 443, 3306 (MySQL), 6379 (Redis), 21 (FTP)
 			"/proc/net/tcp": procTCP([2]string{"00000000", "0016"}, [2]string{"00000000", "0050"}, [2]string{"00000000", "01BB"},
 				[2]string{"00000000", "0CEA"}, [2]string{"00000000", "18EB"}, [2]string{"00000000", "0015"}),
+			"/proc/net/tcp6": procTCP(), "/proc/net/udp": procTCP(), "/proc/net/udp6": procTCP(),
 			"/etc/apache2/sites-enabled/shop.conf": "<VirtualHost *:443>\n  ServerName " + site + "\n</VirtualHost>\n",
 			"/etc/crontab":                         "* * * * * root /usr/local/bin/backup.sh\n",
 		},
@@ -135,6 +136,7 @@ func Hardened() *sys.Fake {
 			// 22, 80, 443 public; MySQL and Redis on 127.0.0.1 (0100007F)
 			"/proc/net/tcp": procTCP([2]string{"00000000", "0016"}, [2]string{"00000000", "0050"}, [2]string{"00000000", "01BB"},
 				[2]string{"0100007F", "0CEA"}, [2]string{"0100007F", "18EB"}),
+			"/proc/net/tcp6": procTCP(), "/proc/net/udp": procTCP(), "/proc/net/udp6": procTCP(),
 			"/etc/apache2/sites-enabled/shop.conf": "<VirtualHost *:443>\n  ServerName " + site + "\n</VirtualHost>\n",
 			"/etc/crontab":                         "17 * * * * root cd / && run-parts --report /etc/cron.hourly\n",
 		},
@@ -148,13 +150,14 @@ func Hardened() *sys.Fake {
 		},
 		Commands: map[string]string{
 			"sshd -T": "permitrootlogin no\npasswordauthentication no\nkbdinteractiveauthentication no\npermitemptypasswords no\nx11forwarding no\nmaxauthtries 3\n" +
+				"allowtcpforwarding no\nallowagentforwarding no\npermittunnel no\ngatewayports no\nlogingracetime 30\nauthenticationmethods publickey\n" +
 				"ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com\nmacs hmac-sha2-512-etm@openssh.com\nkexalgorithms curve25519-sha256\nhostkeyalgorithms ssh-ed25519\n",
-			"apt-get -s upgrade":          "Reading package lists...\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n",
-			"ufw status":                  "Status: active\n",
-			"systemctl is-active rsyslog": "active",
-			"systemctl is-active auditd":  "active",
-			"systemctl is-active chronyd": "active",
-			"php -v":                      "PHP 8.3.6 (cli)",
+			"apt-get -s upgrade":                                "Reading package lists...\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n",
+			"ufw status verbose":                                "Status: active\nDefault: deny (incoming), allow (outgoing), disabled (routed)\n",
+			"systemctl is-active rsyslog":                       "active",
+			"systemctl is-active auditd":                        "active",
+			"systemctl is-active chronyd":                       "active",
+			"php -v":                                            "PHP 8.3.6 (cli)",
 			"php -r echo ini_get('display_errors'),\"\\n\";":    "",
 			"php -r echo ini_get('expose_php'),\"\\n\";":        "",
 			"php -r echo ini_get('allow_url_include'),\"\\n\";": "0",
@@ -165,7 +168,7 @@ func Hardened() *sys.Fake {
 			"http://" + site + "/": {Status: 301, Header: hdr("Location", "https://"+site+"/")},
 		},
 		TLSResp: map[string]sys.TLSInfo{
-			"443/" + site + "/1.3": {Version: tls.VersionTLS13, NotAfter: later, Subject: site, DNSNames: []string{site, "www." + site}},
+			"443/" + site + "/1.3": {Version: tls.VersionTLS13, NotAfter: later, Subject: site, DNSNames: []string{site, "www." + site}, Trusted: true},
 		},
 	}
 }

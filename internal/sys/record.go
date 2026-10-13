@@ -30,15 +30,18 @@ func (r *Recorder) log(kind, what string) {
 	}
 }
 
-func (r *Recorder) ReadFile(p string) ([]byte, error) { r.log("read", p); return nil, fs.ErrNotExist }
+func (r *Recorder) ReadFile(_ context.Context, p string) (ReadResult, error) {
+	r.log("read", p)
+	return ReadResult{}, fs.ErrNotExist
+}
 func (r *Recorder) Stat(p string) (FileInfo, error) {
 	r.log("stat", p)
 	return FileInfo{}, fs.ErrNotExist
 }
 func (r *Recorder) Glob(p string) ([]string, error) { r.log("glob", p); return nil, nil }
-func (r *Recorder) Walk(root string, n int) ([]FileInfo, error) {
+func (r *Recorder) Walk(_ context.Context, root string, n int) (WalkResult, error) {
 	r.log("walk", fmt.Sprintf("%s (max %d files, metadata only)", root, n))
-	return nil, nil
+	return WalkResult{Complete: true}, nil
 }
 func (r *Recorder) Run(_ context.Context, name string, args ...string) (string, error) {
 	if !IsAllowed(name, args) {

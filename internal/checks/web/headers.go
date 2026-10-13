@@ -25,7 +25,6 @@ func init() {
 		Refs:      []check.Ref{{Title: "RFC 6797, HTTP Strict Transport Security", URL: "https://www.rfc-editor.org/rfc/rfc6797"}, refHTTPHeadersCS, refMDN("Strict-Transport-Security")},
 		Standards: check.Standards{CWE: []string{"CWE-319", "CWE-523"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.4.5"}, NIST: []string{"SC-8"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
-			re := regexp.MustCompile(`max-age=(\d+)`)
 			return ForEachSite(ctx, s, func(st Site) check.Result {
 				if !st.HTTPS {
 					return check.SkipR(st.Name, "Site not served over HTTPS (see WEB-TLS-001)")
@@ -34,10 +33,12 @@ func init() {
 				if h == "" {
 					return check.FailR(st.Name, "Strict-Transport-Security header is missing")
 				}
-				if m := re.FindStringSubmatch(h); m != nil {
-					if n, _ := strconv.Atoi(m[1]); n < 15552000 {
-						return check.FailR(st.Name, "HSTS max-age is shorter than 180 days", h)
-					}
+				n, ok := hstsMaxAge(h)
+				if !ok {
+					return check.FailR(st.Name, "HSTS max-age is missing, duplicated or invalid", h)
+				}
+				if n < 15552000 {
+					return check.FailR(st.Name, "HSTS max-age is shorter than 180 days", h)
 				}
 				return check.PassR(st.Name, "HSTS is set", h)
 			})
@@ -63,9 +64,8 @@ func init() {
 				if h == "" {
 					return check.FailR(st.Name, "Content-Security-Policy header is missing")
 				}
-				l := strings.ToLower(h)
-				if strings.Contains(l, "'unsafe-inline'") && !strings.Contains(l, "'nonce-") && !strings.Contains(l, "'sha256-") && (strings.Contains(l, "script-src") || !strings.Contains(l, "default-src")) {
-					return check.FailR(st.Name, "CSP allows inline scripts ('unsafe-inline'), weakening XSS protection", h)
+				if reason := weakCSP(h); reason != "" {
+					return check.FailR(st.Name, reason, h)
 				}
 				return check.PassR(st.Name, "Content-Security-Policy is set", h)
 			})
@@ -167,4 +167,59 @@ func init() {
 			})
 		},
 	})
+}
+
+func hstsMaxAge(h string) (uint64, bool) {
+	var value string
+	for _, part := range strings.Split(h, ";") {
+		kv := strings.SplitN(strings.TrimSpace(part), "=", 2)
+		if len(kv) == 2 && strings.EqualFold(strings.TrimSpace(kv[0]), "max-age") {
+			if value != "" {
+				return 0, false
+			}
+			value = strings.TrimSpace(kv[1])
+		}
+	}
+	if value == "" || strings.HasPrefix(value, "\"") {
+		return 0, false
+	}
+	n, err := strconv.ParseUint(value, 10, 64)
+	return n, err == nil
+}
+
+func weakCSP(h string) string {
+	dirs := map[string][]string{}
+	for _, raw := range strings.Split(strings.ToLower(h), ";") {
+		f := strings.Fields(raw)
+		if len(f) > 0 {
+			dirs[f[0]] = f[1:]
+		}
+	}
+	script := dirs["script-src"]
+	if len(script) == 0 {
+		script = dirs["default-src"]
+	}
+	for _, src := range script {
+		if src == "*" || src == "data:" || strings.HasPrefix(src, "http:") {
+			return "CSP permits an unsafe script source"
+		}
+		if src == "'unsafe-eval'" {
+			return "CSP allows unsafe script evaluation"
+		}
+		if src == "'unsafe-inline'" && !hasNonceOrHash(script) {
+			return "CSP allows inline scripts without a nonce or hash"
+		}
+	}
+	if _, ok := dirs["object-src"]; !ok {
+		return "CSP does not restrict object-src"
+	}
+	return ""
+}
+func hasNonceOrHash(src []string) bool {
+	for _, s := range src {
+		if strings.HasPrefix(s, "'nonce-") || strings.HasPrefix(s, "'sha256-") || strings.HasPrefix(s, "'sha384-") || strings.HasPrefix(s, "'sha512-") {
+			return true
+		}
+	}
+	return false
 }

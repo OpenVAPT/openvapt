@@ -35,10 +35,43 @@ func TestVHostNames(t *testing.T) {
 func TestSSHDFallbackParsesFiles(t *testing.T) {
 	f := &sys.Fake{Files: map[string]string{
 		"/etc/ssh/sshd_config.d/10-hard.conf": "PasswordAuthentication no\n",
-		"/etc/ssh/sshd_config":                "PasswordAuthentication yes\nPermitRootLogin yes\nMatch User x\nPermitRootLogin no\n",
+		"/etc/ssh/sshd_config":                "Include /etc/ssh/sshd_config.d/*.conf\nPasswordAuthentication yes\nPermitRootLogin yes\nMatch User x\nPermitRootLogin no\n",
 	}}
 	cfg, ok := SSHD(context.Background(), f)
 	if !ok || cfg["passwordauthentication"] != "no" || cfg["permitrootlogin"] != "yes" {
 		t.Fatalf("drop-in should win and Match blocks be ignored: %v", cfg)
+	}
+}
+
+func TestSSHDFallbackIgnoresDormantDropIn(t *testing.T) {
+	f := &sys.Fake{Files: map[string]string{"/etc/ssh/sshd_config.d/10-hard.conf": "PasswordAuthentication no\n", "/etc/ssh/sshd_config": "PasswordAuthentication yes\nPermitRootLogin no\n"}}
+	cfg, ok := SSHD(context.Background(), f)
+	if !ok || cfg["passwordauthentication"] != "yes" {
+		t.Fatalf("dormant drop-in affected config: %v", cfg)
+	}
+}
+
+func TestSSHDMergesDangerousMatchContext(t *testing.T) {
+	base := "permitrootlogin no\npasswordauthentication no\n"
+	f := &sys.Fake{Commands: map[string]string{
+		"sshd -T -C user=root,host=localhost,addr=127.0.0.1":   "permitrootlogin yes\npasswordauthentication no\n",
+		"sshd -T -C user=nobody,host=localhost,addr=127.0.0.1": base,
+		"sshd -T -C user=root,host=localhost,addr=192.0.2.1":   base,
+		"sshd -T -C user=nobody,host=localhost,addr=192.0.2.1": base,
+	}}
+	cfg, ok := SSHD(context.Background(), f)
+	if !ok || cfg["permitrootlogin"] != "yes" {
+		t.Fatalf("dangerous Match context was hidden: %v", cfg)
+	}
+}
+
+func TestWebTargetsExpandIncludesAndStripComments(t *testing.T) {
+	f := &sys.Fake{Files: map[string]string{
+		"/etc/nginx/nginx.conf":       "include /etc/nginx/custom/*.conf;\n",
+		"/etc/nginx/custom/site.conf": "server {\n listen 443 ssl;\n server_name example.test www.example.test; # production\n ssl_certificate x;\n}\n",
+	}}
+	got := WebTargets(f)
+	if len(got) != 2 || got[0].Scheme != "https" || got[0].Name != "example.test" || got[1].Name != "www.example.test" {
+		t.Fatalf("got %+v", got)
 	}
 }
