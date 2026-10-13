@@ -36,7 +36,7 @@
       <a href="{{.Base}}checks/" {{if eq .Section "checks"}}aria-current="page"{{end}}>Checks</a>
       <a href="{{.Base}}how-it-works.html" {{if eq .Section "built"}}aria-current="page"{{end}}>How It's Built</a>
       <a href="{{.Base}}standards.html" {{if eq .Section "standards"}}aria-current="page"{{end}}>Standards</a>
-      <a href="{{.Base}}learn.html" {{if eq .Section "learn"}}aria-current="page"{{end}}>Learn</a>
+      <a href="{{.Base}}academy/" {{if or (eq .Section "academy") (eq .Section "learn")}}aria-current="page"{{end}}>Academy</a>
       <a href="{{.Base}}download.html" {{if eq .Section "download"}}aria-current="page"{{end}}>Download</a>
       <a href="{{.Base}}faq.html" {{if eq .Section "faq"}}aria-current="page"{{end}}>FAQ</a>
       <a href="{{.Base}}contribute.html" {{if eq .Section "contribute"}}aria-current="page"{{end}}>Contribute</a>
@@ -44,7 +44,7 @@
   </div>
 </header>
 <div class="wrap pt-4">
-  <div class="alert alert-info" role="note">{{icon "info"}}<span><strong>Academic, non-commercial, open-source code.</strong> Free for your own personal or business use, on your own machines, 100% at your own risk. Not for sale. Not for providing services. This website collects no data. <a href="{{.Base}}download.html#acknowledge">Read the Acknowledgements</a></span></div>
+  <div class="alert alert-info" role="note">{{icon "info"}}<span><strong>Academic, non-commercial, AI-generated, source-available code.</strong> Free for your own personal or business use, on your own machines, 100% at your own risk. Not for sale. Not for providing services. This website collects no data. <a href="{{.Base}}download.html#acknowledge">Read the Acknowledgements</a></span></div>
 </div>
 <main id="main" class="wrap pb-16 pt-10">
 {{.Body}}
@@ -60,6 +60,8 @@
       <p class="foot-h">Project</p>
       <a href="{{.Base}}limits.html">What It Does Not Do</a>
       <a href="{{.Base}}compare.html">Compare With Other Tools</a>
+      <a href="{{.Base}}glossary.html">VAPT Glossary</a>
+      <a href="{{.Base}}learn.html">Quick Lessons</a>
       <a href="{{.Base}}cite.html">Cite OpenVAPT</a>
       <a href="{{repo}}" rel="noreferrer">Source Code on GitHub</a>
       <a href="{{repo}}/issues" rel="noreferrer">Report a Bug</a>
@@ -71,12 +73,15 @@
       <a href="{{.Base}}legal/privacy.html">Privacy Policy</a>
       <a href="{{.Base}}legal/acceptable-use.html">Acceptable Use</a>
       <a href="{{.Base}}legal/licence.html">Licence</a>
+      <a href="{{.Base}}legal/ai-disclosure.html">AI Disclosure</a>
+      <a href="{{.Base}}legal/credits.html">Credits and Citations</a>
     </div>
   </div>
   <div class="wrap mt-8 border-t border-line pt-5 text-[13px] text-ink-3">Built {{.Built}} from commit <a href="{{repo}}/tree/{{.Commit}}" rel="noreferrer" class="inline"><code>{{.CommitShort}}</code></a>. PolyForm Noncommercial 1.0.0 with own-use permission.</div>
 </footer>
 {{if eq .Path "checks/index.html"}}<script src="{{.Base}}assets/vendor/ag-grid-community.min.js" defer></script><script src="{{.Base}}assets/catalogue.js" defer></script>{{end}}
 {{if eq .Path "download.html"}}<script src="{{.Base}}assets/acknowledge.js" defer></script>{{end}}
+{{if hasPrefix .Path "academy/"}}<script src="{{.Base}}assets/academy.js" defer></script>{{end}}
 {{if or (eq .Path "index.html") (eq .Path "standards.html")}}<script src="{{.Base}}assets/vendor/echarts.min.js" defer></script><script src="{{.Base}}assets/charts.js" defer></script>{{end}}
 </body>
 </html>{{end}}

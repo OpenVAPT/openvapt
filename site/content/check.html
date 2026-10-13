@@ -16,6 +16,7 @@
   {{with $c.Standards.CISTopic}}<dt>Benchmark Topic</dt><dd>{{.}} (topic only, no benchmark text)</dd>{{end}}
   <dt>References</dt><dd>{{range $c.Refs}}<a href="{{.URL}}" rel="noreferrer">{{.Title}}</a><br>{{end}}</dd>
 </dl>
+{{with .Data.Learn}}<div class="alert alert-info mt-8" role="note">{{icon "graduation-cap"}}<span><strong>Learn the theory behind this check:</strong> {{range $i, $m := .}}{{if $i}}, {{end}}<a href="../academy/{{lower $m.ID}}.html">{{$m.ID}} {{$m.Title}}</a>{{end}}.</span></div>{{end}}
 <h2>{{icon "code-xml"}} Source Code</h2>
 <p>The complete file that defines this check. Run it with <code>openvapt scan --only {{$c.ID}}</code>, or read it offline with <code>openvapt explain {{$c.ID}}</code>.</p>
 {{template "cite" .Data.Cite}}

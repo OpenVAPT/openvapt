@@ -1,0 +1,48 @@
+{{define "content"}}{{$m := .Data.M}}{{$g := .Data.Glossary}}
+<nav class="crumbs" aria-label="Breadcrumb"><a href="./">OpenVAPT Academy</a>{{icon "chevron-right"}}<span>{{$m.ID}}</span></nav>
+<div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-plain">{{$m.ID}}</span><span class="tag tag-info">{{$m.Level}}</span><span class="muted">About {{$m.Minutes}} minutes</span></div>
+<h1>{{$m.Title}}</h1>
+<p class="lead">{{$m.Summary}}</p>
+<div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+<div class="min-w-0">
+  <div class="card-layer mt-6"><h3 class="mt-0">You Will Be Able To</h3><ul class="mb-0">{{range $m.Objectives}}<li>{{.}}</li>{{end}}</ul></div>
+  {{range $m.Sections}}<h2>{{.Heading}}</h2>{{range .Body}}<p>{{.}}</p>{{end}}{{end}}
+
+  {{with .Data.Checks}}<h2>{{icon "list-checks"}} Apply It</h2>
+  <p>These OpenVAPT checks put this module into practice. Open one to see its detection logic and source code.</p>
+  <div class="table-wrap"><table class="table"><thead><tr><th>Check</th><th>Title</th><th>Severity</th></tr></thead><tbody>
+  {{range .}}<tr><td><code>{{.ID}}</code></td><td><a href="../checks/{{.ID}}.html">{{.Title}}</a></td><td>{{template "sev" .Severity}}</td></tr>{{end}}
+  </tbody></table></div>{{end}}
+
+  <h2>{{icon "flask-conical"}} Lab</h2>
+  <ol>{{range $m.Lab}}<li><code>{{.}}</code></li>{{end}}</ol>
+
+  <h2>{{icon "graduation-cap"}} Check Yourself</h2>
+  <p class="muted">Answers are checked in your browser and never stored or sent.</p>
+  {{range $qi, $q := $m.Quiz}}
+  <fieldset class="card quiz mb-4" data-answer="{{$q.Answer}}">
+    <legend class="sr-only">Question {{add $qi 1}}</legend>
+    <p class="mt-0 font-semibold">{{add $qi 1}}. {{$q.Q}}</p>
+    {{range $oi, $o := $q.Options}}<label class="flex cursor-pointer items-start gap-3 py-1.5"><input type="radio" name="q{{$qi}}" value="{{$oi}}" class="mt-1 accent-blue-6"><span>{{$o}}</span></label>{{end}}
+    <p class="quiz-result mb-0 mt-3 hidden text-[15px]" aria-live="polite" data-explain="{{$q.Explain}}" data-correct="{{index $q.Options $q.Answer}}"></p>
+  </fieldset>
+  {{end}}
+  <noscript><p class="muted">Turn on scripts to check your answers here, or run <code>openvapt learn {{$m.ID}} --quiz</code> offline.</p></noscript>
+
+  <h2>References</h2>
+  <ul>{{range $m.Refs}}<li><a href="{{.URL}}" rel="noreferrer">{{.Title}}</a></li>{{end}}</ul>
+
+  <div class="mt-10 flex flex-wrap justify-between gap-3 border-t border-line-2 pt-6">
+    {{with .Data.Prev}}<a class="btn btn-default" href="{{lower .ID}}.html">Previous: {{.ID}} {{.Title}}</a>{{else}}<span></span>{{end}}
+    {{with .Data.Next}}<a class="btn btn-primary" href="{{lower .ID}}.html">Next: {{.ID}} {{.Title}}</a>{{end}}
+  </div>
+</div>
+<aside class="min-w-0">
+  <div class="card-layer mt-6 text-[14px]">
+    <p class="foot-h">Key Terms</p>
+    <dl class="m-0">{{range $m.KeyTerms}}<dt class="mt-3 font-semibold text-ink first:mt-0"><a href="../glossary.html#{{slug .}}">{{.}}</a></dt><dd class="m-0 text-ink-2">{{index $g .}}</dd>{{end}}</dl>
+  </div>
+  <div class="card-layer mt-4 text-[14px]"><p class="foot-h">Offline</p><code>openvapt learn {{$m.ID}}</code></div>
+</aside>
+</div>
+{{end}}

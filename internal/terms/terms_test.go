@@ -23,7 +23,7 @@ func TestAcknowledgementsAreInSync(t *testing.T) {
 }
 
 func TestPositioningWording(t *testing.T) {
-	for _, must := range []string{"Academic", "Non-commercial", "Open-source code", "Free", "own use", "100% at your own risk"} {
+	for _, must := range []string{"Academic", "Non-commercial", "AI-generated", "source-available", "Free", "own personal or business use", "100% at your own risk"} {
 		if !strings.Contains(Tagline, must) {
 			t.Errorf("tagline must contain %q", must)
 		}

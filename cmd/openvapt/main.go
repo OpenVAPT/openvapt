@@ -5,6 +5,7 @@
 //	openvapt demo       scan the built-in simulated lab servers (safe anywhere)
 //	openvapt checks     list every check
 //	openvapt explain    show the full documentation of one check
+//	openvapt learn      the OpenVAPT Academy course, offline
 //	openvapt diff       compare two reports (what was fixed, what is new)
 //	openvapt verify     confirm a signed report was not edited
 //	openvapt terms      print the terms of use
@@ -69,6 +70,8 @@ func main() {
 		err = cmdDemo(ctx, os.Args[2:])
 	case "checks", "list":
 		err = cmdChecks(os.Args[2:])
+	case "learn", "academy":
+		err = cmdLearn(os.Args[2:])
 	case "explain":
 		err = cmdExplain(os.Args[2:])
 	case "diff":
@@ -101,6 +104,7 @@ Usage:
   openvapt demo [flags]          Scan the built-in simulated lab (vulnerable|hardened)
   openvapt checks [--json]       List every check
   openvapt explain <CHECK-ID>    Show what a check does, why, how to fix it
+  openvapt learn [MODULE] [--quiz]  OpenVAPT Academy: learn VAPT from theory to application
   openvapt diff <old.json> <new.json>
   openvapt verify <report.json> [--key-id ID]
   openvapt terms | version

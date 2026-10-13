@@ -7,6 +7,7 @@
 @source "../content";
 @source "../static/assets/catalogue.js";
 @source "../static/assets/charts.js";
+@source "../static/assets/academy.js";
 @source "../../cmd/sitegen";
 
 @font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-Regular.woff2") format("woff2");font-weight:400;font-display:swap}

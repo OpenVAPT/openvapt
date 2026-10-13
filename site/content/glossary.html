@@ -1,0 +1,8 @@
+{{define "content"}}{{$d := .Data}}
+<h1>VAPT Glossary</h1>
+<p class="lead">Plain-language definitions of the vulnerability assessment and penetration testing terms used across OpenVAPT and the Academy.</p>
+<dl class="mt-8 grid gap-3 md:grid-cols-2">
+{{range $d.Terms}}<div class="card p-5" id="{{slug .}}"><dt class="font-semibold text-ink">{{.}}</dt><dd class="m-0 mt-1 text-[15px] text-ink-2">{{index $d.Glossary .}}</dd></div>
+{{end}}</dl>
+<p class="muted mt-8">Offline: <code>openvapt learn glossary</code> or <code>openvapt learn --term CVSS</code>.</p>
+{{end}}

@@ -1,8 +1,8 @@
 # OpenVAPT Additional Permission
 
-Version 1.0, 2026-10-13
+Version 1.1, 2026-10-13
 
-This additional permission is granted by the licensor of OpenVAPT, The OpenVAPT Project, in addition to the PolyForm Noncommercial License 1.0.0 in the file LICENSE. Where the two differ, this permission adds rights; it never takes away a right that the licence gives you.
+This additional permission is granted by the licensor of OpenVAPT (the individual who owns and runs the project; see NOTICE) in addition to the PolyForm Noncommercial License 1.0.0 in the file LICENSE. It adds a permission for commercial organisations to use the software for their own internal purposes. It does not reduce any permission that the PolyForm Noncommercial License 1.0.0 itself grants.
 
 ## Permission for Own Use
 
@@ -10,12 +10,16 @@ Any person or organisation, including a company or other commercial organisation
 
 ## What This Permission Does Not Allow
 
-This permission does not allow, and no other part of the licence allows:
+This additional permission does not allow:
 
 - providing services to anyone else with the software, whether paid or unpaid, including vulnerability assessment, penetration testing, auditing, scanning, consulting or managed security services;
 - selling, renting or licensing the software or copies of it;
 - including the software, or any part or modified version of it, in a product, platform or service offered to others;
-- any other business activity that earns money from the software.
+- any other activity that earns money from the software.
+
+## Separate Conditions of Use
+
+Separately from the copyright licence, everyone who downloads or uses OpenVAPT is asked to accept the End User Licence Agreement (EULA.md) and the Acceptable Use Policy (ACCEPTABLE_USE.md). Those documents are a contract between you and the licensor, and under them you agree not to use OpenVAPT to provide services to anyone else, paid or unpaid, even where the PolyForm Noncommercial License on its own might otherwise allow a particular noncommercial use. We state this openly so that the effect of each document is clear.
 
 ## Conditions
 
@@ -23,4 +27,4 @@ This permission does not allow, and no other part of the licence allows:
 - You use the software entirely at your own risk. The No Liability section of the licence and the EULA apply in full.
 - Copies you share must include LICENSE, this file and NOTICE.
 
-Required Notice: Copyright (c) 2026 The OpenVAPT Project. Licensed under the PolyForm Noncommercial License 1.0.0 with the OpenVAPT Additional Permission.
+Required Notice: Copyright (c) 2026 the OpenVAPT project owner and contributors. Licensed under the PolyForm Noncommercial License 1.0.0 with the OpenVAPT Additional Permission.

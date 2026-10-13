@@ -30,6 +30,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/openvapt/openvapt/internal/academy"
 	"github.com/openvapt/openvapt/internal/check"
 	_ "github.com/openvapt/openvapt/internal/checks/all"
 	"github.com/openvapt/openvapt/internal/engine"
@@ -105,10 +106,14 @@ func main() {
 		"Acks":        terms.Acknowledgements,
 		"TermsVer":    terms.Version,
 		"FAQ":         faqs,
+		"Levels":      academy.Levels(),
+		"Modules":     academy.Modules,
+		"Glossary":    academy.Glossary,
+		"Terms":       academy.Terms(),
 		"ChartData":   chartData(checks),
 	}
 	pages := []struct{ file, path, title, desc, section string }{
-		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "OpenVAPT is an academic, non-commercial project with open-source code. Free to download and use on your own Linux server, for personal or business own use, 100% at your own risk.", "home"},
+		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "OpenVAPT is an academic, non-commercial project with AI-generated, source-available code. Free to download and use on your own Linux server, for personal or business own use, 100% at your own risk.", "home"},
 		{"how-it-works.html", "how-it-works.html", "How OpenVAPT Is Built", "A module by module walkthrough of the OpenVAPT source code, with every function cited to the exact file and line.", "built"},
 		{"standards.html", "standards.html", "Standards and Methodology", "How OpenVAPT maps to NIST SP 800-115, CVSS v3.1, OWASP Top 10, OWASP ASVS, CWE and NIST SP 800-53.", "standards"},
 		{"limits.html", "limits.html", "What OpenVAPT Does Not Do", "The deliberate limits of OpenVAPT: no exploitation, no remote targets, no data collection, not a penetration test.", "limits"},
@@ -129,8 +134,24 @@ func main() {
 	g.content("checks.html", "checks/index.html", "Check Catalogue", fmt.Sprintf("All %d OpenVAPT checks with their rationale, detection logic, fix, references and source code.", len(checks)), "checks", data)
 	for _, c := range checks {
 		g.render("check.html", "checks/"+c.ID+".html", c.ID+": "+c.Title, c.Summary, "checks",
-			map[string]any{"C": c, "Cite": cites[c.ID]})
+			map[string]any{"C": c, "Cite": cites[c.ID], "Learn": academy.ForCheck(c.ID)})
 	}
+
+	// OpenVAPT Academy: course index, one page per module, and the glossary.
+	g.render("academy.html", "academy/index.html", "OpenVAPT Academy: Learn VAPT From Theory to Application", "A free 13-module course that teaches vulnerability assessment from security basics to running, fixing, reporting and building checks, using OpenVAPT and a safe simulated lab.", "academy", data)
+	for i := range academy.Modules {
+		m := &academy.Modules[i]
+		var prev, next *academy.Module
+		if i > 0 {
+			prev = &academy.Modules[i-1]
+		}
+		if i+1 < len(academy.Modules) {
+			next = &academy.Modules[i+1]
+		}
+		g.render("module.html", "academy/"+strings.ToLower(m.ID)+".html", m.ID+": "+m.Title+" - OpenVAPT Academy", m.Summary, "academy",
+			map[string]any{"M": m, "Checks": checksFor(m), "Prev": prev, "Next": next, "Glossary": academy.Glossary})
+	}
+	g.render("glossary.html", "glossary.html", "VAPT Glossary: Vulnerability Assessment Terms Explained", "Plain-language definitions of vulnerability assessment and penetration testing terms, from ASLR and CVSS to TLS and VAPT.", "academy", data)
 
 	// Legal pages are rendered from the Markdown files in the repository root,
 	// so the website and the repository always say the same thing.
@@ -140,6 +161,8 @@ func main() {
 		{"PRIVACY.md", "legal/privacy.html", "Privacy Policy", "OpenVAPT collects no personal data at all."},
 		{"ACCEPTABLE_USE.md", "legal/acceptable-use.html", "Acceptable Use Policy", "How OpenVAPT may and may not be used."},
 		{"LICENSING.md", "legal/licence.html", "Licence", "OpenVAPT is licensed under the PolyForm Noncommercial License 1.0.0 with an additional permission for own use."},
+		{"AI-DISCLOSURE.md", "legal/ai-disclosure.html", "AI Disclosure", "OpenVAPT is entirely AI-generated. Which AI systems produced it, what the human owner did, and what has not been reviewed."},
+		{"CREDITS.md", "legal/credits.html", "Credits, Sources and Citations", "Every component, tool, standard, source and AI system OpenVAPT uses or refers to, cited precisely."},
 	} {
 		b, err := os.ReadFile(l.md)
 		must(err)
@@ -206,9 +229,11 @@ func funcs() template.FuncMap {
 		"cwe": func(id string) string {
 			return "https://cwe.mitre.org/data/definitions/" + strings.TrimPrefix(id, "CWE-") + ".html"
 		},
-		"icon":    icon,
-		"tagline": func() string { return terms.Tagline },
-		"add":     func(a, b int) int { return a + b },
+		"icon":      icon,
+		"tagline":   func() string { return terms.Tagline },
+		"add":       func(a, b int) int { return a + b },
+		"slug":      slug,
+		"hasPrefix": strings.HasPrefix,
 		"json": func(v any) template.JS {
 			b, err := json.Marshal(v) // escapes <, > and & so it is safe inside a script element
 			must(err)
@@ -389,6 +414,20 @@ func standards(cs []*check.Check) map[string][]StdRow {
 	}
 }
 
+// checksFor returns the checks a module applies, in catalogue order.
+func checksFor(m *academy.Module) []*check.Check {
+	var out []*check.Check
+	for _, c := range check.All() {
+		for _, r := range m.RelatedChecks {
+			if c.ID == r || (strings.HasSuffix(r, "-") && strings.HasPrefix(c.ID, r)) {
+				out = append(out, c)
+				break
+			}
+		}
+	}
+	return out
+}
+
 // catalogueRows is the data behind the AG Grid check catalogue.
 func catalogueRows(cs []*check.Check) []map[string]string {
 	var rows []map[string]string
@@ -424,7 +463,7 @@ func jsonLD(p Page) template.JS {
 	url := siteURL + "/" + strings.TrimSuffix(p.Path, "index.html")
 	org := map[string]any{"@type": "Organization", "@id": siteURL + "/#org", "name": "The OpenVAPT Project", "alternateName": "OpenVAPT",
 		"url": siteURL, "logo": siteURL + "/assets/icon.svg", "sameAs": []string{"https://github.com/OpenVAPT", repoURL},
-		"description": "An academic, non-commercial project that publishes OpenVAPT, a free vulnerability assessment tool with open-source code. Not a business; provides no services."}
+		"description": "An academic, non-commercial project that publishes OpenVAPT, a free, AI-generated vulnerability assessment learning tool with source-available code. Not a business; provides no services."}
 	site := map[string]any{"@type": "WebSite", "@id": siteURL + "/#website", "name": "OpenVAPT", "url": siteURL, "publisher": map[string]string{"@id": siteURL + "/#org"}, "inLanguage": "en"}
 	app := map[string]any{"@type": "SoftwareApplication", "@id": siteURL + "/#software", "name": "OpenVAPT",
 		"applicationCategory": "SecurityApplication", "applicationSubCategory": "Vulnerability Assessment Tool",
@@ -432,7 +471,7 @@ func jsonLD(p Page) template.JS {
 		"description":         terms.Tagline + " Read-only checks for the Linux machine it runs on: server, network exposure and websites.",
 		"isAccessibleForFree": true, "offers": map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD"},
 		"license": "https://polyformproject.org/licenses/noncommercial/1.0.0/", "publisher": map[string]string{"@id": siteURL + "/#org"},
-		"keywords":    "free VAPT tool, vulnerability assessment, open-source code, Linux security, server hardening, web security headers, academic, education",
+		"keywords":    "free VAPT tool, VAPT learning, vulnerability assessment, source-available code, AI-generated, Linux security, server hardening, web security headers, academic, education",
 		"featureList": []string{"56 read-only checks", "Server, network and web app coverage", "CVSS v3.1 ratings", "OWASP, CWE and NIST mapping", "HTML, JSON, SARIF and Markdown reports", "Loopback-only scope guard", "Simulated lab for learning", "Zero data collection"}}
 	graph := []any{org, site}
 	switch {
@@ -445,6 +484,26 @@ func jsonLD(p Page) template.JS {
 			qs = append(qs, map[string]any{"@type": "Question", "name": f.Q, "acceptedAnswer": map[string]string{"@type": "Answer", "text": f.A}})
 		}
 		graph = append(graph, map[string]any{"@type": "FAQPage", "url": url, "mainEntity": qs})
+	case p.Path == "academy/index.html":
+		var parts []any
+		for _, m := range academy.Modules {
+			parts = append(parts, map[string]any{"@type": "LearningResource", "name": m.ID + ": " + m.Title, "url": siteURL + "/academy/" + strings.ToLower(m.ID) + ".html", "educationalLevel": string(m.Level), "timeRequired": fmt.Sprintf("PT%dM", m.Minutes)})
+		}
+		graph = append(graph, map[string]any{"@type": "Course", "name": "OpenVAPT Academy", "url": url, "description": p.Description,
+			"provider": map[string]string{"@id": siteURL + "/#org"}, "isAccessibleForFree": true, "inLanguage": "en", "educationalLevel": "Beginner to Intermediate",
+			"teaches": "Vulnerability assessment (VAPT) from theory to application", "hasPart": parts,
+			"offers":            map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free"},
+			"hasCourseInstance": map[string]any{"@type": "CourseInstance", "courseMode": "online", "courseWorkload": "PT5H"}})
+	case strings.HasPrefix(p.Path, "academy/"):
+		graph = append(graph, map[string]any{"@type": "LearningResource", "name": p.Title, "description": p.Description, "url": url,
+			"isPartOf": map[string]string{"@type": "Course", "name": "OpenVAPT Academy", "url": siteURL + "/academy/"}, "isAccessibleForFree": true,
+			"learningResourceType": "Lesson", "inLanguage": "en", "publisher": map[string]string{"@id": siteURL + "/#org"}})
+	case p.Path == "glossary.html":
+		var ts []any
+		for _, t := range academy.Terms() {
+			ts = append(ts, map[string]any{"@type": "DefinedTerm", "name": t, "description": academy.Glossary[t], "url": url + "#" + slug(t)})
+		}
+		graph = append(graph, map[string]any{"@type": "DefinedTermSet", "name": "VAPT Glossary", "url": url, "hasDefinedTerm": ts})
 	case strings.HasPrefix(p.Path, "checks/") && p.Path != "checks/index.html":
 		graph = append(graph, map[string]any{"@type": "TechArticle", "headline": p.Title, "description": p.Description, "url": url,
 			"about": map[string]string{"@id": siteURL + "/#software"}, "publisher": map[string]string{"@id": siteURL + "/#org"}, "dateModified": p.Built, "inLanguage": "en"})
@@ -456,6 +515,9 @@ func jsonLD(p Page) template.JS {
 		items := []any{map[string]any{"@type": "ListItem", "position": 1, "name": "OpenVAPT", "item": siteURL + "/"}}
 		if strings.HasPrefix(p.Path, "checks/") && p.Path != "checks/index.html" {
 			items = append(items, map[string]any{"@type": "ListItem", "position": 2, "name": "Check Catalogue", "item": siteURL + "/checks/"})
+		}
+		if strings.HasPrefix(p.Path, "academy/") && p.Path != "academy/index.html" {
+			items = append(items, map[string]any{"@type": "ListItem", "position": 2, "name": "OpenVAPT Academy", "item": siteURL + "/academy/"})
 		}
 		if strings.HasPrefix(p.Path, "legal/") {
 			items = append(items, map[string]any{"@type": "ListItem", "position": 2, "name": "Legal", "item": siteURL + "/legal/eula.html"})
@@ -490,7 +552,7 @@ func writeSEO(paths []string, cs []*check.Check) {
 	must(os.WriteFile(filepath.Join(*outDir, "robots.txt"), []byte(robots), 0o644)) // #nosec G306 -- public website file
 
 	var l strings.Builder
-	l.WriteString("# OpenVAPT\n\n> OpenVAPT is a free, academic, non-commercial vulnerability assessment (VA) tool for Linux servers with open-source code. It runs read-only checks on the machine it is installed on (and only that machine) to identify weaknesses in the server, its network exposure and its websites, rates findings with CVSS v3.1 and proposes cited fixes. It is made for learning how a VAPT tool works. It is not a business, not a penetration testing service and collects no data.\n\n")
+	l.WriteString("# OpenVAPT\n\n> OpenVAPT is a free, academic, non-commercial vulnerability assessment (VA) tool for Linux servers with source-available code, generated entirely by AI under human direction. It runs read-only checks on the machine it is installed on (and only that machine) to identify weaknesses in the server, its network exposure and its websites, rates findings with CVSS v3.1 and proposes cited fixes. It is made for learning how a VAPT tool works. It is not a business, not a penetration testing service and collects no data.\n\n")
 	l.WriteString("Key facts:\n- Price: free. No account, no licence key.\n- Use: anyone, including companies, may use it on machines they own or control, for their own use. It may not be sold or used to provide services.\n- Risk: provided as is; users carry 100% of the risk.\n- Licence: PolyForm Noncommercial 1.0.0 plus an own-use permission (source-available).\n- Platform: Linux. Single static Go binary, standard library only.\n- Scope: loopback-only, enforced in code. Detection only, no exploit code.\n- Standards: NIST SP 800-115, CVSS v3.1, OWASP Top 10 2021, OWASP ASVS 4.0.3, CWE, NIST SP 800-53.\n- Source: " + repoURL + "\n- Built with AI assistance (Claude by Anthropic, via Claude Code) under the owner's direction.\n\n## Docs\n\n")
 	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How it is built, with code citations"}, {"checks/", "Check catalogue"}, {"standards.html", "Standards and methodology"}, {"compare.html", "Comparison with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What it does not do"}, {"learn.html", "Lessons and lab"}, {"download.html", "Download and acknowledgements"}, {"no-data.html", "No data collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}} {
 		l.WriteString("- [" + p[1] + "](" + siteURL + "/" + p[0] + ")\n")
