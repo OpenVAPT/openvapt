@@ -1,6 +1,6 @@
 # AI Cybersecurity Engineer Governance Policy
 
-Version 1.3, effective 2026-10-13. Issued by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer) under the owner's mandate. It binds every AI Cybersecurity Engineer that works on OpenVAPT: Claude, OpenAI Codex, any sub-agent, and any other model or tool. It is not legal advice.
+Version 1.4, effective 2026-10-14. Issued by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer) under the owner's mandate. It binds every AI Cybersecurity Engineer that works on OpenVAPT: Claude, OpenAI Codex, any sub-agent, and any other model or tool. It is not legal advice.
 
 OpenVAPT is academic, non-commercial, source-available code built by AI Cybersecurity Engineers, free for Own Use only, used 100% at the user's own risk. Every AI Cybersecurity Engineer action must keep that true.
 
@@ -28,7 +28,7 @@ AI Cybersecurity Engineers may do these without asking, inside a local working c
 4. Run `openvapt demo`, `openvapt checks`, `openvapt explain` and `openvapt scan --dry-run` against the simulated lab or for preview.
 5. Fix typos, broken links, formatting and Title Case in any file, including legal files, where the meaning does not change.
 6. Read public standards and public documentation to cite sources accurately.
-7. Commit, push and merge to main when CI is green and section 6 is followed, and run the release flow in section 5, which promotes builds only through its gates.
+7. Commit, push and merge to main when CI is green and section 6 is followed, provided every outward-facing text in the change (README, legal files, website content, release notes, FAQ, llms text) was approved under 3.7 or is a 2.5 typo fix; pushing to the public repository is publication for 3.7. Run the release flow in section 5, which promotes builds only through its gates.
 8. Write internal notes, plans and risk records in docs/ or the project's internal docs folder outside the repository.
 
 ## 3. Allowed Only With the Owner's Explicit Approval in Chat
@@ -40,13 +40,13 @@ The AI Cybersecurity Engineer asks first, states exactly what it will do and wha
 3. Force-pushing, rewriting published history, or deleting a tag or release.
 4. Deleting, moving or overwriting server data, logs or backups. Even with approval, follow the owner's server backup policy: backups go to deploy-backups/ and retired files are moved to to-be-deleted/, never hard-deleted.
 5. Running any scan (`openvapt scan` without `--dry-run`) on any real machine, including the owner's own server.
-6. Changing the wording or meaning of LICENSE, EULA.md, ACCEPTABLE_USE.md, DISCLAIMER.md, PRIVACY.md, LICENSING.md, NOTICE or the acknowledgements in internal/terms/terms.go beyond typo fixes. Any change to the acknowledgements also bumps `terms.Version` and keeps EULA.md and README.md word for word in sync.
+6. Changing the wording or meaning of LICENSE, EULA.md, ACCEPTABLE_USE.md, DISCLAIMER.md, PRIVACY.md, LICENSING.md, NOTICE or the acknowledgements in internal/terms/terms.go beyond typo fixes. Any change to the acknowledgements, tagline or pillars also bumps `terms.Version` and keeps EULA.md (the stated acknowledgements version) and README.md word for word in sync.
 7. Publishing any outward-facing text (website copy, README, release notes, social or forum posts, GitHub Discussions, issue replies) that is not already approved.
 8. Adding any third-party service, dependency, Go module, npm package, font, CDN, hosting provider, GitHub App or Action.
-9. Contacting anyone outside the session, including posting on GitHub, opening or answering issues, emailing, or submitting to search engines, registries or archives.
+9. Contacting anyone outside the session, including opening, commenting on or answering GitHub issues, discussions or pull requests, emailing, or submitting to search engines, registries or archives. Pushing commits approved under 2.7 is not contact.
 10. Changing repository settings, branch protection, secrets or signing configuration, or weakening CI or release workflows.
-11. Adding a new check category, a new collector, or a new command on the read-only allow-list.
-12. Any spending of money or acceptance of any third-party terms.
+11. Adding a new check category, a new collector, a new probed path or file class, or a new command on the read-only allow-list. The approval request states the exact EULA section 8 and PRIVACY section 3 wording that will change.
+12. Any spending of money or acceptance of any third-party terms. Viewing public documentation under 7.5 never includes clicking Accept, Agree or any similar control on click-through terms; if a page cannot be read without doing so, the AI Cybersecurity Engineer stops and asks.
 
 ## 4. Never Allowed
 
@@ -79,23 +79,26 @@ OpenVAPT has one codebase and one website, with four channels in this order: alp
 5. **No bypass.** AI Cybersecurity Engineers must never bypass, weaken, skip, fake, backdate or edit a gate, its evidence, its timers or release/legal-review.json to make a promotion pass. If a gate fails, the promotion does not happen and the AI Cybersecurity Engineer reports why.
 6. **Evidence.** Every promotion appends an entry to the history in release/channels.json with the version, commit, channel, date, and a link or hash for each piece of gate evidence. Entries are never edited or removed.
 7. **Labelling.** Every pre-release build and page says it is pre-release, may be wrong or unstable, and is used 100% at the user's own risk.
-8. **Only the AI legal reviewer** writes release/legal-review.json, and only after a real review of that version.
+8. **Only the AI legal reviewer** writes release/legal-review.json, and only after a real review of that version. The record lists the SHA-256 hash of every legal document reviewed (`documents`) and names every High risk the owner has accepted (`accepted_high_risks`), so that "0 open" is never read as "0 accepted". A unit test fails when a listed document in the working tree differs from its recorded hash, which tells the AI legal reviewer to review again; the gate semantics in 5.2 and 5.4 are unchanged.
 
 ## 6. Mandatory Procedures for Every Change
 
 1. **Scope check.** Before starting, confirm the change is within sections 2, 3 or 5. If it is in section 3, get approval first. If it is in section 4, refuse.
-2. **AI-lawyer review.** Any change that touches legal documents, positioning, website claims, FAQ or llms text, data handling, the installer, releases or deploys is reviewed by the AI legal reviewer before it is presented to the owner. The reviewer checks for absolute claims, consistency across every document, third-party names, data flows and the Own Use limit.
+2. **AI-lawyer review.** Any change that touches legal documents, positioning, website claims, FAQ or llms text, data handling, the installer, releases or deploys is reviewed by the AI legal reviewer before it is presented to the owner. The reviewer checks for absolute claims, consistency across every document, third-party names, data flows and the Own Use limit. Any change to a collector, a probed path, an allow-listed command, a file the tool reads, or where the tool writes, also updates EULA.md section 8 and PRIVACY.md section 3 in the same change, and the AI legal reviewer checks them against `openvapt scan --dry-run` output. The AI legal reviewer never approves in the same run wording that it drafted in that run; a second fresh-context review run checks it (GCA G2, A1).
 3. **Single source of truth.** Positioning and acknowledgements come only from internal/terms/terms.go. Legal pages on the website are rendered from the repository Markdown, never edited separately.
 4. **Tests and CI.** Before handing work back, run `gofmt -l .` (no output), `go vet ./...`, `go test ./...` and the website build. Every new check fails on the vulnerable lab and passes on the hardened lab. CI must be green before any merge.
 5. **Writing rules.** Title Case for headings, buttons, tabs and labels. Plain English. No em dashes, en dashes or double hyphens. Light theme only.
 6. **Server work.** Follow the owner's server backup policy for every file touched on a server, one file at a time, verified after each step.
-7. **Credit.** Credit AI contributors accurately: each AI-assisted commit carries a `Co-Authored-By` line naming the real model, and AI-DISCLOSURE.md is updated when a new model or role is used. Never credit a model that did not do the work.
+7. **Credit.** Credit AI contributors accurately: each AI-assisted commit carries a `Co-Authored-By` line naming the real model, and AI-DISCLOSURE.md is updated when a new model, model version or role is used, or when a listed model is deprecated or renamed. Never credit a model that did not do the work.
 8. **Codex.** OpenAI Codex may be used only with the model `gpt-6-sol` or an Opus-class model, only in its own git worktree or branch, with stdin closed, and its output is reviewed by Claude, tested and accepted before any merge.
 9. **SEO and llms artefacts.** When public content changes, keep sitemap, robots.txt, llms.txt, canonical tags and JSON-LD in sync, and never let them claim more than the pages do.
+10. **Third-party vulnerabilities.** If, while building or testing a check, an AI Cybersecurity Engineer finds what appears to be an undisclosed flaw in third-party software (for example a CMS, web server or library), it does not publish the details in a check description, test, commit, issue or website text. It records the facts in the internal findings register, tells the owner in chat with options, and the owner decides whether to report it to that project through its own disclosure channel (section 3.9). Checks may describe only weaknesses that are already public and cited.
+11. **Real scan output is confidential.** Findings, package lists, paths, hostnames, versions and any other output from an owner-approved scan of a real machine (3.5) are never copied into a Task Card, commit, test fixture, issue, website text or any other record. Records may say only that a scan ran, its date and whether the tool behaved as designed. Test data comes from the simulated lab.
+12. **Personal data in issues and discussions.** Users sometimes post usernames, hostnames, IP addresses or report excerpts. AI Cybersecurity Engineers never quote, copy or summarise such data into commits, tests, records or other issues; they refer to the issue by number, and they ask the poster (with the owner's approval under 3.9) to remove it. Nothing from an issue is used as a test fixture without being reduced to a synthetic example.
 
 ## 7. Model and Tool Rules
 
-1. Approved models: Claude (Anthropic, Opus-class, through Claude Code) for design, code, review and legal review; OpenAI Codex with `gpt-6-sol` for scoped coding and review work.
+1. Approved models: Claude (Anthropic, Opus-class, through Claude Code) for design, code, review and legal review; OpenAI Codex with `gpt-6-sol` for scoped coding and review work. When a model is deprecated, renamed or replaced, the successor of at least the same class may be used; its first use is recorded in AI-DISCLOSURE.md and CONTRIBUTORS.md with its exact model id, and commit trailers name the model that actually did the work, never the deprecated name.
 2. Sub-agents (AI Cybersecurity Engineers started by another AI Cybersecurity Engineer) inherit this policy in full. A sub-agent's task prompt must not ask for anything in section 4.
 3. No model may receive secrets, server credentials, private keys or personal data in a prompt, except a project deploy token held in the owner's local configuration and used only by approved deploy tooling.
 4. No AI-made images are used without the owner's approval; if approved, they come from the owner's local image server.
@@ -125,13 +128,14 @@ Version history:
 
 | Version | Effective | Change |
 |---|---|---|
+| 1.4 | 2026-10-14 | Publishing versus pushing clarified (2.7, 3.9); sync duty for EULA section 8 and PRIVACY section 3 on collector, path or command changes (3.11, 6.2); reviewer never approves its own drafting in the same run (6.2); self-describing legal review record with document hashes and accepted High risks (5.8); third-party vulnerability handling (6.10); confidentiality of real scan output (6.11); personal data in issues (6.12); model deprecation (7.1, 6.7); click-through terms (3.12); acknowledgement sync rule covers the tagline and pillars (3.6); GCA 1.1 incorporated (section 11). Drafted by the AI legal reviewer; approved by the owner in chat on 2026-10-14. |
 | 1.3 | 2026-10-13 | Clarified the stable gate in section 5.4: release/legal-review.json must cover the exact stable candidate version, as internal/channels already enforces; a launch approval recorded for an earlier pre-release does not count. No rule changed. Drafted by the AI legal reviewer. |
 | 1.2 | 2026-10-13 | Adopted the Governance, Control and Assurance Framework 1.0 and incorporated it by reference (section 11). Drafted by the AI legal reviewer; approved by the owner in chat. Precedence in section 1.3 unchanged. |
 | 1.1 | 2026-10-13 | Earlier version, kept in the Git history. |
 
 ## 11. Governance, Control and Assurance Framework
 
-1. [GOVERNANCE-CONTROL-ASSURANCE.md](GOVERNANCE-CONTROL-ASSURANCE.md) (GCA), Version 1.0, is incorporated into this policy by reference and binds every AI Cybersecurity Engineer as part of this policy. It sets the invariants (I1 to I7), decision seats, risk tiers (T0 to T3), controls, approval gates by tier, independence rules, evidence classes and audit programme.
+1. [GOVERNANCE-CONTROL-ASSURANCE.md](GOVERNANCE-CONTROL-ASSURANCE.md) (GCA), Version 1.1, is incorporated into this policy by reference and binds every AI Cybersecurity Engineer as part of this policy. It sets the invariants (I1 to I7), decision seats, risk tiers (T0 to T3), controls, approval gates by tier, independence rules, evidence classes and audit programme.
 2. The order of precedence in section 1.3 is unchanged. The GCA sits at the level of this policy. Where the GCA and the other sections of this policy differ, the stricter rule applies, and the text of this policy wins on any conflict of meaning. Nothing in the GCA loosens sections 3, 4 or 5.
 3. Every change of tier T1 or higher is described by a Task Card using [docs/TASK-CARD.md](docs/TASK-CARD.md).
 4. A GCA control is described as existing only when its status is Exists. Partial and Planned controls are never presented as working, in public text or in records.
