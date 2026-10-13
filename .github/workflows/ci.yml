@@ -7,11 +7,43 @@ permissions:
   contents: read
 jobs:
   test:
+    # The check run is named "ci": the main branch ruleset requires it
+    # (docs/adr/0007-branch-ruleset.md).
+    name: ci
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - name: DCO (every commit in the range carries a Signed-off-by trailer)
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -eu
+          case "$EVENT" in
+          pull_request) range="$BASE..$HEAD_SHA" ;;
+          *) if echo "$BEFORE" | grep -Eq '^0{40}$' || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then range="$AFTER^..$AFTER"; else range="$BEFORE..$AFTER"; fi ;;
+          esac
+          bad=0; n=0
+          for c in $(git rev-list --no-merges "$range"); do
+            n=$((n + 1))
+            if grep -q "^$c " release/dco-exceptions.txt 2>/dev/null; then
+              echo "skip   $c (listed in release/dco-exceptions.txt)"; continue
+            fi
+            if git show -s --format=%B "$c" | grep -Eq '^Signed-off-by: .+ <[^<>@ ]+@[^<>@ ]+>$'; then
+              echo "ok     $c"
+            else
+              echo "::error::commit $c has no Signed-off-by trailer (git commit -s; see CONTRIBUTING.md)"; bad=1
+            fi
+          done
+          echo "checked $n commit(s) in $range"
+          exit $bad
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version-file: go.mod
@@ -59,9 +91,9 @@ jobs:
         run: go run ./cmd/sitegen -out dist/site
       - name: Website collects no data
         run: |
-          ! grep -rEl "https?://(fonts\.googleapis|www\.google-analytics|googletagmanager|cdn\.|unpkg|jsdelivr)" dist/site
-          ! grep -rE "document\.cookie|localStorage|sessionStorage|navigator\.sendBeacon|fetch\(" dist/site/assets
+          if grep -rEl "https?://(fonts\.googleapis|www\.google-analytics|googletagmanager|cdn\.|unpkg|jsdelivr)" dist/site; then exit 1; fi
+          if grep -rE "document\.cookie|localStorage|sessionStorage|navigator\.sendBeacon|fetch\(" dist/site/assets; then exit 1; fi
       - name: No email addresses published (project-authored files only)
         run: |
-          ! git grep -IEoh "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}" -- . ':!site/static/assets/vendor' ':!site/package-lock.json' ':!.github/workflows/ci.yml' \
-            | grep -v -E "noreply|@openssh\.com|@v[0-9]|@[0-9]{4}\.|@[0-9]x\." 
+          if git grep -IEoh "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}" -- . ':!site/static/assets/vendor' ':!site/package-lock.json' ':!.github/workflows/ci.yml' \
+            | grep -v -E "noreply|@openssh\.com|@v[0-9]|@[0-9]{4}\.|@[0-9]x\."; then exit 1; fi
