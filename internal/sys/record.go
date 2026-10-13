@@ -59,3 +59,7 @@ func (r *Recorder) TLS(_ context.Context, port, sni string, minV, maxV uint16) (
 	r.log("tls", fmt.Sprintf("handshake 127.0.0.1:%s (SNI %s, versions %#x-%#x)", port, sni, minV, maxV))
 	return TLSInfo{}, fs.ErrNotExist
 }
+func (r *Recorder) TLSWithCiphers(_ context.Context, port, sni string, suites []uint16) (TLSInfo, error) {
+	r.log("tls", fmt.Sprintf("TLS 1.2 handshake 127.0.0.1:%s (SNI %s, restricted cipher suites %v)", port, sni, suites))
+	return TLSInfo{}, fs.ErrNotExist
+}

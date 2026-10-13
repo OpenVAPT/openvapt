@@ -35,7 +35,8 @@ a{color:var(--accent)}ul{padding-left:20px}
 <p class="muted">{{.Scan.Host}} - {{.Scan.OS}} - {{.Scan.Started.Format "2006-01-02 15:04 UTC"}}</p>
 <div class="note">{{.Disclaimer}}</div>
 
-<h2>Summary</h2>
+<h2>Executive Summary</h2>
+<p>{{.Posture}}</p>
 <div class="stats">
 <div class="stat"><b class="critical">{{.Summary.Critical}}</b><span>Critical</span></div>
 <div class="stat"><b class="high">{{.Summary.High}}</b><span>High</span></div>
@@ -53,6 +54,27 @@ a{color:var(--accent)}ul{padding-left:20px}
 {{with .Integrity}}<tr><th>Integrity</th><td>Signed with key <code>{{.KeyID}}</code>. Check with <code>openvapt verify report.json</code>.</td></tr>{{end}}
 </table>
 
+<h3>Top 5 Risks</h3>
+<table><tr><th>ID</th><th>Risk</th><th>Severity</th><th>Category</th></tr>
+{{range .TopRisks}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{title .Category}}</td></tr>{{end}}
+</table>
+
+<h2>Risk Heat Map</h2>
+<p class="muted">Failed checks by security control area and severity.</p>
+<table><tr><th>Category</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Info</th></tr>
+{{range .HeatMap}}<tr><td>{{.Category}}</td><td class="critical">{{.Critical}}</td><td class="high">{{.High}}</td><td class="medium">{{.Medium}}</td><td class="low">{{.Low}}</td><td>{{.Info}}</td></tr>{{end}}
+</table>
+
+<h2>Compliance Coverage</h2>
+<p>Coverage shows mapped automated checks and does not certify compliance.</p>
+<table><tr><th>Framework</th><th>Control or Category</th><th>Checks Run</th><th>Failed</th><th>Passed</th></tr>
+{{range .ComplianceCoverage}}<tr><td>{{.Framework}}</td><td>{{.Control}}</td><td>{{.Checks}}</td><td>{{.Failed}}</td><td>{{.Passed}}</td></tr>{{end}}
+</table>
+
+<h2>Prioritised Remediation Plan</h2>
+<p>High-severity, low-effort quick wins appear first.</p>
+<ol>{{range .RemediationPlan}}<li><strong>{{.ID}} - {{.Title}}</strong> <span class="sev {{.Severity}}">{{upper .Severity}}</span> <span class="muted">{{title .Effort}} Effort</span><p>{{.Fix}}</p></li>{{end}}</ol>
+
 <h2>Findings</h2>
 {{$any := false}}{{range .Findings}}{{if failed .}}{{$any = true}}
 <article class="finding" id="{{.ID}}">
@@ -64,6 +86,8 @@ a{color:var(--accent)}ul{padding-left:20px}
 <dt>Fix</dt><dd>{{.Fix}}</dd>
 <dt>Verify</dt><dd><code>{{.Verify}}</code></dd>
 <dt>CVSS v3.1</dt><dd><code>{{.CVSS}}</code></dd>
+<dt>Category</dt><dd>{{title .Category}}</dd>
+<dt>Effort</dt><dd>{{title .Effort}}</dd>
 {{if .Standards.CWE}}<dt>Standards</dt><dd>{{join .Standards.CWE ", "}}{{if .Standards.OWASP}}, OWASP {{join .Standards.OWASP ", "}}{{end}}{{if .Standards.ASVS}}, ASVS {{join .Standards.ASVS ", "}}{{end}}{{if .Standards.NIST}}, NIST 800-53 {{join .Standards.NIST ", "}}{{end}}</dd>{{end}}
 <dt>References</dt><dd>{{range .Refs}}<a href="{{.URL}}" rel="noreferrer">{{.Title}}</a><br>{{end}}</dd>
 <dt>Source</dt><dd><code>{{.Source}}</code></dd>
@@ -80,8 +104,8 @@ a{color:var(--accent)}ul{padding-left:20px}
 
 <h2>All Checks</h2>
 <table>
-<tr><th>ID</th><th>Title</th><th>Severity</th><th>Status</th></tr>
-{{range .Findings}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{title .Status}}</td></tr>
+<tr><th>ID</th><th>Title</th><th>Category</th><th>Effort</th><th>Severity</th><th>Status</th></tr>
+{{range .Findings}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td>{{title .Category}}</td><td>{{title .Effort}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{title .Status}}</td></tr>
 {{end}}</table>
 
 <h2>Methodology</h2>

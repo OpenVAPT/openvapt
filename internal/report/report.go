@@ -7,13 +7,14 @@
 package report
 
 import (
+	"sort"
 	"time"
 
 	"github.com/openvapt/openvapt/internal/check"
 )
 
 // SchemaVersion changes whenever the JSON shape changes incompatibly.
-const SchemaVersion = "openvapt.report/2"
+const SchemaVersion = "openvapt.report/3"
 
 type Report struct {
 	Schema      string     `json:"schema"`
@@ -64,6 +65,8 @@ type Finding struct {
 	Title     string          `json:"title"`
 	Domain    string          `json:"domain"`
 	Severity  string          `json:"severity"`
+	Category  check.Category  `json:"category"`
+	Effort    check.Effort    `json:"effort"`
 	CVSS      string          `json:"cvss"`
 	Status    string          `json:"status"`
 	Summary   string          `json:"summary"`
@@ -89,10 +92,153 @@ type Integrity struct {
 // FromCheck copies the static metadata of a check into a finding.
 func FromCheck(c *check.Check) Finding {
 	return Finding{
-		ID: c.ID, Title: c.Title, Domain: string(c.Domain), Severity: string(c.Severity), CVSS: c.CVSS,
+		ID: c.ID, Title: c.Title, Domain: string(c.Domain), Severity: string(c.Severity), Category: c.Category, Effort: c.Effort, CVSS: c.CVSS,
 		Summary: c.Summary, Rationale: c.Rationale, Fix: c.Fix, Verify: c.Verify,
 		Refs: c.Refs, Standards: c.Standards, Source: c.SourceFile,
 	}
+}
+
+type HeatRow struct {
+	Category                          string
+	Critical, High, Medium, Low, Info int
+}
+type CoverageRow struct {
+	Framework, Control     string
+	Checks, Failed, Passed int
+}
+
+func (r *Report) Posture() string {
+	if r.Summary.Critical > 0 {
+		return "Critical weaknesses require immediate attention."
+	}
+	if r.Summary.High > 0 {
+		return "High-risk weaknesses should be addressed promptly."
+	}
+	if r.Summary.Medium > 0 {
+		return "The system has material hardening opportunities."
+	}
+	if r.Summary.Failed > 0 {
+		return "Only lower-severity weaknesses were detected."
+	}
+	return "No checks failed, but incomplete and skipped checks still limit assurance."
+}
+func (r *Report) TopRisks() []Finding {
+	var x []Finding
+	for _, f := range r.Findings {
+		if f.Status == string(check.Fail) {
+			x = append(x, f)
+		}
+	}
+	sort.SliceStable(x, func(i, j int) bool {
+		return check.Severity(x[i].Severity).Rank() < check.Severity(x[j].Severity).Rank()
+	})
+	if len(x) > 5 {
+		x = x[:5]
+	}
+	return x
+}
+func (r *Report) RemediationPlan() []Finding {
+	var x []Finding
+	for _, f := range r.Findings {
+		if f.Status == string(check.Fail) {
+			x = append(x, f)
+		}
+	}
+	eff := func(e check.Effort) int {
+		if e == check.EffortLow {
+			return 0
+		}
+		if e == check.EffortMedium {
+			return 1
+		}
+		return 2
+	}
+	sort.SliceStable(x, func(i, j int) bool {
+		si, sj := check.Severity(x[i].Severity).Rank(), check.Severity(x[j].Severity).Rank()
+		quickI := si <= 1 && x[i].Effort == check.EffortLow
+		quickJ := sj <= 1 && x[j].Effort == check.EffortLow
+		if quickI != quickJ {
+			return quickI
+		}
+		if si != sj {
+			return si < sj
+		}
+		if eff(x[i].Effort) != eff(x[j].Effort) {
+			return eff(x[i].Effort) < eff(x[j].Effort)
+		}
+		return x[i].ID < x[j].ID
+	})
+	return x
+}
+func (r *Report) HeatMap() []HeatRow {
+	rows := make([]HeatRow, 0, len(check.Categories))
+	for _, c := range check.Categories {
+		row := HeatRow{Category: c.Name}
+		for _, f := range r.Findings {
+			if f.Status != string(check.Fail) || f.Category != c.ID {
+				continue
+			}
+			switch check.Severity(f.Severity) {
+			case check.Critical:
+				row.Critical++
+			case check.High:
+				row.High++
+			case check.Medium:
+				row.Medium++
+			case check.Low:
+				row.Low++
+			default:
+				row.Info++
+			}
+		}
+		rows = append(rows, row)
+	}
+	return rows
+}
+func (r *Report) ComplianceCoverage() []CoverageRow {
+	type key struct{ f, c string }
+	m := map[key]*CoverageRow{}
+	for _, ci := range check.Categories {
+		for _, c := range ci.CIS {
+			m[key{"CIS Controls v8", c}] = &CoverageRow{Framework: "CIS Controls v8", Control: c}
+		}
+		for _, c := range ci.NISTCSF {
+			m[key{"NIST CSF 2.0", c}] = &CoverageRow{Framework: "NIST CSF 2.0", Control: c}
+		}
+	}
+	for _, f := range r.Findings {
+		ci := check.CategoryByID(f.Category)
+		var ks []key
+		for _, c := range ci.CIS {
+			ks = append(ks, key{"CIS Controls v8", c})
+		}
+		for _, c := range ci.NISTCSF {
+			ks = append(ks, key{"NIST CSF 2.0", c})
+		}
+		for _, k := range ks {
+			row := m[k]
+			row.Checks++
+			if f.Status == string(check.Fail) {
+				row.Failed++
+			}
+			if f.Status == string(check.Pass) {
+				row.Passed++
+			}
+		}
+	}
+	var out []CoverageRow
+	for _, v := range m {
+		if v.Checks > 0 {
+			out = append(out, *v)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Framework != out[j].Framework {
+			return out[i].Framework < out[j].Framework
+		}
+		return out[i].Control < out[j].Control
+	})
+	return out
 }
 
 // Summarise fills in r.Summary from r.Findings.

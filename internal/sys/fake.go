@@ -2,6 +2,7 @@ package sys
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -16,6 +17,7 @@ type Fake struct {
 	Commands        map[string]string       // "name arg1 arg2" -> output
 	HTTPResp        map[string]HTTPResponse // "scheme://vhost/path"
 	TLSResp         map[string]TLSInfo      // "port/sni/maxVersion"
+	TLSCipherResp   map[string]TLSInfo      // "port/sni/cipher"
 	IncompleteFiles map[string]bool
 	IncompleteWalks map[string]bool
 }
@@ -83,6 +85,14 @@ func (f *Fake) TLS(_ context.Context, port, sni string, minV, maxV uint16) (TLSI
 	key := port + "/" + sni + "/" + versionKey(maxV)
 	if r, ok := f.TLSResp[key]; ok {
 		return r, nil
+	}
+	return TLSInfo{}, fs.ErrNotExist
+}
+func (f *Fake) TLSWithCiphers(_ context.Context, port, sni string, suites []uint16) (TLSInfo, error) {
+	for _, suite := range suites {
+		if r, ok := f.TLSCipherResp[port+"/"+sni+"/"+fmt.Sprint(suite)]; ok {
+			return r, nil
+		}
 	}
 	return TLSInfo{}, fs.ErrNotExist
 }
