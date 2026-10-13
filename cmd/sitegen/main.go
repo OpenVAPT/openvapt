@@ -756,10 +756,11 @@ func writeSEO(paths []string, cs []*check.Check) {
 	sm.WriteString("</urlset>\n")
 	must(os.WriteFile(filepath.Join(*outDir, "sitemap.xml"), []byte(sm.String()), 0o644)) // #nosec G306 -- public website file
 
-	robots := "User-agent: *\nAllow: /\n\n"
-	for _, bot := range []string{"GPTBot", "ClaudeBot", "Claude-Web", "anthropic-ai", "PerplexityBot", "Google-Extended", "CCBot", "Applebot-Extended", "OAI-SearchBot", "ChatGPT-User"} {
-		robots += "User-agent: " + bot + "\nAllow: /\n\n"
-	}
+	// One group admits every search and AI crawler (GPTBot, ClaudeBot,
+	// PerplexityBot, Google-Extended and the rest). Named groups are avoided
+	// on purpose: under RFC 9309 a crawler obeys only its most specific group,
+	// so a named block would silently drop the Disallow lines below.
+	robots := "# Every search engine and AI crawler is welcome: one group applies to all.\nUser-agent: *\nAllow: /\nDisallow: /tools/\n\n"
 	robots += "Sitemap: " + siteURL + "/sitemap.xml\n"
 	if *noindex {
 		robots = "User-agent: *\nDisallow: /\n"
