@@ -183,8 +183,12 @@ run_scan() {
 		"$DIR/openvapt" scan --out "$OUT" </dev/tty || status=$?
 	elif command -v sudo >/dev/null 2>&1; then
 		say "Running with sudo so checks can read protected files such as /etc/shadow."
+		# The terminal is opened by this user on purpose: the scan reads I ACCEPT from it.
+		# shellcheck disable=SC2024
 		sudo "$DIR/openvapt" scan --out "$OUT" </dev/tty || status=$?
-		[ -d "$OUT" ] && sudo chown -R "$(id -u):$(id -g)" "$OUT" 2>/dev/null || true
+		if [ -d "$OUT" ]; then
+			sudo chown -R "$(id -u):$(id -g)" "$OUT" 2>/dev/null || true
+		fi
 	else
 		say "sudo is not available; scanning without root, so some checks will be skipped or Incomplete."
 		"$DIR/openvapt" scan --out "$OUT" </dev/tty || status=$?
