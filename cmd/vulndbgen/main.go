@@ -110,7 +110,7 @@ func fetch(u string) (string, error) {
 		e = fmt.Errorf("%s: body exceeds the %d byte limit", u, maxDownload)
 	}
 	if e != nil {
-		os.Remove(f.Name())
+		_ = os.Remove(f.Name())
 		return "", e
 	}
 	return f.Name(), nil
@@ -233,7 +233,7 @@ func build(ecos []string, allow map[string]bool, get func(string) (string, error
 		return s, e
 	}
 	kevData, e := os.ReadFile(kevPath) // #nosec G304 -- temporary file created by fetch
-	os.Remove(kevPath)
+	_ = os.Remove(kevPath)
 	if e != nil {
 		return s, e
 	}
@@ -278,7 +278,7 @@ type oneFile struct{ name, path string }
 
 func (f *oneFile) drop() {
 	if f.path != "" {
-		os.Remove(f.path)
+		_ = os.Remove(f.path)
 	}
 	*f = oneFile{}
 }

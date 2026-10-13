@@ -216,7 +216,8 @@ func defaultOutDir(prefix string) (string, error) {
 		return "", err
 	}
 	// A private directory needs the execute bit; 0700 is owner-only.
-	if err := os.Chmod(dir, 0o700); err != nil { // #nosec G302 -- directory, not a file
+	err = os.Chmod(dir, 0o700) // #nosec G302 -- directory, not a file
+	if err != nil {
 		return "", err
 	}
 	return dir, nil

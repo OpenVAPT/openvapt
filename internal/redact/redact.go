@@ -13,7 +13,7 @@ import (
 const (
 	dq     = `"(?:[^"\\]|\\.)*"`
 	sq     = `'(?:[^'\\]|\\.)*'`
-	secret = `pass(?:word|wd|phrase)?|pwd|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|auth|credential|salt`
+	secret = `pass(?:word|wd|phrase)?|pwd|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|auth|credential|salt` // #nosec G101 -- key-name pattern used to find and redact secrets, not a credential
 )
 
 var rules = []struct {
