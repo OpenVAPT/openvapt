@@ -52,6 +52,7 @@ a{color:var(--accent)}ul{padding-left:20px}
 <tr><th>Scope</th><td>This machine only ({{.Scan.Checks}} checks{{if .Scan.Sites}}, sites: {{join .Scan.Sites ", "}}{{end}})</td></tr>
 <tr><th>Run As Root</th><td>{{if .Scan.AsRoot}}Yes{{else}}No, some checks were skipped{{end}}</td></tr>
 <tr><th>Tool</th><td>{{.Tool.Name}} {{.Tool.Version}} (commit {{short .Tool.Commit}}){{if and .Tool.Channel (ne .Tool.Channel "stable")}} <span class="tag">Pre-Release: {{.Tool.Channel}}</span>{{end}}</td></tr>
+<tr><th>Vulnerability Data</th><td>{{with .Scan.VulnDB}}{{if .Fixture}}Test fixture data only: no CVE matching was possible (build with make vulndb or use a release build){{else}}Snapshot {{.Generated}}, {{.AgeDays}} days old, {{.Advisories}} advisories{{if .Stale}} <span class="medium">Warning: older than 90 days; newer vulnerabilities are not in it (not a failure)</span>{{end}}{{end}}{{else}}Not available{{end}}</td></tr>
 {{with .Integrity}}<tr><th>Integrity</th><td>Signed with key <code>{{.KeyID}}</code>. Check with <code>openvapt verify report.json</code>.</td></tr>{{end}}
 </table>
 
@@ -91,6 +92,7 @@ a{color:var(--accent)}ul{padding-left:20px}
 <dt>Effort</dt><dd>{{title .Effort}}</dd>
 {{if .Standards.CWE}}<dt>Standards</dt><dd>{{join .Standards.CWE ", "}}{{if .Standards.OWASP}}, OWASP {{join .Standards.OWASP ", "}}{{end}}{{if .Standards.ASVS}}, ASVS {{join .Standards.ASVS ", "}}{{end}}{{if .Standards.NIST}}, NIST 800-53 {{join .Standards.NIST ", "}}{{end}}</dd>{{end}}
 <dt>References</dt><dd>{{range .Refs}}<a href="{{.URL}}" rel="noreferrer">{{.Title}}</a><br>{{end}}</dd>
+{{if .Academy}}<dt>Learn</dt><dd>{{range .Academy}}<a href="{{.URL}}" rel="noreferrer">{{.ID}}: {{.Title}}</a> (offline: <code>openvapt learn {{.ID}}</code>)<br>{{end}}</dd>{{end}}
 <dt>Source</dt><dd><code>{{.Source}}</code></dd>
 </dl>
 </article>

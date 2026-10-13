@@ -132,6 +132,7 @@ func (r *Report) Markdown() string {
 	fmt.Fprintf(&b, "> %s\n\n", r.Disclaimer)
 	fmt.Fprintf(&b, "| Item | Value |\n|---|---|\n| Host | %s |\n| Operating System | %s |\n| Scan Time (UTC) | %s |\n| Run As Root | %v |\n| Tool | %s %s (%s, %s channel) |\n\n",
 		mdTable(r.Scan.Host), mdTable(r.Scan.OS), r.Scan.Started.Format("2006-01-02 15:04:05"), r.Scan.AsRoot, mdTable(r.Tool.Name), mdTable(r.Tool.Version), mdTable(short(r.Tool.Commit)), mdTable(r.Tool.Channel))
+	fmt.Fprintf(&b, "%s\n\n", mdText(r.Scan.VulnDB.Notice()))
 	fmt.Fprintf(&b, "## Executive Summary\n\n%s\n\n| Critical | High | Medium | Low | Passed | Incomplete | Skipped | Errors |\n|---|---|---|---|---|---|---|---|\n| %d | %d | %d | %d | %d | %d | %d | %d |\n\n",
 		mdText(r.Posture()),
 		s.Critical, s.High, s.Medium, s.Low, s.Passed, s.Incomplete, s.Skipped, s.Errors)
@@ -169,6 +170,9 @@ func (r *Report) Markdown() string {
 		fmt.Fprintf(&b, "\n**Fix:** %s\n\n**Verify:** %s\n\n", mdText(f.Fix), mdText(f.Verify))
 		if st := standardsLine(f.Standards); st != "" {
 			fmt.Fprintf(&b, "**Standards:** %s\n\n", mdText(st))
+		}
+		for _, m := range f.Academy {
+			fmt.Fprintf(&b, "**Learn:** %s: %s, %s (offline: `openvapt learn %s`)\n\n", mdText(m.ID), mdText(m.Title), m.URL, mdText(m.ID))
 		}
 	}
 	fmt.Fprintf(&b, "## Passed and Skipped Checks\n\n| ID | Title | Status |\n|---|---|---|\n")
@@ -242,7 +246,8 @@ func short(c string) string {
 func (r *Report) PrintSummary(w io.Writer) {
 	s := r.Summary
 	fmt.Fprintf(w, "\n  Checks run:  %d   Passed: %d   Failed: %d   Incomplete: %d   Skipped: %d   Errors: %d\n", r.Scan.Checks, s.Passed, s.Failed, s.Incomplete, s.Skipped, s.Errors)
-	fmt.Fprintf(w, "  Failed by severity:  Critical %d   High %d   Medium %d   Low %d\n\n", s.Critical, s.High, s.Medium, s.Low)
+	fmt.Fprintf(w, "  Failed by severity:  Critical %d   High %d   Medium %d   Low %d\n", s.Critical, s.High, s.Medium, s.Low)
+	fmt.Fprintf(w, "  %s\n\n", r.Scan.VulnDB.Notice())
 	for _, f := range r.Findings {
 		if f.Status == string(check.Fail) {
 			fmt.Fprintf(w, "  %-9s %-13s %s\n", strings.ToUpper(f.Severity), f.ID, f.Title)
