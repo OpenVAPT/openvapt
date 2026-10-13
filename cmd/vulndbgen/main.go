@@ -12,6 +12,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -80,13 +81,13 @@ func build(ecos []string, allow map[string]bool, get func(string) ([]byte, error
 		kev[v.CveID] = true
 	}
 	seen := map[string]*vulndb.Advisory{}
+	exports := map[string][]byte{}
 	for _, eco := range ecos {
 		eco = strings.TrimSpace(eco)
 		if eco == "" {
 			continue
 		}
-		url := "https://osv-vulnerabilities.storage.googleapis.com/" + eco + "/all.zip"
-		b, e := get(url)
+		b, e := export(eco, get, exports)
 		if e != nil {
 			return s, e
 		}
@@ -177,6 +178,36 @@ func build(ecos []string, allow map[string]bool, get func(string) ([]byte, error
 	sort.Slice(s.Advisories, func(i, j int) bool { return s.Advisories[i].ID < s.Advisories[j].ID })
 	s.Header.Counts.Advisories = len(s.Advisories)
 	return s, nil
+}
+
+// export downloads the OSV export that holds an ecosystem's records. OSV
+// publishes some release-specific ecosystems (Debian:12, Ubuntu:24.04:LTS)
+// as their own export, and others (AlmaLinux:8, Rocky Linux:9) only inside
+// the parent export (AlmaLinux, Rocky Linux), so a 404 falls back to the
+// parent. Records are filtered by their own ecosystem afterwards, so the
+// fallback never mixes releases. Each export is downloaded once.
+func export(eco string, get func(string) ([]byte, error), cache map[string][]byte) ([]byte, error) {
+	const bucket = "https://osv-vulnerabilities.storage.googleapis.com/"
+	names := []string{eco}
+	if parent, _, ok := strings.Cut(eco, ":"); ok {
+		names = append(names, parent)
+	}
+	var lastErr error
+	for _, n := range names {
+		if b, ok := cache[n]; ok {
+			return b, nil
+		}
+		b, e := get(bucket + url.PathEscape(n) + "/all.zip")
+		if e == nil {
+			cache[n] = b
+			return b, nil
+		}
+		lastErr = e
+		if !strings.Contains(e.Error(), "HTTP 404") {
+			break
+		}
+	}
+	return nil, lastErr
 }
 
 // cvss3 computes the CVSS v3 base score from an OSV severity vector.
