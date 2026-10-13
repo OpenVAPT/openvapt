@@ -61,7 +61,7 @@ type Page struct {
 	Title, Description, Path, Section  string
 	Base, Commit, CommitShort, Version string
 	Built                              string
-	NoIndex                            bool   // whole build is noindex (beta, pre-release)
+	NoIndex                            bool   // whole build is noindex (only before launch approval, or when -noindex is passed)
 	NoIndexPage                        bool   // this page alone is noindex (404)
 	Canonical                          string // absolute URL of this page; empty when it has none (404)
 	Root                               string // absolute URL of the site root, siteURL + base, no trailing slash

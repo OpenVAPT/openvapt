@@ -8,9 +8,9 @@ import (
 )
 
 // The website is one site for every channel. It shows where each channel
-// stands and stays hidden from search engines until a Stable release exists
-// and the AI legal reviewer has signed off public release (AGENTS.md
-// section 5). Nobody switches that by hand: it follows the release record.
+// stands and is indexed once release/legal-review.json records the owner's
+// public launch approval, and shows a pre-release banner on every page until
+// a Stable release exists. Nobody switches that by hand: it follows the release record.
 
 var (
 	statePath = "release/channels.json"

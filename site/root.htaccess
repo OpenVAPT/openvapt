@@ -1,9 +1,21 @@
 # openvapt.com public site. Public launch approved by the owner 2026-10-13.
-# /beta/ has its own .htaccess (noindex). /tools/ is excluded from the rules
-# below so the server-side admin endpoint there keeps working unchanged.
+# Everything is public here for every channel (Alpha, Beta, RC, Stable); the
+# old /beta/ preview was retired on 2026-10-13 and redirects to the root.
+# /tools/ is excluded from the rules below so the server-side admin endpoint
+# there keeps working unchanged.
 Options -Indexes
 DirectoryIndex index.html
 ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # One canonical origin: https://openvapt.com (HTTP and www redirect here).
+  RewriteCond %{HTTPS} !=on [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^ https://openvapt.com%{REQUEST_URI} [R=301,L]
+  # The retired /beta/ preview: send old links to the same page at the root.
+  RewriteRule ^beta(?:/(.*))?$ /$1 [R=301,L]
+</IfModule>
 
 <IfModule mod_headers.c>
   <If "%{REQUEST_URI} !~ m#^/tools/#">
@@ -21,8 +33,8 @@ ErrorDocument 404 /404.html
 
 # The public site is static. Refuse to run server-side code anywhere except
 # the admin endpoint in /tools/.
-<If "%{REQUEST_URI} !~ m#^/tools/#">
-  <FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh)$">
+<FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh)$">
+  <If "%{REQUEST_URI} !~ m#^/tools/#">
     Require all denied
-  </FilesMatch>
-</If>
+  </If>
+</FilesMatch>

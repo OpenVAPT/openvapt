@@ -1,6 +1,6 @@
 # AI Cybersecurity Engineer Governance Policy
 
-Version 1.2, effective 2026-10-13. Issued by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer) under the owner's mandate. It binds every AI Cybersecurity Engineer that works on OpenVAPT: Claude, OpenAI Codex, any sub-agent, and any other model or tool. It is not legal advice.
+Version 1.3, effective 2026-10-13. Issued by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer) under the owner's mandate. It binds every AI Cybersecurity Engineer that works on OpenVAPT: Claude, OpenAI Codex, any sub-agent, and any other model or tool. It is not legal advice.
 
 OpenVAPT is academic, non-commercial, source-available code built by AI Cybersecurity Engineers, free for Own Use only, used 100% at the user's own risk. Every AI Cybersecurity Engineer action must keep that true.
 
@@ -75,7 +75,7 @@ OpenVAPT has one codebase and one website, with four channels in this order: alp
 1. **Alpha gate.** CI is green on the exact commit: formatting, vet, unit and lab tests, staticcheck, gosec, govulncheck and the website build.
 2. **Beta gate.** The alpha gate passes, and release/legal-review.json records an AI-lawyer review for that exact version with `open_high_risks` equal to 0, and the full vulnerable and hardened lab suite passes, and the version has been on alpha for at least 7 days.
 3. **Release candidate gate.** The beta gate passes, and the installer end to end test passes, and the build is signed with provenance and an SBOM, and the version has been on beta for at least 7 days.
-4. **Stable gate.** The release candidate gate passes, and the version has been on rc for at least 14 days with no regression, and release/legal-review.json for that version has `public_launch_approved` set to true.
+4. **Stable gate.** The release candidate gate passes, and the version has been on rc for at least 14 days with no regression, and release/legal-review.json covers that exact stable candidate version (its `version` equals the version being promoted) and has `public_launch_approved` set to true. A launch approval recorded for an earlier pre-release version does not count.
 5. **No bypass.** AI Cybersecurity Engineers must never bypass, weaken, skip, fake, backdate or edit a gate, its evidence, its timers or release/legal-review.json to make a promotion pass. If a gate fails, the promotion does not happen and the AI Cybersecurity Engineer reports why.
 6. **Evidence.** Every promotion appends an entry to the history in release/channels.json with the version, commit, channel, date, and a link or hash for each piece of gate evidence. Entries are never edited or removed.
 7. **Labelling.** Every pre-release build and page says it is pre-release, may be wrong or unstable, and is used 100% at the user's own risk.
@@ -125,6 +125,7 @@ Version history:
 
 | Version | Effective | Change |
 |---|---|---|
+| 1.3 | 2026-10-13 | Clarified the stable gate in section 5.4: release/legal-review.json must cover the exact stable candidate version, as internal/channels already enforces; a launch approval recorded for an earlier pre-release does not count. No rule changed. Drafted by the AI legal reviewer. |
 | 1.2 | 2026-10-13 | Adopted the Governance, Control and Assurance Framework 1.0 and incorporated it by reference (section 11). Drafted by the AI legal reviewer; approved by the owner in chat. Precedence in section 1.3 unchanged. |
 | 1.1 | 2026-10-13 | Earlier version, kept in the Git history. |
 

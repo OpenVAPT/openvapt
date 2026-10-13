@@ -76,3 +76,26 @@ func TestSSHDMergesMatchContextFinding(t *testing.T) {
 		t.Errorf("conditional finding missing: %v", cfg)
 	}
 }
+
+func TestMatchKeepsNameCaseAndUsesPrimaryGroup(t *testing.T) {
+	f := matchFake("Match User Alice\n  X11Forwarding yes\nMatch Group ops\n  PasswordAuthentication yes\n")
+	f.Files["/etc/group"] += "ops:x:1500:\n"
+	f.Files["/etc/passwd"] = "root:x:0:0::/root:/bin/bash\nerin:x:1501:1500::/home/erin:/bin/bash\n"
+	got := MatchContexts(context.Background(), f, nil)
+	// "Alice" has an uppercase letter, which sshd user contexts reject, so it
+	// is skipped rather than silently lowercased into a different user.
+	for _, c := range got {
+		if strings.Contains(c, "user=alice") {
+			t.Errorf("Match User Alice must not become alice: %v", got)
+		}
+	}
+	found := false
+	for _, c := range got {
+		if strings.HasPrefix(c, "user=erin,") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("primary-group member erin not used for Match Group ops: %v", got)
+	}
+}

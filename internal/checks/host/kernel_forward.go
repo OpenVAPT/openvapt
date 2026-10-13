@@ -45,7 +45,10 @@ func forwardFiltered(ctx context.Context, s sys.System) (bool, bool, string) {
 			if strings.HasPrefix(line, "-P FORWARD ") {
 				policy = strings.TrimSpace(strings.TrimPrefix(line, "-P FORWARD "))
 			}
-			if strings.HasPrefix(line, "-A DOCKER-USER ") {
+			// Docker appends "-A DOCKER-USER -j RETURN" as the chain's final
+			// rule and admins insert their deny before it, so a trailing
+			// unconditional RETURN is skipped when judging the chain.
+			if strings.HasPrefix(line, "-A DOCKER-USER ") && line != "-A DOCKER-USER -j RETURN" {
 				lastDockerUser = line
 			}
 		}

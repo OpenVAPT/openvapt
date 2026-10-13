@@ -17,30 +17,27 @@ import (
 // Sources: each vendor's published lifecycle page, cited in the check refs.
 // The table is dated; a release newer than this table may be missing, while a
 // release older than the oldest row of its distribution is always past end of
-// support and fails. Rows added on 2026-10-13: Fedora 42, Ubuntu 25.10 and
-// 26.04 LTS, Ubuntu interim releases 20.10 to 23.04, CentOS Stream 9, RHEL,
-// Rocky and AlmaLinux 10, Oracle Linux 7 to 9 and Amazon Linux 1. Also on
-// 2026-10-13: Fedora 43 and 44 and CentOS Stream 10. Their dates are
-// approximate, from the projects' published schedules as known on that date:
-// Fedora ends support four weeks after the release two versions later, so
-// Fedora 43 ends about 2026-12-09 and Fedora 44 about 2027-05 (both depend
-// on the Fedora 45 and 46 release dates); CentOS Stream 10 is expected to end
-// about 2030-01-01. Re-check these rows when the table is next refreshed.
+// support and fails. Every row was re-verified on 2026-10-13 against the
+// vendors' published schedules (Canonical, Debian, Red Hat, CentOS, Rocky,
+// AlmaLinux, Oracle, Fedora, Amazon) as collected by endoflife.date, with the
+// Fedora 44 date from Fedora's own schedule (fedorapeople.org f-44 key
+// tasks). Fedora dates are provisional until the release two versions later
+// ships; re-check them when the table is next refreshed.
 var eol = map[string]string{
-	"ubuntu 16.04": "2021-04-30", "ubuntu 18.04": "2023-05-31", "ubuntu 20.04": "2025-05-31",
+	"ubuntu 16.04": "2021-04-02", "ubuntu 18.04": "2023-05-31", "ubuntu 20.04": "2025-05-31",
 	"ubuntu 20.10": "2021-07-22", "ubuntu 21.04": "2022-01-20", "ubuntu 21.10": "2022-07-14",
-	"ubuntu 22.04": "2027-06-01", "ubuntu 22.10": "2023-07-20", "ubuntu 23.04": "2024-01-25",
-	"ubuntu 23.10": "2024-07-11", "ubuntu 24.04": "2029-05-31", "ubuntu 24.10": "2025-07-10",
-	"ubuntu 25.04": "2026-01-15", "ubuntu 25.10": "2026-07-09", "ubuntu 26.04": "2031-05-31",
+	"ubuntu 22.04": "2027-06-01", "ubuntu 22.10": "2023-07-20", "ubuntu 23.04": "2024-01-20",
+	"ubuntu 23.10": "2024-07-12", "ubuntu 24.04": "2029-05-31", "ubuntu 24.10": "2025-07-10",
+	"ubuntu 25.04": "2026-01-17", "ubuntu 25.10": "2026-07-01", "ubuntu 26.04": "2031-05-31",
 	"debian 9": "2022-06-30", "debian 10": "2024-06-30", "debian 11": "2026-08-31", "debian 12": "2028-06-30", "debian 13": "2030-06-30",
 	// CentOS Linux 7 and 8; CentOS Stream 9 reports ID centos as well.
-	"centos 7": "2024-06-30", "centos 8": "2021-12-31", "centos 9": "2027-05-31", "centos 10": "2030-01-01",
+	"centos 7": "2024-06-30", "centos 8": "2021-12-31", "centos 9": "2027-05-31", "centos 10": "2030-05-31",
 	"rhel 7": "2024-06-30", "rhel 8": "2029-05-31", "rhel 9": "2032-05-31", "rhel 10": "2035-05-31",
 	"rocky 8": "2029-05-31", "rocky 9": "2032-05-31", "rocky 10": "2035-05-31",
-	"almalinux 8": "2029-03-01", "almalinux 9": "2032-05-31", "almalinux 10": "2035-05-31",
-	"ol 7": "2024-12-31", "ol 8": "2029-07-31", "ol 9": "2032-06-30",
-	"fedora 39": "2024-11-26", "fedora 40": "2025-05-13", "fedora 41": "2025-12-15", "fedora 42": "2026-05-13",
-	"fedora 43": "2026-12-09", "fedora 44": "2027-05-19",
+	"almalinux 8": "2029-05-31", "almalinux 9": "2032-05-31", "almalinux 10": "2035-05-31",
+	"ol 7": "2024-12-31", "ol 8": "2029-07-31", "ol 9": "2032-06-30", "ol 10": "2035-06-30",
+	"fedora 39": "2024-11-26", "fedora 40": "2025-05-13", "fedora 41": "2025-12-15", "fedora 42": "2026-05-27",
+	"fedora 43": "2026-12-09", "fedora 44": "2027-06-02",
 	"amzn 2018.03": "2023-12-31", "amzn 2": "2026-06-30", "amzn 2023": "2029-06-30",
 }
 

@@ -136,8 +136,10 @@ func inline(s string) string {
 		}
 		if page, ok := mdPages[href]; ok {
 			href = page // a repository document that has its own legal page
-		} else if strings.HasSuffix(href, ".md") {
-			href = strings.TrimSuffix(strings.ToLower(strings.ReplaceAll(href, "_", "-")), ".md") + ".html"
+		} else if strings.HasSuffix(href, ".md") && !strings.Contains(href, "://") {
+			// A repository document without a page on the site: link to it
+			// on GitHub so the link never breaks.
+			href = repoURL + "/blob/main/" + strings.TrimPrefix(href, "./")
 		}
 		return `<a href="` + href + `" rel="noreferrer">` + p[1] + `</a>`
 	})

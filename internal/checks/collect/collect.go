@@ -163,6 +163,19 @@ func groupMembers(ctx context.Context, s sys.System) map[string]string {
 	if err != nil || !r.Complete {
 		return m
 	}
+	// A group's members are its listed members plus users whose primary
+	// group it is (gid in /etc/passwd).
+	primary := map[string]string{}
+	if pw, err := s.ReadFile(ctx, "/etc/passwd"); err == nil && pw.Complete {
+		for _, line := range strings.Split(string(pw.Data), "\n") {
+			f := strings.Split(strings.TrimSpace(line), ":")
+			if len(f) >= 4 && sshName(f[0]) {
+				if _, ok := primary[f[3]]; !ok {
+					primary[f[3]] = f[0]
+				}
+			}
+		}
+	}
 	for _, line := range strings.Split(string(r.Data), "\n") {
 		f := strings.Split(strings.TrimSpace(line), ":")
 		if len(f) < 4 {
@@ -172,6 +185,11 @@ func groupMembers(ctx context.Context, s sys.System) map[string]string {
 			if u = strings.TrimSpace(u); sshName(u) {
 				m[f[0]] = u
 				break
+			}
+		}
+		if _, ok := m[f[0]]; !ok {
+			if u, ok := primary[f[2]]; ok {
+				m[f[0]] = u
 			}
 		}
 	}
@@ -324,7 +342,16 @@ func sshKeyword(raw string) (string, string, bool) {
 	if rest == "" {
 		return "", "", false
 	}
-	return k, strings.ToLower(strings.Join(strings.Fields(rest), " ")), true
+	f := strings.Fields(rest)
+	if k == "match" {
+		// sshd compares Match user and group names case-sensitively, so only
+		// the criterion keywords (User, Group, Address...) are lowercased.
+		for i := 0; i < len(f); i += 2 {
+			f[i] = strings.ToLower(f[i])
+		}
+		return k, strings.Join(f, " "), true
+	}
+	return k, strings.ToLower(strings.Join(f, " ")), true
 }
 
 func parseKV(text string) map[string]string {

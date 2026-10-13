@@ -109,11 +109,11 @@ Controls are preferred in this order: technical (cannot happen) > automated dete
 
 ### C2. Detective Controls (Fail the Build When Something Drifts)
 
-Exists: `gofmt`, `go vet`, unit and lab tests with the race detector, staticcheck, gosec, govulncheck; lab proof (every check fails on Vulnerable, passes on Hardened); Academy tests (`TestEveryCheckIsTaught`, `TestRelatedChecksExist`, `TestNoLongDashes`); terms drift test (EULA and README match `terms.go`); `internal/sources` tests (SOURCES.md and vendored file hashes); CITATION.cff version check (`cmd/channel`); website build fails on title and description length; CI "website collects no data" and "no email addresses published" steps.
+Exists: `gofmt`, `go vet`, unit and lab tests with the race detector, staticcheck, gosec, govulncheck; lab proof (every check fails on Vulnerable, passes on Hardened); Academy tests (`TestEveryCheckIsTaught`, `TestRelatedChecksExist`, `TestNoLongDashes`); terms drift test (EULA and README match `terms.go`); `internal/sources` tests (SOURCES.md current, and every vendored website file listed in CREDITS.md with its exact SHA-256); terminology test `TestTerminology` for I5 and I7 ("open source", "non-profit", "AI-generated", "AI agents") across repository Markdown, docs, site content and templates, sitegen, terms and Academy text; CITATION.cff version check (`cmd/channel`); website build fails when a page title (with suffix) or meta description breaks the length rules, or when the git commit for pinned source links cannot be resolved; CI "website collects no data" and "no email addresses published" steps.
 
-Partial: long-dash checks cover Academy text only.
+Partial: long-dash checks (em dashes, en dashes, double hyphens) cover Academy text only.
 
-Planned (not yet true, do not describe as existing): site one-H1 and broken-link assertions; terminology test for I5 and I7 across repository and site text ("open source", "non-profit", "AI-generated", "AI agents", em dashes, en dashes, double hyphens); binary no-egress test; commit trailer check (Co-Authored-By present on AI commits).
+Planned (not yet true, do not describe as existing): site one-H1 and broken-link assertions; long-dash test across repository and site text; binary no-egress test; commit trailer check (Co-Authored-By present on AI commits).
 
 ### C3. Approval Gates
 
@@ -169,13 +169,13 @@ Usefulness test (Steward, every T1+ card): name the user (server administrator o
 
 Task Card > commit (Co-Authored-By trailer naming the real model, AGENTS.md 6.7) > CI run > Verifier report > findings register entry > CHANGELOG.md > release record (`release/channels.json`, `release/legal-review.json`) > published artefact with SHA-256, Sigstore signature, SBOM and provenance > website check pages with line-level source permalinks.
 
-Records of truth. In the repository: `CHANGELOG.md`, `docs/adr/`, `docs/TASK-CARD.md` (the Task Card template), `release/`. Kept internally, outside the public repository: the handoff notes, the decision log, the legal risk register and audit reports. Planned: a findings register (does not exist yet). Records never contain secrets, private hostnames, personal data or the owner's identity (AGENTS.md 9.4).
+Records of truth. In the repository: `CHANGELOG.md`, `docs/adr/`, `docs/TASK-CARD.md` (the Task Card template), `release/`. Kept internally, outside the public repository: the handoff notes, the decision log, the legal risk register and audit reports. The findings register (A4) is kept internally, seeded with the 2026-10-13 audit findings. Records never contain secrets, private hostnames, personal data or the owner's identity (AGENTS.md 9.4).
 
 ### A5. Audit Programme
 
 | Cadence | Audit |
 |---|---|
-| Every release | Release gate evidence audit; Claims audit (site and docs versus code); Terminology audit until the automated test exists |
+| Every release | Release gate evidence audit; Claims audit (site and docs versus code); Terminology audit for wording the automated test does not cover (long dashes outside the Academy) |
 | Monthly | Security code audit (cross-model); Red Team against I1 to I3 using the lab and code review only, never a real machine without the owner's approval (AGENTS.md 3.5) |
 | Quarterly | VAPT Standards audit; Process and Compliance audit (were these rules followed?); Accessibility audit; Supply Chain audit; seeded-defect test of every lens |
 | On demand | After any large change |
@@ -208,5 +208,5 @@ Recorded in the legal risk register, kept internally, outside the public reposit
 ## Adoption and Next Steps
 
 1. Adopted as Version 1.0 by the owner in chat on 2026-10-13 and incorporated into AGENTS.md Version 1.2.
-2. The Steward seeds the findings register with the 2026-10-13 audit findings and builds the Planned C2 tests; each control moves to Exists only when CI runs it.
+2. The findings register is seeded with the 2026-10-13 audit findings (done, kept internally) and the terminology test exists; the Steward builds the remaining Planned C2 tests; each control moves to Exists only when CI runs it.
 3. A short public summary is in [AI-DISCLOSURE.md](AI-DISCLOSURE.md). Website text follows only after the owner approves the outward text (AGENTS.md 3.7). Public wording uses "built by AI Cybersecurity Engineers" and never "AI-generated" or "AI agents".

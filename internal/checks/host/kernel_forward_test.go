@@ -40,6 +40,16 @@ func TestIPForwardContainerContext(t *testing.T) {
 	if r := run(t, "HOST-KRN-005", f); r.Status != check.Pass {
 		t.Errorf("docker-user: want Pass, got %v", r.Status)
 	}
+	// Docker's trailing "-j RETURN" after an inserted deny is still filtered.
+	f.Commands["iptables -S"] = "-P INPUT DROP\n-P FORWARD ACCEPT\n-A DOCKER-USER -i eth0 -j DROP\n-A DOCKER-USER -j RETURN\n"
+	if r := run(t, "HOST-KRN-005", f); r.Status != check.Pass {
+		t.Errorf("docker-user with trailing RETURN: want Pass, got %v", r.Status)
+	}
+	// Only Docker's default RETURN: forwarded traffic is not filtered.
+	f.Commands["iptables -S"] = "-P INPUT DROP\n-P FORWARD ACCEPT\n-A DOCKER-USER -j RETURN\n"
+	if r := run(t, "HOST-KRN-005", f); r.Status != check.Fail {
+		t.Errorf("docker-user RETURN only: want Fail, got %v", r.Status)
+	}
 	// nftables forward chain with policy drop.
 	f = base()
 	f.Files["/etc/kubernetes/kubelet.conf"] = ""

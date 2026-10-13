@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Version 1.4, effective 2026-10-13. This policy was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. It is an information notice, not a contract.
+Version 1.5, effective 2026-10-13. This policy was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. It is an information notice, not a contract.
 
 ## Summary
 
@@ -32,9 +32,9 @@ To be fully transparent about the infrastructure that delivers the website:
 - The HTTPS certificate is issued by **Let's Encrypt**. Your browser may contact Let's Encrypt's certificate status services as part of normal HTTPS checks; that is between your browser and Let's Encrypt.
 - Like any internet service, the hosting provider's network equipment necessarily handles your IP address while delivering the pages. We have configured our server to keep no record of your visit. We do not control, and cannot see, any network-level records the hosting provider may keep for its own security or legal purposes; those are governed by the provider's own privacy policy.
 
-### The Beta Site
+### One Site for Every Channel
 
-openvapt.com/beta/ is an internal preview, excluded from search engines. It follows exactly the same no-data rules.
+There is no separate preview site. Every release channel (alpha, beta, release candidate and stable) is shown publicly on openvapt.com. Old openvapt.com/beta/ addresses redirect to the same page at the root, and the same no-data rules apply everywhere.
 
 ## 3. The OpenVAPT Software
 
