@@ -103,7 +103,9 @@ func build(ecos []string, allow map[string]bool, get func(string) ([]byte, error
 				return s, e
 			}
 			data, e := io.ReadAll(io.LimitReader(r, 4<<20))
-			r.Close()
+			if ce := r.Close(); e == nil {
+				e = ce
+			}
 			if e != nil {
 				return s, e
 			}
