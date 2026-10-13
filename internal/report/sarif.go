@@ -50,7 +50,7 @@ func (r *Report) SARIF() ([]byte, error) {
 				level = "warning"
 			}
 			results = append(results, result{
-				RuleID: f.ID, Level: level, Message: msg{strings.Title(string(res.Status)) + ": " + res.Message},
+				RuleID: f.ID, Level: level, Message: msg{capitalise(string(res.Status)) + ": " + res.Message},
 				Locations: []location{{PhysicalLocation: map[string]any{"artifactLocation": map[string]string{"uri": res.Target}}}},
 			})
 		}
@@ -92,4 +92,13 @@ func sevScore(s string) string {
 	default:
 		return "0.0"
 	}
+}
+
+// capitalise upper-cases the first letter of an ASCII status word such as
+// "incomplete" (strings.Title is deprecated).
+func capitalise(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }
