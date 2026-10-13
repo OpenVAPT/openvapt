@@ -1,26 +1,46 @@
 # openvapt.com public site. Public launch approved by the owner 2026-10-13.
 # Everything is public here for every channel (Alpha, Beta, RC, Stable); the
 # old /beta/ preview was retired on 2026-10-13 and no longer exists (410 Gone).
-# /tools/ is excluded from the rules below so the server-side admin endpoint
-# there keeps working unchanged.
+# /tools/ is excluded from the header and PHP rules below so the server-side
+# admin endpoint there keeps working unchanged.
 Options -Indexes
 DirectoryIndex index.html
 ErrorDocument 404 /404.html
 ErrorDocument 410 /404.html
 
+# Every text response declares UTF-8 in its Content-Type header as well as in
+# the page itself.
+AddDefaultCharset utf-8
+# No server version or module list in error pages.
+ServerSignature Off
+
 # Citation files offered on /cite.html.
 AddType application/x-research-info-systems .ris
 AddType application/x-bibtex .bib
 AddType text/plain .cff
+# Sample reports and Markdown documents.
+AddType application/sarif+json .sarif
+AddType text/markdown .md
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  # One canonical origin: https://openvapt.com (HTTP and www redirect here).
+  # One canonical origin: https://openvapt.com. Plain HTTP and every other
+  # host name that reaches this site (www., mail., autoconfig. and the rest)
+  # redirect to the apex over HTTPS.
   RewriteCond %{HTTPS} !=on [OR]
-  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteCond %{HTTP_HOST} !^openvapt\.com$ [NC]
   RewriteRule ^ https://openvapt.com%{REQUEST_URI} [R=301,L]
   # The retired /beta/ preview no longer exists: answer 410 Gone, no redirect.
   RewriteRule ^beta(?:/.*)?$ - [G,L]
+  # One address per page: /index.html redirects to its directory form, which
+  # is what every canonical tag names. Only an explicit request is rewritten,
+  # never the DirectoryIndex lookup.
+  RewriteCond %{REQUEST_URI} !^/tools/
+  RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+  RewriteRule ^(.*/)?index\.html$ https://openvapt.com/$1 [R=301,L]
+  # RFC 9116: the well-known location is canonical; the legacy root path
+  # redirects to it.
+  RewriteRule ^security\.txt$ /.well-known/security.txt [R=301,L]
 </IfModule>
 
 <IfModule mod_headers.c>
@@ -35,7 +55,40 @@ AddType text/plain .cff
     # The site sets no cookies; make sure nothing upstream does either.
     Header always unset Set-Cookie
   </If>
+  # Caching. Pages, feeds and crawler files are revalidated on every visit so
+  # a deploy is seen at once; fonts and the vendored libraries (versioned by
+  # package, replaced only with a new file) are kept for a year; the site's
+  # own CSS, scripts and images for a week.
+  <FilesMatch "\.(html|xml|txt|json|md|sarif|bib|ris|cff)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.(woff2|woff)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(css|js|svg|png|ico)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
 </IfModule>
+
+# The vendored libraries live under their own folder and change only when the
+# vendored file changes, so they may be cached for a year.
+<IfModule mod_headers.c>
+  <If "%{REQUEST_URI} =~ m#^/assets/vendor/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+</IfModule>
+
+# Compress the sample report formats the server does not compress by default.
+<IfModule mod_deflate.c>
+  <IfModule mod_filter.c>
+    AddOutputFilterByType DEFLATE application/sarif+json text/markdown application/x-bibtex application/x-research-info-systems
+  </IfModule>
+</IfModule>
+
+# RFC 9116 security.txt is plain text, UTF-8.
+<Files "security.txt">
+  ForceType text/plain
+</Files>
 
 # The public site is static. Refuse to run server-side code anywhere except
 # the admin endpoint in /tools/.
