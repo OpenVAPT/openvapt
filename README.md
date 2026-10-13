@@ -51,7 +51,7 @@ Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, 
 
 ## What It Covers
 
-56 checks in three domains: server (OS support, patches, SSH, accounts, sudo, file permissions, SUID, cron, kernel hardening, logging, audit, time), network (listening services, exposed databases, cleartext services, host firewall, TLS versions and certificates) and web apps (security headers, cookies, HTTPS redirect, exposed `.git`, `.env`, backups, phpinfo, directory listing, status pages, PHP settings, WordPress hygiene). Run `openvapt checks` for the full list.
+58 checks in three domains: server (OS support, patches, SSH, accounts, sudo, file permissions, SUID, cron, kernel hardening, logging, audit, time), network (listening services, exposed databases, cleartext services, host firewall, TLS versions and certificates) and web apps (security headers, cookies, HTTPS redirect, exposed `.git`, `.env`, backups, phpinfo, directory listing, status pages, PHP settings, WordPress hygiene). Run `openvapt checks` for the full list.
 
 ## What It Does Not Do
 

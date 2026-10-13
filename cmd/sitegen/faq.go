@@ -24,7 +24,7 @@ var faqs = []FAQ{
 	{"Is OpenVAPT a penetration test?",
 		"No. OpenVAPT is an automated, non-intrusive vulnerability assessment following the planning, discovery, analysis and reporting phases of NIST SP 800-115, without the attack phase. It contains no exploit code. A report without findings does not prove a system is secure."},
 	{"What does OpenVAPT check?",
-		"OpenVAPT runs 56 checks: 28 for the server (OS support and patches, SSH, accounts, sudo, file permissions, SUID, cron, kernel hardening, logging, auditing, time sync), 7 for the network (listening services, exposed databases, cleartext services, host firewall, TLS versions and certificates) and 21 for web apps (security headers, cookies, HTTPS redirect, exposed .git, .env and backups, phpinfo, directory listing, status pages, PHP settings and WordPress hygiene)."},
+		"OpenVAPT runs 58 checks: 30 for the server (OS support and patches, SSH including forwarding and authentication methods, accounts, sudo, file permissions, SUID, cron, kernel hardening, logging, auditing, time sync), 7 for the network (listening services, exposed databases, cleartext services, host firewall, TLS versions and certificates) and 21 for web apps (security headers, cookies, HTTPS redirect, exposed .git, .env and backups, phpinfo, directory listing, status pages, PHP settings and WordPress hygiene)."},
 	{"Which standards does OpenVAPT follow?",
 		"OpenVAPT follows NIST SP 800-115 for methodology, rates severity with CVSS v3.1, and maps checks to the OWASP Top 10 (2021), OWASP ASVS 4.0.3, CWE and NIST SP 800-53 Rev. 5. Reports are available in HTML, JSON, SARIF 2.1.0 and Markdown."},
 	{"Does OpenVAPT collect any data?",

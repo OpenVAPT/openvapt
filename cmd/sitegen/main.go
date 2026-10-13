@@ -472,7 +472,7 @@ func jsonLD(p Page) template.JS {
 		"isAccessibleForFree": true, "offers": map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD"},
 		"license": "https://polyformproject.org/licenses/noncommercial/1.0.0/", "publisher": map[string]string{"@id": siteURL + "/#org"},
 		"keywords":    "free VAPT tool, VAPT learning, vulnerability assessment, source-available code, AI-generated, Linux security, server hardening, web security headers, academic, education",
-		"featureList": []string{"56 read-only checks", "Server, network and web app coverage", "CVSS v3.1 ratings", "OWASP, CWE and NIST mapping", "HTML, JSON, SARIF and Markdown reports", "Loopback-only scope guard", "Simulated lab for learning", "Zero data collection"}}
+		"featureList": []string{"58 read-only checks", "Server, network and web app coverage", "CVSS v3.1 ratings", "OWASP, CWE and NIST mapping", "HTML, JSON, SARIF and Markdown reports", "Loopback-only scope guard", "Simulated lab for learning", "Zero data collection"}}
 	graph := []any{org, site}
 	switch {
 	case p.Path == "index.html":

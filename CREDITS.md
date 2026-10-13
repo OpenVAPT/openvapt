@@ -92,7 +92,7 @@ Each check cites at least one public source on its own page (`openvapt explain <
 | PHP end of security support | `internal/checks/web/php.go` | https://www.php.net/supported-versions.php |
 | Well-known service ports | `internal/checks/network/listeners.go` | IANA Service Name and Transport Protocol Port Number Registry |
 
-These tables can contain errors and become outdated; Codex's review found and reported one (Debian LTS dates), which is being corrected.
+These tables can contain errors and become outdated; Codex's review found one (Debian LTS dates), which Codex corrected on 2026-10-13.
 
 ## 9. Design References
 
