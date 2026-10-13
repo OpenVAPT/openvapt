@@ -56,7 +56,7 @@ func (d Dialer) DialContext(ctx context.Context, network, addr string) (net.Conn
 	}
 	// Defence in depth: confirm the connected peer really is loopback.
 	if ta, ok := conn.RemoteAddr().(*net.TCPAddr); ok && !ta.IP.IsLoopback() {
-		conn.Close()
+		_ = conn.Close()
 		return nil, ErrNotLocal
 	}
 	return conn, nil

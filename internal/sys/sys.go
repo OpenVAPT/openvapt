@@ -144,7 +144,7 @@ func NewLive() *Live {
 	tr := &http.Transport{
 		DialContext:       d.DialContext,
 		Proxy:             nil,                                   // never use a proxy: it would leave the machine
-		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // we inspect, not trust
+		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true}, // #nosec G402 -- certificates are inspected and reported, never trusted; loopback only
 		DisableKeepAlives: true,
 	}
 	return &Live{client: &http.Client{
@@ -231,7 +231,7 @@ func (l *Live) HTTP(ctx context.Context, scheme, vhost, path string) (HTTPRespon
 	req.Host = vhost
 	req.Header.Set("User-Agent", "OpenVAPT local self-assessment")
 	tr := l.client.Transport.(*http.Transport).Clone()
-	tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true, ServerName: vhost} //nolint:gosec
+	tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true, ServerName: vhost} // #nosec G402 -- inspecting the local site, including broken certificates, is the purpose
 	c := *l.client
 	c.Transport = tr
 	resp, err := c.Do(req)
@@ -251,7 +251,7 @@ func (l *Live) TLS(ctx context.Context, port, serverName string, minV, maxV uint
 	}
 	defer raw.Close()
 	_ = raw.SetDeadline(time.Now().Add(8 * time.Second))
-	cfg := &tls.Config{ServerName: serverName, InsecureSkipVerify: true, MinVersion: minV, MaxVersion: maxV} //nolint:gosec
+	cfg := &tls.Config{ServerName: serverName, InsecureSkipVerify: true, MinVersion: minV, MaxVersion: maxV} // #nosec G402 -- deliberately probes weak or invalid TLS on 127.0.0.1
 	conn := tls.Client(raw, cfg)
 	if err := conn.HandshakeContext(ctx); err != nil {
 		return TLSInfo{}, err

@@ -14,6 +14,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
+          cache: false
       - run: go test ./...
       - run: make release VERSION=${GITHUB_REF_NAME}
       - uses: sigstore/cosign-installer@v3

@@ -82,7 +82,7 @@ func main() {
 		*base += "/"
 	}
 	must(os.RemoveAll(*outDir))
-	must(os.MkdirAll(*outDir, 0o755))
+	must(os.MkdirAll(*outDir, 0o755)) // #nosec G301 -- public website output
 
 	g := &gen{}
 
@@ -137,7 +137,7 @@ func main() {
 		b, err := os.ReadFile(l.md)
 		must(err)
 		g.page("legal/"+filepath.Base(l.path), l.path, l.title, l.desc, "legal",
-			template.HTML(`<div class="legal"><h1>`+template.HTMLEscapeString(l.title)+`</h1>`+markdown(string(b))+`</div>`))
+			template.HTML(`<div class="legal"><h1>`+template.HTMLEscapeString(l.title)+`</h1>`+markdown(string(b))+`</div>`)) // #nosec G203 -- markdown() HTML-escapes all text first
 	}
 
 	writeSampleReports()
@@ -166,7 +166,7 @@ func (g *gen) render(file, path, title, desc, section string, data any) {
 	if err := t.ExecuteTemplate(&body, "content", pageFor(path, title, desc, section, "", data)); err != nil {
 		log.Fatalf("%s: %v", file, err)
 	}
-	g.page(file, path, title, desc, section, template.HTML(body.String()))
+	g.page(file, path, title, desc, section, template.HTML(body.String())) // #nosec G203 -- output of html/template, already escaped
 }
 
 func (g *gen) page(_, path, title, desc, section string, body template.HTML) {
@@ -177,8 +177,8 @@ func (g *gen) page(_, path, title, desc, section string, body template.HTML) {
 		log.Fatalf("%s: %v", path, err)
 	}
 	dst := filepath.Join(*outDir, path)
-	must(os.MkdirAll(filepath.Dir(dst), 0o755))
-	must(os.WriteFile(dst, out.Bytes(), 0o644))
+	must(os.MkdirAll(filepath.Dir(dst), 0o755)) // #nosec G301 -- public website output
+	must(os.WriteFile(dst, out.Bytes(), 0o644)) // #nosec G306 -- public website file
 	g.paths = append(g.paths, path)
 }
 
@@ -203,7 +203,7 @@ func funcs() template.FuncMap {
 		"json": func(v any) template.JS {
 			b, err := json.Marshal(v) // escapes <, > and & so it is safe inside a script element
 			must(err)
-			return template.JS(b)
+			return template.JS(b) // #nosec G203 -- json.Marshal escapes <, > and &
 		},
 		"pct": func(a, b int) int {
 			if b == 0 {
@@ -226,7 +226,7 @@ func icon(name string) template.HTML {
 		svg = svg[i:]
 	}
 	svg = strings.Replace(svg, "<svg", `<svg aria-hidden="true" focusable="false"`, 1)
-	return template.HTML(svg) //nolint:gosec // trusted, vendored at build time
+	return template.HTML(svg) // #nosec G203 -- trusted SVG vendored into the repository at build time
 }
 
 // ---------- code citation ----------
@@ -429,7 +429,7 @@ func jsonLD(p Page) template.JS {
 			"isPartOf": map[string]any{"@type": "WebSite", "name": "OpenVAPT", "url": siteURL}}
 	}
 	b, _ := json.Marshal(doc)
-	return template.JS(b)
+	return template.JS(b) // #nosec G203 -- json.Marshal escapes <, > and &
 }
 
 func writeSEO(paths []string, cs []*check.Check) {
@@ -442,7 +442,7 @@ func writeSEO(paths []string, cs []*check.Check) {
 		fmt.Fprintf(&sm, "  <url><loc>%s/%s</loc><lastmod>%s</lastmod></url>\n", siteURL, strings.TrimSuffix(p, "index.html"), built.Format("2006-01-02"))
 	}
 	sm.WriteString("</urlset>\n")
-	must(os.WriteFile(filepath.Join(*outDir, "sitemap.xml"), []byte(sm.String()), 0o644))
+	must(os.WriteFile(filepath.Join(*outDir, "sitemap.xml"), []byte(sm.String()), 0o644)) // #nosec G306 -- public website file
 
 	robots := "User-agent: *\nAllow: /\n\n"
 	for _, bot := range []string{"GPTBot", "ClaudeBot", "Claude-Web", "anthropic-ai", "PerplexityBot", "Google-Extended", "CCBot", "Applebot-Extended", "OAI-SearchBot", "ChatGPT-User"} {
@@ -452,7 +452,7 @@ func writeSEO(paths []string, cs []*check.Check) {
 	if *noindex {
 		robots = "User-agent: *\nDisallow: /\n"
 	}
-	must(os.WriteFile(filepath.Join(*outDir, "robots.txt"), []byte(robots), 0o644))
+	must(os.WriteFile(filepath.Join(*outDir, "robots.txt"), []byte(robots), 0o644)) // #nosec G306 -- public website file
 
 	var l strings.Builder
 	l.WriteString("# OpenVAPT\n\n> OpenVAPT is an open, free, academic project that shows how a vulnerability assessment tool is designed, built and tested. It runs read-only checks on the Linux machine it is installed on, and only that machine. It is not a penetration testing service. It collects no data.\n\n")
@@ -460,7 +460,7 @@ func writeSEO(paths []string, cs []*check.Check) {
 	for _, p := range []string{"how-it-works.html", "checks/", "standards.html", "limits.html", "learn.html", "download.html", "no-data.html", "legal/eula.html", "legal/disclaimer.html", "legal/privacy.html"} {
 		l.WriteString("- " + siteURL + "/" + p + "\n")
 	}
-	must(os.WriteFile(filepath.Join(*outDir, "llms.txt"), []byte(l.String()), 0o644))
+	must(os.WriteFile(filepath.Join(*outDir, "llms.txt"), []byte(l.String()), 0o644)) // #nosec G306 -- public website file
 
 	var full strings.Builder
 	full.WriteString(l.String() + "\n## All checks\n\n")
@@ -468,7 +468,7 @@ func writeSEO(paths []string, cs []*check.Check) {
 		fmt.Fprintf(&full, "### %s %s\n- Domain: %s, severity: %s, CVSS: %s\n- What: %s\n- Why: %s\n- How detected: %s\n- Fix: %s\n- Verify: %s\n- Source: %s/blob/%s/%s\n\n",
 			c.ID, c.Title, c.Domain, c.Severity, c.CVSS, c.Summary, c.Rationale, c.Detection, c.Fix, c.Verify, repoURL, commit, c.SourceFile)
 	}
-	must(os.WriteFile(filepath.Join(*outDir, "llms-full.txt"), []byte(full.String()), 0o644))
+	must(os.WriteFile(filepath.Join(*outDir, "llms-full.txt"), []byte(full.String()), 0o644)) // #nosec G306 -- public website file
 }
 
 // writeSampleReports scans the simulated lab servers with the real engine and
@@ -503,11 +503,11 @@ func copyDir(src, dst string) {
 		rel, _ := filepath.Rel(src, p)
 		t := filepath.Join(dst, rel)
 		if d.IsDir() {
-			return os.MkdirAll(t, 0o755)
+			return os.MkdirAll(t, 0o755) // #nosec G301 -- public website output
 		}
 		b, err := os.ReadFile(p)
 		must(err)
-		return os.WriteFile(t, b, 0o644)
+		return os.WriteFile(t, b, 0o644) // #nosec G306 -- public website file
 	})
 }
 
