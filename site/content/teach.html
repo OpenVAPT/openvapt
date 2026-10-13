@@ -38,8 +38,17 @@
 </details>
 {{end}}
 
-<h2>Worksheets and Answer Keys</h2>
-<p>Print them from your browser, or generate Markdown files offline with <code>openvapt teach worksheet P2 --out p2.md</code> (add <code>--answers</code> for the key).</p>
+<h2>Printable Handouts, Worksheets and Answer Keys</h2>
+<p>Every module page prints as a handout: the browser's Print command drops the navigation, notices, quiz feedback and buttons and keeps the theory, key terms, lab steps, questions, references and the credit line. Each module also has a student worksheet and a teacher answer key. Generate Markdown files offline with <code>openvapt teach worksheet P2 --out p2.md</code> (add <code>--answers</code> for the key).</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Module</th><th>Read First</th><th>Minutes</th><th>Handout</th><th>Worksheet</th><th>Answer Key</th></tr></thead>
+<tbody>
+{{range $d.Modules}}<tr><td><a href="academy/{{lower .ID}}.html">{{.ID}}: {{.Title}}</a></td><td>{{if .Prereqs}}{{join .Prereqs ", "}}{{else}}<span class="muted">None</span>{{end}}</td><td>{{.Minutes}}</td><td><a href="academy/{{lower .ID}}.html">Print the Module</a></td><td><a href="academy/worksheet-{{lower .ID}}.html">Worksheet</a></td><td><a href="academy/key-{{lower .ID}}.html">Answer Key</a></td></tr>
+{{end}}
+</tbody>
+</table>
+</div>
 
 <h2>Copying and Adapting Materials</h2>
 <p>You may copy, adapt, shorten and translate the modules, quizzes, worksheets, rubric and course plans for your own students, free of charge, under <a href="legal/teaching.html">Teaching With OpenVAPT</a>. You may not sell them or present them as approved, certified or endorsed by OpenVAPT. Every copy or adaptation must:</p>
@@ -50,15 +59,16 @@
 </ol>
 <p>The material was built by AI Cybersecurity Engineers and may contain mistakes. Check it before you teach it.</p>
 <div class="alert alert-info mt-6" role="note">{{icon "quote"}}<span><strong>Please cite OpenVAPT</strong> in handouts, slides and course pages. Ready-to-copy credit lines and references are on <a href="cite.html">How to Cite OpenVAPT</a>, and the full guide is <a href="legal/citing.html">Citing OpenVAPT</a>.</span></div>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Module</th><th>Level</th><th>Minutes</th><th>Worksheet</th><th>Answer Key</th></tr></thead>
-<tbody>
-{{range $d.Modules}}<tr><td><a href="academy/{{lower .ID}}.html">{{.ID}}: {{.Title}}</a></td><td>{{.Level}}</td><td>{{.Minutes}}</td><td><a href="academy/worksheet-{{lower .ID}}.html">Worksheet</a></td><td><a href="academy/key-{{lower .ID}}.html">Answer Key</a></td></tr>
-{{end}}
-</tbody>
-</table>
-</div>
+<h2 id="classroom-terms">Classroom Use Terms</h2>
+<p>The short version of <a href="legal/teaching.html">Teaching With OpenVAPT</a> (TEACHING.md), which governs if anything here differs:</p>
+<ul>
+  <li><strong>Free for teaching.</strong> Schools, colleges, universities and individual teachers may use, copy, adapt, shorten and translate the Academy and this toolkit for their own students, at no cost.</li>
+  <li><strong>Credit required.</strong> Every copy or adaptation carries the Teaching Credit above and says where it was changed.</li>
+  <li><strong>No selling, no endorsement.</strong> You may not sell the materials or present them as approved, certified or endorsed by OpenVAPT. Charging students a normal course fee is not selling the materials.</li>
+  <li><strong>Students accept the terms themselves.</strong> Nobody accepts the acknowledgements for a student. Students under 18 need a parent's or guardian's acceptance before they download or run the tool.</li>
+  <li><strong>Only authorised machines.</strong> The simulated lab, or isolated machines your institution owns or controls and has authorised. Never a third party's system.</li>
+  <li><strong>Pre-release, as is.</strong> The material was built by AI Cybersecurity Engineers, may contain mistakes, and is used 100% at your own risk. Check it before you teach it.</li>
+</ul>
 
 <h2>Practice Labs: A Different Server for Every Student</h2>
 <p>A practice server is the simulated vulnerable lab with some weaknesses fixed. The seed decides which ones, check by check, so every student is likely to assess a different server, which makes copying a neighbour's report much harder. The same seed gives the same server in the same version of OpenVAPT. The practice lab is simulated in memory and is not run against a real machine.</p>
@@ -86,6 +96,34 @@
 {{end}}
 </tbody>
 </table>
+</div>
+
+<h2 id="lab-recipe">Lab Recipe</h2>
+<p>Three ways to give students something to assess, from no setup to a full lab, each labelled by what exists today.</p>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="card mb-0">
+    <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-low">Exists</span><span class="tag tag-plain">No Setup</span></div>
+    <h3 class="mt-0">Simulated Lab: <code>openvapt demo</code></h3>
+    <p class="text-ink-2">Two servers live in memory inside the tool: one deliberately misconfigured, one hardened. Nothing is installed, listened on or written except the report folder you name.</p>
+<pre class="term">openvapt demo --out demo-report
+openvapt demo --lab hardened --out demo-hardened
+openvapt diff demo-report demo-hardened</pre>
+    <p class="m-0 text-[14px] text-ink-2">Classroom use: project the vulnerable report, pick three findings, and ask what the hardened report shows for each.</p>
+  </div>
+  <div class="card mb-0">
+    <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-low">Exists</span><span class="tag tag-plain">One Server per Student</span></div>
+    <h3 class="mt-0">Practice Lab With a Seed</h3>
+    <p class="text-ink-2">The practice lab is the vulnerable server with a seed-chosen set of weaknesses fixed, so each student assesses a different server. The teacher prints the planted weaknesses for any seed.</p>
+<pre class="term">openvapt demo --lab practice --seed 42 --out s42
+openvapt teach answers --seed 42</pre>
+    <p class="m-0 text-[14px] text-ink-2">Still simulated in memory; see the limitation below about answer keys being public.</p>
+  </div>
+  <div class="card mb-0 border-dashed">
+    <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-medium">Planned</span><span class="tag tag-plain">Not Yet Available</span></div>
+    <h3 class="mt-0">Lab Image for Virtual Machines</h3>
+    <p class="text-ink-2">A ready-made Linux virtual machine image with the same misconfigurations as the simulated vulnerable server, so a class can assess, fix and re-scan a real machine on an isolated lab network.</p>
+    <p class="m-0 text-[14px] text-ink-2">This is planned work and does not exist yet. Until it does, build your own: install a supported Linux on an isolated virtual machine your institution owns, apply the settings each failed demo check describes, snapshot it, and let students harden it and scan again.</p>
+  </div>
 </div>
 
 <h2>Setting Up a Lab</h2>

@@ -3,6 +3,8 @@
 <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-plain">{{$m.ID}}</span><span class="tag tag-info">{{$m.Level}}</span><span class="muted">About {{$m.Minutes}} minutes</span></div>
 <h1>{{$m.Title}}</h1>
 <p class="lead">{{$m.Summary}}</p>
+<p class="print-only muted">OpenVAPT Academy handout. Online, with the self-check quiz: {{.Canonical}}. Offline: openvapt learn {{$m.ID}}.</p>
+{{with $m.Prereqs}}<p class="muted mt-2"><strong class="text-ink">Read First:</strong> {{range $i, $p := .}}{{if $i}}, {{end}}<a href="{{lower $p}}.html">{{$p}}</a>{{end}}</p>{{end}}
 <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
 <div class="min-w-0">
   <div class="card-layer mt-6"><h2 class="mt-0 mb-2 text-[1.25rem] leading-[1.4]">You Will Be Able To</h2><ul class="mb-0">{{range $m.Objectives}}<li>{{.}}</li>{{end}}</ul></div>
@@ -14,7 +16,7 @@
   {{range .}}<tr><td><code>{{.ID}}</code></td><td><a href="../checks/{{.ID}}.html">{{.Title}}</a></td><td>{{template "sev" .Severity}}</td></tr>{{end}}
   </tbody></table></div>{{end}}
 
-  <p class="muted"><a href="worksheet-{{lower $m.ID}}.html">Printable Worksheet</a> &middot; <a href="key-{{lower $m.ID}}.html">Teacher Answer Key</a> &middot; <a href="../teach.html">For Teachers</a></p>
+  <p class="muted no-print"><a href="worksheet-{{lower $m.ID}}.html">Printable Worksheet</a> &middot; <a href="key-{{lower $m.ID}}.html">Teacher Answer Key</a> &middot; <a href="../teach.html">For Teachers</a> &middot; Print this page with your browser's Print command for a handout.</p>
   <h2>{{icon "flask-conical"}} Lab</h2>
   <ol>{{range $m.Lab}}<li><code>{{.}}</code></li>{{end}}</ol>
 
@@ -32,9 +34,10 @@
 
   <h2>References</h2>
   <ul>{{range $m.Refs}}<li><a href="{{.URL}}" rel="noreferrer">{{.Title}}</a></li>{{end}}</ul>
+  <p class="print-only muted">Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.2. Free teaching use under Teaching With OpenVAPT. Pre-release material may be wrong or unstable; use at your own risk.</p>
   {{template "citepage" .Data.PageCite}}
 
-  <div class="mt-10 flex flex-wrap justify-between gap-3 border-t border-line-2 pt-6">
+  <div class="no-print mt-10 flex flex-wrap justify-between gap-3 border-t border-line-2 pt-6">
     {{with .Data.Prev}}<a class="btn btn-default min-w-0 max-w-full" href="{{lower .ID}}.html"><span class="truncate">Previous: {{.ID}} {{.Title}}</span></a>{{else}}<span></span>{{end}}
     {{with .Data.Next}}<a class="btn btn-primary min-w-0 max-w-full" href="{{lower .ID}}.html"><span class="truncate">Next: {{.ID}} {{.Title}}</span></a>{{end}}
   </div>
@@ -44,7 +47,7 @@
     <p class="foot-h">Key Terms</p>
     <dl class="m-0">{{range $m.KeyTerms}}<dt class="mt-3 font-semibold text-ink first:mt-0"><a href="../glossary.html#{{slug .}}">{{.}}</a></dt><dd class="m-0 text-ink-2">{{index $g .}}</dd>{{end}}</dl>
   </div>
-  <div class="card-layer mt-4 text-[14px]"><p class="foot-h">Offline</p><code>openvapt learn {{$m.ID}}</code></div>
+  <div class="card-layer mt-4 text-[14px] no-print"><p class="foot-h">Offline</p><code>openvapt learn {{$m.ID}}</code></div>
 </aside>
 </div>
 {{end}}

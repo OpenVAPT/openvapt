@@ -1,10 +1,37 @@
 // Charts (Apache ECharts, self-hosted). Data is embedded in the page as JSON,
 // generated from the check registry at build time. Nothing is fetched or stored.
+// The 369 KB library is loaded only when the first chart scrolls near the
+// viewport (a script element from this site, allowed by the CSP); the data
+// tables under each chart are in the page already, so nothing is lost if it
+// never loads.
 (function () {
-  if (!window.echarts) return;
   var dataEl = document.getElementById('chart-data');
   if (!dataEl) return;
   var d = JSON.parse(dataEl.textContent);
+  var vendor = (document.currentScript && document.currentScript.getAttribute('data-vendor')) || 'assets/vendor/';
+  var containers = Array.prototype.slice.call(document.querySelectorAll('[id^="chart-"]')).filter(function (el) { return el.id !== 'chart-data'; });
+  if (!containers.length) return;
+  var loaded = false;
+  function load() {
+    if (loaded) return;
+    loaded = true;
+    if (window.echarts) { render(); return; }
+    var s = document.createElement('script');
+    s.src = vendor + 'echarts.min.js';
+    s.defer = true;
+    s.onload = render;
+    document.head.appendChild(s);
+  }
+  if (window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (entries) {
+      if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
+    }, { rootMargin: '400px 0px' });
+    containers.forEach(function (el) { io.observe(el); });
+  } else {
+    load();
+  }
+  function render() {
+  if (!window.echarts) return;
   var font = { fontFamily: 'IBM Plex Sans, system-ui, sans-serif', color: 'rgba(0,0,0,.65)' };
   var sevColors = { Critical: '#cf1322', High: '#d4380d', Medium: '#d48806', Low: '#2f54eb', Info: '#8c8c8c' };
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -87,5 +114,6 @@
   if (window.ResizeObserver) {
     var ro = new ResizeObserver(function () { charts.forEach(function (c) { c.resize(); }); });
     charts.forEach(function (c) { ro.observe(c.getDom()); });
+  }
   }
 })();

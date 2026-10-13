@@ -75,9 +75,9 @@ CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
 # 5. Read the acknowledgements again, then check the version
 ./openvapt terms
 ./openvapt version</pre>
-  <p>To build exactly a released version, check out its tag first, for example <code>git checkout v1.0.0</code>. To build the same bytes as the official release binary, use the same Go version and flags as the release (shown in its release notes and in the <code>Makefile</code>):</p>
-<pre class="term">git checkout v1.0.0
-make release VERSION=v1.0.0
+  <p>To build exactly a released version, check out its tag first, for example <code>git checkout v{{$d.CiteVersion}}</code> (the newest released build; see <a href="channels.html">Release Channels</a> for every channel). To build the same bytes as the official release binary, use the same Go version and flags as the release (shown in its release notes and in the <code>Makefile</code>):</p>
+<pre class="term">git checkout v{{$d.CiteVersion}}
+make release VERSION=v{{$d.CiteVersion}}
 sha256sum dist/release/openvapt_linux_amd64   # compare with the published SHA256SUMS</pre>
 
   <h3>Option 2: One-Command Install (Optional)</h3>

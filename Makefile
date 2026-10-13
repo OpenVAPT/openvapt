@@ -15,9 +15,13 @@ check:
 test:
 	go test ./...
 
+# Builds the self-hosted assets and the site, then verifies the output:
+# every local link resolves, the SEO and security artefacts exist, and no
+# page carries a long dash or a banned phrase.
 site:
 	cd site && npm ci --ignore-scripts && npm run build
 	go run ./cmd/sitegen -out dist/site
+	go run ./cmd/sitecheck dist/site
 
 release:
 	mkdir -p dist/release

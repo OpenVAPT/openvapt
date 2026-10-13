@@ -13,19 +13,19 @@
 
 <h2>Checks by Category and Severity</h2>
 <p class="muted">Severity is the rating a check carries when it fails, on the CVSS v3.1 qualitative scale.</p>
-<div class="card"><div id="chart-catsev" class="h-[420px] w-full" role="img" aria-label="Stacked bar chart of checks per control category by severity"></div></div>
+<div class="card"><div id="chart-catsev" class="h-[420px] w-full" role="img" aria-label="Stacked bar chart of checks per control category by severity"></div>{{chartTable $d.ChartData "matrix" "Checks by Category and Severity"}}</div>
 
 <div class="mt-6 grid gap-6 lg:grid-cols-2">
-  <div class="card"><h3>Severity Heat Map</h3><div id="chart-heat" class="h-[420px] w-full" role="img" aria-label="Heat map of checks by category and severity"></div></div>
-  <div class="card"><h3>Checks by Domain</h3><div id="chart-domain" class="chart" role="img" aria-label="Donut chart of checks by domain"></div><h3>Checks by Severity</h3><div id="chart-severity" class="chart" role="img" aria-label="Bar chart of checks by severity"></div></div>
+  <div class="card"><h3>Severity Heat Map</h3><div id="chart-heat" class="h-[420px] w-full" role="img" aria-label="Heat map of checks by category and severity"></div>{{chartTable $d.ChartData "matrix" "Severity Heat Map Values"}}</div>
+  <div class="card"><h3>Checks by Domain</h3><div id="chart-domain" class="chart" role="img" aria-label="Donut chart of checks by domain"></div>{{chartTable $d.ChartData "domain" "Checks by Domain"}}<h3>Checks by Severity</h3><div id="chart-severity" class="chart" role="img" aria-label="Bar chart of checks by severity"></div>{{chartTable $d.ChartData "severity" "Checks by Severity"}}</div>
 </div>
 
 <h2>Framework Coverage</h2>
 <div class="grid gap-6 lg:grid-cols-2">
-  <div class="card"><h3>CIS Critical Security Controls v8</h3><p class="muted">Checks per control, through each check's category. Control numbers only; no CIS text is reproduced.</p><div id="chart-cis" class="h-[380px] w-full" role="img" aria-label="Bar chart of checks per CIS Control"></div></div>
-  <div class="card"><h3>NIST Cybersecurity Framework 2.0</h3><p class="muted">Checks per CSF category, through each check's category.</p><div id="chart-csf" class="h-[380px] w-full" role="img" aria-label="Bar chart of checks per NIST CSF category"></div></div>
+  <div class="card"><h3>CIS Critical Security Controls v8</h3><p class="muted">Checks per control, through each check's category. Control numbers only; no CIS text is reproduced.</p><div id="chart-cis" class="h-[380px] w-full" role="img" aria-label="Bar chart of checks per CIS Control"></div>{{chartTable $d.ChartData "cis" "Checks per CIS Control"}}</div>
+  <div class="card"><h3>NIST Cybersecurity Framework 2.0</h3><p class="muted">Checks per CSF category, through each check's category.</p><div id="chart-csf" class="h-[380px] w-full" role="img" aria-label="Bar chart of checks per NIST CSF category"></div>{{chartTable $d.ChartData "csf" "Checks per NIST CSF Category"}}</div>
 </div>
-<div class="card mt-6"><h3>OWASP Top 10 (2021)</h3><div id="chart-owasp" class="h-[380px] w-full" role="img" aria-label="Bar chart of checks per OWASP Top 10 category"></div></div>
+<div class="card mt-6"><h3>OWASP Top 10 (2021)</h3><div id="chart-owasp" class="h-[380px] w-full" role="img" aria-label="Bar chart of checks per OWASP Top 10 category"></div>{{chartTable $d.ChartData "owasp" "Checks per OWASP Top 10 Category"}}</div>
 
 <h2>Control Categories</h2>
 <div class="table-wrap"><table class="table">

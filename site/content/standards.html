@@ -14,17 +14,17 @@
 </tbody></table></div>
 
 <h2>Severity: CVSS v3.1</h2>
-<div class="card mb-6"><div id="chart-severity" class="chart" role="img" aria-label="Bar chart of checks by severity"></div></div>
+<div class="card mb-6"><div id="chart-severity" class="chart" role="img" aria-label="Bar chart of checks by severity"></div>{{chartTable $d.ChartData "severity" "Checks by Severity"}}</div>
 <p>Every check carries a representative CVSS v3.1 base vector and the matching qualitative rating from the <a href="https://www.first.org/cvss/v3.1/specification-document" rel="noreferrer">FIRST CVSS v3.1 specification</a>: Critical 9.0-10.0, High 7.0-8.9, Medium 4.0-6.9, Low 0.1-3.9. The vector reflects a typical internet-facing server. Your own environment can raise or lower the real risk, which is why the report states this limitation.</p>
 <div class="my-6 grid grid-cols-2 gap-6 border-y border-line-2 py-6 md:grid-cols-4">
-  <div><div class="stat-title">Critical checks</div><div class="stat-value">{{$d.Counts.critical}}</div></div>
-  <div><div class="stat-title">High checks</div><div class="stat-value">{{$d.Counts.high}}</div></div>
-  <div><div class="stat-title">Medium checks</div><div class="stat-value">{{$d.Counts.medium}}</div></div>
-  <div><div class="stat-title">Low checks</div><div class="stat-value">{{$d.Counts.low}}</div></div>
+  <div><div class="stat-title">Critical Checks</div><div class="stat-value">{{$d.Counts.critical}}</div></div>
+  <div><div class="stat-title">High Checks</div><div class="stat-value">{{$d.Counts.high}}</div></div>
+  <div><div class="stat-title">Medium Checks</div><div class="stat-value">{{$d.Counts.medium}}</div></div>
+  <div><div class="stat-title">Low Checks</div><div class="stat-value">{{$d.Counts.low}}</div></div>
 </div>
 
 <h2>OWASP Top 10 (2021)</h2>
-<div class="card"><div id="chart-owasp" class="h-[360px] w-full" role="img" aria-label="Bar chart of checks per OWASP Top 10 category"></div></div>
+<div class="card"><div id="chart-owasp" class="h-[360px] w-full" role="img" aria-label="Bar chart of checks per OWASP Top 10 category"></div>{{chartTable $d.ChartData "owasp" "Checks per OWASP Top 10 Category"}}</div>
 <script type="application/json" id="chart-data">{{json .Data.ChartData}}</script>
 <div class="table-wrap"><table class="table">
 <thead><tr><th>Category</th><th>Checks</th></tr></thead>

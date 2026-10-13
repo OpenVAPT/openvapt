@@ -53,7 +53,7 @@
 <table>
 <thead><tr><th>Date</th><th>Channel</th><th>Version</th><th>Commit</th><th>Evidence</th></tr></thead>
 <tbody>
-{{range $c.History}}<tr><td>{{.Date}}</td><td>{{.Channel}}</td><td class="font-mono">{{.Version}}</td><td class="font-mono"><a href="{{$d.Repo}}/commit/{{.Commit}}">{{slice .Commit 0 12}}</a></td><td class="text-[13px]">{{range .Evidence}}{{.}}<br>{{end}}</td></tr>
+{{range $c.History}}<tr><td>{{.Date}}</td><td>{{chanName .Channel}}</td><td class="font-mono">{{.Version}}</td><td class="font-mono"><a href="{{$d.Repo}}/commit/{{.Commit}}">{{slice .Commit 0 12}}</a></td><td class="text-[13px]">{{range .Evidence}}{{.}}<br>{{end}}</td></tr>
 {{end}}
 </tbody>
 </table>

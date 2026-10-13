@@ -54,7 +54,7 @@
   </div>
 </div>
 
-<div class="card mt-6"><div class="flex flex-wrap items-baseline justify-between gap-2"><h3 class="mt-0">Checks by Control Category and Severity</h3><a href="coverage.html">Open the Coverage Dashboard</a></div><div id="chart-catsev" class="h-[400px] w-full" role="img" aria-label="Stacked bar chart of checks per control category by severity"></div></div>
+<div class="card mt-6"><div class="flex flex-wrap items-baseline justify-between gap-2"><h3 class="mt-0">Checks by Control Category and Severity</h3><a href="coverage.html">Open the Coverage Dashboard</a></div><div id="chart-catsev" class="h-[400px] w-full" role="img" aria-label="Stacked bar chart of checks per control category by severity"></div>{{chartTable $d.ChartData "matrix" "Checks by Control Category and Severity"}}</div>
 <script type="application/json" id="chart-data">{{json $d.ChartData}}</script>
 
 <h2>Identify, Evaluate, Fix, Verify</h2>
