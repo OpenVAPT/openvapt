@@ -4,6 +4,10 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Stream: coverage, kernel, filesystem and boot
+- 34 new host checks, detection only and read-only, each with a lab pair and Academy coverage: HOST-KRN-019 to HOST-KRN-031 (SysRq, protected FIFOs and regular files, user namespaces, IPv6 source routing and router advertisements, secure redirects, bogus ICMP errors, kexec, userfaultfd, TTY line discipline autoload, BPF JIT hardening, io_uring), HOST-FS-010 to HOST-FS-022 (/var/tmp, /home and /var/log as separate mounts, noexec on temporary filesystems, world-writable files and directories outside /etc, unowned files, SUID/SGID inventory against a documented baseline, boot file permissions, cron and at allow lists, cron file modes, shell umask, account database backups) and the new HOST-BOOT family 001 to 008 (GRUB password, Secure Boot state, filesystem and USB storage module blacklists, module loading restrictions, file integrity monitoring, prelink, core dumps). Every check returns Incomplete when a file it needs exists but cannot be read.
+- Academy module P15, Kernel, Filesystem and Boot Hardening (Practitioner), taught in week 4 of the semester course, with seven new glossary terms.
+
 ### Website
 - How to Cite OpenVAPT (cite.html) redesigned around CITING.md: credit required versus citation requested, a Copy a Citation card with a keyboard-accessible style switcher (APA 7, IEEE, Harvard, MLA 9, Chicago, Vancouver, BibTeX, BibLaTeX, RIS, CSL-JSON, Plain Text, Slide or Poster, Code Header, Teaching Credit), version and commit filled from the build, a When to Cite table, version and commit citing, Academy, module and check patterns, and "Use does not imply endorsement". The unsupported claim that archived releases may receive a DOI is removed. Copy buttons use the clipboard with a select-all fallback and announce "Copied" to screen readers; access dates show the reader's date.
 - Every check page and Academy module page ends with a Cite This Page box (APA 7 and BibTeX with the page's exact address and version).
