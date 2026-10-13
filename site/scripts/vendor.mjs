@@ -1,0 +1,47 @@
+// Copies the exact third-party files the website needs out of node_modules
+// into the repository, so the site is fully self-hosted (no CDN) and the Go
+// site generator never needs node_modules. Run: npm run vendor
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const nm = (p) => fileURLToPath(new URL('../node_modules/' + p, import.meta.url));
+const out = (p) => fileURLToPath(new URL('../' + p, import.meta.url));
+const copy = (from, to) => { mkdirSync(dirname(out(to)), { recursive: true }); copyFileSync(nm(from), out(to)); };
+
+// AG Grid Community (MIT): script without bundled styles + legacy CSS theme,
+// so no style tags are injected at runtime.
+copy('ag-grid-community/dist/ag-grid-community.min.noStyle.js', 'static/assets/vendor/ag-grid-community.min.js');
+copy('ag-grid-community/styles/ag-grid.min.css', 'static/assets/vendor/ag-grid.min.css');
+copy('ag-grid-community/styles/ag-theme-quartz-no-font.min.css', 'static/assets/vendor/ag-theme-quartz.min.css');
+copy('ag-grid-community/LICENSE.txt', 'static/assets/vendor/LICENSES/ag-grid-community.txt');
+
+// Apache ECharts (Apache-2.0)
+copy('echarts/dist/echarts.min.js', 'static/assets/vendor/echarts.min.js');
+copy('echarts/LICENSE', 'static/assets/vendor/LICENSES/echarts.txt');
+copy('echarts/NOTICE', 'static/assets/vendor/LICENSES/echarts-NOTICE.txt');
+
+// IBM Plex Sans and Mono (SIL Open Font License 1.1). Only the font files are
+// copied; the packages' install-time telemetry scripts are never run.
+for (const w of ['Regular', 'Medium', 'SemiBold', 'Bold']) {
+  copy(`@ibm/plex-sans/fonts/complete/woff2/IBMPlexSans-${w}.woff2`, `static/assets/fonts/IBMPlexSans-${w}.woff2`);
+}
+for (const w of ['Regular', 'Medium']) {
+  copy(`@ibm/plex-mono/fonts/complete/woff2/IBMPlexMono-${w}.woff2`, `static/assets/fonts/IBMPlexMono-${w}.woff2`);
+}
+copy('@ibm/plex-sans/LICENSE.txt', 'static/assets/vendor/LICENSES/ibm-plex.txt');
+
+// Lucide icons (ISC): only the icons the templates use are copied, and the
+// site generator inlines them as SVG at build time.
+const icons = ['shield-check', 'code-xml', 'book-open', 'download', 'git-pull-request', 'list-checks', 'scale',
+  'server', 'network', 'globe', 'search', 'wrench', 'circle-check', 'triangle-alert', 'info', 'external-link',
+  'file-text', 'lock', 'eye-off', 'ban', 'graduation-cap', 'chevron-right', 'flask-conical', 'quote', 'gauge'];
+for (const i of icons) {
+  try { copy(`lucide-static/icons/${i}.svg`, `icons/${i}.svg`); }
+  catch { console.warn('missing icon', i); }
+}
+copy('lucide-static/LICENSE', 'static/assets/vendor/LICENSES/lucide.txt');
+
+writeFileSync(out('static/assets/vendor/VERSIONS.txt'), ['ag-grid-community', 'echarts', 'lucide-static', '@ibm/plex-sans', '@ibm/plex-mono', 'tailwindcss']
+  .map((p) => `${p} ${JSON.parse(readFileSync(nm(p + '/package.json'))).version}`).join('\n') + '\n');
+console.log('vendored');

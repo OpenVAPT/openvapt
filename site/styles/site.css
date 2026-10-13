@@ -1,0 +1,166 @@
+/* openvapt.com design system
+   Philosophy: Ant Design 5 (tokens, component shapes, states) + IBM Carbon
+   (2x grid spacing, IBM Plex type, productive data density).
+   Built with Tailwind CSS v4. Light theme only. Fonts are self-hosted. */
+@import "tailwindcss";
+@source "../templates";
+@source "../content";
+@source "../static/assets/catalogue.js";
+@source "../static/assets/charts.js";
+@source "../../cmd/sitegen";
+
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-Medium.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-SemiBold.woff2") format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("fonts/IBMPlexMono-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("fonts/IBMPlexMono-Medium.woff2") format("woff2");font-weight:500;font-display:swap}
+
+@theme {
+  /* Primitives: Ant Design 5 palettes */
+  --color-blue-1:#e6f4ff; --color-blue-2:#bae0ff; --color-blue-5:#4096ff; --color-blue-6:#1677ff; --color-blue-7:#0958d9;
+  --color-red-1:#fff1f0; --color-red-3:#ffa39e; --color-red-7:#cf1322;
+  --color-volcano-1:#fff2e8; --color-volcano-3:#ffbb96; --color-volcano-7:#d4380d;
+  --color-gold-1:#fffbe6; --color-gold-3:#ffe58f; --color-gold-7:#d48806;
+  --color-geek-1:#f0f5ff; --color-geek-3:#adc6ff; --color-geek-6:#2f54eb;
+  --color-green-1:#f6ffed; --color-green-3:#b7eb8f; --color-green-7:#389e0d;
+  /* Neutrals: Ant colorText / colorBorder family, Carbon gray-10 layer */
+  --color-ink:rgba(0,0,0,.88); --color-ink-2:rgba(0,0,0,.65); --color-ink-3:rgba(0,0,0,.45);
+  --color-line:#d9d9d9; --color-line-2:#f0f0f0; --color-layer:#f4f4f4; --color-page:#ffffff;
+
+  --font-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  /* Ant radius scale: controls 6, cards 8 */
+  --radius-ctl:6px; --radius-card:8px;
+  /* Ant control heights */
+  --spacing-ctl:32px; --spacing-ctl-lg:40px;
+  --shadow-card:0 1px 2px 0 rgba(0,0,0,.03),0 1px 6px -1px rgba(0,0,0,.02),0 2px 4px 0 rgba(0,0,0,.02);
+}
+
+@layer base {
+  html{color-scheme:light;-webkit-text-size-adjust:100%}
+  body{@apply bg-page text-ink font-sans antialiased;font-size:16px;line-height:1.6}
+  h1,h2,h3,h4{@apply text-ink font-semibold;letter-spacing:0}
+  h1{font-size:clamp(2rem,3.4vw,2.625rem);line-height:1.18;letter-spacing:-.01em;margin:0 0 16px}
+  h2{font-size:1.75rem;line-height:1.25;margin:56px 0 16px}
+  h3{font-size:1.25rem;line-height:1.4;margin:32px 0 8px}
+  p,li{max-width:72ch}
+  a{@apply text-blue-6 no-underline hover:text-blue-5 hover:underline}
+  code{@apply font-mono text-[0.86em] bg-layer rounded px-1.5 py-px}
+  p code,li code,dd code,td code{overflow-wrap:anywhere}
+  :focus-visible{outline:2px solid var(--color-blue-6);outline-offset:2px;border-radius:4px}
+  ::selection{background:var(--color-blue-2)}
+}
+
+@layer components {
+  .wrap{@apply mx-auto w-full max-w-[1312px] px-4 md:px-8}
+
+  /* Carbon UI shell header, in normal flow (scrolls away with the page) */
+  .shell{@apply bg-white border-b border-line-2}
+  .shell-row{@apply mx-auto w-full max-w-[1312px] px-4 md:px-8 flex min-h-14 flex-wrap items-center justify-between gap-x-8 gap-y-1}
+  .brand{@apply flex items-center gap-2.5 font-semibold text-ink text-[17px] hover:no-underline hover:text-ink}
+  .nav{@apply flex flex-wrap gap-x-1}
+  .nav a{@apply text-ink-2 text-[14px] px-2.5 py-2 md:px-3 md:py-4 hover:text-ink hover:no-underline border-b-2 border-transparent}
+  .nav a[aria-current=page]{@apply text-blue-6 border-blue-6}
+
+  /* Ant Alert */
+  .alert{@apply flex items-start gap-2 rounded-card border px-4 py-2.5 text-[14px] leading-[1.57]}
+  .alert-info{@apply bg-blue-1 border-blue-2 text-ink}
+  .alert-warn{@apply bg-gold-1 border-gold-3 text-ink}
+  .alert svg{@apply mt-0.5 size-4 shrink-0 text-blue-6}
+  .alert-warn svg{@apply text-gold-7}
+
+  /* Ant Button */
+  .btn{@apply inline-flex h-ctl-lg items-center justify-center gap-2 whitespace-nowrap rounded-ctl border px-[15px] text-[16px] font-medium leading-none transition-[background,border-color,color,transform] duration-150 select-none hover:no-underline active:scale-[.98]}
+  .btn svg{@apply size-4}
+  .btn-primary{@apply bg-blue-6 border-blue-6 text-white shadow-[0_2px_0_rgba(5,145,255,.1)] hover:bg-blue-5 hover:border-blue-5 hover:text-white active:bg-blue-7}
+  .btn-default{@apply bg-white border-line text-ink shadow-[0_2px_0_rgba(0,0,0,.02)] hover:text-blue-5 hover:border-blue-5}
+
+  /* Ant Tag, used for severity */
+  .tag{@apply inline-flex items-center rounded-[4px] border px-[7px] text-[12px] leading-5 font-medium whitespace-nowrap}
+  .tag-critical{@apply bg-red-1 border-red-3 text-red-7}
+  .tag-high{@apply bg-volcano-1 border-volcano-3 text-volcano-7}
+  .tag-medium{@apply bg-gold-1 border-gold-3 text-gold-7}
+  .tag-low{@apply bg-geek-1 border-geek-3 text-geek-6}
+  .tag-info{@apply bg-layer border-line text-ink-2}
+  .tag-plain{@apply bg-layer border-line text-ink-2 font-mono}
+
+  /* Ant Card */
+  .card{@apply rounded-card border border-line-2 bg-white p-6 shadow-card}
+  .card-layer{@apply rounded-card bg-layer p-6}
+  .card h3{@apply mt-0}
+  .card-icon{@apply mb-4 flex size-10 items-center justify-center rounded-ctl bg-blue-1 text-blue-6}
+  .card-icon svg{@apply size-5}
+
+  /* Ant Statistic */
+  .stat-title{@apply text-[14px] text-ink-3}
+  .stat-value{@apply font-mono text-[30px] leading-[1.3] font-medium text-ink}
+
+  /* Ant Breadcrumb */
+  .crumbs{@apply mb-4 flex items-center gap-1 text-[14px] text-ink-3}
+  .crumbs svg{@apply size-3.5}
+
+  /* Ant Descriptions (bordered) */
+  .desc{@apply grid min-w-0 overflow-hidden rounded-card border border-line-2 text-[15px] grid-cols-[minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]}
+  .desc dt{@apply bg-layer px-6 py-4 font-medium text-ink-2 md:border-b md:border-line-2}
+  .desc dd{@apply m-0 min-w-0 [overflow-wrap:anywhere] border-b border-line-2 px-6 py-4 md:border-b}
+  .desc dt:nth-last-of-type(1),.desc dd:last-child{@apply border-b-0}
+
+  /* Ant Table */
+  .table-wrap{@apply my-4 overflow-x-auto overflow-y-hidden rounded-card border border-line-2 bg-white}
+  .table{@apply w-full border-collapse text-[14px]}
+  .table th{@apply bg-[#fafafa] px-4 py-3 text-left font-semibold text-ink border-b border-line-2 whitespace-nowrap}
+  .table td{@apply px-4 py-3 align-top border-b border-line-2}
+  .table tr:last-child td{@apply border-b-0}
+  .table tbody tr:hover td{@apply bg-[#fafafa]}
+
+  /* Ant Steps (vertical-ish, horizontal on desktop) */
+  .steps{@apply grid gap-6 md:grid-cols-4}
+  .step{@apply flex gap-3}
+  .step-dot{@apply flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-6 text-white text-[14px] font-medium}
+  .step b{@apply block text-ink font-semibold}
+  .step p{@apply m-0 text-[14px] text-ink-2}
+
+  /* Code citation block */
+  .code{@apply my-4 max-w-full overflow-hidden rounded-card border border-line-2 bg-white}
+  .code-head{@apply flex flex-wrap items-center justify-between gap-2 border-b border-line-2 bg-[#fafafa] px-4 py-2 text-[13px] text-ink-2}
+  .code-head code{@apply bg-transparent p-0}
+  .code-head a{@apply inline-flex items-center gap-1}
+  .code-head svg{@apply size-3.5}
+  .code-body{@apply overflow-x-auto overflow-y-hidden}
+  .code.tall .code-body{@apply max-h-[560px] overflow-y-auto}
+  .code-body table{@apply w-full border-collapse}
+  .code-body td{@apply whitespace-pre pr-4 align-top font-mono text-[13px] leading-[1.65];tab-size:4}
+  .code-body td.n{@apply min-w-[3.5em] select-none border-r border-line-2 px-3 text-right text-ink-3}
+  .code-body td.l{@apply pl-4}
+  pre.term{@apply my-4 max-w-full overflow-x-auto overflow-y-hidden rounded-card bg-[#161616] p-4 font-mono text-[13px] leading-[1.7] text-[#f4f4f4];tab-size:4}
+
+  /* Ant Form items: label above, inputs and selects share the 40px height */
+  .filters{@apply my-4 flex flex-wrap items-end gap-4}
+  .field{@apply flex flex-col gap-2 max-sm:w-full}
+  .field label{@apply text-[14px] text-ink}
+  .field input,.field select{@apply h-ctl-lg min-w-[240px] rounded-ctl border border-line bg-white px-[11px] text-[15px] text-ink outline-none transition-colors hover:border-blue-5 focus:border-blue-6 focus:shadow-[0_0_0_2px_rgba(5,145,255,.1)] max-sm:w-full max-sm:min-w-0}
+  .field select{@apply min-w-[170px]}
+
+  .lead{@apply text-[18px] leading-[1.6] text-ink-2 max-w-[62ch]}
+  .muted{@apply text-[14px] text-ink-3}
+  .section-icon{@apply inline-flex size-5 align-[-3px] text-blue-6 mr-2}
+
+  .legal{@apply max-w-[80ch]}
+  .legal h2{@apply text-[1.35rem] mt-10}
+  .legal blockquote{@apply my-4 rounded-card border border-blue-2 bg-blue-1 px-4 py-3}
+
+  .chart{@apply h-[300px] w-full}
+
+  .foot{@apply mt-16 border-t border-line-2 bg-layer py-12 text-[14px]}
+  .foot a{@apply block py-1 text-ink-2 hover:text-blue-6}
+  .foot-h{@apply mb-2 font-semibold text-ink}
+}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{.shell,.foot,.filters,.alert{display:none}}
+
+/* AG Grid Quartz theme tuned to Ant Design tokens */
+.ag-theme-quartz.ov-grid{--ag-font-family:var(--font-sans);--ag-font-size:14px;--ag-active-color:#1677ff;--ag-header-background-color:#fafafa;
+  --ag-border-color:#f0f0f0;--ag-row-hover-color:#fafafa;--ag-wrapper-border-radius:8px;--ag-header-foreground-color:rgba(0,0,0,.88)}

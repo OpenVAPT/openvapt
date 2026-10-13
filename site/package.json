@@ -1,0 +1,21 @@
+{
+  "name": "openvapt-site",
+  "private": true,
+  "description": "Build-time assets for openvapt.com. Nothing here ships inside the openvapt binary.",
+  "scripts": {
+    "build:css": "tailwindcss -i ./styles/site.css -o ./static/assets/site.css --minify",
+    "vendor": "node ./scripts/vendor.mjs",
+    "build": "npm run vendor && npm run build:css"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "tailwindcss": "4.3.3"
+  },
+  "dependencies": {
+    "@ibm/plex-mono": "2.5.0",
+    "@ibm/plex-sans": "1.1.0",
+    "ag-grid-community": "36.2.0",
+    "echarts": "6.1.0",
+    "lucide-static": "1.55.0"
+  }
+}

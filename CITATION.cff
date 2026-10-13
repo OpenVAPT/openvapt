@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use OpenVAPT in academic work, please cite it as below, including the version you used."
+title: "OpenVAPT: An Open Academic Vulnerability Assessment Tool"
+type: software
+authors:
+  - name: "The OpenVAPT Project"
+repository-code: "https://github.com/openvapt/openvapt"
+url: "https://openvapt.com"
+license-url: "https://polyformproject.org/licenses/noncommercial/1.0.0/"
+version: "0.1.0-dev"
+date-released: "2026-10-13"
+keywords:
+  - vulnerability assessment
+  - security education
+  - linux hardening
+  - web security
+  - NIST SP 800-115

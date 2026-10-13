@@ -1,0 +1,12 @@
+name: False Positive
+description: A check reported a problem that is not real
+labels: [false-positive]
+body:
+  - type: input
+    id: check
+    attributes: {label: Check ID, placeholder: HOST-SSH-001}
+    validations: {required: true}
+  - type: textarea
+    id: evidence
+    attributes: {label: Redacted Evidence and Why It Is Wrong}
+    validations: {required: true}

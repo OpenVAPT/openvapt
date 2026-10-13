@@ -1,0 +1,46 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: Format
+        run: test -z "$(gofmt -l .)"
+      - name: Vet
+        run: go vet ./...
+      - name: Tests (unit and lab)
+        run: go test -race ./...
+      - name: Staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
+      - name: Gosec
+        run: go run github.com/securego/gosec/v2/cmd/gosec@v2.22.0 -exclude=G204,G304 ./...
+      - name: Govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+      - name: Build Linux binaries
+        run: make release
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Build website assets (self-hosted, install scripts disabled)
+        working-directory: site
+        run: npm ci --ignore-scripts && npm run build
+      - name: Vendored assets are up to date
+        run: git diff --exit-code -- site/icons site/static/assets
+      - name: Build website
+        run: go run ./cmd/sitegen -out dist/site
+      - name: Website collects no data
+        run: |
+          ! grep -rEl "https?://(fonts\.googleapis|www\.google-analytics|googletagmanager|cdn\.|unpkg|jsdelivr)" dist/site
+          ! grep -rE "document\.cookie|localStorage|sessionStorage|navigator\.sendBeacon|fetch\(" dist/site/assets
+      - name: No email addresses published
+        run: |
+          ! grep -rEIo "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}" --exclude-dir=.git --exclude=ci.yml . | grep -v -E "noreply|@openssh\.com|@v[0-9]|@[0-9]{4}\.|actions/"

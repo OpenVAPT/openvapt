@@ -1,0 +1,8 @@
+/openvapt
+/dist/
+/openvapt-report-*/
+/openvapt-demo-report/
+*.test
+.DS_Store
+
+node_modules/

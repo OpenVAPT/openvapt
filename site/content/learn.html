@@ -1,0 +1,51 @@
+{{define "content"}}
+<h1>Learn Vulnerability Assessment</h1>
+<p class="lead">Short lessons that use OpenVAPT itself as the textbook. Every exercise runs on the built-in simulated lab, so you can follow along on any computer without touching a real server.</p>
+<ol class="columns-1 md:columns-2 gap-10">
+<li><a href="#va-vs-pt">Assessment Versus Penetration Testing</a></li>
+<li><a href="#anatomy">Anatomy of a Check</a></li>
+<li><a href="#cvss">Reading a CVSS Vector</a></li>
+<li><a href="#lab">Lab: Scan, Fix, Verify</a></li>
+<li><a href="#scope">Why Scope Is Enforced in Code</a></li>
+<li><a href="#write">Write Your Own Check</a></li>
+</ol>
+
+<h2 id="va-vs-pt">Assessment Versus Penetration Testing</h2>
+<p>VAPT combines two activities. A <strong>vulnerability assessment</strong> looks for known weaknesses and rates them, without exploiting anything. A <strong>penetration test</strong> goes further: a skilled, authorised tester tries to exploit weaknesses to show real impact. OpenVAPT does only the first part, automatically, on one machine. NIST SP 800-115 calls the missing part the attack phase.</p>
+
+<h2 id="anatomy">Anatomy of a Check</h2>
+<p>Open any <a href="checks/">check page</a>. Each check has the same parts, defined in <code>internal/check/check.go</code>:</p>
+<ul>
+<li><strong>Metadata</strong>: id, title, domain, severity and CVSS vector.</li>
+<li><strong>Rationale</strong>: why the weakness matters, in plain words.</li>
+<li><strong>Detection</strong>: exactly what is read and what counts as a failure.</li>
+<li><strong>Fix and Verify</strong>: what to change, and how to confirm it worked.</li>
+<li><strong>References and Standards</strong>: public sources and CWE, OWASP and NIST mappings.</li>
+<li><strong>Run</strong>: the Go function that does the work through the read-only System.</li>
+</ul>
+
+<h2 id="cvss">Reading a CVSS Vector</h2>
+<p>Take <code>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</code>, used by the exposed secrets check. AV:N means attackable over the network. AC:L means low complexity. PR:N and UI:N mean no account and no user action are needed. S:U means the impact stays in the same component. C:H, I:H and A:H mean high impact on confidentiality, integrity and availability. Together these score in the Critical range.</p>
+
+<h2 id="lab">Lab: Scan, Fix, Verify</h2>
+<p>No time to build it? Open the real reports produced from the simulated lab: <a href="sample/vulnerable/report.html">vulnerable server report</a> and <a href="sample/hardened/report.html">hardened server report</a> (also as <a href="sample/vulnerable/report.json">JSON</a>, <a href="sample/vulnerable/report.sarif">SARIF</a> and <a href="sample/vulnerable/report.md">Markdown</a>).</p>
+<p>Build the tool (see <a href="download.html">Download</a>), then run:</p>
+<pre class="term">openvapt demo --lab vulnerable --out lab-before
+openvapt demo --lab hardened   --out lab-after
+openvapt diff lab-before/report.json lab-after/report.json</pre>
+<p>Open <code>lab-before/report.html</code> in a browser. For three findings, read the fix, then find the matching line in <code>internal/lab/lab.go</code> that differs between the vulnerable and hardened servers. The diff shows every finding moving to Fixed.</p>
+<p>Questions to discuss: Which findings would matter most on an internet-facing shop? Which CVSS ratings would you change for a server on a private network, and why?</p>
+
+<h2 id="scope">Why Scope Is Enforced in Code</h2>
+<p>A policy that says "only scan your own machine" can be ignored. A dialer that refuses non-loopback addresses cannot. Read <code>CheckAddr</code> in the <a href="how-it-works.html#internal/scope">walkthrough</a> and its unit test, then consider why host names such as <code>localhost</code> are deliberately rejected.</p>
+
+<h2 id="write">Write Your Own Check</h2>
+<ol>
+<li>Copy a small check such as <code>internal/checks/host/logging_time.go</code>.</li>
+<li>Give it a new id, fill in every documentation field and cite at least one public source. Registration refuses checks without them.</li>
+<li>Read what you need only through the <code>sys.System</code> interface.</li>
+<li>Make the vulnerable lab trigger it and the hardened lab pass it in <code>internal/lab/lab.go</code>.</li>
+<li>Run <code>go test ./...</code>. The engine tests fail until both labs behave correctly.</li>
+<li>Open a pull request, as described on <a href="contribute.html">Contribute</a>.</li>
+</ol>
+{{end}}

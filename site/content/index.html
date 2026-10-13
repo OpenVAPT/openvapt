@@ -1,0 +1,69 @@
+{{define "content"}}{{$d := .Data}}
+<section class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+  <div class="min-w-0">
+    <span class="tag tag-plain mb-4">Academic Project &middot; Source Available &middot; Zero Data</span>
+    <h1>See exactly how a vulnerability assessment tool works</h1>
+    <p class="lead mb-8">Read every line of OpenVAPT, then run it on your own Linux server to find, rate and fix weaknesses.</p>
+    <div class="flex flex-wrap gap-3">
+      <a class="btn btn-primary" href="how-it-works.html">{{icon "code-xml"}}Read the Code</a>
+      <a class="btn btn-default" href="download.html">{{icon "download"}}Download</a>
+    </div>
+  </div>
+  <div class="min-w-0">{{template "cite" (index (index $d.Walkthrough 0).Cites 1)}}</div>
+</section>
+
+<section class="mt-14 grid grid-cols-2 gap-6 border-y border-line-2 py-8 md:grid-cols-4">
+  <div><div class="stat-title">Checks, Each Cited</div><div class="stat-value">{{$d.Counts.total}}</div></div>
+  <div><div class="stat-title">Bytes Sent to Anyone</div><div class="stat-value">0</div></div>
+  <div><div class="stat-title">Third-Party Go Modules</div><div class="stat-value">0</div></div>
+  <div><div class="stat-title">Machines in Scope</div><div class="stat-value">1</div></div>
+</section>
+
+<h2>What It Covers</h2>
+<div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+  <div class="card">
+    <div class="card-icon">{{icon "server"}}</div>
+    <h3>Server <span class="muted">({{$d.Counts.host}} checks)</span></h3>
+    <p class="text-ink-2">Operating system support and pending security updates, SSH daemon settings, accounts and sudo rules, permissions on sensitive files and cron, SUID programs, kernel hardening, logging, auditing and time sync.</p>
+  </div>
+  <div class="grid gap-6">
+    <div class="card">
+      <div class="card-icon">{{icon "network"}}</div>
+      <h3>Network <span class="muted">({{$d.Counts.network}})</span></h3>
+      <p class="m-0 text-ink-2">Listening ports read from the kernel, exposed databases, cleartext services, the host firewall, TLS versions and certificates.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">{{icon "globe"}}</div>
+      <h3>Web Apps <span class="muted">({{$d.Counts.web}})</span></h3>
+      <p class="m-0 text-ink-2">Security headers, cookies, HTTPS redirects, exposed .git, .env and backups, directory listing, PHP settings and WordPress hygiene.</p>
+    </div>
+  </div>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="card"><h3>Checks by Severity</h3><div id="chart-severity" class="chart" role="img" aria-label="Bar chart of checks by severity"></div></div>
+  <div class="card"><h3>Checks by Domain</h3><div id="chart-domain" class="chart" role="img" aria-label="Donut chart of checks by domain"></div></div>
+</div>
+<script type="application/json" id="chart-data">{{json $d.ChartData}}</script>
+
+<h2>Identify, Evaluate, Fix, Verify</h2>
+<div class="steps">
+  <div class="step"><span class="step-dot">1</span><div><b>Identify</b><p>Read-only collectors examine configuration, the kernel and local websites.</p></div></div>
+  <div class="step"><span class="step-dot">2</span><div><b>Evaluate</b><p>Each finding gets a CVSS v3.1 rating, redacted evidence and the reason it matters.</p></div></div>
+  <div class="step"><span class="step-dot">3</span><div><b>Fix</b><p>Exact remediation steps citing OWASP, NIST, CWE and vendor manuals.</p></div></div>
+  <div class="step"><span class="step-dot">4</span><div><b>Verify</b><p>A command to confirm the fix, and a diff showing what changed between scans.</p></div></div>
+</div>
+
+<h2>See a Real Report</h2>
+<div class="card-layer flex flex-wrap items-center justify-between gap-4">
+  <p class="m-0 text-ink-2">Produced by the actual engine scanning a simulated, deliberately misconfigured server, and the same server after the fixes.</p>
+  <div class="flex flex-wrap gap-3">
+    <a class="btn btn-default" href="sample/vulnerable/report.html">{{icon "file-text"}}Vulnerable Server Report</a>
+    <a class="btn btn-default" href="sample/hardened/report.html">{{icon "circle-check"}}Hardened Server Report</a>
+  </div>
+</div>
+
+<h2>Built to Be Read</h2>
+<p>The website is generated from the source code. Each <a href="checks/">check page</a> shows the real file it lives in, with line numbers and a link to that exact commit on GitHub. The <a href="how-it-works.html">walkthrough</a> explains every module, and the <a href="standards.html">standards page</a> maps the work to NIST SP 800-115, CVSS, OWASP and CWE.</p>
+<div class="alert alert-warn mt-6" role="note">{{icon "triangle-alert"}}<span><strong>Your machine, your risk.</strong> Anyone, including companies, may use OpenVAPT free of charge on their own computers and servers, for their own use. It may not be used to provide services or to do business. It is provided as is, and you carry 100% of the risk. <a href="legal/eula.html">Read the EULA</a>.</span></div>
+{{end}}

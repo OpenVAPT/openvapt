@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
+<meta name="referrer" content="no-referrer">
+<title>OpenVAPT Report - {{.Scan.Host}}</title>
+<style>
+:root{color-scheme:light;--bg:#f5f5f5;--surface:#fff;--text:rgba(0,0,0,.88);--muted:rgba(0,0,0,.55);--line:#f0f0f0;--accent:#1677ff;
+--crit:#cf1322;--high:#d4380d;--med:#d48806;--low:#2f54eb;--pass:#389e0d;--radius:8px;
+--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 var(--sans)}
+main{max-width:1000px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:28px;line-height:1.2;margin:0 0 8px}h2{font-size:20px;margin:40px 0 12px}h3{font-size:17px;margin:0}
+.muted{color:var(--muted)}.note{border-left:3px solid var(--accent);padding:12px 16px;background:var(--surface);border-radius:var(--radius);margin:16px 0}
+table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--radius);overflow:hidden}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:13px;color:var(--muted);font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:16px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
+.stat b{display:block;font:600 26px/1.1 var(--mono)}.stat span{font-size:13px;color:var(--muted)}
+.sev{display:inline-block;font:600 12px/1 var(--mono);padding:4px 8px;border-radius:4px;border:1px solid currentColor}
+.critical{color:var(--crit)}.high{color:var(--high)}.medium{color:var(--med)}.low{color:var(--low)}.info{color:var(--muted)}.pass{color:var(--pass)}
+.finding{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:0 0 16px}
+.finding header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+code,pre{font-family:var(--mono);font-size:13px}pre{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 12px;margin:4px 0}
+dl{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;margin:8px 0}dt{color:var(--muted);font-size:13px}dd{margin:0}
+a{color:var(--accent)}ul{padding-left:20px}
+@media (max-width:640px){dl{grid-template-columns:1fr}h1{font-size:23px}}
+@media print{body{background:#fff;color:#000}.finding,.stat,table{border-color:#ccc;break-inside:avoid}}
+</style>
+</head>
+<body><main>
+<h1>OpenVAPT Self-Assessment Report</h1>
+<p class="muted">{{.Scan.Host}} - {{.Scan.OS}} - {{.Scan.Started.Format "2006-01-02 15:04 UTC"}}</p>
+<div class="note">{{.Disclaimer}}</div>
+
+<h2>Summary</h2>
+<div class="stats">
+<div class="stat"><b class="critical">{{.Summary.Critical}}</b><span>Critical</span></div>
+<div class="stat"><b class="high">{{.Summary.High}}</b><span>High</span></div>
+<div class="stat"><b class="medium">{{.Summary.Medium}}</b><span>Medium</span></div>
+<div class="stat"><b class="low">{{.Summary.Low}}</b><span>Low</span></div>
+<div class="stat"><b class="pass">{{.Summary.Passed}}</b><span>Passed</span></div>
+<div class="stat"><b>{{.Summary.Skipped}}</b><span>Skipped</span></div>
+</div>
+<table>
+<tr><th>Scope</th><td>This machine only ({{.Scan.Checks}} checks{{if .Scan.Sites}}, sites: {{join .Scan.Sites ", "}}{{end}})</td></tr>
+<tr><th>Run As Root</th><td>{{if .Scan.AsRoot}}Yes{{else}}No, some checks were skipped{{end}}</td></tr>
+<tr><th>Tool</th><td>{{.Tool.Name}} {{.Tool.Version}} (commit {{short .Tool.Commit}})</td></tr>
+{{with .Integrity}}<tr><th>Integrity</th><td>Signed with key <code>{{.KeyID}}</code>. Check with <code>openvapt verify report.json</code>.</td></tr>{{end}}
+</table>
+
+<h2>Findings</h2>
+{{$any := false}}{{range .Findings}}{{if failed .}}{{$any = true}}
+<article class="finding" id="{{.ID}}">
+<header><span class="sev {{.Severity}}">{{upper .Severity}}</span><h3>{{.Title}}</h3><code class="muted">{{.ID}}</code></header>
+<p>{{.Summary}}</p>
+<p><strong>Why it matters.</strong> {{.Rationale}}</p>
+{{range fails .Results}}<p><strong>{{.Target}}:</strong> {{.Message}}</p>{{range .Evidence}}<pre>{{.}}</pre>{{end}}{{end}}
+<dl>
+<dt>Fix</dt><dd>{{.Fix}}</dd>
+<dt>Verify</dt><dd><code>{{.Verify}}</code></dd>
+<dt>CVSS v3.1</dt><dd><code>{{.CVSS}}</code></dd>
+{{if .Standards.CWE}}<dt>Standards</dt><dd>{{join .Standards.CWE ", "}}{{if .Standards.OWASP}}, OWASP {{join .Standards.OWASP ", "}}{{end}}{{if .Standards.ASVS}}, ASVS {{join .Standards.ASVS ", "}}{{end}}{{if .Standards.NIST}}, NIST 800-53 {{join .Standards.NIST ", "}}{{end}}</dd>{{end}}
+<dt>References</dt><dd>{{range .Refs}}<a href="{{.URL}}" rel="noreferrer">{{.Title}}</a><br>{{end}}</dd>
+<dt>Source</dt><dd><code>{{.Source}}</code></dd>
+</dl>
+</article>
+{{end}}{{end}}
+{{if not $any}}<p>No check failed. This does not prove the machine is secure; see Limitations.</p>{{end}}
+
+<h2>All Checks</h2>
+<table>
+<tr><th>ID</th><th>Title</th><th>Severity</th><th>Status</th></tr>
+{{range .Findings}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{title .Status}}</td></tr>
+{{end}}</table>
+
+<h2>Methodology</h2>
+<ul>{{range .Methodology}}<li>{{.}}</li>{{end}}</ul>
+<h2>Limitations</h2>
+<ul>{{range .Limitations}}<li>{{.}}</li>{{end}}</ul>
+<p class="muted">Generated locally by OpenVAPT. Nothing in this report was sent anywhere.</p>
+</main></body></html>

@@ -1,0 +1,27 @@
+{{define "content"}}
+<h1>Review, Report and Contribute</h1>
+<p class="lead">Everything happens in the open on GitHub. There is no email address and no contact form: the repository is the only channel.</p>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="card"><div class="card-icon">{{icon "git-pull-request"}}</div><h3>Report a Bug or False Result</h3><p>Open an issue with the Bug, False Positive or False Negative template. Include the check id and the redacted evidence line, never secrets or full reports.</p><p><a href="{{repo}}/issues/new/choose" rel="noreferrer">Open an Issue</a></p></div>
+  <div class="card"><div class="card-icon">{{icon "book-open"}}</div><h3>Ask or Discuss</h3><p>Questions and academic discussion go to GitHub Discussions. There is no private support.</p><p><a href="{{repo}}/discussions" rel="noreferrer">Discussions</a></p></div>
+  <div class="card"><div class="card-icon">{{icon "lock"}}</div><h3>Security Flaw in OpenVAPT</h3><p>Use GitHub Private Vulnerability Reporting. It is published as an advisory once fixed.</p><p><a href="{{repo}}/security/advisories/new" rel="noreferrer">Report Privately</a></p></div>
+</div>
+
+<h2>Pull Requests</h2>
+<ul>
+<li>Every commit is signed off under the Developer Certificate of Origin (<code>git commit -s</code>). No separate agreement is needed.</li>
+<li>Contributions are accepted under the same licence as the project.</li>
+<li>CI must pass: formatting, vet, staticcheck, gosec, govulncheck, unit tests and the lab tests.</li>
+<li>New checks need full documentation, at least one public reference and lab coverage. See <a href="learn.html#write">Write Your Own Check</a>.</li>
+</ul>
+
+<h2>Versions and Releases</h2>
+<ul>
+<li><strong>Semantic Versioning</strong>: MAJOR for breaking changes to the CLI or report schema, MINOR for new checks, PATCH for fixes.</li>
+<li><strong>Conventional Commits</strong> feed the changelog.</li>
+<li>Releases are built only by GitHub Actions from a signed tag, with SHA-256 checksums, Sigstore signatures and a software bill of materials (SBOM).</li>
+<li>Only the latest minor version receives fixes.</li>
+<li>Each report records the tool version and commit it was produced with.</li>
+</ul>
+<p><a href="{{repo}}/blob/main/CHANGELOG.md" rel="noreferrer">Changelog</a> and <a href="{{repo}}/releases" rel="noreferrer">Releases</a></p>
+{{end}}

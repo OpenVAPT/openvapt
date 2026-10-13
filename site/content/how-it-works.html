@@ -1,0 +1,25 @@
+{{define "content"}}{{$d := .Data}}
+<h1>How OpenVAPT Is Built</h1>
+<p class="lead">A walk through the source, module by module. Every excerpt is read from the repository when this site is built, so line numbers and links always match the commit in the footer.</p>
+<div class="grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)]">
+  <nav aria-label="Modules" class="min-w-0">
+    <p class="foot-h">Modules</p>
+    <ul class="m-0 list-none p-0 text-[14px]">{{range $d.Walkthrough}}<li class="border-l-2 border-line-2 py-1.5 pl-3"><a href="#{{.Path}}">{{.Name}}</a> <span class="muted">{{.Lines}} lines</span></li>{{end}}</ul>
+  </nav>
+  <div class="min-w-0">
+    <div class="card-layer">
+      <h3 class="mt-0">Design in One Paragraph</h3>
+      <p class="m-0">Checks are small Go files that describe one weakness and how to detect it. They never touch the operating system directly. Instead they receive a read-only <code>System</code>, whose network access is confined by the scope guard to this machine. The engine runs the checks, redacts secrets and writes the report to the local disk. The same checks run against simulated lab servers in the tests, which proves each one detects its weakness and stays silent once it is fixed.</p>
+    </div>
+    {{range $d.Walkthrough}}
+    <section class="mt-14 border-t border-line-2 pt-8" id="{{.Path}}">
+      <p class="muted m-0 font-mono"><a href="{{blob .Path}}" rel="noreferrer">{{.Path}}</a></p>
+      <h2 class="mt-2">{{.Name}}</h2>
+      <p>{{.Purpose}}</p>
+      {{with .Points}}<ul>{{range .}}<li>{{.}}</li>{{end}}</ul>{{end}}
+      {{range .Cites}}{{template "cite" .}}{{end}}
+    </section>
+    {{end}}
+  </div>
+</div>
+{{end}}

@@ -1,0 +1,31 @@
+{{define "content"}}
+<h1>Download and Run OpenVAPT</h1>
+<p class="lead">Free for anyone, including companies, to run on their own Linux machines for their own use. Read the <a href="legal/eula.html">EULA</a> first: you carry 100% of the risk.</p>
+<div class="alert alert-info" role="note">{{icon "info"}}<span>Public releases start once the GitHub repository opens. Until then, build from source as shown below. Each release will publish SHA-256 checksums and signatures produced by the public build pipeline.</span></div>
+
+<h2>Build From Source</h2>
+<p>You need Go 1.22 or newer. OpenVAPT uses only the Go standard library, so nothing else is downloaded.</p>
+<pre class="term">git clone https://github.com/openvapt/openvapt.git
+cd openvapt
+go test ./...
+CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
+./openvapt version</pre>
+
+<h2>Try It Safely First</h2>
+<pre class="term">./openvapt demo                    # scans a simulated vulnerable server, in memory
+./openvapt scan --dry-run          # lists every file, command and request a real scan would use
+./openvapt explain HOST-SSH-001    # documentation for one check</pre>
+
+<h2>Scan Your Own Linux Machine</h2>
+<pre class="term">sudo ./openvapt scan --out ~/openvapt-report</pre>
+<p>Running as root lets checks read protected files such as <code>/etc/shadow</code>; without root those checks are skipped. The scan asks you to accept the terms each time (nothing is stored), writes the report only to the folder you choose with private permissions, and exits with code 3 when Critical or High findings exist, which is useful in automation.</p>
+
+<h2>Verify a Release Download</h2>
+<pre class="term">sha256sum -c openvapt_linux_amd64.sha256
+cosign verify-blob --certificate-identity-regexp 'https://github.com/openvapt/openvapt/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --bundle openvapt_linux_amd64.sigstore.json openvapt_linux_amd64</pre>
+
+<h2>Uninstall</h2>
+<p>OpenVAPT installs nothing. Delete the binary and your report folders. If you signed reports, also delete <code>~/.config/openvapt/report-key</code>.</p>
+{{end}}

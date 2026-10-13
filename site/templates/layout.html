@@ -1,0 +1,80 @@
+{{define "layout"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'self'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light">
+<title>{{.Title}}{{if ne .Path "index.html"}} - OpenVAPT{{end}}</title>
+<meta name="description" content="{{.Description}}">
+{{if .NoIndex}}<meta name="robots" content="noindex, nofollow, noarchive">{{end}}
+<link rel="canonical" href="https://openvapt.com/{{if ne .Path "index.html"}}{{.Path}}{{end}}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{.Title}}">
+<meta property="og:description" content="{{.Description}}">
+<meta property="og:url" content="https://openvapt.com/{{if ne .Path "index.html"}}{{.Path}}{{end}}">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="{{.Base}}assets/icon.svg" type="image/svg+xml">
+<link rel="preload" href="{{.Base}}assets/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{.Base}}assets/site.css">
+{{if eq .Path "checks/index.html"}}<link rel="stylesheet" href="{{.Base}}assets/vendor/ag-grid.min.css"><link rel="stylesheet" href="{{.Base}}assets/vendor/ag-theme-quartz.min.css">{{end}}
+<script type="application/ld+json">{{.JSONLD}}</script>
+</head>
+<body>
+<a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-10 focus:bg-white focus:px-3 focus:py-2" href="#main">Skip to Content</a>
+<header class="shell">
+  <div class="shell-row">
+    <a class="brand" href="{{.Base}}"><img src="{{.Base}}assets/icon.svg" alt="" width="26" height="26">OpenVAPT</a>
+    <nav class="nav" aria-label="Main">
+      <a href="{{.Base}}checks/" {{if eq .Section "checks"}}aria-current="page"{{end}}>Checks</a>
+      <a href="{{.Base}}how-it-works.html" {{if eq .Section "built"}}aria-current="page"{{end}}>How It's Built</a>
+      <a href="{{.Base}}standards.html" {{if eq .Section "standards"}}aria-current="page"{{end}}>Standards</a>
+      <a href="{{.Base}}learn.html" {{if eq .Section "learn"}}aria-current="page"{{end}}>Learn</a>
+      <a href="{{.Base}}download.html" {{if eq .Section "download"}}aria-current="page"{{end}}>Download</a>
+      <a href="{{.Base}}contribute.html" {{if eq .Section "contribute"}}aria-current="page"{{end}}>Contribute</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap pt-4">
+  <div class="alert alert-info" role="note">{{icon "info"}}<span>Academic project for learning. Use only on your own machines, at your own risk. This website collects no data. <a href="{{.Base}}no-data.html">How We Know</a></span></div>
+</div>
+<main id="main" class="wrap pb-16 pt-10">
+{{.Body}}
+</main>
+<footer class="foot">
+  <div class="wrap grid gap-10 md:grid-cols-[2fr_1fr_1fr]">
+    <div>
+      <p class="foot-h">OpenVAPT</p>
+      <p class="text-ink-2">An open academic project showing how a vulnerability assessment tool is built. Free for anyone to use on their own machines, for their own use, at their own risk. Not a service.</p>
+      <p class="text-ink-3">This website collects nothing. No cookies, no tracking, no analytics, no server logs, no forms, no accounts. We do not keep, sell or share any data, because we have none.</p>
+    </div>
+    <div>
+      <p class="foot-h">Project</p>
+      <a href="{{.Base}}limits.html">What It Does Not Do</a>
+      <a href="{{.Base}}cite.html">Cite OpenVAPT</a>
+      <a href="{{repo}}" rel="noreferrer">Source Code on GitHub</a>
+      <a href="{{repo}}/issues" rel="noreferrer">Report a Bug</a>
+    </div>
+    <div>
+      <p class="foot-h">Legal</p>
+      <a href="{{.Base}}legal/eula.html">EULA</a>
+      <a href="{{.Base}}legal/disclaimer.html">Disclaimer</a>
+      <a href="{{.Base}}legal/privacy.html">Privacy Policy</a>
+      <a href="{{.Base}}legal/acceptable-use.html">Acceptable Use</a>
+      <a href="{{.Base}}legal/licence.html">Licence</a>
+    </div>
+  </div>
+  <div class="wrap mt-8 border-t border-line pt-5 text-[13px] text-ink-3">Built {{.Built}} from commit <a href="{{repo}}/tree/{{.Commit}}" rel="noreferrer" class="inline"><code>{{.CommitShort}}</code></a>. PolyForm Noncommercial 1.0.0 with own-use permission.</div>
+</footer>
+{{if eq .Path "checks/index.html"}}<script src="{{.Base}}assets/vendor/ag-grid-community.min.js" defer></script><script src="{{.Base}}assets/catalogue.js" defer></script>{{end}}
+{{if or (eq .Path "index.html") (eq .Path "standards.html")}}<script src="{{.Base}}assets/vendor/echarts.min.js" defer></script><script src="{{.Base}}assets/charts.js" defer></script>{{end}}
+</body>
+</html>{{end}}
+
+{{define "cite"}}<figure class="code{{if gt (len .Lines) 40}} tall{{end}}">
+<figcaption class="code-head"><span><code>{{.File}}</code>{{if .Func}} &middot; <code>{{.Func}}</code>{{end}} &middot; Lines {{.Start}}-{{.End}}</span><a href="{{.Permalink}}" rel="noreferrer">View on GitHub at This Commit {{icon "external-link"}}</a></figcaption>
+<div class="code-body" tabindex="0"><table>{{range .Lines}}<tr><td class="n">{{.N}}</td><td class="l">{{.Text}}</td></tr>{{end}}</table></div>
+</figure>{{end}}
+
+{{define "sev"}}<span class="tag tag-{{.}}">{{title (print .)}}</span>{{end}}

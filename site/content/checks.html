@@ -1,0 +1,21 @@
+{{define "content"}}{{$d := .Data}}
+<h1>Check Catalogue</h1>
+<p class="lead">Every check OpenVAPT runs, generated from the code. Sort, filter or search, then open a check to see its rationale, detection logic, fix, references, standards mapping and full source.</p>
+<div class="filters" role="search">
+  <div class="field"><label for="q">Search Checks</label><input id="q" type="search" autocomplete="off"></div>
+  <div class="field"><label for="domain">Domain</label><select id="domain"><option value="">All Domains</option><option value="host">Server</option><option value="network">Network</option><option value="web">Web Apps</option></select></div>
+  <div class="field"><label for="severity">Severity</label><select id="severity"><option value="">All Severities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option><option value="info">Info</option></select></div>
+  <p class="muted m-0 flex h-ctl-lg items-center" id="shown" aria-live="polite">{{len $d.Checks}} checks</p>
+</div>
+<div id="grid" class="ag-theme-quartz ov-grid" hidden></div>
+<script type="application/json" id="catalogue-data">{{json $d.Catalogue}}</script>
+<div class="table-wrap" id="static-table">
+<table class="table">
+<thead><tr><th>ID</th><th>Check</th><th>Domain</th><th>Severity</th><th>CWE</th></tr></thead>
+<tbody>
+{{range $d.Checks}}<tr>
+<td><code>{{.ID}}</code></td><td><a href="{{.ID}}.html">{{.Title}}</a><br><span class="muted">{{.Summary}}</span></td>
+<td>{{if eq .Domain "host"}}Server{{else if eq .Domain "network"}}Network{{else}}Web Apps{{end}}</td>
+<td>{{template "sev" .Severity}}</td><td>{{join .Standards.CWE ", "}}</td></tr>
+{{end}}</tbody></table></div>
+{{end}}
