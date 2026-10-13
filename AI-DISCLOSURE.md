@@ -15,7 +15,7 @@
 
 ## AI Systems Used
 
-| System | Provider | Interface and version | Role |
+| System | Provider | Interface and Version | Role |
 |---|---|---|---|
 | Claude Opus 5.5 (model id `claude-opus-5-5`) | Anthropic | Claude Code (desktop app), October 2026 | Planned, designed and architected the system; wrote and tested most of the code (Codex wrote the parts listed in its row); wrote the website, course (Academy), documentation and legal drafts; built, committed, pushed and deployed; coordinated the other AI systems; verified their output. |
 | Claude (same model, as a separate sub-agent) | Anthropic | Claude Code sub-agent | Acts as the project's legal reviewer (an AI lawyer focused on Malaysian technology law and source-available licensing): reviewed, audited and rewrote the legal documents; produced findings and replacement clauses that were then applied. This is an AI review, not legal advice. |

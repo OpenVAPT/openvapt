@@ -1,0 +1,100 @@
+{{define "content"}}{{$d := .Data}}
+<h1>For Teachers</h1>
+<p class="lead">Teach vulnerability assessment from theory to practice, free. OpenVAPT gives you ready course plans, printable worksheets with answer keys, a marking rubric and a simulated practice server chosen by each student's seed. All of it works offline, and the practice labs are simulated in memory rather than run against a real machine. It is free, pre-release and used 100% at your own risk.</p>
+
+<div class="alert alert-info" role="note">{{icon "scale"}}<span>What teaching allows, and what stays excluded, is set by <a href="legal/teaching.html">Teaching With OpenVAPT</a>. Please read it before your first class. It covers who may teach, school lab machines, online classes, assessment, students under 18 and how students accept the terms.</span></div>
+
+<div class="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+  <div class="card mb-0"><div class="card-icon">{{icon "calendar"}}</div><h2 class="mt-0 text-base">Course Plans</h2><p class="m-0 text-ink-2">Four-week, eight-week and fourteen-week plans mapped to the {{len $d.Modules}} Academy modules.</p></div>
+  <div class="card mb-0"><div class="card-icon">{{icon "file-text"}}</div><h2 class="mt-0 text-base">Worksheets and Keys</h2><p class="m-0 text-ink-2">A printable worksheet and a teacher answer key for every module.</p></div>
+  <div class="card mb-0"><div class="card-icon">{{icon "flask-conical"}}</div><h2 class="mt-0 text-base">Practice Labs</h2><p class="m-0 text-ink-2">Each student's seed gives a different simulated server, with an answer key for you.</p></div>
+  <div class="card mb-0"><div class="card-icon">{{icon "circle-check"}}</div><h2 class="mt-0 text-base">Marking Rubric</h2><p class="m-0 text-ink-2">Six weighted criteria for a student's assessment report, structured after NIST SP 800-115.</p></div>
+</div>
+
+<h2>Before Your First Class</h2>
+<ol>
+  <li>Read <a href="legal/teaching.html">Teaching With OpenVAPT</a> and the <a href="legal/eula.html">EULA</a>, and follow the teacher's checklist in the teaching terms.</li>
+  <li>Brief students on the law and ethics first: assessing a system without authorisation is an offence under the Computer Crimes Act 1997. The Academy's module <a href="academy/f2.html">F2</a> covers this.</li>
+  <li>Decide where students work: the website and your projector demo only, the built-in simulated lab, or isolated lab machines your institution owns or controls and has authorised. Never a third party's system. A student may also run OpenVAPT on a computer the student personally owns or controls, but that is the student's own Own Use, not part of your class: do not run it on a student's machine for them or make it a requirement.</li>
+  <li>Every student who downloads or runs OpenVAPT reads and accepts the acknowledgements personally. You may not accept for them, and you may not tell them to use <code>--accept-terms</code>. Students under 18 may download or run OpenVAPT only after a parent or guardian has accepted the EULA for them; otherwise they use only the website Academy and watch your demonstration.</li>
+  <li>OpenVAPT is pre-release software (see <a href="channels.html">Release Channels</a>). It may be wrong or unstable. Use it only on isolated lab machines, 100% at your own risk, and remember that a clean report does not prove a system is secure.</li>
+</ol>
+
+<h2>Course Plans</h2>
+{{range $d.Courses}}
+<details class="card mb-4">
+  <summary class="cursor-pointer"><strong>{{.Title}}</strong> <span class="muted">&middot; {{.Hours}}</span></summary>
+  <p class="text-ink-2">{{.Summary}} For: {{.Audience}}.</p>
+  <div class="table-wrap">
+  <table>
+  <thead><tr><th>Week</th><th>Topic</th><th>Academy Modules</th><th>Activity</th></tr></thead>
+  <tbody>
+  {{range .Sessions}}<tr><td>{{.Week}}</td><td>{{.Topic}}</td><td>{{range $i, $m := .Modules}}{{if $i}}, {{end}}<a href="academy/{{lower $m}}.html">{{$m}}</a>{{end}}</td><td>{{.Activity}}</td></tr>
+  {{end}}
+  </tbody>
+  </table>
+  </div>
+  <p class="muted mb-0">Offline copy: <code>openvapt teach course {{.ID}}</code></p>
+</details>
+{{end}}
+
+<h2>Worksheets and Answer Keys</h2>
+<p>Print them from your browser, or generate Markdown files offline with <code>openvapt teach worksheet P2 --out p2.md</code> (add <code>--answers</code> for the key).</p>
+
+<h2>Copying and Adapting Materials</h2>
+<p>You may copy, adapt, shorten and translate the modules, quizzes, worksheets, rubric and course plans for your own students, free of charge, under <a href="legal/teaching.html">Teaching With OpenVAPT</a>. You may not sell them or present them as approved, certified or endorsed by OpenVAPT. Every copy or adaptation must:</p>
+<ol>
+  <li>Credit the source: <em>"Adapted from the OpenVAPT Academy (openvapt.com), built by AI agents, used under the OpenVAPT Source-Available Licence 1.1."</em></li>
+  <li>Carry this notice: <em>"OpenVAPT is not affiliated with, and is not endorsed by, this institution or any third party named in this material. Pre-release versions may be wrong or unstable. Use at your own risk."</em></li>
+  <li>Say clearly where you changed the material.</li>
+</ol>
+<p>The material was built by AI agents and may contain mistakes. Check it before you teach it.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Module</th><th>Level</th><th>Minutes</th><th>Worksheet</th><th>Answer Key</th></tr></thead>
+<tbody>
+{{range $d.Modules}}<tr><td><a href="academy/{{lower .ID}}.html">{{.ID}}: {{.Title}}</a></td><td>{{.Level}}</td><td>{{.Minutes}}</td><td><a href="academy/worksheet-{{lower .ID}}.html">Worksheet</a></td><td><a href="academy/key-{{lower .ID}}.html">Answer Key</a></td></tr>
+{{end}}
+</tbody>
+</table>
+</div>
+
+<h2>Practice Labs: A Different Server for Every Student</h2>
+<p>A practice server is the simulated vulnerable lab with some weaknesses fixed. The seed decides which ones, check by check, so every student is likely to assess a different server, which makes copying a neighbour's report much harder. The same seed gives the same server in the same version of OpenVAPT. The practice lab is simulated in memory and is not run against a real machine.</p>
+<div class="grid gap-6 lg:grid-cols-2">
+  <div class="min-w-0">
+    <h3 class="mt-0">Student</h3>
+<pre class="term">openvapt demo --lab practice --seed &lt;student-number&gt; --out my-report</pre>
+    <p class="text-ink-2">The student reads the report, verifies each finding, rates it, writes fixes and submits an assessment report, marked with the rubric below.</p>
+  </div>
+  <div class="min-w-0">
+    <h3 class="mt-0">Teacher</h3>
+<pre class="term">openvapt teach answers --seed &lt;student-number&gt;</pre>
+    <p class="text-ink-2">Prints the list of weaknesses planted on that student's simulated server, with severity and category, as a Markdown table for marking.</p>
+  </div>
+</div>
+<div class="alert alert-warn" role="note">{{icon "triangle-alert"}}<span><strong>Limitation:</strong> the answer key is computed by the same public code every student has, so any student can print the answer key for their own seed or anyone else's. Treat practice labs as learning exercises, not secure exams. For graded work, combine them with written questions, the student's own evidence and a short oral explanation of findings. The key lists what the lab planted; it is not proof that a report is complete or correct.</span></div>
+
+<h2>Marking Rubric</h2>
+<p>For a student's assessment report of a practice server or an authorised lab machine. Structured after the reporting guidance of NIST SP 800-115: scope and method, findings with evidence, risk, remediation and verification, limitations. Offline copy: <code>openvapt teach rubric</code></p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Criterion</th><th>Weight</th>{{range $d.RubricLevels}}<th>{{.}}</th>{{end}}</tr></thead>
+<tbody>
+{{range $d.Rubric}}<tr><td><strong>{{.Name}}</strong></td><td>{{.Weight}}%</td>{{range .Levels}}<td class="text-[14px]">{{.}}</td>{{end}}</tr>
+{{end}}
+</tbody>
+</table>
+</div>
+
+<h2>Setting Up a Lab</h2>
+<ul>
+  <li><strong>No setup:</strong> the website Academy and <code>openvapt demo</code> run on any computer and touch nothing.</li>
+  <li><strong>Institution lab:</strong> isolated virtual machines on infrastructure your institution owns or controls, on a lab network with no route to production or third-party systems. Snapshot each machine so students can harden it and start again.</li>
+  <li><strong>Before scanning a lab machine:</strong> record the authorisation, run <code>openvapt scan --dry-run</code> to preview every file, command and request, then scan with <code>sudo openvapt scan --out report</code>.</li>
+  <li><strong>Install:</strong> build from source (recommended for teaching how the tool works) or use the installer on the <a href="download.html">Download</a> page.</li>
+</ul>
+
+<h2>Questions</h2>
+<p>See the <a href="faq.html">FAQ</a>, or open an issue on <a href="{{$d.Repo}}">GitHub</a>, the only public channel. OpenVAPT is an academic project built by AI agents and has no duty to provide support. It is not affiliated with, and is not endorsed by, any institution or any third party named on this page; third-party names, such as NIST, are used only to identify them.</p>
+{{end}}

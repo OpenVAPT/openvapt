@@ -19,9 +19,15 @@ import (
 var refWPHardening = check.Ref{Title: "WordPress Developer Resources, Hardening WordPress", URL: "https://developer.wordpress.org/advanced-administration/security/hardening/"}
 var refWPConfig = check.Ref{Title: "WordPress Developer Resources, Editing wp-config.php", URL: "https://developer.wordpress.org/advanced-administration/wordpress/wp-config/"}
 
-// wpDefine matches define('NAME', value) and reports the value.
+// phpComment removes PHP comments (// ..., # ..., /* ... */) so a
+// commented-out define() is never read as active configuration.
+var phpComment = regexp.MustCompile(`(?s:/\*.*?\*/)|(?m:(^|[^:])//[^\n]*)|(?m:^[ \t]*#[^\n]*)`)
+
+// wpDefine returns the value of the first active define('NAME', value):
+// PHP keeps the first definition of a constant and ignores later ones.
 func wpDefine(text, name string) (string, bool) {
-	re := regexp.MustCompile(`(?i)define\s*\(\s*['"]` + regexp.QuoteMeta(name) + `['"]\s*,\s*([^)]+?)\s*\)`)
+	text = phpComment.ReplaceAllString(text, "$1")
+	re := regexp.MustCompile(`(?i)define\s*\(\s*['"]` + regexp.QuoteMeta(name) + `['"]\s*,\s*(.+?)\s*\)\s*;`)
 	m := re.FindStringSubmatch(text)
 	if m == nil {
 		return "", false
@@ -121,7 +127,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "WEB-CMS-007", Title: "WordPress Dashboard File Editor Enabled", Domain: check.DomainWeb,
 		Severity: check.Low, Category: check.CatConfig, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:L/I:L/A:N",
 		Summary:   "Checks whether wp-config.php leaves the built-in theme and plugin file editor enabled.",
 		Rationale: "The editor lets any administrator account change PHP files from the browser. A stolen or phished admin session then becomes code execution on the server in one step.",
 		Detection: "Reads each wp-config.php found through the web roots and fails unless DISALLOW_FILE_EDIT or DISALLOW_FILE_MODS is defined as true.",
@@ -144,7 +150,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "WEB-CMS-008", Title: "WordPress Automatic Updates Disabled", Domain: check.DomainWeb,
 		Severity: check.Medium, Category: check.CatPatch, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
 		Summary:   "Checks whether wp-config.php turns off WordPress background updates, including security releases.",
 		Rationale: "WordPress ships security fixes as automatic minor updates. Turning the updater off means the site stays vulnerable until someone remembers to update by hand, which is how most compromised WordPress sites fall behind.",
 		Detection: "Reads each wp-config.php found through the web roots and fails when AUTOMATIC_UPDATER_DISABLED is true or WP_AUTO_UPDATE_CORE is false.",
@@ -201,7 +207,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "WEB-CMS-010", Title: "Joomla Version Disclosed", Domain: check.DomainWeb,
 		Severity: check.Low, Category: check.CatExposure, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks whether a Joomla site serves its version manifest at /administrator/manifests/files/joomla.xml.",
 		Rationale: "The manifest gives the exact Joomla version, which lets automated tools pick exploits for known vulnerabilities, such as the unauthenticated information disclosure CVE-2023-23752.",
 		Detection: "Sends one GET for /administrator/manifests/files/joomla.xml and fails on a 200 response that contains a <version> element.",
@@ -226,7 +232,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "WEB-CMS-011", Title: "Drupal Version Disclosed by Changelog", Domain: check.DomainWeb,
 		Severity: check.Low, Category: check.CatExposure, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks whether a Drupal site serves CHANGELOG.txt, which names the exact Drupal version.",
 		Rationale: "The changelog tells attackers precisely which Drupal security advisories apply, as was used at scale for Drupalgeddon 2 (CVE-2018-7600).",
 		Detection: "Sends one GET each for /CHANGELOG.txt and /core/CHANGELOG.txt and fails on a 200 response that mentions Drupal.",

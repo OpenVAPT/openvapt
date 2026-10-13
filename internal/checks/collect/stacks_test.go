@@ -127,3 +127,33 @@ func TestXMLElementsIgnoresComments(t *testing.T) {
 		t.Errorf("XMLElements = %+v", cs)
 	}
 }
+
+// Negated sources admit everyone else; negated ports, loopback-only rules and
+// trailing comments must be read the way the kernel applies them.
+func TestFirewallNegationAndComments(t *testing.T) {
+	ipt := parseIPTables("-A INPUT ! -s 10.0.0.0/8 -p tcp --dport 3306 -j ACCEPT\n-A INPUT -p tcp ! --dport 22 -j ACCEPT\n-A INPUT ! -i lo -p tcp --dport 80 -j ACCEPT\n")
+	if len(ipt) != 2 || !ipt[0].Any() || ipt[1].From != 80 {
+		t.Errorf("iptables negation: %+v", ipt)
+	}
+	_, nft := parseNFT("chain input {\n type filter hook input priority 0; policy drop;\n ip saddr != 10.0.0.0/8 tcp dport 3306 accept\n tcp dport 22 accept comment \"ssh\"\n iifname \"lo\" tcp dport 8080 accept\n}")
+	if len(nft) != 2 || !nft[0].Any() || nft[1].From != 22 {
+		t.Errorf("nftables negation, comments and loopback: %+v", nft)
+	}
+	ufw := parseUFW("Status: active\n\nTo                         Action      From\n--                         ------      ----\n8080/tcp on lo             ALLOW IN    Anywhere\n80/tcp on eth0             ALLOW IN    Anywhere\n")
+	if len(ufw) != 1 || ufw[0].From != 80 {
+		t.Errorf("ufw interface rules: %+v", ufw)
+	}
+}
+
+func TestDropInsSortAcrossDirectories(t *testing.T) {
+	f := &sys.Fake{Files: map[string]string{
+		"/lib/systemd/system/x.service":                    "[Service]\nExecStart=/usr/bin/x\n",
+		"/etc/systemd/system/x.service.d/05-user.conf":     "[Service]\nUser=app\n",
+		"/usr/lib/systemd/system/x.service.d/10-root.conf": "[Service]\nUser=root\n",
+		"/usr/lib/systemd/system/x.service.d/05-user.conf": "[Service]\nUser=ignored\n",
+	}}
+	u := Units(context.Background(), f)[0]
+	if !u.RunsAsRoot() || len(u.DropIns) != 2 {
+		t.Errorf("drop-ins must apply by file name across directories: %v user=%q", u.DropIns, u.Get("service.user"))
+	}
+}

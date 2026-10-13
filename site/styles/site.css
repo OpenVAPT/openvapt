@@ -160,7 +160,7 @@
 }
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-@media print{.shell,.foot,.filters,.alert{display:none}}
+@media print{.shell,.foot,.filters,.alert,.no-print{display:none}.worksheet{font-size:12pt}}
 
 /* AG Grid Quartz theme tuned to Ant Design tokens */
 .ag-theme-quartz.ov-grid{--ag-font-family:var(--font-sans);--ag-font-size:14px;--ag-active-color:#1677ff;--ag-header-background-color:#fafafa;

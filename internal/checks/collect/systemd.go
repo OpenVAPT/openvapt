@@ -85,7 +85,7 @@ func Truthy(v string) bool {
 
 // unitDirs are searched from lowest to highest precedence, so a unit in
 // /etc/systemd/system overrides the packaged copy of the same name.
-var unitDirs = []string{"/usr/lib/systemd/system", "/lib/systemd/system", "/etc/systemd/system"}
+var unitDirs = []string{"/usr/lib/systemd/system", "/lib/systemd/system", "/run/systemd/system", "/etc/systemd/system"}
 
 var unitCache sync.Map // per System, cached for one scan
 
@@ -121,14 +121,25 @@ func Units(ctx context.Context, s sys.System) []Unit {
 		if !parseUnitFile(ctx, s, u.Path, u.Values) {
 			u.Complete = false
 		}
+		// As systemd does: drop-ins from every directory are applied in one
+		// order sorted by file name, and a same-named file in a higher
+		// precedence directory replaces the lower one.
+		drop := map[string]string{}
 		for _, dir := range unitDirs {
-			drops, _ := s.Glob(dir + "/" + n + ".d/*.conf")
-			sort.Strings(drops)
-			for _, d := range drops {
-				u.DropIns = append(u.DropIns, d)
-				if !parseUnitFile(ctx, s, d, u.Values) {
-					u.Complete = false
-				}
+			files, _ := s.Glob(dir + "/" + n + ".d/*.conf")
+			for _, d := range files {
+				drop[filepath.Base(d)] = d
+			}
+		}
+		names := make([]string, 0, len(drop))
+		for b := range drop {
+			names = append(names, b)
+		}
+		sort.Strings(names)
+		for _, b := range names {
+			u.DropIns = append(u.DropIns, drop[b])
+			if !parseUnitFile(ctx, s, drop[b], u.Values) {
+				u.Complete = false
 			}
 		}
 		out = append(out, u)

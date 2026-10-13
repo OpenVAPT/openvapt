@@ -16,6 +16,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -38,6 +39,7 @@ func main() {
 	inst := fs.Bool("installer-e2e", false, "installer end-to-end test passed")
 	signed := fs.String("signed", "", "comma-separated release versions verified to carry signatures, provenance and SBOM")
 	today := fs.String("today", "", "override today's date (YYYY-MM-DD), for tests")
+	expect := fs.String("version", "", "the version the plan published; promote refuses if it would record another")
 
 	var target string
 	if cmd == "promote" && len(args) > 0 && !strings.HasPrefix(args[0], "-") {
@@ -56,7 +58,9 @@ func main() {
 	lr, lerr := channels.LoadLegal(*legal)
 	signedSet := map[string]bool{}
 	for _, v := range strings.Split(*signed, ",") {
-		signedSet[strings.TrimSpace(v)] = true
+		if v = strings.TrimSpace(v); channels.Of(v) != channels.Dev {
+			signedSet[v] = true
+		}
 	}
 	evidence := func(c channels.Channel, commit string, ci, lab, inst bool) channels.Evidence {
 		e := channels.Evidence{Commit: commit, CIGreen: ci, LabPass: lab, InstallerE2E: inst, Legal: lr, LegalErr: lerr, Now: now}
@@ -102,6 +106,12 @@ func main() {
 		if channels.InfoFor(c).SoakDays == 0 && c != channels.Alpha {
 			die("unknown channel %q", target)
 		}
+		if !commitRe.MatchString(*commit) {
+			die("--commit must be the full 40-character commit that was verified")
+		}
+		if *expect != "" && s.NextVersion(c) != *expect {
+			die("the record would be %s but the plan published %s; nothing was promoted", s.NextVersion(c), *expect)
+		}
 		ok, checks := channels.Gate(s, c, evidence(c, *commit, *ci, *lab, *inst))
 		for _, x := range checks {
 			mark := "PASS"
@@ -135,8 +145,18 @@ func summary(cs []channels.Check) string {
 	return "blocked by " + strings.Join(failed, "; ")
 }
 
-// output prints key=value and appends it to $GITHUB_OUTPUT when set.
+var (
+	commitRe  = regexp.MustCompile(`^[0-9a-f]{40}$`)
+	safeValue = regexp.MustCompile(`^[A-Za-z0-9.\-]*$`)
+)
+
+// output prints key=value and appends it to $GITHUB_OUTPUT when set. Values
+// are restricted to versions, channel names and commit hashes, so nothing
+// read from the repository can inject extra workflow outputs.
 func output(k, v string) {
+	if !safeValue.MatchString(v) {
+		die("refusing unsafe output %s=%q", k, v)
+	}
 	fmt.Printf("%s=%s\n", k, v)
 	if p := os.Getenv("GITHUB_OUTPUT"); p != "" {
 		f, err := os.OpenFile(p, os.O_APPEND|os.O_WRONLY, 0o600) // #nosec G304 -- path provided by GitHub Actions

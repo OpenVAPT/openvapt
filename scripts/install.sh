@@ -18,7 +18,7 @@
 # except the binary, and needs no root unless you choose a system folder.
 # Downloads come from GitHub, a third party. This script is part of OpenVAPT:
 # provided free, as is, with no warranty, and run 100% at your own risk under
-# the EULA and the OpenVAPT Source-Available Licence 1.0 (own use only).
+# the EULA and the OpenVAPT Source-Available Licence 1.1 (own use only).
 #
 # Options:
 #   --channel NAME     stable (default), rc, beta or alpha; pre-releases may be wrong
@@ -34,7 +34,8 @@
 set -eu
 
 REPO_URL="https://github.com/OpenVAPT/openvapt"
-SIGNER="^https://github.com/OpenVAPT/openvapt/"
+# Only the release workflow on main may have signed a release.
+SIGNER='^https://github\.com/OpenVAPT/openvapt/\.github/workflows/release\.yml@refs/heads/main$'
 ISSUER="https://token.actions.githubusercontent.com"
 
 say() { printf '%s\n' "$*"; }
@@ -44,7 +45,25 @@ die() {
 	exit 1
 }
 
-usage() { sed -n '2,/^$/p' "$0" 2>/dev/null | sed 's/^# \{0,1\}//' || true; }
+# usage is a copy of the header, so --help also works when piped into sh.
+usage() {
+	cat <<'EOF_USAGE'
+OpenVAPT one-command installer
+
+  curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh
+
+Options:
+  --channel NAME     stable (default), rc, beta or alpha; pre-releases may be wrong
+  --version vX.Y.Z   install this exact release instead
+  --dir DIR          install into DIR (default ~/.local/bin, or /usr/local/bin as root)
+  --run              after installing, start an interactive scan of THIS machine
+  --help             show this help
+
+It verifies the SHA-256 checksum (always) and the Sigstore signature (when
+cosign is installed), scans nothing unless you pass --run, and never accepts
+the terms for you. Provided free, as is, 100% at your own risk.
+EOF_USAGE
+}
 
 fetch() { # fetch URL FILE
 	if command -v curl >/dev/null 2>&1; then
@@ -72,7 +91,7 @@ sha256() { # sha256 FILE -> hex digest
 channel_version() {
 	list="$TMP/channels.txt"
 	fetch "$CHANNELS_URL" "$list" 2>/dev/null || return 0
-	awk -v c="$1" '$1 == c { print $2; exit }' "$list"
+	tr -d '\r' <"$list" | awk -v c="$1" '$1 == c { print $2; exit }'
 }
 
 main() {
@@ -109,7 +128,8 @@ main() {
 	esac
 
 	TMP=$(mktemp -d 2>/dev/null || mktemp -d -t openvapt)
-	trap 'rm -rf "$TMP"' EXIT INT TERM
+	trap 'rm -rf "$TMP"' EXIT
+	trap 'exit 130' INT TERM
 
 	if [ -z "$VERSION" ]; then
 		VERSION=$(channel_version "$CHANNEL")
@@ -128,7 +148,12 @@ main() {
 	esac
 
 	if [ -z "$DIR" ]; then
-		if [ "$(id -u)" -eq 0 ]; then DIR=/usr/local/bin; else DIR="$HOME/.local/bin"; fi
+		if [ "$(id -u)" -eq 0 ]; then
+			DIR=/usr/local/bin
+		else
+			[ -n "${HOME:-}" ] || die "HOME is not set; choose a folder with --dir"
+			DIR="$HOME/.local/bin"
+		fi
 	fi
 
 	BIN="openvapt_linux_$ARCH"
@@ -151,6 +176,7 @@ main() {
 	if command -v cosign >/dev/null 2>&1; then
 		fetch "$BASE_URL/download/$VERSION/$BIN.sigstore.json" "$TMP/$BIN.sigstore.json" || die "download failed: Sigstore bundle"
 		cosign verify-blob --certificate-identity-regexp "$SIGNER" --certificate-oidc-issuer "$ISSUER" \
+			--certificate-github-workflow-repository OpenVAPT/openvapt \
 			--bundle "$TMP/$BIN.sigstore.json" "$TMP/$BIN" >/dev/null 2>&1 ||
 			die "Sigstore signature verification failed for $BIN. Nothing was installed."
 		say "  Sigstore signature verified (built by the OpenVAPT GitHub release workflow)"
@@ -194,6 +220,7 @@ main() {
 # --accept-terms on your behalf.
 run_scan() {
 	[ -r /dev/tty ] || die "--run needs an interactive terminal; run: sudo $DIR/openvapt scan --out ~/openvapt-report"
+	[ -n "${HOME:-}" ] || die "HOME is not set, so there is nowhere to write the report"
 	OUT="$HOME/openvapt-report-$(date +%Y%m%d-%H%M%S)"
 	say ""
 	say "Starting a read-only scan of THIS machine only. Scan only a machine you own or control."

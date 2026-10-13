@@ -71,7 +71,7 @@ var tomcatDefaults = map[string]bool{"": true, "tomcat": true, "admin": true, "p
 func init() {
 	registerTomcat(tomcatRule{
 		id: "WEB-TOM-001", title: "Tomcat Manager Reachable Without Address Restriction", sev: check.High, cat: check.CatWebApp, msg: "Tomcat Manager is deployed without an address restriction",
-		cvss:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		summary:   "Checks whether the Tomcat Manager or Host Manager application is deployed without an address filter limiting it to localhost.",
 		rationale: "The Manager deploys WAR files, which means it runs any code it is given. Exposed to the network it is one stolen or guessed password away from full compromise, and it is a standard target of automated attacks.",
 		detection: "Looks for the manager and host-manager applications in each Tomcat installation's webapps folder (and /usr/share/tomcatN-admin on Debian and Ubuntu), then reads their META-INF/context.xml and conf/Catalina/localhost/<app>.xml. Fails when no active RemoteAddrValve or RemoteCIDRValve restricts access.",

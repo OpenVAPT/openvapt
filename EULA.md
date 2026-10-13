@@ -1,6 +1,6 @@
 # End User Licence Agreement
 
-Version 2.0, effective 2026-10-13. Acknowledgements version 1.4. This Agreement was drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
+Version 2.1, effective 2026-10-13. Acknowledgements version 1.4. This Agreement was drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
 
 This End User Licence Agreement ("Agreement") applies to everyone who downloads, builds, installs, copies or uses OpenVAPT, including its source code, compiled programs, documentation and website (together, the "Software"). If you do not agree, do not download or use the Software.
 
@@ -14,7 +14,7 @@ This End User Licence Agreement ("Agreement") applies to everyone who downloads,
 
 **Own Use** means (a) downloading the Software to computers and servers that you own or control and running it there for your own personal testing and learning, or (b) running it on computers and servers that your company or organisation owns or controls, to test those same machines for the organisation's own internal purposes, where the organisation has authorised you to do so. Business use within your own organisation is Own Use. Own Use never includes selling the Software or providing any service with it.
 
-**Teaching** has the meaning in the licence: free teaching that shows the source code and runs the Software only against its simulated lab or on machines the teacher or the educational institution owns or controls and has authorised. Teaching is permitted and is not a service. It never includes scanning a student's or anyone else's machine, or a course run by a commercial training provider. Every student who downloads or runs the Software must accept this Agreement personally.
+**Teaching** has the meaning in the licence and is governed by the Teaching With OpenVAPT terms (TEACHING.md), which form part of this Agreement. Teaching is permitted and is not a service. Teachers and institutions must follow the teacher's checklist in TEACHING.md, may not accept these terms for any student, and are bound by this Agreement, including sections 12 to 15, as users. Every student who downloads or runs the Software must accept this Agreement personally, or through a parent or guardian if under 18.
 
 **Commercial Exploitation** means selling, renting, licensing or distributing the Software for payment or any other benefit; including it in a product or service for others; or using the Software, or anything from or produced by it (including its reports, code and course material), to provide any service to anyone other than yourself or your own organisation, whether paid or unpaid. Examples are security consulting, scanning or assessing machines for clients, a hosted or managed service, and selling or supplying reports to others.
 
@@ -58,7 +58,7 @@ The website asks you to tick each statement before showing the download instruct
 
 ## 6. Licence
 
-The Software is licensed to you only under the OpenVAPT Source-Available Licence 1.0 (file `LICENSE`; see the Licence page). In summary:
+The Software is licensed to you only under the OpenVAPT Source-Available Licence 1.1 (file `LICENSE`; see the Licence page). In summary:
 
 1. **Anyone may use it.** Individuals, students, educational institutions, government bodies and companies may download and use the Software free of charge.
 2. **Own Use only.** You may run the Software only for Own Use.
@@ -147,7 +147,7 @@ You are responsible for complying with all export control, sanctions and trade l
 
 ## 20. Contributions and Feedback
 
-**Contributions.** By submitting a contribution (code, documentation or other material) you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it, and you license it under the OpenVAPT Source-Available Licence 1.0 and grant the licensor the licence to relicense it set out in section 10 of the licence. You keep your copyright. You must disclose in your pull request if an AI agent or other AI system produced any part of your contribution.
+**Contributions.** By submitting a contribution (code, documentation or other material) you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it, and you license it under the OpenVAPT Source-Available Licence 1.1 and grant the licensor the licence to relicense it set out in section 10 of the licence. You keep your copyright. You must disclose in your pull request if an AI agent or other AI system produced any part of your contribution.
 
 **Feedback.** If you share an idea, suggestion or report (for example in a GitHub Issue or Discussion), you agree that we may use it freely, without payment, attribution or any obligation to you.
 
@@ -185,7 +185,7 @@ This Agreement was drafted by an AI agent in good faith and reviewed by an AI ag
 
 ## 29. Whole Agreement and Severability
 
-**Whole agreement.** This Agreement, the licence and the Acceptable Use Policy are the whole agreement between you and us about the Software. The Disclaimer forms part of this Agreement. The Privacy Policy and Security Policy are information notices and do not create contractual obligations for us. You confirm that you have not relied on any statement, promise or representation that is not written in these documents.
+**Whole agreement.** This Agreement, the licence, the Acceptable Use Policy and the Teaching With OpenVAPT terms are the whole agreement between you and us about the Software. The Disclaimer forms part of this Agreement. The Privacy Policy and Security Policy are information notices and do not create contractual obligations for us. You confirm that you have not relied on any statement, promise or representation that is not written in these documents.
 
 **Severability.** If any part of this Agreement is found invalid, illegal or unenforceable in any place, that part is changed to the minimum extent needed to make it enforceable there, or, if that is not possible, removed there. The rest of this Agreement remains in full force, and the part stays in force in every other place.
 

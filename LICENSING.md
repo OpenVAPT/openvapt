@@ -1,6 +1,6 @@
 # Licence
 
-Version 2.0, effective 2026-10-13. Drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; no human lawyer drafted or reviewed it. This page summarises the licence; the file `LICENSE` is the legal text and prevails.
+Version 2.1, effective 2026-10-13. Drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; no human lawyer drafted or reviewed it. This page summarises the licence; the file `LICENSE` is the legal text and prevails.
 
 ## In Short
 
@@ -14,13 +14,17 @@ OpenVAPT is **academic, non-commercial, open, source-available code built by AI 
 
 ## The Licence Text
 
-OpenVAPT is licensed only under the **OpenVAPT Source-Available Licence 1.0** (file `LICENSE`, identifier `LicenseRef-OpenVAPT-SAL-1.0`). The licence itself grants only these permissions: to read, study and quote the code; to download, build and run it for Own Use; to modify it for Own Use or to contribute back; and to share complete copies free of charge with the licence and terms attached. Everything else is not licensed. In particular, providing any service with OpenVAPT or its output, paid or unpaid, is not licensed for anyone, including charities, schools and government bodies.
+OpenVAPT is licensed only under the **OpenVAPT Source-Available Licence 1.1** (file `LICENSE`, identifier `LicenseRef-OpenVAPT-SAL-1.1`). The licence itself grants only these permissions: to read, study and quote the code; to download, build and run it for Own Use; to modify it for Own Use or to contribute back; to teach with it under the Teaching With OpenVAPT terms (`TEACHING.md`), including adapting its course material free of charge; and to share complete copies free of charge with the licence and terms attached. Everything else is not licensed. In particular, providing any service with OpenVAPT or its output, paid or unpaid, is not licensed for anyone, including charities, schools and government bodies.
 
 The End User Licence Agreement (EULA) and Acceptable Use Policy are conditions of the licence, so breaking them also ends the licence.
 
 ## Earlier Licence
 
 Before its public release, the repository carried the PolyForm Noncommercial License 1.0.0 with an OpenVAPT Additional Permission. No release was published under those terms. They were replaced on 2026-10-13 by the OpenVAPT Source-Available Licence 1.0 so that the ban on services is part of the licence itself.
+
+## Licence Versions
+
+Release v0.1.0-alpha.1 was published on 2026-10-13 under version 1.0 of the OpenVAPT Source-Available Licence, and the source archive of that release carries its text. Version 1.1 then widened the Teaching permission by adding the Teaching With OpenVAPT terms (`TEACHING.md`), with their teaching conditions, and left every other term unchanged. Each copy is governed by the licence version provided with it (licence sections 12 and 15).
 
 ## Why We Say Source-Available
 
@@ -36,4 +40,4 @@ All of OpenVAPT was researched, developed and built by AI agents under the direc
 
 ## Contributions
 
-By submitting a contribution you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it; you license it to everyone under the OpenVAPT Source-Available Licence 1.0; and you grant the licensor a perpetual licence to relicense it, as set out in section 10 of the licence. You keep your copyright. Disclose in your pull request if an AI agent or other AI system produced any part of your contribution. Feedback and ideas shared in Issues or Discussions may be used freely, without payment or obligation.
+By submitting a contribution you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it; you license it to everyone under the OpenVAPT Source-Available Licence 1.1; and you grant the licensor a perpetual licence to relicense it, as set out in section 10 of the licence. You keep your copyright. Disclose in your pull request if an AI agent or other AI system produced any part of your contribution. Feedback and ideas shared in Issues or Discussions may be used freely, without payment or obligation.

@@ -29,10 +29,10 @@ jobs:
       version: ${{ steps.plan.outputs.version }}
       signed: ${{ steps.signed.outputs.signed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: "1.26.x"
           check-latest: true
@@ -48,27 +48,30 @@ jobs:
             echo "$assets" | grep -qx 'openvapt_linux_amd64.sigstore.json' || continue
             echo "$assets" | grep -qx 'sbom.cdx.json' || continue
             gh release download "$v" -p openvapt_linux_amd64 -D "$RUNNER_TEMP/$v" || continue
-            gh attestation verify "$RUNNER_TEMP/$v/openvapt_linux_amd64" --repo "$GITHUB_REPOSITORY" >/dev/null || continue
+            gh attestation verify "$RUNNER_TEMP/$v/openvapt_linux_amd64" --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml" >/dev/null || continue
             signed="$signed,$v"
           done
           echo "signed=${signed#,}" >> "$GITHUB_OUTPUT"
       - name: Plan
         id: plan
+        env:
+          SIGNED: ${{ steps.signed.outputs.signed }}
         run: |
           # The newest commit that changed anything outside release/, so that
           # recording a promotion never counts as a new build by itself.
           head=$(git log -1 --format=%H -- . ':(exclude)release')
-          go run ./cmd/channel plan --head "$head" --signed "${{ steps.signed.outputs.signed }}"
+          go run ./cmd/channel plan --head "$head" --signed "$SIGNED"
 
   verify:
     needs: plan
     if: needs.plan.outputs.target != ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ needs.plan.outputs.commit }}
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: "1.26.x"
           check-latest: true
@@ -115,23 +118,33 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: "1.26.x"
           check-latest: true
           cache: false
-      - name: Re-check every gate with the verified evidence and record the promotion
+      - name: Re-check every gate with the verified evidence, record the promotion and push
+        env:
+          TARGET: ${{ needs.plan.outputs.target }}
+          COMMIT: ${{ needs.plan.outputs.commit }}
+          VERSION: ${{ needs.plan.outputs.version }}
+          SIGNED: ${{ needs.plan.outputs.signed }}
         run: |
-          go run ./cmd/channel promote "${{ needs.plan.outputs.target }}" \
-            --commit "${{ needs.plan.outputs.commit }}" --ci-green --lab-pass --installer-e2e \
-            --signed "${{ needs.plan.outputs.signed }}"
-      - name: Commit the release record
-        run: |
+          set -eu
           git config user.name "OpenVAPT Release Agent"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add release/channels.json release/channels.txt
-          git commit -m "release: promote ${{ needs.plan.outputs.version }} to ${{ needs.plan.outputs.target }}"
-          git push origin HEAD:main
+          # main may move while the pipeline runs: rebuild the record on the
+          # newest main and retry, so a published release is always recorded.
+          for attempt in 1 2 3 4 5; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            go run ./cmd/channel promote "$TARGET" --version "$VERSION" \
+              --commit "$COMMIT" --ci-green --lab-pass --installer-e2e --signed "$SIGNED"
+            git add release/channels.json release/channels.txt
+            git commit -q -m "release: promote $VERSION to $TARGET"
+            if git push -q origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 10))
+          done
+          echo "could not record $VERSION after 5 attempts"; exit 1

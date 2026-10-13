@@ -99,8 +99,11 @@ func parseUFW(out string) []FWRule {
 			continue
 		}
 		to := strings.TrimSpace(strings.Replace(cols[0], "(v6)", "", 1))
-		if strings.Contains(to, " on ") { // "80/tcp on eth0": still incoming
-			to = strings.Fields(to)[0]
+		if f := strings.Fields(to); len(f) >= 3 && f[1] == "on" { // "80/tcp on eth0": still incoming
+			if f[2] == "lo" {
+				continue // loopback only, not reachable from the network
+			}
+			to = f[0]
 		}
 		proto := ""
 		if p, pr, ok := strings.Cut(to, "/"); ok {
@@ -118,7 +121,9 @@ func parseUFW(out string) []FWRule {
 }
 
 var nftDport = regexp.MustCompile(`\b(tcp|udp) dport (\{[^}]*\}|\S+)`)
-var nftSaddr = regexp.MustCompile(`\bip6? saddr (\{[^}]*\}|\S+)`)
+var nftSaddr = regexp.MustCompile(`\bip6? saddr (!=\s*)?(\{[^}]*\}|\S+)`)
+var nftAccept = regexp.MustCompile(`\baccept\b`)
+var nftLoopback = regexp.MustCompile(`\biif(name)? "?lo"?(\s|$)`)
 
 // parseNFT reads accept rules with a destination port in input-hook chains.
 func parseNFT(out string) (bool, []FWRule) {
@@ -138,19 +143,24 @@ func parseNFT(out string) (bool, []FWRule) {
 			}
 			continue
 		}
-		if !inInput || !strings.HasSuffix(t, "accept") {
+		// The verdict may be followed by a comment: tcp dport 22 accept comment "ssh".
+		verdict := t
+		if i := strings.Index(t, " comment "); i >= 0 {
+			verdict = t[:i]
+		}
+		if !inInput || !nftAccept.MatchString(verdict) || nftLoopback.MatchString(verdict) || strings.Contains(verdict, "dport !=") {
 			continue
 		}
-		m := nftDport.FindStringSubmatch(t)
+		m := nftDport.FindStringSubmatch(verdict)
 		if m == nil {
 			continue
 		}
 		src := "anywhere"
-		if sm := nftSaddr.FindStringSubmatch(t); sm != nil {
-			src = strings.Trim(sm[1], "{} ")
+		if sm := nftSaddr.FindStringSubmatch(verdict); sm != nil && sm[1] == "" {
+			src = strings.Trim(sm[2], "{} ") // "saddr != X" admits everyone else, so it stays anywhere
 		}
 		for _, r := range portRanges(strings.Trim(m[2], "{} ")) {
-			rules = append(rules, FWRule{Engine: "nftables", Proto: m[1], From: r[0], To: r[1], Source: src, Raw: t})
+			rules = append(rules, FWRule{Engine: "nftables", Proto: m[1], From: r[0], To: r[1], Source: src, Raw: verdict})
 		}
 	}
 	return deny, rules
@@ -171,20 +181,23 @@ func parseIPTables(out string) []FWRule {
 			continue
 		}
 		var proto, ports, src string
-		loopback := false
+		loopback, negPort := false, false
 		for i := 0; i+1 < len(f); i++ {
+			neg := i > 0 && f[i-1] == "!" // iptables prints negation as "! -s X"
 			switch f[i] {
 			case "-p":
 				proto = f[i+1]
 			case "--dport", "--dports":
-				ports = f[i+1]
+				ports, negPort = f[i+1], neg
 			case "-s":
-				src = f[i+1]
+				if !neg { // "! -s X" admits everyone except X, so it stays anywhere
+					src = f[i+1]
+				}
 			case "-i":
-				loopback = f[i+1] == "lo"
+				loopback = f[i+1] == "lo" && !neg
 			}
 		}
-		if ports == "" || loopback {
+		if ports == "" || loopback || negPort {
 			continue
 		}
 		if src == "" || src == "0.0.0.0/0" || src == "::/0" {

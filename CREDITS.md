@@ -48,9 +48,9 @@ Exact versions are also recorded in `site/static/assets/vendor/VERSIONS.txt`, an
 
 ## 5. Licence and Legal Texts Used
 
-| Text | How used | Source |
+| Text | How Used | Source |
 |---|---|---|
-| OpenVAPT Source-Available Licence 1.0 | Original text drafted by an AI agent in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
+| OpenVAPT Source-Available Licence 1.1 (1.0 before the Teaching terms) | Original text drafted by an AI agent in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
 | Go BSD 3-Clause licence | Included word for word in THIRD_PARTY_NOTICES.md | https://go.dev/LICENSE |
 | Contributor Covenant 2.1 | Adopted by reference (linked, not copied) | https://www.contributor-covenant.org/version/2/1/code_of_conduct/ |
 | Developer Certificate of Origin 1.1 | Referenced for commit sign-off | https://developercertificate.org/ |
@@ -96,7 +96,7 @@ The repository currently ships a small, hand-written **test fixture** snapshot w
 
 ## 8. Data Sources for Version Tables
 
-| Table | Location | Sources (dated 2026-10-13) |
+| Table | Location | Sources (Dated 2026-10-13) |
 |---|---|---|
 | Operating system end-of-life dates | `internal/checks/host/os_patch.go` | Ubuntu release cycle, Debian releases and LTS, Red Hat Enterprise Linux life cycle, endoflife.date (community data) |
 | PHP end of security support | `internal/checks/web/php.go` | https://www.php.net/supported-versions.php |

@@ -38,6 +38,7 @@
       <a href="{{.Base}}coverage.html" {{if eq .Section "coverage"}}aria-current="page"{{end}}>Coverage</a>
       <a href="{{.Base}}standards.html" {{if eq .Section "standards"}}aria-current="page"{{end}}>Standards</a>
       <a href="{{.Base}}academy/" {{if or (eq .Section "academy") (eq .Section "learn")}}aria-current="page"{{end}}>Academy</a>
+      <a href="{{.Base}}teach.html" {{if eq .Section "teach"}}aria-current="page"{{end}}>Teachers</a>
       <a href="{{.Base}}download.html" {{if eq .Section "download"}}aria-current="page"{{end}}>Download</a>
       <a href="{{.Base}}faq.html" {{if eq .Section "faq"}}aria-current="page"{{end}}>FAQ</a>
       <a href="{{.Base}}contribute.html" {{if eq .Section "contribute"}}aria-current="page"{{end}}>Contribute</a>
@@ -79,7 +80,7 @@
       <a href="{{.Base}}legal/credits.html">Credits and Citations</a>
     </div>
   </div>
-  <div class="wrap mt-8 border-t border-line pt-5 text-[13px] text-ink-3">Built {{.Built}} from commit <a href="{{repo}}/tree/{{.Commit}}" rel="noreferrer" class="inline"><code>{{.CommitShort}}</code></a>. OpenVAPT Source-Available Licence 1.0: own use only, no services, no selling. Provided as is, at your own risk. Third-party names identify their owners only, with no affiliation or endorsement.</div>
+  <div class="wrap mt-8 border-t border-line pt-5 text-[13px] text-ink-3">Built {{.Built}} from commit <a href="{{repo}}/tree/{{.Commit}}" rel="noreferrer" class="inline"><code>{{.CommitShort}}</code></a>. OpenVAPT Source-Available Licence 1.1: own use only, no services, no selling. Provided as is, at your own risk. Third-party names identify their owners only, with no affiliation or endorsement.</div>
 </footer>
 {{if eq .Path "checks/index.html"}}<script src="{{.Base}}assets/vendor/ag-grid-community.min.js" defer></script><script src="{{.Base}}assets/catalogue.js" defer></script>{{end}}
 {{if eq .Path "download.html"}}<script src="{{.Base}}assets/acknowledge.js" defer></script>{{end}}

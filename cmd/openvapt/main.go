@@ -71,6 +71,8 @@ func main() {
 		err = cmdDemo(ctx, os.Args[2:])
 	case "checks", "list":
 		err = cmdChecks(os.Args[2:])
+	case "teach":
+		err = cmdTeach(ctx, os.Args[2:])
 	case "learn", "academy":
 		err = cmdLearn(os.Args[2:])
 	case "explain":
@@ -129,10 +131,11 @@ Free for your own personal or business use, 100% at your own risk. Not for sale.
 
 Usage:
   openvapt scan [flags]          Assess this machine and write a local report
-  openvapt demo [flags]          Scan the built-in simulated lab (vulnerable|hardened)
+  openvapt demo [flags]          Scan the built-in simulated lab (vulnerable|hardened|practice --seed S)
   openvapt checks [--json]       List every check
   openvapt explain <CHECK-ID>    Show what a check does, why, how to fix it
   openvapt learn [MODULE] [--quiz]  OpenVAPT Academy: learn VAPT from theory to application
+  openvapt teach                 Teacher toolkit: course plans, worksheets, rubric, practice lab keys
   openvapt diff <old.json> <new.json>
   openvapt verify <report.json> [--key-id ID]
   openvapt vulndb             Show offline snapshot details
@@ -203,9 +206,18 @@ func cmdDemo(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("demo", flag.ExitOnError)
 	var f scanFlags
 	var which string
-	fs.StringVar(&which, "lab", "vulnerable", "which simulated server to scan: vulnerable or hardened")
+	fs.StringVar(&which, "lab", "vulnerable", "which simulated server to scan: vulnerable, hardened or practice")
+	seed := fs.String("seed", "", "practice lab seed, for example a student number (with --lab practice)")
 	addScanFlags(fs, &f, "openvapt-demo-report")
 	_ = fs.Parse(args)
+	if which == "practice" {
+		if strings.TrimSpace(*seed) == "" {
+			return usageErr("--lab practice needs --seed, for example your student number")
+		}
+		fmt.Printf("Demo: scanning your practice lab server, seed %q (simulated in memory, your machine is not touched).\n", *seed)
+		r := engine.Practice(ctx, *seed, engine.Options{Only: splitList(f.only), Skip: splitList(f.skip), Parallel: f.parallel})
+		return finish(r, f)
+	}
 	var s sys.System
 	switch which {
 	case "vulnerable":
@@ -213,7 +225,7 @@ func cmdDemo(ctx context.Context, args []string) error {
 	case "hardened":
 		s = lab.Hardened()
 	default:
-		return fmt.Errorf("unknown lab %q (vulnerable or hardened)", which)
+		return fmt.Errorf("unknown lab %q (vulnerable, hardened or practice)", which)
 	}
 	fmt.Printf("Demo: scanning the simulated %q lab server (in memory, your machine is not touched).\n", which)
 	r := engine.Run(ctx, s, engine.Options{Only: splitList(f.only), Skip: splitList(f.skip), Parallel: f.parallel})

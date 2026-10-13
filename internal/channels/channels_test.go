@@ -143,3 +143,21 @@ func TestRepositoryStateIsValid(t *testing.T) {
 		t.Errorf("legal review record: %v", err)
 	}
 }
+
+// Evidence without the tested commit must never promote beyond Alpha.
+func TestGateRequiresTheTestedCommit(t *testing.T) {
+	s := &State{Next: "v0.1.0", Current: map[Channel]Release{Alpha: {Channel: Alpha, Version: "v0.1.0-alpha.1", Commit: "aaa", Date: "2026-10-01"}}}
+	legal := LegalReview{Version: "v0.1.0-alpha.1", Reviewed: "2026-10-01", Reviewer: "AI legal reviewer"}
+	ev := Evidence{CIGreen: true, LabPass: true, Legal: legal, Now: day("2026-10-20")}
+	if ok, cs := Gate(s, Beta, ev); ok {
+		t.Fatalf("promotion without a commit passed: %v", cs)
+	}
+	ev.Commit = "aaa"
+	if ok, cs := Gate(s, Beta, ev); !ok {
+		t.Fatalf("with the tested commit it should pass: %v", names(cs, false))
+	}
+	s.Next = "v0.2.0"
+	if ok, _ := Gate(s, Beta, ev); ok {
+		t.Error("an alpha from another cycle must not be promoted under the new version")
+	}
+}

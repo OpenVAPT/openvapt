@@ -55,7 +55,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "NET-FW-003", Title: "Firewall Allows Sensitive Services From Anywhere", Domain: check.DomainNetwork,
 		Severity: check.High, Category: check.CatNetwork, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Checks whether the host firewall explicitly opens a listening database, administrative or application server port to every address on the internet.",
 		Rationale: "A default-deny firewall only protects what it does not allow. A single \"allow 3306 from anywhere\" rule, often added while debugging, makes a database or admin panel as exposed as if there were no firewall at all.",
 		Detection: "Reads the incoming allow rules of ufw (ufw status verbose), nftables (nft list ruleset, input-hook chains) or iptables (iptables -S, INPUT and ufw chains), and matches rules with no source restriction against network-reachable listening sockets on well-known data, administrative and application server ports.",
@@ -141,7 +141,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "NET-FW-005", Title: "Container Ports Bypass the Host Firewall", Domain: check.DomainNetwork,
 		Severity: check.Medium, Category: check.CatNetwork, Effort: check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
 		Summary:   "Checks whether Docker publishes container ports through its own iptables chains with no DOCKER-USER filtering.",
 		Rationale: "Docker inserts its NAT and FORWARD rules ahead of ufw and of the INPUT chain, so a port published with -p 8080:80 is reachable from the internet even when ufw says the port is denied. Administrators routinely believe the firewall protects these containers when it does not.",
 		Detection: "Reads iptables -S and looks for ACCEPT rules with a destination port in the DOCKER chain (published container ports). Fails when there are such rules and the DOCKER-USER chain contains no DROP or REJECT rule.",

@@ -14,6 +14,7 @@
   {{range .}}<tr><td><code>{{.ID}}</code></td><td><a href="../checks/{{.ID}}.html">{{.Title}}</a></td><td>{{template "sev" .Severity}}</td></tr>{{end}}
   </tbody></table></div>{{end}}
 
+  <p class="muted"><a href="worksheet-{{lower $m.ID}}.html">Printable Worksheet</a> &middot; <a href="key-{{lower $m.ID}}.html">Teacher Answer Key</a> &middot; <a href="../teach.html">For Teachers</a></p>
   <h2>{{icon "flask-conical"}} Lab</h2>
   <ol>{{range $m.Lab}}<li><code>{{.}}</code></li>{{end}}</ol>
 

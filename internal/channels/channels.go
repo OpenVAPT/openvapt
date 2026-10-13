@@ -245,8 +245,11 @@ func Gate(s *State, c Channel, e Evidence) (bool, []Check) {
 		if cur, ok := s.Current[c]; ok && cur.Commit == src.Commit {
 			add("New Build", false, "this build is already "+InfoFor(c).Name+" "+cur.Version)
 		}
-		if e.Commit != "" && e.Commit != src.Commit {
-			add("Same Build Tested", false, "CI evidence is for "+short(e.Commit)+", not the "+InfoFor(prev).Name+" commit "+short(src.Commit))
+		if e.Commit != src.Commit {
+			add("Same Build Tested", false, "CI evidence is for commit "+short(e.Commit)+", not the "+InfoFor(prev).Name+" commit "+short(src.Commit))
+		}
+		if Base(src.Version) != s.Next {
+			add("Same Cycle", false, src.Version+" does not belong to the "+s.Next+" cycle")
 		}
 		days := daysSince(src.Date, e.Now)
 		need := InfoFor(c).SoakDays

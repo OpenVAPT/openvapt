@@ -29,7 +29,7 @@ type ChannelView struct {
 // enforces exactly these conditions.
 var gateText = map[channels.Channel][]string{
 	channels.Alpha:  {"CI green: format, vet, race tests, static analysis, security and vulnerability scans", "Lab proof: every check fails on the vulnerable lab and passes on the hardened lab", "A new build since the last Alpha"},
-	channels.Beta:   {"Everything required for Alpha, re-run on the exact Alpha commit", "At least 7 days in Alpha", "AI legal review recorded for the exact Alpha build, with no open High legal risk"},
+	channels.Beta:   {"Everything required for Alpha, re-run on the exact Alpha commit", "At least 7 days in Alpha", "An AI legal review recorded for the Alpha build being promoted, with no open High legal risk"},
 	channels.RC:     {"Everything required for Beta, re-run on the exact Beta commit", "At least 7 days in Beta", "Installer test: a verified build installs and a tampered one is refused", "The Beta release carries Sigstore signatures, build provenance and an SBOM"},
 	channels.Stable: {"Everything required for Release Candidate, re-run on the exact Release Candidate commit", "At least 14 days in Release Candidate", "The AI legal reviewer's sign-off for public release"},
 }

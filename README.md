@@ -122,6 +122,6 @@ OpenVAPT and openvapt.com collect no data. See [PRIVACY.md](PRIVACY.md).
 
 ## Licence
 
-OpenVAPT Source-Available Licence 1.0 (`LicenseRef-OpenVAPT-SAL-1.0`, file [LICENSE](LICENSE)): Own Use only, no services, no selling. Source-available, not OSI open source. See [LICENSING.md](LICENSING.md).
+OpenVAPT Source-Available Licence 1.1 (`LicenseRef-OpenVAPT-SAL-1.1`, file [LICENSE](LICENSE)): Own Use only, no services, no selling. Source-available, not OSI open source. See [LICENSING.md](LICENSING.md).
 
 Names of other projects and products in this repository (for example Lynis, OpenVAS, ZAP, WordPress, Apache Tomcat, Node.js and Django) identify them only. Their owners do not sponsor, endorse or have any connection with OpenVAPT.

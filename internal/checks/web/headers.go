@@ -140,7 +140,7 @@ func init() {
 		Title:     "Server Software Version Disclosed",
 		Domain:    check.DomainWeb,
 		Severity:  check.Low,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks whether response headers reveal exact web server, PHP or framework versions.",
 		Rationale: "Exact versions let attackers match the site against public exploit lists in seconds. Hiding them does not fix vulnerabilities but removes free reconnaissance.",
 		Detection: "Looks for a version number in the Server header and for the X-Powered-By, X-AspNet-Version and X-Generator headers.",

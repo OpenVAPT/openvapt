@@ -61,7 +61,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "HOST-SYSD-001", Title: "Custom Services Run as Root", Domain: check.DomainHost,
 		Severity: check.Medium, Category: check.CatIdentity, Effort: check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:L",
 		Summary:   "Checks whether long-running services written by the administrator run as root instead of a dedicated user.",
 		Rationale: "Application services (Node.js, Python, Java, custom daemons) are the code most exposed to attackers. If one runs as root, any bug in it gives the attacker full control of the machine instead of one unprivileged account.",
 		Detection: "Reads every service unit in /etc/systemd/system (symlinks skipped) together with its drop-in files, keeps units that start a long-running process (Type is not oneshot), and flags those with no User= (or User=root) and no DynamicUser=yes.",
@@ -90,7 +90,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "HOST-SYSD-002", Title: "Custom Services Lack Sandboxing", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatConfig, Effort: check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:L/I:L/A:N",
 		Summary:   "Checks whether custom long-running services use systemd's basic sandboxing options.",
 		Rationale: "systemd can confine a service with a few lines: block privilege gain through setuid programs, mount the operating system read-only, give it a private /tmp and hide home directories. These limit what an attacker can do after exploiting the service, at almost no cost.",
 		Detection: "For each long-running service unit in /etc/systemd/system, merges drop-ins and checks for NoNewPrivileges=yes, ProtectSystem=strict (or full/yes), PrivateTmp=yes and ProtectHome=yes (or read-only/tmpfs). Lists the missing settings per unit.",

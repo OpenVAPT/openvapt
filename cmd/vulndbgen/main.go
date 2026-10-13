@@ -8,9 +8,9 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/openvapt/openvapt/internal/check"
 	"github.com/openvapt/openvapt/internal/vulndb"
 	"io"
-	"math"
 	"net/http"
 	"net/url"
 	"os"
@@ -136,7 +136,7 @@ func build(ecos []string, allow map[string]bool, get func(string) ([]byte, error
 			vector := ""
 			for _, v := range raw.Severity {
 				if strings.HasPrefix(v.Score, "CVSS:3") {
-					score = cvss3(v.Score)
+					score, _ = check.BaseScore(v.Score)
 					vector = v.Score
 					break
 				} else if n, e := strconv.ParseFloat(v.Score, 64); e == nil {
@@ -208,37 +208,4 @@ func export(eco string, get func(string) ([]byte, error), cache map[string][]byt
 		}
 	}
 	return nil, lastErr
-}
-
-// cvss3 computes the CVSS v3 base score from an OSV severity vector.
-func cvss3(vector string) float64 {
-	m := map[string]string{}
-	for _, p := range strings.Split(vector, "/") {
-		k, v, ok := strings.Cut(p, ":")
-		if ok {
-			m[k] = v
-		}
-	}
-	av := map[string]float64{"N": .85, "A": .62, "L": .55, "P": .2}[m["AV"]]
-	ac := map[string]float64{"L": .77, "H": .44}[m["AC"]]
-	ui := map[string]float64{"N": .85, "R": .62}[m["UI"]]
-	pr := map[string]float64{"N": .85, "L": .62, "H": .27}[m["PR"]]
-	if m["S"] == "C" {
-		pr = map[string]float64{"N": .85, "L": .68, "H": .5}[m["PR"]]
-	}
-	impactMetric := func(x string) float64 { return map[string]float64{"N": 0, "L": .22, "H": .56}[x] }
-	isc := 1 - (1-impactMetric(m["C"]))*(1-impactMetric(m["I"]))*(1-impactMetric(m["A"]))
-	impact := 6.42 * isc
-	if m["S"] == "C" {
-		impact = 7.52*(isc-.029) - 3.25*math.Pow(isc-.02, 15)
-	}
-	if impact <= 0 {
-		return 0
-	}
-	exploit := 8.22 * av * ac * pr * ui
-	score := math.Min(impact+exploit, 10)
-	if m["S"] == "C" {
-		score = math.Min(1.08*(impact+exploit), 10)
-	}
-	return math.Ceil(score*10) / 10
 }

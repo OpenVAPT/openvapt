@@ -12,7 +12,7 @@ Version 1.3, effective 2026-10-13. This policy was drafted by an AI agent and re
 
 ## 2. This Website (openvapt.com)
 
-| Possible data flow | What actually happens |
+| Possible Data Flow | What Actually Happens |
 |---|---|
 | Cookies | None. The website sets no cookies of any kind, so there is no cookie banner. |
 | Browser storage | None. No localStorage, sessionStorage or IndexedDB is used. |

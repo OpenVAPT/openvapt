@@ -130,7 +130,7 @@ func registerHardening() {
 	check.Register(&check.Check{
 		ID: "HOST-SSH-011", Title: "SSH Legacy Trust Options Enabled", Domain: check.DomainHost,
 		Severity: check.Medium, Category: check.CatIdentity, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:L",
 		Summary:   "Checks for host-based trust and user environment options that weaken SSH authentication.",
 		Rationale: "HostbasedAuthentication and ignoring .rhosts trust other machines instead of users. PermitUserEnvironment lets users set variables such as LD_PRELOAD that can bypass restrictions.",
 		Detection: "Reads hostbasedauthentication, ignorerhosts and permituserenvironment from the effective sshd configuration (all evaluated Match contexts).",
@@ -187,7 +187,7 @@ func registerHardening() {
 	check.Register(&check.Check{
 		ID: "HOST-FS-008", Title: "Temporary Filesystems Allow Executables or Devices", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatConfig, Effort: check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:L",
+		CVSS:      "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks that /tmp, /var/tmp and /dev/shm are mounted with nodev and nosuid.",
 		Rationale: "World-writable temporary areas are where attackers drop tools. nosuid stops planted setuid programs working there, and nodev stops device files being created.",
 		Detection: "Reads /proc/mounts. For each of /tmp, /var/tmp and /dev/shm that is a separate mount, nodev and nosuid must be present. Paths that are not separate mounts are reported as skipped.",
@@ -263,7 +263,7 @@ func registerHardening() {
 	check.Register(&check.Check{
 		ID: "HOST-MAC-001", Title: "No Mandatory Access Control Enforced", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatConfig, Effort: check.EffortHigh,
-		CVSS:      "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:L",
+		CVSS:      "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks that AppArmor or SELinux is enabled and enforcing.",
 		Rationale: "Mandatory access control confines services even when they run as root, so a compromised web server or database cannot freely read or change the rest of the system.",
 		Detection: "Reads /sys/fs/selinux/enforce (1 means enforcing) and /sys/module/apparmor/parameters/enabled (Y means enabled).",
@@ -285,7 +285,7 @@ func registerHardening() {
 	check.Register(&check.Check{
 		ID: "HOST-UPD-001", Title: "Automatic Security Updates Not Configured", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatPatch, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks that security updates are installed automatically.",
 		Rationale: "Many compromises use vulnerabilities fixed days or weeks earlier. Automatic security updates close that window without relying on someone remembering.",
 		Detection: "Debian/Ubuntu: reads /etc/apt/apt.conf.d/20auto-upgrades (and 50unattended-upgrades) for APT::Periodic::Unattended-Upgrade \"1\". RHEL family: asks systemd whether dnf-automatic.timer or dnf-automatic-install.timer is active.",
@@ -309,7 +309,7 @@ func registerHardening() {
 	check.Register(&check.Check{
 		ID: "HOST-UPD-002", Title: "Reboot Required to Apply Updates", Domain: check.DomainHost,
 		Severity: check.Medium, Category: check.CatPatch, Effort: check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
 		Summary:   "Checks whether installed updates (often kernel or core library fixes) are waiting for a reboot.",
 		Rationale: "Updated packages do not protect anything until the running kernel and libraries are replaced. A pending reboot means known-fixed vulnerabilities are still live.",
 		Detection: "Checks for /var/run/reboot-required (Debian/Ubuntu) and reads the package list in /var/run/reboot-required.pkgs when present.",
@@ -335,7 +335,7 @@ func registerHardening() {
 	check.Register(&check.Check{
 		ID: "HOST-SVC-001", Title: "Unnecessary Legacy Services Running", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatConfig, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+		CVSS:      "CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks for desktop and legacy network services that servers rarely need.",
 		Rationale: "Each running service adds attack surface. Zeroconf discovery, printing, RPC portmapping and inetd-style super-servers are common, long-forgotten exposures.",
 		Detection: "Asks systemd whether avahi-daemon, cups, rpcbind, xinetd, telnet.socket, rsh.socket, rlogin.socket or vsftpd is active.",
@@ -359,7 +359,7 @@ func registerHardening() {
 
 	check.Register(&check.Check{
 		ID: "HOST-DKR-001", Title: "Users With Root-Equivalent Docker Access", Domain: check.DomainHost,
-		Severity: check.Medium, Category: check.CatIdentity, Effort: check.EffortMedium,
+		Severity: check.High, Category: check.CatIdentity, Effort: check.EffortMedium,
 		CVSS:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
 		Summary:   "Checks whether non-root users can control Docker, which is equivalent to root access.",
 		Rationale: "Members of the docker group, or anyone who can write to the Docker socket, can start a container that mounts the host filesystem and become root.",
@@ -435,7 +435,7 @@ func registerHardening() {
 	check.Register(&check.Check{
 		ID: "HOST-IDS-001", Title: "No Brute-Force Protection Service", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatLogging, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks that a log-based intrusion prevention service (fail2ban, sshguard or CrowdSec) is running.",
 		Rationale: "Internet-facing services receive constant guessing. Automatically blocking sources that fail repeatedly reduces noise and risk, and turns logs into active defence.",
 		Detection: "Asks systemd whether fail2ban, sshguard or crowdsec is active.",

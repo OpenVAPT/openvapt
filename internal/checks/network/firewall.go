@@ -14,7 +14,7 @@ func init() {
 		Title:     "No Active Host Firewall",
 		Domain:    check.DomainNetwork,
 		Severity:  check.Medium,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
 		Summary:   "Checks whether a host firewall (nftables, iptables, ufw or firewalld) is filtering incoming traffic.",
 		Rationale: "A default-deny host firewall is a safety net: a service that is installed or misconfigured by mistake is still not reachable from the internet.",
 		Detection: "Runs read-only status commands in order: ufw status, firewall-cmd --state, nft list ruleset, iptables -S. Passes if ufw/firewalld report active, or if nftables/iptables contain a drop/reject rule or a DROP input policy.",

@@ -64,7 +64,8 @@ func unitResults(ctx context.Context, s sys.System, applies func(collect.Unit) b
 	return []check.Result{check.PassR("systemd units", okMsg)}
 }
 
-var inspectFlag = regexp.MustCompile(`--inspect(-brk|-wait)?(=(\S+))?`)
+// --inspect-port only sets a port; it does not start the inspector.
+var inspectFlag = regexp.MustCompile(`--inspect(-brk|-wait)?(=(\S+))?(\s|$)`)
 var pyDevServer = regexp.MustCompile(`manage\.py\s+runserver|\bflask\s+run\b|-m\s+(http\.server|SimpleHTTPServer)\b|\buvicorn\b.*--reload|\bstreamlit\s+run\b`)
 var flaskDebug = regexp.MustCompile(`(?i)\bFLASK_DEBUG=(1|true|yes|on)\b|\bFLASK_ENV=development\b|\bflask\b.*\s--debug\b|\bWERKZEUG_DEBUG_PIN=off\b`)
 
@@ -72,7 +73,8 @@ var flaskDebug = regexp.MustCompile(`(?i)\bFLASK_DEBUG=(1|true|yes|on)\b|\bFLASK
 // the start of a line, as Django's own generated settings write them.
 var (
 	djDebugOn   = regexp.MustCompile(`(?m)^\s*DEBUG\s*=\s*True\b`)
-	djDebugSafe = regexp.MustCompile(`(?m)^\s*DEBUG\s*=\s*(False\b|os\.|env|config\(|bool\()`)
+	djDebugSafe = regexp.MustCompile(`^(False\b|os\.|env|config\(|bool\()`)
+	djDebugAny  = regexp.MustCompile(`(?m)^\s*DEBUG\s*=\s*(.*)$`)
 	djHostsAny  = regexp.MustCompile(`(?m)^\s*ALLOWED_HOSTS\s*=\s*[\[(]\s*['"]\*['"]`)
 	djInsecure  = regexp.MustCompile(`(?m)^\s*SECRET_KEY\s*=\s*['"]django-insecure-`)
 	djMarker    = regexp.MustCompile(`INSTALLED_APPS|ROOT_URLCONF|DJANGO_SETTINGS_MODULE|django`)
@@ -132,7 +134,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "WEB-NODE-001", Title: "Node.js Version Past End of Life", Domain: check.DomainWeb,
 		Severity: check.High, Category: check.CatPatch, Effort: check.EffortHigh,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Checks whether the installed Node.js runtime is a release line that no longer receives security fixes.",
 		Rationale: "After end of life the Node.js project publishes no more security releases, so every later vulnerability in the runtime, its bundled OpenSSL or its HTTP parser stays open for good.",
 		Detection: "Runs node --version (or nodejs --version), a read-only command, and compares the major version with the Node.js release schedule's end-of-life dates.",
@@ -195,7 +197,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "WEB-NODE-003", Title: "Node.js Service Not Running in Production Mode", Domain: check.DomainWeb,
 		Severity: check.Low, Category: check.CatConfig, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks whether Node.js services set NODE_ENV=production.",
 		Rationale: "Express and many other frameworks treat a missing NODE_ENV as development: error pages then include stack traces with file paths, and caching and other production safeguards are off.",
 		Detection: "For long-running services whose ExecStart= runs node, npm, yarn, pnpm or pm2, reads Environment= and fails when NODE_ENV is missing or not production. Variables loaded with EnvironmentFile= are read only for NODE_ENV.",
@@ -234,12 +236,24 @@ func init() {
 		Standards: check.Standards{CWE: []string{"CWE-489", "CWE-215"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.2"}, WSTG: []string{"WSTG-ERRH-01"}, NIST: []string{"CM-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return djangoCheck(ctx, s, func(fs []djangoFile) []string {
+				// Python keeps the last assignment in a file. A folder is safe
+				// when some file's final DEBUG is False or read from the
+				// environment (a production module overriding a base one).
+				var on []string
 				for _, f := range fs {
-					if djDebugSafe.MatchString(f.text) {
+					all := djDebugAny.FindAllStringSubmatch(f.text, -1)
+					if len(all) == 0 {
+						continue
+					}
+					last := strings.TrimSpace(all[len(all)-1][1])
+					if djDebugSafe.MatchString(last) {
 						return nil
 					}
+					if strings.HasPrefix(last, "True") {
+						on = append(on, f.path+": DEBUG = True")
+					}
 				}
-				return matching(fs, djDebugOn, "DEBUG = True")
+				return on
 			}, "Django debug mode is on")
 		},
 	})

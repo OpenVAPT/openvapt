@@ -45,10 +45,10 @@ var phpEOL = map[string]string{
 }
 
 func init() {
-	iniRule := func(id, title, key, summary, rationale, fix string, sev check.Severity, cwe string, bad func(string) bool) {
+	iniRule := func(id, title, key, summary, rationale, fix string, sev check.Severity, cvss, cwe string, bad func(string) bool) {
 		check.Register(&check.Check{
 			ID: id, Title: title, Domain: check.DomainWeb, Severity: sev,
-			CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+			CVSS:      cvss,
 			Summary:   summary,
 			Rationale: rationale,
 			Detection: "Asks the PHP command-line binary for ini_get('" + key + "') (the only PHP code OpenVAPT may run). Web PHP-FPM pools can use a different php.ini; verify those too.",
@@ -71,22 +71,22 @@ func init() {
 	iniRule("WEB-PHP-001", "PHP Displays Errors to Visitors", "display_errors",
 		"Checks whether PHP prints error messages into web pages.",
 		"Error messages reveal file paths, SQL queries and code structure, and can leak data. They help attackers turn a small bug into a working exploit.",
-		"In php.ini set  display_errors = Off  and  log_errors = On , then restart PHP-FPM or the web server.", check.Medium, "CWE-209", on)
+		"In php.ini set  display_errors = Off  and  log_errors = On , then restart PHP-FPM or the web server.", check.Medium, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", "CWE-209", on)
 	iniRule("WEB-PHP-002", "PHP Version Exposed in Headers", "expose_php",
 		"Checks whether PHP adds an X-Powered-By header with its version.",
 		"The header advertises the exact PHP version to every visitor and scanner.",
-		"In php.ini set  expose_php = Off  and restart PHP.", check.Low, "CWE-200", on)
+		"In php.ini set  expose_php = Off  and restart PHP.", check.Low, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N", "CWE-200", on)
 	iniRule("WEB-PHP-003", "PHP Allows Remote File Inclusion", "allow_url_include",
 		"Checks whether include() and require() may load code from URLs.",
 		"With allow_url_include on, a single file-inclusion bug lets an attacker run their own PHP code from their own server (remote file inclusion).",
-		"In php.ini set  allow_url_include = Off  (the default since PHP 5.2) and restart PHP.", check.High, "CWE-98", on)
+		"In php.ini set  allow_url_include = Off  (the default since PHP 5.2) and restart PHP.", check.High, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H", "CWE-98", on)
 
 	check.Register(&check.Check{
 		ID:        "WEB-PHP-004",
 		Title:     "PHP Version Past End of Security Support",
 		Domain:    check.DomainWeb,
 		Severity:  check.High,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Checks whether the installed PHP branch still receives security fixes from the PHP project.",
 		Rationale: "Unsupported PHP versions never get fixes for newly found vulnerabilities, some of which allow remote code execution.",
 		Detection: "Runs php -v, extracts the major.minor version and compares it with the PHP project's published end-of-security-support dates. Distribution vendors may backport fixes; the evidence notes this.",

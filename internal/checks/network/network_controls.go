@@ -16,7 +16,7 @@ func init() {
 		Severity:  check.High,
 		Category:  check.CatNetwork,
 		Effort:    check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Network-reachable IPv6 listeners exist without a default-deny IPv6 firewall policy.",
 		Rationale: "An IPv4-only firewall does not protect IPv6 services, creating an alternate path that bypasses intended filtering.",
 		Detection: "Parses /proc/net/tcp6 and udp6, then inspects nft list ruleset and ip6tables -S for an input drop or reject policy.",

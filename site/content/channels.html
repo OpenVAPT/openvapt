@@ -1,6 +1,6 @@
 {{define "content"}}{{$d := .Data}}{{$c := $d.Channels}}
 <h1>Release Channels</h1>
-<p class="lead">OpenVAPT has one codebase and one website. Every build moves through four channels, from Alpha to Stable, and it moves up only when every gate for the next channel passes on that exact build. AI agents run the gates; nobody can skip or override one.</p>
+<p class="lead">OpenVAPT has one codebase and one website. Every build moves through four channels, from Alpha to Stable, and it moves up only when every gate for the next channel passes on that exact build. AI agents run the gates, and the promotion code refuses any build whose gates do not all pass.</p>
 
 <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 {{range $c.Views}}

@@ -6,8 +6,9 @@ authors:
   - name: "OpenVAPT"
 repository-code: "https://github.com/openvapt/openvapt"
 url: "https://openvapt.com"
+license: LicenseRef-OpenVAPT-SAL-1.1
 license-url: "https://github.com/OpenVAPT/openvapt/blob/main/LICENSE"
-version: "0.1.0-dev"
+version: "0.1.0-alpha.1"
 date-released: "2026-10-13"
 keywords:
   - vulnerability assessment

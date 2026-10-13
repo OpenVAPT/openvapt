@@ -1,6 +1,6 @@
 # OpenVAPT Source-Available Licence
 
-Version 1.0, effective 2026-10-13. Identifier: `LicenseRef-OpenVAPT-SAL-1.0`.
+Version 1.1, effective 2026-10-13. Identifier: `LicenseRef-OpenVAPT-SAL-1.1`. Version history is in section 15.
 
 This licence was drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer. No human lawyer drafted or reviewed it. It is not legal advice to anyone.
 
@@ -22,7 +22,7 @@ You may use the Software only under this licence. To get any permission under it
 
 **Service** means any activity done for, or made available to, any person other than you or Your Organisation, whether paid or unpaid, including vulnerability assessment, penetration testing, auditing, scanning, consulting, training delivered as a service, and any hosted, managed or outsourced service. Teaching is not a Service.
 
-**Teaching** means, without charge for the Software or for teaching about it (ordinary tuition fees of a school, college or university are not such a charge), explaining and showing the Software's source code and documentation to students, and running the Software only against its built-in simulated lab (`openvapt demo`) or on machines that the teacher, or the educational institution, owns or controls and has authorised. Teaching never includes running the Software on a student's, client's or any other person's machine, or any course, workshop or training offered by a commercial training provider.
+**Teaching** means teaching that is permitted by, and done in line with, the Teaching With OpenVAPT terms (TEACHING.md) provided with the Software, which form part of this licence. In summary: teaching by educational institutions (including those charging ordinary tuition), government training academies, organisations training their own staff, and free individual teachers; using the simulated lab, the website Academy, and machines and virtual machines the institution owns or controls and has authorised, under supervision; and adapting the teaching materials free of charge with attribution and notices. Teaching never includes commercial training providers, paid bootcamps or courses sold to the public, fee-paying certification courses, training another organisation's staff, any fee charged specifically for the Software, or running the Software, as part of Teaching, on any machine the institution does not own or control. A student who runs the Software on a computer that the student personally owns or controls does so as that student's own Own Use, under that student's own acceptance of this licence and the EULA, and not as Teaching.
 
 **Output** means anything produced by the Software, including reports, findings, scores and signed reports.
 
@@ -33,8 +33,8 @@ The Licensor grants you a non-exclusive, worldwide, royalty-free, non-transferab
 1. **Read and study.** Read, study, review and discuss the source code and documentation, and quote reasonable extracts of them, with attribution, in teaching, study, research and academic writing.
 2. **Own Use.** Download, copy, build, install and run the Software for Own Use only.
 3. **Modify.** Modify the Software for Own Use, or to propose a contribution back to the OpenVAPT project.
-4. **Share copies free of charge.** Give complete copies of the Software, modified or unmodified, to others free of charge, but only if (a) you include this licence, the NOTICE file, the End User Licence Agreement (EULA.md) and the Acceptable Use Policy (ACCEPTABLE_USE.md) unchanged; (b) you clearly mark any modified version as modified and do not call it OpenVAPT without saying so; and (c) you charge nothing, and receive no other benefit, for the copies or for anything connected with them. Each recipient gets permission only from the Licensor, under this licence, and not from you.
-5. **Teaching.** Use the Software for Teaching. Each student who downloads or runs the Software must accept this licence and the EULA personally.
+4. **Share copies free of charge.** Give complete copies of the Software, modified or unmodified, to others free of charge, but only if (a) you include this licence, the NOTICE file, the End User Licence Agreement (EULA.md), the Acceptable Use Policy (ACCEPTABLE_USE.md) and TEACHING.md unchanged; (b) you clearly mark any modified version as modified and do not call it OpenVAPT without saying so; and (c) you charge nothing, and receive no other benefit, for the copies or for anything connected with them. Each recipient gets permission only from the Licensor, under this licence, and not from you.
+5. **Teaching.** Use the Software for Teaching, including copying, adapting and translating its course material into your own teaching materials for your own students free of charge, as set out in TEACHING.md. Each student who downloads or runs the Software must accept this licence and the EULA personally, or through a parent or guardian if under 18.
 
 ## 4. What Is Not Licensed
 
@@ -88,5 +88,9 @@ Nothing in this licence limits any right that the law gives you and that cannot 
 ## 14. Governing Law and Severability
 
 This licence is governed by the laws of Malaysia, and the courts of Malaysia have exclusive jurisdiction, subject only to any right the law of your country gives you that cannot be excluded. If any part of this licence is invalid or unenforceable anywhere, it is read down to the minimum extent needed to make it enforceable there, or, if that is not possible, removed there, and the rest stays in full force. A permission that is removed is not replaced by a wider one.
+## 15. Version History
 
-Required Notice: Copyright (c) 2026 OpenVAPT and contributors. Licensed under the OpenVAPT Source-Available Licence 1.0 (LicenseRef-OpenVAPT-SAL-1.0). Own Use only; no services, no selling.
+1. **Version 1.0** (2026-10-13) was the first version. Release v0.1.0-alpha.1 was published under it, and the source archive of that release contains its text, which continues to govern copies obtained from that release (section 12).
+2. **Version 1.1** (2026-10-13) widens the Teaching permission by adding the Teaching With OpenVAPT terms (TEACHING.md): more kinds of teachers, institution virtual machines, and free adaptation of course material. It also adds teaching conditions: TEACHING.md must travel with shared copies, and students under 18 need a parent's or guardian's acceptance. Every other term is unchanged. Anyone holding a version 1.0 copy may instead choose to use that copy under version 1.1 by accepting all of its terms.
+
+Required Notice: Copyright (c) 2026 OpenVAPT and contributors. Licensed under the OpenVAPT Source-Available Licence 1.1 (LicenseRef-OpenVAPT-SAL-1.1). Own Use only; no services, no selling.

@@ -4,13 +4,23 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Audit and Fixes (Claude, with three independent AI review passes)
+- Severity now always matches the check's own CVSS v3.1 vector: a shared calculator (internal/check/cvss.go, tested against FIRST reference scores) is enforced at registration; 56 overstated or wrong vectors corrected and 12 severities adjusted to their honest scores.
+- Release pipeline: release.yml runs only from promote.yml (no gate bypass by tag push), re-runs the tests and installer test on exactly the shipped binaries, states the embedded snapshot checksum, covers every asset in SHA256SUMS, is safe to re-run, and pins every action to a commit; the record step retries on a moving main and refuses a version that differs from the published one; channel outputs are validated; promotion requires the exact tested commit and the same release cycle.
+- Installer: signature identity pinned to release.yml on main, Ctrl-C stops it, help works when piped, clear error when HOME is unset, Windows line endings tolerated.
+- Check accuracy: negated iptables and nftables sources and ports, nftables comments and loopback rules, ufw rules on lo, systemd drop-ins ordered across all directories including /run, commented-out WordPress define() lines ignored, Django's last DEBUG assignment honoured, --inspect-port no longer reported as the inspector.
+- Teacher toolkit: openvapt teach (course plans, worksheets and answer keys, rubric, practice-lab answer keys with --only and --skip), seeded practice labs (openvapt demo --lab practice --seed), For Teachers page, printable worksheets and keys for every module, TEACHING.md.
+- Website: Title Case fixes, noindex on sample reports, clearer channel gate wording, CITATION.cff version.
+
 ### Release Channels
 - One codebase and one website with four channels: Alpha, Beta, Release Candidate and Stable. Promotion is decided by evidence gates in internal/channels (CI, lab proof, soak time, AI legal review of the exact build, installer test, signing, provenance and SBOM, public release sign-off), run daily by .github/workflows/promote.yml; every promotion is recorded in release/channels.json (Claude).
 - `openvapt version`, every report and the website show the channel; pre-release builds carry a warning. The installer takes `--channel` (Stable by default). The website stays noindex until a signed-off Stable release exists. New Release Channels page.
 
 ### Licence and Legal (2026-10-13)
+- Licence version 1.1 (`LicenseRef-OpenVAPT-SAL-1.1`): release v0.1.0-alpha.1 was published under version 1.0, so the widened Teaching grant is a new version rather than an edit of 1.0. Version 1.1 adds the Teaching With OpenVAPT terms and their conditions and leaves every other term unchanged; licence section 15 records the history. A student's own machine is that student's Own Use, not Teaching.
 - Relicensed before any release from PolyForm Noncommercial 1.0.0 with an Additional Permission to the self-contained OpenVAPT Source-Available Licence 1.0 (`LicenseRef-OpenVAPT-SAL-1.0`): only Own Use is licensed, and providing any service, paid or unpaid, is not licensed for anyone. ADDITIONAL-PERMISSION.md removed. Free Teaching (simulated lab or the institution's own authorised machines) is licensed and is not a service.
 - Pre-release warning for alpha, beta and rc builds in the licence, EULA, Disclaimer, Acceptable Use Policy, README and website.
+- TEACHING.md 1.0, Teaching With OpenVAPT terms; licence Teaching definition and grant aligned; EULA 2.1, Acceptable Use Policy 1.5, Licence summary 2.1.
 - Terminology: OpenVAPT is described as researched, developed and built by AI agents under human direction.
 - EULA 2.0, Disclaimer 1.4, Acceptable Use Policy 1.3, Licence summary 2.0, acknowledgements 1.3: gift framing, no relationship or duty, release of claims, no reliance, read-down liability limit, non-affiliation notice for third-party names, installer risk notice.
 

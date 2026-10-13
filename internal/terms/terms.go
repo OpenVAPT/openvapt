@@ -22,7 +22,7 @@ var Pillars = []Pillar{
 	{"Academic", "Made for learning and open review. It shows, in public, how a vulnerability assessment tool is designed, built and tested."},
 	{"Non-Commercial", "Nothing is sold. The project is not a business, earns no money, accepts no payments or donations, and offers no paid or unpaid services, support or advice."},
 	{"Built by AI Agents", "All code, tests, documentation, the website and the legal drafts were researched, developed and built by AI agents (Claude by Anthropic, and OpenAI Codex), directed and approved by the human project owner. It may contain mistakes and has not been audited by an independent human expert."},
-	{"Open, Source-Available Code", "Every line of code is public on GitHub to read, study, review and improve within the licence. Licensed under the OpenVAPT Source-Available Licence 1.0, it is not \"open source\" in the formal OSI sense, because selling and providing services are not licensed."},
+	{"Open, Source-Available Code", "Every line of code is public on GitHub to read, study, review and improve within the licence. Licensed under the OpenVAPT Source-Available Licence 1.1, it is not \"open source\" in the formal OSI sense, because selling and providing services are not licensed."},
 	{"Free to Download and Use", "Free of charge for anyone: individuals, students, schools and companies."},
 	{"For Your Own Use", "Download it to your own server for personal testing, or use it to test your own company's servers with your company's authorisation. For your own purposes only."},
 	{"Not for Sale or Services", "You may not sell it, and you may not provide any service to anyone else with anything from or produced by OpenVAPT, paid or unpaid."},

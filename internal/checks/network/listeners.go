@@ -63,7 +63,7 @@ func init() {
 		Title:     "Database or Cache Service Exposed to the Network",
 		Domain:    check.DomainNetwork,
 		Severity:  check.High,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Checks whether databases, caches, search engines or the Docker API listen on a network-reachable address.",
 		Rationale: "Exposed databases and caches (Redis, MongoDB, Elasticsearch, Memcached) are among the most common causes of mass data breaches and ransom wipes, often because they ship without authentication.",
 		Detection: "Matches network-reachable listening ports from /proc/net against a list of well-known data service ports (IANA registry).",

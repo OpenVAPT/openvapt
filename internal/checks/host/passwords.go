@@ -59,7 +59,7 @@ func init() {
 
 	check.Register(&check.Check{
 		ID: "HOST-PWD-002", Title: "Accounts With Obsolete Password Hashes", Domain: check.DomainHost,
-		Severity: check.High, Category: check.CatIdentity, Effort: check.EffortLow,
+		Severity: check.Medium, Category: check.CatIdentity, Effort: check.EffortLow,
 		CVSS:      "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:N",
 		Summary:   "Checks /etc/shadow for passwords still stored with MD5 or traditional DES crypt.",
 		Rationale: "Old hashes survive configuration changes until the user changes the password. MD5-crypt and DES hashes can be cracked quickly with commodity hardware.",
@@ -99,7 +99,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "HOST-PWD-003", Title: "Short Minimum Password Length", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatIdentity, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks that the password quality policy requires at least 12 characters.",
 		Rationale: "Length is the single most effective property against guessing. NIST SP 800-63B recommends allowing long passphrases and rejecting short passwords.",
 		Detection: "Reads minlen from /etc/security/pwquality.conf and /etc/security/pwquality.conf.d/*.conf. A value below 12, or no pwquality configuration, fails.",
@@ -182,7 +182,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "HOST-USR-004", Title: "Duplicate User IDs", Domain: check.DomainHost,
 		Severity: check.Medium, Category: check.CatIdentity, Effort: check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N",
+		CVSS:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
 		Summary:   "Checks that no two accounts share the same numeric user id.",
 		Rationale: "Accounts with the same UID are the same user to the kernel: they own each other's files and processes, and audit logs cannot tell them apart.",
 		Detection: "Reads /etc/passwd and reports any UID used by more than one account.",
@@ -261,7 +261,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "HOST-USR-006", Title: "Legacy NIS Entries in Account Files", Domain: check.DomainHost,
 		Severity: check.Medium, Category: check.CatIdentity, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
 		Summary:   "Checks /etc/passwd, /etc/shadow and /etc/group for legacy '+' NIS inclusion entries.",
 		Rationale: "'+' entries pull accounts from NIS, an unencrypted legacy directory service. If NIS is gone, the entry can still be abused to create unexpected accounts.",
 		Detection: "Reads the account files and lists lines beginning with '+'.",
@@ -292,7 +292,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "HOST-USR-007", Title: "Insecure Trust Files in Home Directories", Domain: check.DomainHost,
 		Severity: check.High, Category: check.CatIdentity, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
 		Summary:   "Looks for .rhosts, .shosts and .netrc files in user home directories.",
 		Rationale: ".rhosts and .shosts grant password-less trust to other hosts. .netrc files usually hold plain-text passwords for FTP or other services.",
 		Detection: "Reads home directories from /etc/passwd and checks each for .rhosts, .shosts and .netrc (file existence only; contents are never read).",

@@ -27,7 +27,8 @@ const (
 )
 
 // Severity follows the qualitative rating scale of CVSS v3.1
-// (FIRST, "CVSS v3.1 Specification", section 5).
+// (FIRST, "CVSS v3.1 Specification", section 5). Register enforces that
+// every check's severity matches the base score of its own CVSS vector.
 type Severity string
 
 const (
@@ -130,6 +131,13 @@ func Register(c *Check) {
 	applyLegacy(c)
 	if c.Category == "" || CategoryByID(c.Category).ID == "" || c.Effort == "" {
 		panic(fmt.Sprintf("check %q must have a valid Category and Effort", c.ID))
+	}
+	score, err := BaseScore(c.CVSS)
+	if err != nil {
+		panic(fmt.Sprintf("check %q: %v", c.ID, err))
+	}
+	if want := SeverityFor(score); c.Severity != want {
+		panic(fmt.Sprintf("check %q: severity %s does not match its CVSS v3.1 base score %.1f (%s)", c.ID, c.Severity, score, want))
 	}
 	if len(c.Refs) == 0 {
 		panic(fmt.Sprintf("check %q must cite at least one reference", c.ID))

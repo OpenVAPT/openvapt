@@ -1,10 +1,13 @@
 name: release
-# Publishes one release. Normally called by promote.yml after a channel gate
-# passes (alpha, beta and rc are published as pre-releases); a manually pushed
-# v* tag also works.
+# Publishes one release. It runs only when promote.yml calls it after every
+# channel gate passed (AGENTS.md section 5: no bypass), so there is no tag
+# push trigger. Alpha, beta and rc are published as pre-releases.
+#
+# The released binary is the verified commit plus the vulnerability snapshot
+# built here from public OSV and CISA KEV data. Because the snapshot changes
+# the binary, the full test suite, lab proof and installer test run again on
+# exactly what ships, and the snapshot's checksum is stated in the notes.
 on:
-  push:
-    tags: ["v*"]
   workflow_call:
     inputs:
       tag:
@@ -21,51 +24,90 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      TAG: ${{ inputs.tag || github.ref_name }}
-      COMMIT: ${{ inputs.commit || github.sha }}
+      TAG: ${{ inputs.tag }}
+      COMMIT: ${{ inputs.commit }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Validate inputs
+        run: |
+          echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' || { echo "bad tag $TAG"; exit 1; }
+          echo "$COMMIT" | grep -Eq '^[0-9a-f]{40}$' || { echo "bad commit $COMMIT"; exit 1; }
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          ref: ${{ inputs.commit || github.ref }}
-      - uses: actions/setup-go@v5
+          ref: ${{ inputs.commit }}
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: "1.26.x"
           check-latest: true
           cache: false
-      - run: go test ./...
+      - name: Existing release (re-runs complete the record instead of publishing twice)
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            target=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq .object.sha)
+            if [ "$target" != "$COMMIT" ]; then echo "release $TAG exists at $target, not $COMMIT"; exit 1; fi
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Build the vulnerability snapshot from public OSV and CISA KEV data (owner decision A; see docs/VULNDB.md)
+        if: steps.existing.outputs.exists == 'false'
         run: |
           go run ./cmd/vulndbgen -out internal/vulndb/data/snapshot.json.gz \
             -ecosystems "Debian:11,Debian:12,Debian:13,Ubuntu:20.04:LTS,Ubuntu:22.04:LTS,Ubuntu:24.04:LTS,AlmaLinux:8,AlmaLinux:9,Rocky Linux:8,Rocky Linux:9,Packagist,npm" \
             -packages docs/vulndb-packages.txt
-          go test ./internal/vulndb/...
-      - run: make release VERSION=${TAG}
-      - name: Publish the embedded snapshot alongside the binaries
-        run: cp internal/vulndb/data/snapshot.json.gz "dist/release/openvapt-${TAG}-vulndb-snapshot.json.gz"
-      - name: Source archive (the recommended way to use OpenVAPT is to build from source)
+      - name: Test exactly what ships (snapshot included)
+        if: steps.existing.outputs.exists == 'false'
         run: |
-          git archive --format=tar.gz --prefix="openvapt-${TAG}/" -o "dist/release/openvapt-${TAG}-source.tar.gz" "${COMMIT}"
-          cd dist/release && sha256sum openvapt_linux_* openvapt-*-source.tar.gz openvapt-*-vulndb-snapshot.json.gz > SHA256SUMS
-          go version > GO_VERSION.txt
-      - uses: sigstore/cosign-installer@v3
-      - name: Sign binaries (keyless, bound to this workflow)
+          go vet ./...
+          go test -race ./internal/vulndb/... ./internal/checks/... ./internal/report/... ./internal/sys/... ./internal/scope/... ./cmd/...
+      - name: Build
+        if: steps.existing.outputs.exists == 'false'
+        run: make release VERSION="$TAG" COMMIT="$COMMIT"
+      - name: Installer end to end on the release binaries
+        if: steps.existing.outputs.exists == 'false'
         run: |
+          set -eu
+          rel="$RUNNER_TEMP/rel/download/$TAG"; mkdir -p "$rel"
+          cp dist/release/openvapt_linux_* dist/release/SHA256SUMS "$rel/"
+          OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel" sh scripts/install.sh --version "$TAG" --dir "$RUNNER_TEMP/bin"
+          "$RUNNER_TEMP/bin/openvapt" version | grep -F "$TAG"
+      - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
+        if: steps.existing.outputs.exists == 'false'
+      - name: Snapshot, source archive, SBOM, signatures and checksums
+        if: steps.existing.outputs.exists == 'false'
+        run: |
+          set -eu
+          cp internal/vulndb/data/snapshot.json.gz "dist/release/openvapt-${TAG}-vulndb-snapshot.json.gz"
+          git archive --format=tar.gz --prefix="openvapt-${TAG}/" -o "dist/release/openvapt-${TAG}-source.tar.gz" "$COMMIT"
+          go run github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@v1.8.0 app -main cmd/openvapt -output dist/release/sbom.cdx.json
+          go version > dist/release/GO_VERSION.txt
           cd dist/release
           for f in openvapt_linux_*; do cosign sign-blob --yes --bundle "$f.sigstore.json" "$f"; done
-      - name: SBOM
-        run: go run github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@v1.8.0 app -main cmd/openvapt -output dist/release/sbom.cdx.json
-      - uses: actions/attest-build-provenance@v2
+          rm -f SHA256SUMS
+          sha256sum openvapt_linux_* openvapt-*-source.tar.gz openvapt-*-vulndb-snapshot.json.gz sbom.cdx.json GO_VERSION.txt > SHA256SUMS
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+        if: steps.existing.outputs.exists == 'false'
         with:
           subject-path: dist/release/openvapt_linux_*
       - name: Publish release
+        if: steps.existing.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -eu
           case "$TAG" in
           *-alpha.*|*-beta.*|*-rc.*) pre=--prerelease; kind="Pre-release: may be incomplete or wrong, for test machines only, 100% at your own risk." ;;
-          *) pre=""; kind="Stable release." ;;
+          *) pre=""; kind="Stable release, provided free and as is, 100% at your own risk." ;;
           esac
-          { echo "$kind"; echo; echo "Promoted through the OpenVAPT release channels; gate evidence: release/channels.json. Verify before use: SHA256SUMS, Sigstore bundles, provenance and SBOM are attached."; echo; cat CHANGELOG.md; } > notes.md
-          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then target=""; else target="--target $COMMIT"; fi
+          snap=$(sha256sum "dist/release/openvapt-${TAG}-vulndb-snapshot.json.gz" | cut -d' ' -f1)
+          {
+            echo "$kind"; echo
+            echo "Promoted through the OpenVAPT release channels after every gate passed on commit $COMMIT; evidence: release/channels.json."
+            echo "The binaries are that commit plus the vulnerability snapshot built at release time from public OSV and CISA KEV data (sha256 $snap); the full tests and the installer test ran again on exactly these binaries."
+            echo "Verify before use: SHA256SUMS, Sigstore bundles, build provenance and SBOM are attached."
+            echo; cat CHANGELOG.md
+          } > notes.md
           # shellcheck disable=SC2086
-          gh release create "$TAG" dist/release/* --title "OpenVAPT $TAG" --notes-file notes.md $pre $target
+          gh release create "$TAG" dist/release/* --title "OpenVAPT $TAG" --notes-file notes.md --target "$COMMIT" $pre

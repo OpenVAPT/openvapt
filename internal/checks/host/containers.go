@@ -218,7 +218,7 @@ func init() {
 
 	check.Register(&check.Check{
 		ID: "HOST-CTR-004", Title: "Containers Mount the Docker Socket or Host Root", Domain: check.DomainHost,
-		Severity: check.Critical, Category: check.CatAccess, Effort: check.EffortMedium,
+		Severity: check.High, Category: check.CatAccess, Effort: check.EffortMedium,
 		CVSS:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
 		Summary:   "Looks for containers that bind-mount the Docker socket, the host root filesystem or sensitive host paths.",
 		Rationale: "A container with /var/run/docker.sock can control Docker and therefore the host. Mounting / or /etc gives direct write access to host configuration.",

@@ -19,10 +19,14 @@ func init() {
 		id, title string
 		sev       check.Severity
 		kev, age  bool
+		cvss      string
 	}{
-		{"HOST-CVE-001", "Installed OS Packages With Known Vulnerabilities", check.High, false, false},
-		{"HOST-CVE-002", "Known Exploited Vulnerabilities Present", check.Critical, true, false},
-		{"HOST-CVE-003", "Vulnerability Snapshot Outdated or Test Data", check.Low, false, true},
+		// Representative vectors: a vulnerable package usually needs a reachable
+		// code path (AC:H); a known exploited one is used in the wild (AC:L);
+		// an outdated snapshot only hides information.
+		{"HOST-CVE-001", "Installed OS Packages With Known Vulnerabilities", check.High, false, false, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"},
+		{"HOST-CVE-002", "Known Exploited Vulnerabilities Present", check.Critical, true, false, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"},
+		{"HOST-CVE-003", "Vulnerability Snapshot Outdated or Test Data", check.Low, false, true, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N"},
 	} {
 		x := spec
 		check.Register(&check.Check{
@@ -32,7 +36,7 @@ func init() {
 			Severity:  x.sev,
 			Category:  check.CatPatch,
 			Effort:    check.EffortMedium,
-			CVSS:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+			CVSS:      x.cvss,
 			Summary:   "Checks installed packages against an offline vulnerability snapshot.",
 			Rationale: "Known vulnerable package versions can expose a server to documented attacks.",
 			Detection: "Reads installed package versions and matches OSV ecosystem ranges; the snapshot date and fixture status are reported.",

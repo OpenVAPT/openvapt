@@ -140,7 +140,7 @@ func init() {
 		ID:        "HOST-FS-004",
 		Title:     "Unexpected SUID or SGID Programs",
 		Domain:    check.DomainHost,
-		Severity:  check.Medium,
+		Severity:  check.High,
 		CVSS:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Looks for set-user-ID or set-group-ID programs in places where packages do not normally install them.",
 		Rationale: "A SUID program runs with its owner's rights (usually root). One placed in /tmp, /home, /var/www or /opt is a common persistence and privilege-escalation trick.",

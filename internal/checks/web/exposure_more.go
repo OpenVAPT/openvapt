@@ -60,7 +60,7 @@ func init() {
 		},
 		exposureRule{
 			id: "WEB-EXP-009", title: "Dependency Manifests Exposed", sev: check.Low, cat: check.CatExposure, effort: check.EffortLow,
-			cvss:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+			cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 			summary:   "Checks whether package manifests and lock files are downloadable.",
 			rationale: "Lock files list exact library versions, giving attackers a ready list to match against public vulnerabilities, and often reveal internal package names.",
 			detection: "Requests /composer.json, /composer.lock, /package.json, /package-lock.json, /yarn.lock and /Gemfile.lock; a non-HTML 200 response with the file's characteristic structure confirms exposure.",
@@ -73,7 +73,7 @@ func init() {
 		},
 		exposureRule{
 			id: "WEB-EXP-010", title: "Default Web Server Page Served", sev: check.Low, cat: check.CatExposure, effort: check.EffortLow,
-			cvss:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+			cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 			summary:   "Checks whether a site shows the web server's default installation page.",
 			rationale: "Default pages reveal the server software and suggest an unmaintained or forgotten virtual host, which attackers prioritise.",
 			detection: "Inspects each site's home page for the default page markers of Apache (It works!, Apache2 Default Page), nginx (Welcome to nginx!), LiteSpeed and IIS.",
@@ -118,7 +118,7 @@ func init() {
 		},
 		exposureRule{
 			id: "WEB-CMS-003", title: "WordPress User Accounts Enumerable", sev: check.Low, cat: check.CatExposure, effort: check.EffortLow,
-			cvss:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+			cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 			summary:   "Checks whether the WordPress REST API lists user accounts to anonymous visitors.",
 			rationale: "A list of login names halves the work of password guessing and phishing against administrators.",
 			detection: "Requests /wp-json/wp/v2/users and fails when it returns a JSON array with user slugs. No login is attempted.",

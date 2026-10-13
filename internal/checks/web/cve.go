@@ -18,7 +18,7 @@ func init() {
 		Severity:  check.High,
 		Category:  check.CatPatch,
 		Effort:    check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Matches local web library versions against offline OSV advisories.",
 		Rationale: "Unpatched web libraries can expose users and server data to known vulnerabilities.",
 		Detection: "Reads lockfiles, WordPress version files and jQuery headers under configured document roots.",
