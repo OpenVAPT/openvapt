@@ -16,7 +16,7 @@ All code, tests, documentation, website content, course material and legal draft
 
 | Component | Version | Licence | Source |
 |---|---|---|---|
-| Go standard library and runtime | Built with Go 1.26.x in CI and releases (Go 1.27.1 used for local development); minimum language version 1.22 (`go.mod`) | BSD 3-Clause | https://go.dev/ , licence text in THIRD_PARTY_NOTICES.md |
+| Go standard library and runtime | Built with Go 1.26.9 in CI and releases (pinned by the `toolchain` line in `go.mod`; Go 1.27.1 used for local development); minimum Go version 1.26.0 (`go.mod`) | BSD 3-Clause | https://go.dev/ , licence text in THIRD_PARTY_NOTICES.md |
 
 No third-party Go modules are used (`go.mod` has no `require` entries).
 

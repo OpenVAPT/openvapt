@@ -33,7 +33,7 @@ Website: https://openvapt.com (generated from this repository; every check page 
 
 ### Build From Source
 
-**Building from source is the recommended, most transparent way**: you run exactly the code you can read, and it needs nothing but Go (1.26 or newer recommended; 1.22 minimum).
+**Building from source is the recommended, most transparent way**: you run exactly the code you can read, and it needs nothing but Go (1.26 or newer; `go.mod` pins the 1.26.9 toolchain, which newer Go downloads automatically).
 
 ```bash
 git clone https://github.com/OpenVAPT/openvapt.git && cd openvapt
