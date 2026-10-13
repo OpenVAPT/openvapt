@@ -3,7 +3,6 @@ package network
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/openvapt/openvapt/internal/check"
@@ -109,43 +108,74 @@ func registerMailChecks() {
 	})
 }
 
-// adminPorts are administrative, orchestration, monitoring and remote
-// desktop services (vendor documentation and the IANA registry).
-var adminPorts = map[int]string{2375: "Docker API without TLS", 2376: "Docker API", 6443: "Kubernetes API", 10250: "Kubelet API", 2379: "etcd client API", 8500: "Consul HTTP API", 9100: "Prometheus Node Exporter", 15672: "RabbitMQ Management", 10000: "Webmin", 2083: "cPanel", 2087: "WHM", 5900: "VNC", 3389: "RDP", 161: "SNMP"}
+// controlPorts are control planes and remote desktops: reaching one of them
+// from the network means administrative control of the host or cluster
+// (vendor documentation and the IANA registry). SNMP is not here: it is a
+// cleartext protocol and belongs to NET-SVC-001 only, so one socket never
+// yields more than one finding per check family.
+var controlPorts = map[int]string{2375: "Docker API without TLS", 6443: "Kubernetes API", 10250: "Kubelet API", 2379: "etcd client API", 5900: "VNC", 3389: "RDP"}
+
+// managementPorts are management panels, monitoring exporters and service
+// discovery APIs: sensitive telemetry and configuration, usually behind their
+// own authentication, so exposure is Medium rather than Critical.
+var managementPorts = map[int]string{2376: "Docker API (TLS)", 8500: "Consul HTTP API", 9100: "Prometheus Node Exporter", 15672: "RabbitMQ Management", 10000: "Webmin", 2083: "cPanel", 2087: "WHM"}
 
 func registerExposureChecks() {
-	ports := adminPorts
 	check.Register(&check.Check{
 		ID:        "NET-SVC-002",
-		Title:     "Administrative Service Ports Network-Reachable",
+		Title:     "Control Plane or Remote Desktop Ports Network-Reachable",
 		Domain:    check.DomainNetwork,
 		Severity:  check.Critical,
 		Category:  check.CatNetwork,
 		Effort:    check.EffortMedium,
 		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
-		Summary:   "Administrative, orchestration, monitoring, or remote desktop ports listen on network-reachable addresses.",
-		Rationale: "These services expose privileged control planes or sensitive telemetry and should not be reachable from untrusted networks.",
-		Detection: "Parses local TCP and UDP socket tables and matches public listeners against vendor and IANA assigned service ports. It sends no packets.",
-		Fix:       "Bind management services to loopback or a dedicated management address, require strong authentication and TLS, and filter access to approved source networks.",
+		Summary:   "Docker API, Kubernetes API, kubelet, etcd, VNC or RDP listen on network-reachable addresses.",
+		Rationale: "These services hand out administrative control of the host or the cluster. The unauthenticated Docker API and etcd give code execution or every cluster secret to whoever connects; RDP and VNC are the most attacked remote access services.",
+		Detection: "Parses local TCP and UDP socket tables and matches listeners bound to a non-loopback address against the default ports of these control planes and remote desktops. Severity follows the service identity: management panels and exporters are rated separately by NET-SVC-004. The binding (all interfaces, private or public address) is recorded as evidence. No packets are sent.",
+		Fix:       "Bind control planes to loopback or a dedicated management address, require mutual TLS or strong authentication, and filter access to approved source networks or a VPN.",
 		Verify:    "Review ss -tulpn and the host firewall from a trusted administrative session.",
-		Refs:      []check.Ref{{Title: "IANA Service Name and Transport Protocol Port Number Registry", URL: "https://www.iana.org/assignments/service-names-port-numbers"}, {Title: "Docker Protect the Daemon Socket", URL: "https://docs.docker.com/engine/security/protect-access/"}, {Title: "Kubernetes Ports and Protocols", URL: "https://kubernetes.io/docs/reference/networking/ports-and-protocols/"}},
+		Refs:      []check.Ref{{Title: "Docker Protect the Daemon Socket", URL: "https://docs.docker.com/engine/security/protect-access/"}, {Title: "Kubernetes Ports and Protocols", URL: "https://kubernetes.io/docs/reference/networking/ports-and-protocols/"}, {Title: "IANA Service Name and Transport Protocol Port Number Registry", URL: "https://www.iana.org/assignments/service-names-port-numbers"}},
 		Standards: check.Standards{CWE: []string{"CWE-284", "CWE-668"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-17", "CM-7", "SC-7"}},
-		Run: func(_ context.Context, s sys.System) []check.Result {
-			ls, err := collect.Listeners(s)
-			if err != nil {
-				return []check.Result{check.IncompleteR("/proc/net", "Socket tables were unreadable or partial")}
+		Run:       portListRun(controlPorts, "Control plane or remote desktop ports are network-reachable", "No control plane or remote desktop port is network-reachable"),
+	})
+	check.Register(&check.Check{
+		ID:        "NET-SVC-004",
+		Title:     "Management Panel or Monitoring Ports Network-Reachable",
+		Domain:    check.DomainNetwork,
+		Severity:  check.Medium,
+		Category:  check.CatNetwork,
+		Effort:    check.EffortLow,
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+		Summary:   "Webmin, cPanel, WHM, RabbitMQ Management, Consul, the Docker API with TLS or the Prometheus node exporter listen on network-reachable addresses.",
+		Rationale: "Management panels and exporters publish host metrics, service configuration and often a login form. They are a reconnaissance gift and a password guessing target, but they sit behind their own authentication or TLS, so the risk is lower than an open control plane.",
+		Detection: "Parses local TCP and UDP socket tables and matches listeners bound to a non-loopback address against the default ports of these management panels, exporters and discovery APIs. The binding (all interfaces, private or public address) is recorded as evidence. No packets are sent.",
+		Fix:       "Bind the panel or exporter to 127.0.0.1 or a management address, put it behind a reverse proxy with authentication, or restrict the port to monitoring hosts in the firewall.",
+		Verify:    "ss -tulpn shows these ports on 127.0.0.1, ::1 or a management address only.",
+		Refs:      []check.Ref{{Title: "Prometheus, Security model", URL: "https://prometheus.io/docs/operating/security/"}, {Title: "IANA Service Name and Transport Protocol Port Number Registry", URL: "https://www.iana.org/assignments/service-names-port-numbers"}},
+		Standards: check.Standards{CWE: []string{"CWE-668", "CWE-1188"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-17", "CM-7", "SC-7"}},
+		Run:       portListRun(managementPorts, "Management panel or monitoring ports are network-reachable", "No management panel or monitoring port is network-reachable"),
+	})
+}
+
+// portListRun builds the Run function of a check that reports every
+// network-reachable listener whose port is in ports.
+func portListRun(ports map[int]string, failMsg, passMsg string) func(context.Context, sys.System) []check.Result {
+	return func(_ context.Context, s sys.System) []check.Result {
+		ls, err := collect.Listeners(s)
+		if err != nil {
+			return []check.Result{check.IncompleteR("/proc/net", "Socket tables were unreadable or partial")}
+		}
+		var ev []string
+		for _, l := range ls {
+			if n, ok := ports[l.Port]; ok && l.Public() {
+				ev = append(ev, l.String()+" "+n+", bound to "+exposure(l))
 			}
-			var ev []string
-			for _, l := range ls {
-				if n, ok := ports[l.Port]; ok && l.Public() {
-					ev = append(ev, l.String()+" "+n)
-				}
-			}
-			if len(ev) > 0 {
-				return []check.Result{check.FailR("sockets", "Privileged service ports are network-reachable", ev...)}
-			}
-			return []check.Result{check.PassR("sockets", "No listed administrative ports are network-reachable")}
-		}})
+		}
+		if len(ev) > 0 {
+			return []check.Result{check.FailR("sockets", failMsg, ev...)}
+		}
+		return []check.Result{check.PassR("sockets", passMsg)}
+	}
 }
 
 func matchingLines(t string, needles ...string) []string {
@@ -166,5 +196,3 @@ func matchingLines(t string, needles ...string) []string {
 	}
 	return out
 }
-
-var _ = fmt.Sprint
