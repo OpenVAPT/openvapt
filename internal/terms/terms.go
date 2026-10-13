@@ -6,10 +6,10 @@
 package terms
 
 // Version changes whenever the acknowledgements change.
-const Version = "1.4 (2026-10-13)"
+const Version = "1.5 (2026-10-13)"
 
 // Tagline is the one-line positioning used in headers and banners.
-const Tagline = "Academic. Non-commercial. Built by AI agents. Open, source-available code. Free to download and use, for your own personal or business use, 100% at your own risk."
+const Tagline = "Academic. Non-commercial. Built by AI Cybersecurity Engineers. Open, source-available code. Free to download and use, for your own personal or business use, 100% at your own risk."
 
 // Pillar is one part of the positioning, shown as a card on the website.
 type Pillar struct {
@@ -21,7 +21,7 @@ type Pillar struct {
 var Pillars = []Pillar{
 	{"Academic", "Made for learning and open review. It shows, in public, how a vulnerability assessment tool is designed, built and tested."},
 	{"Non-Commercial", "Nothing is sold. The project is not a business, earns no money, accepts no payments or donations, and offers no paid or unpaid services, support or advice."},
-	{"Built by AI Agents", "All code, tests, documentation, the website and the legal drafts were researched, developed and built by AI agents (Claude by Anthropic, and OpenAI Codex), directed and approved by the human project owner. It may contain mistakes and has not been audited by an independent human expert."},
+	{"Built by AI Cybersecurity Engineers", "All code, tests, documentation, the website and the legal drafts were researched, developed and built by AI Cybersecurity Engineers (Claude by Anthropic, and OpenAI Codex), directed and approved by the human project owner. They are AI systems, not people or registered engineers, and provide no professional service. It may contain mistakes and has not been audited by an independent human expert."},
 	{"Open, Source-Available Code", "Every line of code is public on GitHub to read, study, review and improve within the licence. Licensed under the OpenVAPT Source-Available Licence 1.1, it is not \"open source\" in the formal OSI sense, because selling and providing services are not licensed."},
 	{"Free to Download and Use", "Free of charge for anyone: individuals, students, schools and companies."},
 	{"For Your Own Use", "Download it to your own server for personal testing, or use it to test your own company's servers with your company's authorisation. For your own purposes only."},
@@ -42,7 +42,7 @@ var Acknowledgements = []string{
 	"I acknowledge, agree to and accept that I use OpenVAPT 100% at my own risk, and that I alone am responsible for every risk and every consequence, including damage, data loss, downtime, security incidents and legal liability.",
 	"I agree that OpenVAPT is a free gift from people who are not in business, provided as is, without any warranty, and that, to the fullest extent the law allows, the developers and contributors owe me no duty and accept no responsibility or liability of any kind, and I release them from every claim.",
 	"I am solely responsible for complying with all laws that apply to me, including the Computer Crimes Act 1997 and the Cyber Security Act 2024 in Malaysia, and the laws of my own country.",
-	"I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI agents under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.",
+	"I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI Cybersecurity Engineers (AI systems, not people or registered engineers) under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.",
 }
 
 // AcceptPhrase is what a user types to accept the acknowledgements in the CLI.

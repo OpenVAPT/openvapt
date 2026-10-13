@@ -6,7 +6,7 @@ This file lists everything OpenVAPT uses, includes, refers to, applies, integrat
 
 ## 1. Authorship
 
-All code, tests, documentation, website content, course material and legal drafts were researched, developed and built by AI agents under the direction of the project owner. See [AI-DISCLOSURE.md](AI-DISCLOSURE.md) for the exact systems, models, versions and roles:
+All code, tests, documentation, website content, course material and legal drafts were researched, developed and built by AI Cybersecurity Engineers under the direction of the project owner. See [AI-DISCLOSURE.md](AI-DISCLOSURE.md) for the exact systems, models, versions and roles:
 
 - **Claude Opus 5.5** (Anthropic), through **Claude Code**: primary author of everything.
 - **GPT-5.6** (OpenAI, `gpt-5.6-sol`), through **Codex CLI 0.162.1**: independent code review, fixes, network and data-service checks, report redesign.
@@ -50,13 +50,13 @@ Exact versions are also recorded in `site/static/assets/vendor/VERSIONS.txt`, an
 
 | Text | How Used | Source |
 |---|---|---|
-| OpenVAPT Source-Available Licence 1.1 (1.0 before the Teaching terms) | Original text drafted by an AI agent in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
+| OpenVAPT Source-Available Licence 1.1 (1.0 before the Teaching terms) | Original text drafted by an AI Cybersecurity Engineer in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
 | Go BSD 3-Clause licence | Included word for word in THIRD_PARTY_NOTICES.md | https://go.dev/LICENSE |
 | Contributor Covenant 2.1 | Adopted by reference (linked, not copied) | https://www.contributor-covenant.org/version/2/1/code_of_conduct/ |
 | Developer Certificate of Origin 1.1 | Referenced for commit sign-off | https://developercertificate.org/ |
 | Malaysian legislation named in the legal documents | Referred to by name only; no text copied | Computer Crimes Act 1997, Cyber Security Act 2024, Personal Data Protection Act 2010 (as amended 2024), Contracts Act 1950, Consumer Protection Act 1999, Strategic Trade Act 2010, Copyright Act 1987, Communications and Multimedia Act 1998, Electronic Commerce Act 2006 |
 
-The licence, EULA, Disclaimer, Privacy Policy and Acceptable Use Policy are original drafts written by AI agents. They were not copied from any template.
+The licence, EULA, Disclaimer, Privacy Policy and Acceptable Use Policy are original drafts written by AI Cybersecurity Engineers. They were not copied from any template.
 
 ## 6. Standards and Methodologies Applied
 

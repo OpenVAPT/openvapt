@@ -4,10 +4,12 @@ An open academic project that shows, in full and in public, how a vulnerability 
 
 OpenVAPT runs read-only checks on the Linux machine it is installed on (and only that machine) to **identify** weaknesses in the server, its network exposure and its websites, **evaluate** them with CVSS v3.1 ratings, **propose fixes** with cited sources, and **verify** them. It writes a report to your own disk and is designed never to send data anywhere.
 
-> **Academic. Non-commercial. Built by AI agents. Open, source-available code. Free to download and use, for your own personal or business use, 100% at your own risk.**
+> **Academic. Non-commercial. Built by AI Cybersecurity Engineers. Open, source-available code. Free to download and use, for your own personal or business use, 100% at your own risk.**
 > You may download and use OpenVAPT on computers and servers you own or control (or that your employer owns or controls and has authorised you to assess), for your own use. You may **not** sell it and you may **not** provide any service to anyone else with anything from or produced by OpenVAPT (no consulting, no scanning for clients, no hosted service, no reselling reports), paid or unpaid, even with their permission. The project itself is not a business and accepts no payments or donations. It comes as is, with no warranty, and the developers accept no responsibility for anything that happens.
 >
-> **All of OpenVAPT was researched, developed and built by AI agents** (Claude by Anthropic through Claude Code, with code review and fixes by OpenAI Codex), directed and approved by the human project owner. It has not been audited by an independent human security expert. The legal documents were drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; no human lawyer drafted or reviewed them. See [AI-DISCLOSURE.md](AI-DISCLOSURE.md).
+> **All of OpenVAPT was researched, developed and built by AI Cybersecurity Engineers** (Claude by Anthropic through Claude Code, with code review and fixes by OpenAI Codex), directed and approved by the human project owner. It has not been audited by an independent human security expert. The legal documents were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. See [AI-DISCLOSURE.md](AI-DISCLOSURE.md).
+>
+> AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude Code, and OpenAI Codex) acting in a cyber security engineering role. They are not people, not registered or professional engineers, and provide no professional engineering or security service.
 
 > **Pre-release.** Builds on the alpha, beta and release candidate (rc) channels are pre-release: they may be wrong, incomplete or unstable and are used 100% at your own risk. Only stable builds are full releases, and they too come with no warranty.
 
@@ -23,7 +25,7 @@ Before downloading or running OpenVAPT, read, study and understand the [EULA](EU
 6. I acknowledge, agree to and accept that I use OpenVAPT 100% at my own risk, and that I alone am responsible for every risk and every consequence, including damage, data loss, downtime, security incidents and legal liability.
 7. I agree that OpenVAPT is a free gift from people who are not in business, provided as is, without any warranty, and that, to the fullest extent the law allows, the developers and contributors owe me no duty and accept no responsibility or liability of any kind, and I release them from every claim.
 8. I am solely responsible for complying with all laws that apply to me, including the Computer Crimes Act 1997 and the Cyber Security Act 2024 in Malaysia, and the laws of my own country.
-9. I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI agents under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.
+9. I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI Cybersecurity Engineers (AI systems, not people or registered engineers) under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.
 
 Website: https://openvapt.com (generated from this repository; every check page cites its source file and line numbers). Every component, standard, source and AI tool used is credited in [CREDITS.md](CREDITS.md).
 

@@ -4,7 +4,7 @@ Thank you for helping. OpenVAPT is an academic project, so clear explanations ma
 
 ## Ground Rules
 
-- AI agents (Claude, OpenAI Codex and any other) must follow [AGENTS.md](AGENTS.md), the AI agent governance policy.
+- AI Cybersecurity Engineers (Claude, OpenAI Codex and any other) must follow [AGENTS.md](AGENTS.md), the AI Cybersecurity Engineer governance policy.
 - Detection only. No exploit code, payloads, brute force or intrusive techniques will be accepted.
 - This machine only. Never weaken `internal/scope` or the `internal/sys` allow-list.
 - Read-only. Checks may only use the `sys.System` interface.

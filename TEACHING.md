@@ -1,8 +1,8 @@
 # Teaching With OpenVAPT
 
-Version 1.0, effective 2026-10-13. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.1 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
+Version 1.0, effective 2026-10-13. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.1 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
 
-OpenVAPT is academic, non-commercial, source-available code built by AI agents, free to use and used 100% at your own risk. Teachers are welcome to use it. These terms say exactly how.
+OpenVAPT is academic, non-commercial, source-available code built by AI Cybersecurity Engineers, free to use and used 100% at your own risk. Teachers are welcome to use it. These terms say exactly how.
 
 ## 1. Who May Teach With OpenVAPT
 
@@ -27,11 +27,11 @@ Ordinary tuition is fine. A fee for OpenVAPT is not.
 
 You may copy, adapt, shorten, translate and rearrange the OpenVAPT Academy modules, quizzes, worksheets, rubrics, course plans, glossary and documentation into your own slides, handouts, exams and learning management system, for your own students, free of charge. Every copy or adaptation must:
 
-1. Credit the source: "Adapted from the OpenVAPT Academy (openvapt.com), built by AI agents, used under the OpenVAPT Source-Available Licence 1.1."
+1. Credit the source: "Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.1."
 2. Carry this notice: "OpenVAPT is not affiliated with, and is not endorsed by, this institution or any third party named in this material. Pre-release versions may be wrong or unstable. Use at your own risk."
 3. Say clearly where you changed the material.
 
-You may not sell the materials, publish them as a paid product, or present them as approved, certified or endorsed by OpenVAPT. You remain responsible for checking that the material is accurate before you teach it; it was built by AI agents and may contain mistakes.
+You may not sell the materials, publish them as a paid product, or present them as approved, certified or endorsed by OpenVAPT. You remain responsible for checking that the material is accurate before you teach it; it was built by AI Cybersecurity Engineers and may contain mistakes.
 
 ## 3. Where Students May Run OpenVAPT
 

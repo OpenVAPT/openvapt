@@ -1,10 +1,10 @@
 # Licence
 
-Version 2.1, effective 2026-10-13. Drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; no human lawyer drafted or reviewed it. This page summarises the licence; the file `LICENSE` is the legal text and prevails.
+Version 2.1, effective 2026-10-13. Drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. This page summarises the licence; the file `LICENSE` is the legal text and prevails.
 
 ## In Short
 
-OpenVAPT is **academic, non-commercial, open, source-available code built by AI agents, free to download and use, for your own personal or business use, 100% at your own risk.**
+OpenVAPT is **academic, non-commercial, open, source-available code built by AI Cybersecurity Engineers, free to download and use, for your own personal or business use, 100% at your own risk.**
 
 - **Free for anyone** to download, read, study, modify and run, including companies.
 - **Own use only**: download it to your own server for personal testing, or use it to test your own company's servers with your company's authorisation.
@@ -34,10 +34,10 @@ The source code is fully public, for everyone to read and review, and you may mo
 
 The compiled program contains only OpenVAPT's own code and the Go standard library (BSD 3-Clause licence). The website also uses self-hosted copies of AG Grid Community (MIT), Apache ECharts (Apache-2.0), Lucide icons (ISC) and the IBM Plex fonts (SIL Open Font License 1.1). Each component's own licence applies to that component and is listed in `THIRD_PARTY_NOTICES.md`. Every source and tool used is credited in `CREDITS.md`.
 
-## Built by AI Agents, and Copyright
+## Built by AI Cybersecurity Engineers, and Copyright
 
-All of OpenVAPT was researched, developed and built by AI agents under the direction of the project owner (see `AI-DISCLOSURE.md`). Copyright may not exist in some parts built by AI agents under the laws of some countries. The licence applies to the extent that rights exist; the promises in the EULA apply to the whole Software regardless.
+All of OpenVAPT was researched, developed and built by AI Cybersecurity Engineers under the direction of the project owner (see `AI-DISCLOSURE.md`). Copyright may not exist in some parts built by AI Cybersecurity Engineers under the laws of some countries. The licence applies to the extent that rights exist; the promises in the EULA apply to the whole Software regardless.
 
 ## Contributions
 
-By submitting a contribution you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it; you license it to everyone under the OpenVAPT Source-Available Licence 1.1; and you grant the licensor a perpetual licence to relicense it, as set out in section 10 of the licence. You keep your copyright. Disclose in your pull request if an AI agent or other AI system produced any part of your contribution. Feedback and ideas shared in Issues or Discussions may be used freely, without payment or obligation.
+By submitting a contribution you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it; you license it to everyone under the OpenVAPT Source-Available Licence 1.1; and you grant the licensor a perpetual licence to relicense it, as set out in section 10 of the licence. You keep your copyright. Disclose in your pull request if an AI Cybersecurity Engineer or other AI system produced any part of your contribution. Feedback and ideas shared in Issues or Discussions may be used freely, without payment or obligation.

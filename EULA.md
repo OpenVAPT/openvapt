@@ -1,6 +1,6 @@
 # End User Licence Agreement
 
-Version 2.1, effective 2026-10-13. Acknowledgements version 1.4. This Agreement was drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
+Version 2.1, effective 2026-10-13. Acknowledgements version 1.5. This Agreement was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
 
 This End User Licence Agreement ("Agreement") applies to everyone who downloads, builds, installs, copies or uses OpenVAPT, including its source code, compiled programs, documentation and website (together, the "Software"). If you do not agree, do not download or use the Software.
 
@@ -16,6 +16,8 @@ This End User Licence Agreement ("Agreement") applies to everyone who downloads,
 
 **Teaching** has the meaning in the licence and is governed by the Teaching With OpenVAPT terms (TEACHING.md), which form part of this Agreement. Teaching is permitted and is not a service. Teachers and institutions must follow the teacher's checklist in TEACHING.md, may not accept these terms for any student, and are bound by this Agreement, including sections 12 to 15, as users. Every student who downloads or runs the Software must accept this Agreement personally, or through a parent or guardian if under 18.
 
+**AI Cybersecurity Engineers** means AI systems (Claude by Anthropic, through Claude Code, and OpenAI Codex) acting in a cyber security engineering role in building the Software. They are not people, not registered or professional engineers under the Registration of Engineers Act 1967 or any other law, hold no qualification, and provide no professional engineering or security service. The term describes a role, not a title or qualification.
+
 **Commercial Exploitation** means selling, renting, licensing or distributing the Software for payment or any other benefit; including it in a product or service for others; or using the Software, or anything from or produced by it (including its reports, code and course material), to provide any service to anyone other than yourself or your own organisation, whether paid or unpaid. Examples are security consulting, scanning or assessing machines for clients, a hosted or managed service, and selling or supplying reports to others.
 
 **Not a business.** OpenVAPT is not a business. It does not carry on business, trade or commerce, sells nothing, earns nothing, accepts no payments or donations of any kind, and offers nothing to consumers: no goods, no services, no support and no advice. Your permitted Own Use within your own organisation does not make the project a supplier to you or to your organisation. Because the Software is given free of charge, as a gift, and not in the course of any business or trade, we believe it is not a supply of goods or services by a supplier under the Consumer Protection Act 1999, and not a trade description or supply in the course of trade under the Trade Descriptions Act 2011; where any law still implies a guarantee or imposes a liability that cannot be excluded, section 14.4 applies.
@@ -28,7 +30,7 @@ The Software is an academic, non-commercial project made for learning and open r
 
 ## 4. Acknowledgement and Acceptance
 
-OpenVAPT is **academic, non-commercial, open, source-available code built by AI agents, free to download and use, for your own personal or business use, 100% at your own risk**. You may not sell it and you may not use it to provide services.
+OpenVAPT is **academic, non-commercial, open, source-available code built by AI Cybersecurity Engineers, free to download and use, for your own personal or business use, 100% at your own risk**. You may not sell it and you may not use it to provide services.
 
 Before downloading, and again before every scan, you must read, study, understand, acknowledge, agree to and accept each of the following statements. By downloading, building, installing or using the Software you confirm every one of them:
 
@@ -40,9 +42,9 @@ Before downloading, and again before every scan, you must read, study, understan
 6. I acknowledge, agree to and accept that I use OpenVAPT 100% at my own risk, and that I alone am responsible for every risk and every consequence, including damage, data loss, downtime, security incidents and legal liability.
 7. I agree that OpenVAPT is a free gift from people who are not in business, provided as is, without any warranty, and that, to the fullest extent the law allows, the developers and contributors owe me no duty and accept no responsibility or liability of any kind, and I release them from every claim.
 8. I am solely responsible for complying with all laws that apply to me, including the Computer Crimes Act 1997 and the Cyber Security Act 2024 in Malaysia, and the laws of my own country.
-9. I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI agents under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.
+9. I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI Cybersecurity Engineers (AI systems, not people or registered engineers) under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.
 
-These statements are version 1.4 of the acknowledgements. The version shown by `openvapt terms` is the one you accept for that copy of the tool.
+These statements are version 1.5 of the acknowledgements. The version shown by `openvapt terms` is the one you accept for that copy of the tool.
 
 The website asks you to tick each statement before showing the download instructions. Before every scan, the tool shows the statements and asks you to type `I ACCEPT`, unless you run it with the `--accept-terms` option, which is intended for automated use. Using `--accept-terms` means that you, or the person who set up the automation, have read and accept every statement. Neither the website nor the tool stores or sends your answer anywhere.
 
@@ -84,11 +86,11 @@ So that you can decide with full information, this is everything the Software do
 6. It writes a report, which describes weaknesses of your machine, to a folder you choose, readable only by your user account. As a second safeguard, the report is also redacted by pattern matching, which may not catch everything. Protecting and sharing the report is your responsibility.
 7. If you enable signing (the default), it creates a private key on your machine in your user configuration folder (for root, under root's home). Keep it private.
 
-## 9. How OpenVAPT Is Made (Built by AI Agents)
+## 9. How OpenVAPT Is Made (Built by AI Cybersecurity Engineers)
 
-All of the Software, including its design, code, tests, documentation, website, course material and these legal drafts, was **researched, developed and built by AI agents**, directed and approved by the human project owner, who decides what is built and published but has not hand-written the code. The AI systems used are listed in `AI-DISCLOSURE.md`: Claude (by Anthropic, through Claude Code) produced the work, and OpenAI Codex reviewed the code and proposed and implemented fixes. These legal documents were reviewed by Claude acting as the project's legal reviewer (an AI lawyer). **No independent human security expert has audited the code, and no human lawyer has drafted or reviewed these documents.** Work built by AI agents can contain mistakes, including security and legal mistakes. The full source code, tests and history are public so that anyone can review them. Commits made with AI assistance carry a `Co-Authored-By` line.
+All of the Software, including its design, code, tests, documentation, website, course material and these legal drafts, was **researched, developed and built by AI Cybersecurity Engineers**, directed and approved by the human project owner, who decides what is built and published but has not hand-written the code. The AI systems used are listed in `AI-DISCLOSURE.md`: Claude (by Anthropic, through Claude Code) produced the work, and OpenAI Codex reviewed the code and proposed and implemented fixes. These legal documents were reviewed by Claude acting as the project's legal reviewer (an AI lawyer). **No independent human security expert has audited the code, and no human lawyer has drafted or reviewed these documents.** Work built by AI Cybersecurity Engineers can contain mistakes, including security and legal mistakes. The full source code, tests and history are public so that anyone can review them. Commits made with AI assistance carry a `Co-Authored-By` line.
 
-Because the Software was built by AI agents, copyright may not exist in some parts under the laws of some countries. The licence and this Agreement apply to the Software to the extent that copyright and other rights exist in it. Your promises in this Agreement, including the promise not to sell the Software or use it to provide services, apply to all of the Software regardless of whether copyright exists in any particular part.
+Because the Software was built by AI Cybersecurity Engineers, copyright may not exist in some parts under the laws of some countries. The licence and this Agreement apply to the Software to the extent that copyright and other rights exist in it. Your promises in this Agreement, including the promise not to sell the Software or use it to provide services, apply to all of the Software regardless of whether copyright exists in any particular part.
 
 ## 10. Third-Party Components and Sources
 
@@ -147,7 +149,7 @@ You are responsible for complying with all export control, sanctions and trade l
 
 ## 20. Contributions and Feedback
 
-**Contributions.** By submitting a contribution (code, documentation or other material) you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it, and you license it under the OpenVAPT Source-Available Licence 1.1 and grant the licensor the licence to relicense it set out in section 10 of the licence. You keep your copyright. You must disclose in your pull request if an AI agent or other AI system produced any part of your contribution.
+**Contributions.** By submitting a contribution (code, documentation or other material) you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it, and you license it under the OpenVAPT Source-Available Licence 1.1 and grant the licensor the licence to relicense it set out in section 10 of the licence. You keep your copyright. You must disclose in your pull request if an AI Cybersecurity Engineer or other AI system produced any part of your contribution.
 
 **Feedback.** If you share an idea, suggestion or report (for example in a GitHub Issue or Discussion), you agree that we may use it freely, without payment, attribution or any obligation to you.
 
@@ -181,7 +183,7 @@ We may update this Agreement. Each version is dated and kept in the public Git h
 
 ## 28. How This Agreement Was Reviewed
 
-This Agreement was drafted by an AI agent in good faith and reviewed by an AI agent acting as the project's legal reviewer (an AI lawyer). No human lawyer drafted or reviewed it, and it is not approved by any human lawyer. Nothing in it is legal advice to you; if you need legal advice, consult your own qualified lawyer. Its wording may change; every version is dated and kept in the public Git history.
+This Agreement was drafted by an AI Cybersecurity Engineer in good faith and reviewed by a separate AI system acting as the project's legal reviewer (an AI lawyer). No human lawyer drafted or reviewed it, and it is not approved by any human lawyer. Nothing in it is legal advice to you; if you need legal advice, consult your own qualified lawyer. Its wording may change; every version is dated and kept in the public Git history.
 
 ## 29. Whole Agreement and Severability
 

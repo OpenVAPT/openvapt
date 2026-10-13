@@ -1,6 +1,6 @@
 # Acceptable Use Policy
 
-Version 1.5, effective 2026-10-13. Drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; no human lawyer drafted or reviewed it.
+Version 1.5, effective 2026-10-13. Drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it.
 
 OpenVAPT is for academic, learning and Own Use only. It is not a business and must never be used to provide services.
 

@@ -21,7 +21,7 @@ All notable changes are documented here. This project follows Semantic Versionin
 - Relicensed before any release from PolyForm Noncommercial 1.0.0 with an Additional Permission to the self-contained OpenVAPT Source-Available Licence 1.0 (`LicenseRef-OpenVAPT-SAL-1.0`): only Own Use is licensed, and providing any service, paid or unpaid, is not licensed for anyone. ADDITIONAL-PERMISSION.md removed. Free Teaching (simulated lab or the institution's own authorised machines) is licensed and is not a service.
 - Pre-release warning for alpha, beta and rc builds in the licence, EULA, Disclaimer, Acceptable Use Policy, README and website.
 - TEACHING.md 1.0, Teaching With OpenVAPT terms; licence Teaching definition and grant aligned; EULA 2.1, Acceptable Use Policy 1.5, Licence summary 2.1.
-- Terminology: OpenVAPT is described as researched, developed and built by AI agents under human direction.
+- Terminology: OpenVAPT is described as researched, developed and built by AI Cybersecurity Engineers under human direction.
 - EULA 2.0, Disclaimer 1.4, Acceptable Use Policy 1.3, Licence summary 2.0, acknowledgements 1.3: gift framing, no relationship or duty, release of claims, no reliance, read-down liability limit, non-affiliation notice for third-party names, installer risk notice.
 
 ### Coverage Expansion: Services, Firewall Correlation, Application Stacks and CMS

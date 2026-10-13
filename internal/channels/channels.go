@@ -45,7 +45,7 @@ type Info struct {
 
 // Infos describes each channel in order.
 var Infos = []Info{
-	{Alpha, "Alpha", "Contributors and AI agents", "Every change that passes CI. Incomplete and may be wrong; for testing the project itself.", 0},
+	{Alpha, "Alpha", "Contributors and AI Cybersecurity Engineers", "Every change that passes CI. Incomplete and may be wrong; for testing the project itself.", 0},
 	{Beta, "Beta", "Early testers on test machines", "An alpha that passed the full lab, the legal review and at least 7 days without regressions.", 7},
 	{RC, "Release Candidate", "Testers preparing to rely on it", "A beta that is signed, has provenance and an SBOM, installs cleanly, and spent at least 7 days in beta.", 7},
 	{Stable, "Stable", "Everyone, for their own use", "A release candidate that spent at least 14 days without regressions and has the legal reviewer's sign-off for public release.", 14},

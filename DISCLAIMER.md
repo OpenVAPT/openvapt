@@ -1,8 +1,8 @@
 # Disclaimer
 
-Version 1.5, effective 2026-10-13. This disclaimer was drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; no human lawyer drafted or reviewed it (see section 12).
+Version 1.5, effective 2026-10-13. This disclaimer was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it (see section 12).
 
-**In one sentence:** OpenVAPT is academic, non-commercial, open, source-available code built by AI agents, free to download and use for your own personal or business use, which you may not sell or use to provide any service, and which you use 100% at your own risk.
+**In one sentence:** OpenVAPT is academic, non-commercial, open, source-available code built by AI Cybersecurity Engineers, free to download and use for your own personal or business use, which you may not sell or use to provide any service, and which you use 100% at your own risk.
 
 ## 1. Academic, Non-Commercial Project
 
@@ -32,9 +32,9 @@ OpenVAPT is an academic, non-commercial project made for learning. It shows, in 
 
 - **Pre-release builds.** Builds published on the alpha, beta and release candidate (rc) channels are pre-release. They are unfinished, may be wrong, incomplete or unstable, may change or be withdrawn at any time, and are used 100% at your own risk. Only a build published on the stable channel is a full release, and it too is provided as is, without any warranty.
 
-## 5. Built by AI Agents
+## 5. Built by AI Cybersecurity Engineers
 
-In full transparency: **all of OpenVAPT was researched, developed and built by AI agents**, including its design, code, tests, documentation, website, course material and these legal drafts. The human project owner directs the work, makes every decision and approves what is published, but has not hand-written the code. Claude (by Anthropic, used through Claude Code) produced the work; OpenAI Codex reviewed the code and proposed and implemented fixes; Claude also reviewed the legal documents as the project's legal reviewer (an AI lawyer). Details are in `AI-DISCLOSURE.md`. **No independent human security expert has audited the code, and no human lawyer has drafted or reviewed these documents.** Work built by AI agents can contain mistakes, including security and legal mistakes, which is one more reason the code is public for review and why you use it at your own risk. Commits made with AI assistance are marked with a `Co-Authored-By` line. Because it was built by AI agents, copyright may not exist in some parts under the laws of some countries.
+In full transparency: AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude Code, and OpenAI Codex) acting in a cyber security engineering role. They are not people, not registered or professional engineers, and provide no professional engineering or security service. **All of OpenVAPT was researched, developed and built by AI Cybersecurity Engineers**, including its design, code, tests, documentation, website, course material and these legal drafts. The human project owner directs the work, makes every decision and approves what is published, but has not hand-written the code. Claude (by Anthropic, used through Claude Code) produced the work; OpenAI Codex reviewed the code and proposed and implemented fixes; Claude also reviewed the legal documents as the project's legal reviewer (an AI lawyer). Details are in `AI-DISCLOSURE.md`. **No independent human security expert has audited the code, and no human lawyer has drafted or reviewed these documents.** Work built by AI Cybersecurity Engineers can contain mistakes, including security and legal mistakes, which is one more reason the code is public for review and why you use it at your own risk. Commits made with AI assistance are marked with a `Co-Authored-By` line. Because it was built by AI Cybersecurity Engineers, copyright may not exist in some parts under the laws of some countries.
 
 ## 6. Use at Your Own Risk, 100%
 
@@ -62,4 +62,4 @@ OpenVAPT is given free of charge, as a gift, by a project that is not a business
 
 ## 12. How These Documents Were Reviewed
 
-These documents were drafted by an AI agent in good faith and reviewed by an AI agent acting as the project's legal reviewer (an AI lawyer). No human lawyer drafted or reviewed them, and they are not approved by any human lawyer. They are not legal advice to you; if you need legal advice, consult your own qualified lawyer. Their wording may change; every version is dated and kept in the public Git history.
+These documents were drafted by an AI Cybersecurity Engineer in good faith and reviewed by a separate AI system acting as the project's legal reviewer (an AI lawyer). No human lawyer drafted or reviewed them, and they are not approved by any human lawyer. They are not legal advice to you; if you need legal advice, consult your own qualified lawyer. Their wording may change; every version is dated and kept in the public Git history.

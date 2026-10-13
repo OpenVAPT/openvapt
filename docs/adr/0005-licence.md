@@ -8,7 +8,7 @@ The OpenVAPT Source-Available Licence 1.0 (`LicenseRef-OpenVAPT-SAL-1.0`), a sel
 Amendment (2026-10-13): version 1.1 (`LicenseRef-OpenVAPT-SAL-1.1`) adds the Teaching With OpenVAPT terms. Version 1.0 remains the licence of release v0.1.0-alpha.1. See LICENSE section 15.
 
 ## Reason
-PolyForm Noncommercial on its own permits unpaid noncommercial services by people who never accepted the EULA. Placing the services ban in the licence itself closes that gap. The change was made before any release, when all code had been built by AI agents for the owner, so relicensing cost nothing.
+PolyForm Noncommercial on its own permits unpaid noncommercial services by people who never accepted the EULA. Placing the services ban in the licence itself closes that gap. The change was made before any release, when all code had been built by AI Cybersecurity Engineers for the owner, so relicensing cost nothing.
 
 ## Consequences
 The code is fully public but the project is described as source-available rather than OSI open source. Contributors grant the licensor a licence to relicense, so the project can later move to a company limited by guarantee. Permissive dependencies remain compatible.
