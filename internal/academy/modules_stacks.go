@@ -6,6 +6,7 @@ var stacks = []Module{
 	{
 		ID: "P11", Title: "Service Hardening With systemd", Level: Practitioner, Minutes: 25,
 		Summary: "How systemd starts services, why most services should not run as root, and how a few unit settings contain a compromised application.",
+		Prereqs: []string{"P1"},
 		Objectives: []string{
 			"Read a systemd unit file and its drop-ins and know which settings win.",
 			"Explain why a service's user, program location and unit file permissions decide what an attacker gains.",
@@ -25,6 +26,9 @@ var stacks = []Module{
 			{"Secrets Do Not Belong in Unit Files", []string{
 				"Unit files are readable by every user, and systemctl show prints a service's Environment= values to anyone. Passwords and tokens belong in a root-only EnvironmentFile= or, better, in systemd credentials (LoadCredential=), which only the service can read.",
 			}},
+			{"In Summary", []string{
+				"A systemd unit can run a service as a dedicated user inside a sandbox. Each hardening option removes something an attacker could abuse.",
+			}},
 		},
 		KeyTerms:      []string{"Service Unit", "Sandboxing", "Least Privilege", "Privilege Escalation"},
 		RelatedChecks: []string{"HOST-SYSD-"},
@@ -43,6 +47,7 @@ var stacks = []Module{
 	{
 		ID: "P12", Title: "Firewall Policy Versus What Is Listening", Level: Practitioner, Minutes: 20,
 		Summary: "Why \"the firewall is on\" is not the same as \"the service is protected\", and how to compare firewall rules with the sockets that are really open.",
+		Prereqs: []string{"P3"},
 		Objectives: []string{
 			"Read incoming allow rules from ufw, nftables and iptables.",
 			"Correlate firewall rules with listening sockets to find real exposure and stale rules.",
@@ -58,6 +63,9 @@ var stacks = []Module{
 			}},
 			{"Docker and the Firewall", []string{
 				"Docker writes its own iptables rules for published ports (-p 8080:80) into the nat table and the DOCKER chain, which traffic reaches before ufw's rules or the INPUT policy. A container port can therefore be open to the world while ufw reports it denied. Publish on 127.0.0.1 behind a reverse proxy, or filter in the DOCKER-USER chain, which Docker evaluates first and never overwrites.",
+			}},
+			{"In Summary", []string{
+				"A firewall rule only matters if it matches what is listening. Compare the two lists. Remove stale rules and close unexpected ports.",
 			}},
 		},
 		KeyTerms:      []string{"Firewall", "Default Deny", "Attack Surface", "Stale Rule"},
@@ -77,6 +85,7 @@ var stacks = []Module{
 	{
 		ID: "P13", Title: "Application Servers: Tomcat, Node.js and Python", Level: Practitioner, Minutes: 30,
 		Summary: "The recurring mistakes when Java, JavaScript and Python applications go to production: exposed app ports, debuggers, development servers, default credentials and unsupported runtimes.",
+		Prereqs: []string{"P6"},
 		Objectives: []string{
 			"Explain why application servers belong behind a reverse proxy, bound to loopback.",
 			"Recognise debuggers and development servers that give remote code execution.",
@@ -94,6 +103,9 @@ var stacks = []Module{
 			}},
 			{"Runtimes Age Out", []string{
 				"Node.js release lines reach end of life on a published schedule; after that there are no security releases. Prefer even-numbered LTS lines and plan upgrades before the date, the same way as for the operating system and PHP.",
+			}},
+			{"In Summary", []string{
+				"Application servers belong behind a reverse proxy on loopback. Remove default apps and credentials. Turn off debug mode and keep the runtime supported.",
 			}},
 		},
 		KeyTerms:      []string{"Reverse Proxy", "Debug Mode", "Default Credentials", "End of Life"},
@@ -113,6 +125,7 @@ var stacks = []Module{
 	{
 		ID: "P14", Title: "CMS Hardening in Depth: WordPress, Joomla and Drupal", Level: Practitioner, Minutes: 25,
 		Summary: "Beyond version banners: protecting CMS configuration files, switching off debug output and in-browser code editing, and keeping security updates flowing.",
+		Prereqs: []string{"P6"},
 		Objectives: []string{
 			"Set safe permissions on wp-config.php, configuration.php and settings.php.",
 			"Turn off debug output and the WordPress file editor in production.",
@@ -127,6 +140,9 @@ var stacks = []Module{
 			}},
 			{"Updates and Fingerprints", []string{
 				"WordPress delivers security fixes as automatic minor updates; switching them off leaves the site exposed until someone updates by hand. Version files such as Joomla's joomla.xml manifest and Drupal's CHANGELOG.txt tell attackers exactly which advisories apply. Removing the fingerprint is not a substitute for patching, but there is no reason to publish it.",
+			}},
+			{"In Summary", []string{
+				"A CMS is attacked through its admin pages, plugins and exposed files. Hide versions, lock down file permissions, remove installers and keep everything updated.",
 			}},
 		},
 		KeyTerms:      []string{"Hardening", "Fingerprinting", "Debug Mode", "Patch Management"},

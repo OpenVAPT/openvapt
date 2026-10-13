@@ -4,12 +4,13 @@ var refNIST115 = Ref{"NIST SP 800-115, Technical Guide to Information Security T
 var refCVSS = Ref{"FIRST, CVSS v3.1 Specification Document", "https://www.first.org/cvss/v3.1/specification-document"}
 
 // Modules is the whole course in teaching order.
-var Modules = append(append(append(foundation, practitioner...), stacks...), applied...)
+var Modules = append(append(append(append(foundation, practitioner...), stacks...), accessLogging...), applied...)
 
 var foundation = []Module{
 	{
 		ID: "F1", Title: "Security Basics", Level: Foundation, Minutes: 15,
 		Summary: "The core ideas every later lesson builds on: what we protect, what threatens it, and how risk is reasoned about.",
+		Prereqs: []string{},
 		Objectives: []string{
 			"Explain confidentiality, integrity and availability with server examples.",
 			"Distinguish an asset, a threat, a vulnerability and a risk.",
@@ -27,6 +28,9 @@ var foundation = []Module{
 			{"Least Privilege and Defence in Depth", []string{
 				"Least privilege means every account, process and service gets only the access it needs. Defence in depth means layering protections so one failure is not fatal: a firewall, then a service bound to 127.0.0.1, then authentication, then logging.",
 				"Most OpenVAPT checks test one layer. Reading a report as a set of layers, not isolated items, is the habit of a good assessor.",
+			}},
+			{"In Summary", []string{
+				"Security protects the confidentiality, integrity and availability of assets. Risk appears when a threat meets a vulnerability. Least privilege, defence in depth and a small attack surface reduce it.",
 			}},
 		},
 		KeyTerms:      []string{"CIA Triad", "Asset", "Threat", "Vulnerability", "Risk", "Least Privilege", "Defence in Depth", "Attack Surface"},
@@ -46,6 +50,7 @@ var foundation = []Module{
 	{
 		ID: "F2", Title: "What VAPT Is, and Doing It Legally", Level: Foundation, Minutes: 20,
 		Summary: "How vulnerability assessment and penetration testing differ, how professional assessments are structured, and why authorisation is the first rule.",
+		Prereqs: []string{"F1"},
 		Objectives: []string{
 			"Explain the difference between vulnerability assessment and penetration testing.",
 			"Describe the phases of NIST SP 800-115 and where OpenVAPT stops.",
@@ -53,7 +58,7 @@ var foundation = []Module{
 		},
 		Sections: []Section{
 			{"VA Versus PT", []string{
-				"A vulnerability assessment (VA) looks for known weaknesses and rates them, without exploiting anything. A penetration test (PT) is performed by skilled, authorised testers who try to exploit weaknesses to prove real impact and find chains a scanner cannot see.",
+				"A vulnerability assessment (VA) looks for known weaknesses and rates them, without exploiting anything. A penetration test (PT) is performed by skilled, authorised testers. They try to exploit weaknesses to prove real impact and to find chains a scanner cannot see.",
 				"VAPT combines both. OpenVAPT teaches and performs only the VA part, automatically, on one machine. That is a deliberate design choice, not a missing feature.",
 			}},
 			{"Methodologies", []string{
@@ -61,8 +66,11 @@ var foundation = []Module{
 				"OpenVAPT implements planning (scope fixed in code), discovery (read-only collection), analysis (checks) and reporting. The attack phase is absent by design.",
 			}},
 			{"Authorisation, Scope and the Law", []string{
-				"Testing a system without permission can be a crime. In Malaysia, unauthorised access to computer material is an offence under the Computer Crimes Act 1997, and the Cyber Security Act 2024 regulates providers of cyber security services. Other countries have similar laws.",
+				"Testing a system without permission can be a crime. In Malaysia, unauthorised access to computer material is an offence under the Computer Crimes Act 1997. The Cyber Security Act 2024 regulates providers of cyber security services. Other countries have similar laws.",
 				"Professional testers work only with written authorisation that defines scope, timing and rules of engagement. OpenVAPT enforces the strictest possible scope in code: the machine it runs on and nothing else. Even so, you need the right to run it on that machine.",
+			}},
+			{"In Summary", []string{
+				"A vulnerability assessment finds and rates weaknesses. A penetration test also exploits them. Both need written authorisation and a clear scope. OpenVAPT assesses only the machine it runs on.",
 			}},
 		},
 		KeyTerms:      []string{"VAPT", "Vulnerability Assessment", "Penetration Testing", "Scope", "Rules of Engagement", "NIST SP 800-115", "False Positive"},
@@ -77,11 +85,12 @@ var foundation = []Module{
 			{"Which NIST SP 800-115 phase does OpenVAPT deliberately leave out?", []string{"Discovery", "Reporting", "Attack"}, 2, "OpenVAPT is detection only; it never attacks."},
 			{"What must exist before testing a system you do not own?", []string{"A fast internet connection", "Written authorisation with a defined scope", "A paid scanner licence"}, 1, "Authorisation and scope come first, always."},
 		},
-		Refs: []Ref{refNIST115, {"OWASP Web Security Testing Guide", "https://owasp.org/projects/web-security-testing-guide"}, {"Penetration Testing Execution Standard", "http://www.pentest-standard.org/index.php/Main_Page"}},
+		Refs: []Ref{refNIST115, {"OWASP Web Security Testing Guide", "https://owasp.org/projects/web-security-testing-guide"}, {"Penetration Testing Execution Standard (PTES) Technical Guidelines", "https://pentest-standard.readthedocs.io/en/latest/"}},
 	},
 	{
 		ID: "F3", Title: "Vulnerabilities, CVE, CWE and CVSS", Level: Foundation, Minutes: 20,
 		Summary: "How vulnerabilities are named, classified and rated, and how to read a severity rating critically.",
+		Prereqs: []string{"F1", "F2"},
 		Objectives: []string{
 			"Explain the difference between a CVE and a CWE.",
 			"Read a CVSS v3.1 vector and explain each metric.",
@@ -99,6 +108,9 @@ var foundation = []Module{
 			{"False Positives and False Negatives", []string{
 				"A false positive is a reported problem that is not real; it wastes time and erodes trust. A false negative is a real problem that is missed; it creates false confidence. Every automated tool has both.",
 				"OpenVAPT's tests run each check against a vulnerable and a hardened simulated server to show that it fires when it should and stays silent when it should not. That still does not prove the absence of real-world errors.",
+			}},
+			{"In Summary", []string{
+				"A CVE names one vulnerability in one product. A CWE names the type of weakness. CVSS rates how severe it is, from 0.0 to 10.0. Any finding can be a false positive, so always check the evidence.",
 			}},
 		},
 		KeyTerms:      []string{"CVE", "CWE", "CVSS", "Severity", "False Positive", "False Negative", "End of Life"},
