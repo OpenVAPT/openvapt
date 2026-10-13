@@ -121,3 +121,38 @@ func orOff(v string) string {
 	}
 	return v
 }
+
+func init() {
+	check.Register(&check.Check{
+		ID: "WEB-PHP-005", Title: "PHP Session Cookies Not Hardened", Domain: check.DomainWeb,
+		Severity: check.Medium, Category: check.CatWebApp, Effort: check.EffortLow,
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:L/A:N",
+		Summary:   "Checks PHP's session settings: HttpOnly and SameSite cookies and strict session id mode.",
+		Rationale: "Session cookies are the keys to logged-in accounts. Without HttpOnly any XSS bug can steal them; without strict mode PHP accepts attacker-chosen session ids (session fixation).",
+		Detection: "Asks the PHP command-line binary for ini_get('session.cookie_httponly'), ini_get('session.use_strict_mode') and ini_get('session.cookie_samesite'). PHP-FPM pools may use a different php.ini; verify those too.",
+		Fix:       "In php.ini set  session.cookie_httponly = 1 ,  session.use_strict_mode = 1 ,  session.cookie_samesite = Lax  and, for HTTPS sites,  session.cookie_secure = 1 , then restart PHP-FPM.",
+		Verify:    "php -r \"echo ini_get('session.cookie_httponly'), ini_get('session.use_strict_mode'), ini_get('session.cookie_samesite');\"",
+		Refs:      []check.Ref{refPHPIni, {Title: "PHP manual, Session security", URL: "https://www.php.net/manual/en/session.security.php"}},
+		Standards: check.Standards{CWE: []string{"CWE-1004", "CWE-384"}, OWASP: []string{"A07:2021"}, ASVS: []string{"3.4.2", "3.2.1"}, WSTG: []string{"WSTG-SESS-02", "WSTG-SESS-03"}},
+		Run: func(ctx context.Context, s sys.System) []check.Result {
+			m, ok := phpIni(ctx, s, "session.cookie_httponly", "session.use_strict_mode", "session.cookie_samesite")
+			if !ok {
+				return []check.Result{check.SkipR("php", "PHP command-line binary not found")}
+			}
+			var bad []string
+			if !on(m["session.cookie_httponly"]) {
+				bad = append(bad, "session.cookie_httponly = "+orOff(m["session.cookie_httponly"]))
+			}
+			if !on(m["session.use_strict_mode"]) {
+				bad = append(bad, "session.use_strict_mode = "+orOff(m["session.use_strict_mode"]))
+			}
+			if strings.TrimSpace(m["session.cookie_samesite"]) == "" {
+				bad = append(bad, "session.cookie_samesite is empty")
+			}
+			if len(bad) > 0 {
+				return []check.Result{check.FailR("php", "PHP session cookies are not hardened", bad...)}
+			}
+			return []check.Result{check.PassR("php", "PHP session cookies are hardened")}
+		},
+	})
+}

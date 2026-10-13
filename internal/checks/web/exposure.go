@@ -36,6 +36,8 @@ func binaryHit(r sys.HTTPResponse) bool { return r.Status == 200 && !HTML(r) && 
 type exposureRule struct {
 	id, title, summary, rationale, detection, fix, verify string
 	sev                                                   check.Severity
+	cat                                                   check.Category // empty for legacy rows (set in check.legacy)
+	effort                                                check.Effort
 	cvss                                                  string
 	refs                                                  []check.Ref
 	std                                                   check.Standards
@@ -124,9 +126,15 @@ var exposureRules = []exposureRule{
 
 func init() {
 	for _, r := range exposureRules {
-		r := r
+		registerExposure(r)
+	}
+}
+
+// registerExposure turns one exposure rule into a registered check.
+func registerExposure(r exposureRule) {
+	{
 		check.Register(&check.Check{
-			ID: r.id, Title: r.title, Domain: check.DomainWeb, Severity: r.sev, CVSS: r.cvss,
+			ID: r.id, Title: r.title, Domain: check.DomainWeb, Severity: r.sev, Category: r.cat, Effort: r.effort, CVSS: r.cvss,
 			Summary: r.summary, Rationale: r.rationale, Detection: r.detection, Fix: r.fix, Verify: r.verify,
 			Refs: r.refs, Standards: r.std,
 			Run: func(ctx context.Context, s sys.System) []check.Result {

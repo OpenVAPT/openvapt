@@ -24,7 +24,7 @@ var practitioner = []Module{
 			}},
 		},
 		KeyTerms:      []string{"End of Life", "Patch Management", "Least Privilege", "SUID", "Sticky Bit", "ASLR", "Hardening"},
-		RelatedChecks: []string{"HOST-OS-", "HOST-PKG-", "HOST-USR-", "HOST-FS-", "HOST-KRN-", "HOST-LOG-", "HOST-TIME-"},
+		RelatedChecks: []string{"HOST-OS-", "HOST-PKG-", "HOST-UPD-", "HOST-FS-", "HOST-KRN-", "HOST-MAC-", "HOST-SVC-", "HOST-LOG-", "HOST-TIME-", "HOST-IDS-"},
 		Lab: []string{
 			"Run: openvapt demo --only HOST- --out p1",
 			"For each failed HOST check, find the line in internal/lab/lab.go that differs between the vulnerable and hardened server.",
@@ -151,7 +151,7 @@ var practitioner = []Module{
 			}},
 		},
 		KeyTerms:      []string{"Content Security Policy", "Cross-Site Scripting", "Clickjacking", "Cookie Flags", "CSRF"},
-		RelatedChecks: []string{"WEB-HDR-002", "WEB-HDR-003", "WEB-HDR-004", "WEB-HDR-005", "WEB-HDR-006", "WEB-CK-"},
+		RelatedChecks: []string{"WEB-HDR-002", "WEB-HDR-003", "WEB-HDR-004", "WEB-HDR-005", "WEB-HDR-006", "WEB-CK-", "WEB-COR-", "WEB-SEC-", "WEB-PHP-005"},
 		Lab: []string{
 			"Run: openvapt demo --only WEB-HDR-,WEB-CK-",
 			"Open your browser's developer tools on any site you own and compare its response headers with the checks.",
@@ -183,7 +183,7 @@ var practitioner = []Module{
 			}},
 		},
 		KeyTerms:      []string{"Information Disclosure", "Security Misconfiguration", "Directory Listing", "Secrets Management"},
-		RelatedChecks: []string{"WEB-EXP-", "WEB-PHP-", "WEB-CMS-", "WEB-HDR-007"},
+		RelatedChecks: []string{"WEB-EXP-", "WEB-DOC-", "WEB-PHP-", "WEB-CMS-", "WEB-HDR-007"},
 		Lab: []string{
 			"Run: openvapt demo --only WEB-EXP-,WEB-PHP-,WEB-CMS- and read how the evidence is redacted.",
 			"Find the bodyHas markers in internal/checks/web/exposure.go and explain how they avoid soft-404 false positives.",
@@ -194,5 +194,40 @@ var practitioner = []Module{
 			{"Why does OpenVAPT require content markers, not just HTTP 200?", []string{"To avoid false positives from sites that return 200 for every path", "To save bandwidth", "Because 200 means error"}, 0, "Soft-404 pages would otherwise trigger every check."},
 		},
 		Refs: []Ref{{"OWASP Top 10 2021, A05 Security Misconfiguration", "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/"}, {"OWASP Secrets Management Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"}},
+	},
+	{
+		ID: "P7", Title: "Identity, Passwords and Privilege", Level: Practitioner, Minutes: 25,
+		Summary: "How accounts, password storage, lockout and privilege escalation paths decide who really controls a server.",
+		Objectives: []string{
+			"Explain why password hashing algorithms and lengths matter.",
+			"Recognise privilege escalation paths: UID 0 accounts, NOPASSWD sudo and the docker group.",
+			"Explain why legacy trust files and service account shells are risky.",
+		},
+		Sections: []Section{
+			{"Storing Passwords", []string{
+				"Linux stores password hashes in /etc/shadow. Modern algorithms such as yescrypt and SHA-512 crypt are salted and deliberately slow, so a stolen shadow file is expensive to crack. MD5-crypt and DES are fast and obsolete. Old hashes stay until each user changes their password.",
+				"NIST SP 800-63B emphasises length over complexity rules and recommends blocking known-breached passwords. A minimum of 12 characters and an account lockout after repeated failures make online guessing impractical.",
+			}},
+			{"Who Is Really Root", []string{
+				"Root is not a name but user id 0. Extra UID 0 accounts, duplicate UIDs, NOPASSWD sudo rules and membership of the docker group (which can mount the host filesystem) all give root, often without a password.",
+				"Sudo should run commands in a pseudo-terminal and log them to a dedicated file, so privileged actions are recorded and cannot linger.",
+			}},
+			{"Legacy Trust", []string{
+				".rhosts and .shosts files trust whole machines instead of people, and .netrc files hold plain-text passwords. Legacy '+' NIS entries can import unexpected accounts. Service accounts should never have a login shell.",
+			}},
+		},
+		KeyTerms:      []string{"Least Privilege", "Brute Force", "Privilege Escalation", "Password Hashing", "Account Lockout"},
+		RelatedChecks: []string{"HOST-USR-", "HOST-PWD-", "HOST-SUDO-", "HOST-DKR-"},
+		Lab: []string{
+			"Run: openvapt demo --only HOST-USR-,HOST-PWD-,HOST-SUDO-,HOST-DKR- --out p7",
+			"For each finding, explain how an attacker would turn it into root access.",
+			"On your own machine: getent group docker sudo wheel and review who is listed.",
+		},
+		Quiz: []Question{
+			{"Why is yescrypt or SHA-512 crypt preferred over MD5-crypt?", []string{"They are salted and deliberately slow to crack", "They make passwords shorter", "They encrypt the whole disk"}, 0, "Slow, salted hashing makes offline cracking expensive."},
+			{"Why is membership of the docker group dangerous?", []string{"It slows the server", "It allows starting containers that mount the host filesystem, which is root access", "It disables SSH"}, 1, "Docker control is equivalent to root on the host."},
+			{"What does an account lockout policy defend against?", []string{"Password guessing", "Disk failure", "TLS downgrade"}, 0, "Lockout limits repeated guesses."},
+		},
+		Refs: []Ref{{"NIST SP 800-63B, Authentication and Lifecycle Management", "https://pages.nist.gov/800-63-3/sp800-63b.html"}, {"MITRE ATT&CK T1548, Abuse Elevation Control Mechanism", "https://attack.mitre.org/techniques/T1548/"}},
 	},
 }
