@@ -81,7 +81,14 @@ var fileModeRules = []fileModeRule{
 
 func init() {
 	for _, r := range fileModeRules {
-		r := r
+		registerFileMode(r)
+	}
+	registerHardening()
+}
+
+// registerFileMode turns one file permission rule into a registered check.
+func registerFileMode(r fileModeRule) {
+	{
 		check.Register(&check.Check{
 			ID: r.id, Title: r.title, Domain: check.DomainHost, Severity: r.sev, Category: r.cat, Effort: check.EffortLow, CVSS: r.cvss,
 			Summary: r.summary, Rationale: r.rationale,
@@ -117,7 +124,9 @@ func init() {
 			},
 		})
 	}
+}
 
+func registerHardening() {
 	check.Register(&check.Check{
 		ID: "HOST-SSH-011", Title: "SSH Legacy Trust Options Enabled", Domain: check.DomainHost,
 		Severity: check.Medium, Category: check.CatIdentity, Effort: check.EffortLow,

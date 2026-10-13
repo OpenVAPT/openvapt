@@ -264,4 +264,38 @@ var practitioner = []Module{
 		},
 		Refs: []Ref{{"OWASP Database Security Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html"}, {"CISA, DNS Amplification Attacks (Alert TA13-088A)", "https://www.cisa.gov/news-events/alerts/2013/03/29/dns-amplification-attacks"}, {"Redis security", "https://redis.io/docs/latest/operate/oss_and_stack/management/security/"}},
 	},
+	{
+		ID: "P9", Title: "Containers and Kubernetes", Level: Practitioner, Minutes: 25,
+		Summary: "How container isolation really works, the configuration mistakes that break it, and how to protect the Docker and Kubernetes control planes on a host.",
+		Objectives: []string{
+			"Explain why control of the Docker API equals root on the host.",
+			"Recognise privileged containers, host namespaces, dangerous capabilities and sensitive mounts.",
+			"Explain kubelet authentication and why etcd and kubeconfig files must be protected.",
+		},
+		Sections: []Section{
+			{"Containers Are Processes", []string{
+				"A container is a set of ordinary Linux processes isolated by namespaces, cgroups, capabilities and security profiles. Each of those layers can be switched off: --privileged removes almost all of them, host namespaces share the host's processes or network, and added capabilities such as SYS_ADMIN reopen kernel interfaces.",
+				"NIST SP 800-190 recommends running containers with the least privilege, read-only where possible, as non-root users, and from minimal images that are scanned for known vulnerabilities.",
+			}},
+			{"The Docker Control Plane", []string{
+				"Whoever can talk to the Docker API can start a container that mounts the host's root filesystem, which makes the docker group, the docker.sock socket and any TCP listener as powerful as root. Exposing the API over TCP without mutual TLS is a common cause of cryptomining infections. Daemon defaults such as no-new-privileges, user namespace remapping and disabled inter-container communication reduce the damage a compromised container can do.",
+			}},
+			{"Kubernetes on the Node", []string{
+				"Each node runs a kubelet whose API can execute commands in its pods; it must require authentication and use Webhook authorisation, never anonymous access or AlwaysAllow, and its unauthenticated read-only port should be off. etcd stores every cluster object, including Secrets, so its data directory and the cluster's kubeconfig and CA key files must be readable only by root.",
+			}},
+		},
+		KeyTerms:      []string{"Container", "Namespace", "Capability", "Least Privilege", "Privilege Escalation"},
+		RelatedChecks: []string{"HOST-CTR-", "HOST-K8S-", "HOST-DKR-"},
+		Lab: []string{
+			"Run: openvapt demo --only HOST-CTR-,HOST-K8S-,HOST-DKR- --out p9",
+			"For the vulnerable container, list every isolation layer that was switched off and the docker run flag that switched it off.",
+			"On a test host with Docker: docker inspect --format '{{.HostConfig.Privileged}} {{.HostConfig.Binds}}' $(docker ps -q)",
+		},
+		Quiz: []Question{
+			{"Why is mounting /var/run/docker.sock into a container dangerous?", []string{"It slows the container", "The container can control Docker and therefore the host", "It disables logging"}, 1, "The Docker API is equivalent to root on the host."},
+			{"What does --privileged do?", []string{"Runs the container faster", "Removes most isolation, giving the container nearly full host access", "Encrypts the container"}, 1, "Privileged containers have almost no isolation."},
+			{"Which kubelet setting is safe?", []string{"authorization mode AlwaysAllow", "anonymous authentication enabled", "authorization mode Webhook with anonymous access disabled"}, 2, "Webhook authorisation and no anonymous access protect the kubelet API."},
+		},
+		Refs: []Ref{{"NIST SP 800-190, Application Container Security Guide", "https://csrc.nist.gov/pubs/sp/800/190/final"}, {"OWASP Docker Security Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html"}, {"Kubernetes, Kubelet authentication and authorization", "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/"}},
+	},
 }
