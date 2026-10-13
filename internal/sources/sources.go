@@ -57,7 +57,7 @@ var Publishers = []Publisher{
 	{"OASIS Open", []string{"docs.oasis-open.org"}, "The SARIF 2.1.0 format is implemented; the specification text is not copied.", ""},
 	{"W3C", []string{"www.w3.org"}, linkOnly, ""},
 	{"IANA", []string{"www.iana.org"}, "Public registry data (port numbers) consulted; cited by link.", ""},
-	{"PTES (Penetration Testing Execution Standard)", []string{"www.pentest-standard.org"}, linkOnly, ""},
+	{"PTES (Penetration Testing Execution Standard)", []string{"www.pentest-standard.org", "pentest-standard.readthedocs.io"}, linkOnly, ""},
 	{"Linux Kernel Documentation", []string{"docs.kernel.org"}, "Kernel documentation is generally distributed under GPL-2.0; individual files may carry other licences. Cited by title and link only.", ""},
 	{"Linux Manual Pages (man7.org, Ubuntu and Debian Manpages)", []string{"man7.org", "manpages.ubuntu.com", "manpages.debian.org"}, "Man pages carry per-page licences. Cited by page name and link only.", ""},
 	{"OpenBSD (OpenSSH Manual Pages)", []string{"man.openbsd.org"}, "Manual pages generally under BSD or ISC style licences. Cited by page name and link only.", ""},

@@ -1,10 +1,45 @@
 // Check catalogue grid (AG Grid Community, self-hosted).
 // Progressive enhancement: the page already contains a plain HTML table, which
 // stays visible if scripts are off. This script stores nothing and sends nothing.
+// On screens narrower than 640 px the static table is kept and the 425 KB grid
+// is never loaded; otherwise the grid script and its two stylesheets are
+// loaded when the catalogue scrolls near the viewport.
 (function () {
   var dataEl = document.getElementById('catalogue-data');
   var host = document.getElementById('grid');
-  if (!dataEl || !host || !window.agGrid) return;
+  if (!dataEl || !host) return;
+  if (!window.matchMedia || !window.matchMedia('(min-width: 640px)').matches) return;
+  var vendor = (document.currentScript && document.currentScript.getAttribute('data-vendor')) || 'assets/vendor/';
+  var loaded = false;
+  function css(name) {
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = vendor + name;
+    document.head.appendChild(l);
+  }
+  function load() {
+    if (loaded) return;
+    loaded = true;
+    css('ag-grid.min.css');
+    css('ag-theme-quartz.min.css');
+    if (window.agGrid) { mount(); return; }
+    var s = document.createElement('script');
+    s.src = vendor + 'ag-grid-community.min.js';
+    s.defer = true;
+    s.onload = mount;
+    document.head.appendChild(s);
+  }
+  var target = document.getElementById('static-table') || host;
+  if (window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (entries) {
+      if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
+    }, { rootMargin: '400px 0px' });
+    io.observe(target);
+  } else {
+    load();
+  }
+  function mount() {
+  if (!window.agGrid) return;
   var rows = JSON.parse(dataEl.textContent);
   var domainName = { host: 'Server', network: 'Network', web: 'Web Apps' };
   var sevRank = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
@@ -61,4 +96,5 @@
   [q, dom, sev, cat].forEach(function (el) { el.addEventListener('input', apply); });
   document.getElementById('static-table').hidden = true;
   host.hidden = false;
+  }
 })();

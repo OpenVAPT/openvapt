@@ -45,7 +45,7 @@ var Courses = []Course{
 		Sessions: []Session{
 			{1, "Foundations, Ethics and Scope", []string{"F1", "F2"}, "Rules of engagement exercise: write the scope and authorisation for an assessment of a school lab machine."},
 			{2, "Vulnerabilities, CVE, CWE and CVSS", []string{"F3", "P10"}, "Score three findings with the CVSS v3.1 calculator and compare with OpenVAPT's vectors."},
-			{3, "Linux Hardening and SSH", []string{"P1", "P2", "P7"}, "Worksheets P1 and P2; practice lab triage of host findings."},
+			{3, "Linux Hardening, SSH, Access Control and Logging", []string{"P1", "P2", "P7", "P15", "P16"}, "Worksheets P1 and P15; practice lab triage of host findings, then ask what the logs would show."},
 			{4, "Network Exposure, Firewalls and Data Services", []string{"P3", "P12", "P8"}, "Map listening services against firewall rules for the practice server (NET-FW-006)."},
 			{5, "TLS and Web Security", []string{"P4", "P5", "P6"}, "Explain each failed web check on the practice server and its fix."},
 			{6, "Services, Application Stacks and CMS", []string{"P11", "P13", "P14", "P9"}, "Write the corrected systemd unit and Tomcat settings for the vulnerable lab."},
@@ -60,8 +60,8 @@ var Courses = []Course{
 			{1, "Security Basics", []string{"F1"}, "Glossary quiz; set up the institution's isolated lab virtual machines."},
 			{2, "VAPT, Ethics and the Law", []string{"F2"}, "Case study discussion on unauthorised access; students accept the acknowledgements personally."},
 			{3, "Vulnerabilities and Scoring", []string{"F3"}, "CVSS scoring exercise."},
-			{4, "Linux Server Hardening", []string{"P1"}, "Practice lab with a personal seed."},
-			{5, "SSH, Identity and Privilege", []string{"P2", "P7"}, "Harden SSH on an isolated institution lab virtual machine the teacher has authorised, and verify with a targeted re-scan."},
+			{4, "Linux Server Hardening, Logging and Time", []string{"P1", "P16"}, "Practice lab with a personal seed; list the findings an investigator would miss without logs."},
+			{5, "SSH, Identity, Privilege and Access Control", []string{"P2", "P7", "P15"}, "Harden SSH on an isolated institution lab virtual machine the teacher has authorised, and verify with a targeted re-scan."},
 			{6, "Network Exposure and Firewall Policy", []string{"P3", "P12"}, "Firewall rule review against listening sockets."},
 			{7, "Mid-Semester Test", []string{"F1", "F2", "F3", "P1", "P2", "P3", "P7", "P12"}, "Printed worksheet questions; teacher answer keys."},
 			{8, "TLS and Certificates", []string{"P4"}, "Inspect the lab's TLS findings and explain each fix."},
@@ -106,6 +106,9 @@ func Worksheet(m *Module, answers bool) string {
 		kind = "Teacher Answer Key"
 	}
 	fmt.Fprintf(&b, "# OpenVAPT Academy %s: %s\n\n**%s** (about %d minutes, %s level)\n\nName: ______________________  Class: __________  Date: __________\n\n", m.ID, m.Title, kind, m.Minutes, m.Level)
+	if len(m.Prereqs) > 0 {
+		fmt.Fprintf(&b, "Read first: %s\n\n", strings.Join(m.Prereqs, ", "))
+	}
 	b.WriteString("## Learning Objectives\n\n")
 	for _, o := range m.Objectives {
 		b.WriteString("- [ ] " + o + "\n")

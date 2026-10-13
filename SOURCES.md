@@ -2,7 +2,7 @@
 
 Generated from the code by `internal/sources` (regenerate with `go test ./internal/sources -update`); do not edit by hand. Every reference that any check or Academy module cites is listed here, grouped by publisher, with the publisher's terms and any credit line those terms ask for. OpenVAPT cites sources by title, identifier and link; it does not copy their text. Use of a source does not imply that its publisher endorses OpenVAPT.
 
-Totals: 170 distinct sources from 33 publishers, cited by 168 checks and 21 Academy modules.
+Totals: 171 distinct sources from 33 publishers, cited by 168 checks and 23 Academy modules.
 
 ## NIST (National Institute of Standards and Technology)
 
@@ -21,9 +21,9 @@ Totals: 170 distinct sources from 33 publishers, cited by 168 checks and 21 Acad
 | [NIST SP 800-40 Rev. 4, Guide to Enterprise Patch Management Planning](https://csrc.nist.gov/pubs/sp/800/40/r4/final) | Academy A2, Academy P1, HOST-PKG-001, HOST-UPD-001, HOST-UPD-002 |
 | [NIST SP 800-41 Rev. 1, Guidelines on Firewalls and Firewall Policy](https://csrc.nist.gov/pubs/sp/800/41/r1/final) | Academy P12, Academy P3, NET-FW-001, NET-FW-003, NET-FW-004, NET-FW-005, NET-FW-006 |
 | [NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations](https://csrc.nist.gov/pubs/sp/800/52/r2/final) | Academy P4, NET-TLS-001, NET-TLS-002, NET-TLS-003, NET-TLS-004 |
-| [NIST SP 800-53 Rev. 5, Security and Privacy Controls](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | HOST-IDS-001, HOST-PWD-004, HOST-TIME-001, HOST-USR-001 |
-| [NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html) | Academy P7, HOST-PWD-001, HOST-PWD-002, HOST-PWD-003, HOST-PWD-005, HOST-SSH-002 |
-| [NIST SP 800-92, Guide to Computer Security Log Management](https://csrc.nist.gov/pubs/sp/800/92/final) | HOST-LOG-001, HOST-LOG-003 |
+| [NIST SP 800-53 Rev. 5, Security and Privacy Controls](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | Academy P15, Academy P16, HOST-IDS-001, HOST-PWD-004, HOST-TIME-001, HOST-USR-001 |
+| [NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html) | Academy P15, Academy P7, HOST-PWD-001, HOST-PWD-002, HOST-PWD-003, HOST-PWD-005, HOST-SSH-002 |
+| [NIST SP 800-92, Guide to Computer Security Log Management](https://csrc.nist.gov/pubs/sp/800/92/final) | Academy P16, HOST-LOG-001, HOST-LOG-003 |
 | [NIST Transitioning Away from SHA-1](https://csrc.nist.gov/News/2022/nist-transitioning-away-from-sha-1-for-all-apps) | NET-TLS-006 |
 | [NVD](https://nvd.nist.gov/) | HOST-CVE-001, HOST-CVE-002, HOST-CVE-003, WEB-CVE-001 |
 | [NVD, CVE-2018-7600](https://nvd.nist.gov/vuln/detail/cve-2018-7600) | WEB-CMS-011 |
@@ -100,6 +100,7 @@ Totals: 170 distinct sources from 33 publishers, cited by 168 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
+| [RFC 5905, Network Time Protocol Version 4](https://www.rfc-editor.org/rfc/rfc5905.html) | Academy P16 |
 | [RFC 6125, Representation and Verification of Domain-Based Application Service Identity](https://www.rfc-editor.org/rfc/rfc6125.html) | NET-TLS-003 |
 | [RFC 6265, HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265.html) | WEB-CK-001 |
 | [RFC 6797, HTTP Strict Transport Security](https://www.rfc-editor.org/rfc/rfc6797.html) | Academy P4, WEB-HDR-001 |
@@ -156,7 +157,7 @@ Totals: 170 distinct sources from 33 publishers, cited by 168 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [Penetration Testing Execution Standard](http://www.pentest-standard.org/index.php/Main_Page) | Academy F2 |
+| [Penetration Testing Execution Standard (PTES) Technical Guidelines](https://pentest-standard.readthedocs.io/en/latest/) | Academy F2 |
 
 ## Linux Kernel Documentation
 
@@ -177,7 +178,7 @@ Totals: 170 distinct sources from 33 publishers, cited by 168 checks and 21 Acad
 | Source | Cited By |
 |---|---|
 | [Linux exports(5)](https://man7.org/linux/man-pages/man5/exports.5.html) | NET-DB-008 |
-| [auditd(8), Linux man-pages](https://man7.org/linux/man-pages/man8/auditd.8.html) | HOST-LOG-002 |
+| [auditd(8), Linux man-pages](https://man7.org/linux/man-pages/man8/auditd.8.html) | Academy P16, HOST-LOG-002 |
 | [chmod(1), Linux man-pages (restricted deletion flag)](https://man7.org/linux/man-pages/man1/chmod.1.html) | HOST-FS-002 |
 | [crontab(5), Linux man-pages](https://man7.org/linux/man-pages/man5/crontab.5.html) | HOST-FS-005 |
 | [crypt(5), libxcrypt, Debian trixie manual pages (hashing methods)](https://manpages.debian.org/trixie/libcrypt-dev/crypt.5.en.html) | HOST-PWD-002 |
@@ -186,7 +187,7 @@ Totals: 170 distinct sources from 33 publishers, cited by 168 checks and 21 Acad
 | [mount(8), Linux man-pages (nodev, nosuid, noexec)](https://man7.org/linux/man-pages/man8/mount.8.html) | HOST-FS-008 |
 | [nologin(8), Linux man-pages](https://man7.org/linux/man-pages/man8/nologin.8.html) | HOST-USR-005 |
 | [nsswitch.conf(5), Linux man-pages (compat mode)](https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html) | HOST-USR-006 |
-| [pam_faillock(8), Linux-PAM](https://man7.org/linux/man-pages/man8/pam_faillock.8.html) | HOST-PWD-004 |
+| [pam_faillock(8), Linux-PAM](https://man7.org/linux/man-pages/man8/pam_faillock.8.html) | Academy P15, HOST-PWD-004 |
 | [passwd(5), Linux man-pages](https://man7.org/linux/man-pages/man5/passwd.5.html) | HOST-USR-001, HOST-USR-004 |
 | [proc_net(5), Linux man-pages](https://man7.org/linux/man-pages/man5/proc_net.5.html) | NET-LSN-001 |
 | [pwquality.conf(5), libpwquality, Debian trixie manual pages](https://manpages.debian.org/trixie/libpwquality-common/pwquality.conf.5.en.html) | HOST-PWD-003 |
@@ -228,7 +229,7 @@ Totals: 170 distinct sources from 33 publishers, cited by 168 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [sudoers(5) manual](https://www.sudo.ws/docs/man/sudoers.man/) | HOST-SUDO-001, HOST-USR-003 |
+| [sudoers(5) manual](https://www.sudo.ws/docs/man/sudoers.man/) | Academy P15, HOST-SUDO-001, HOST-USR-003 |
 
 ## nftables Project
 

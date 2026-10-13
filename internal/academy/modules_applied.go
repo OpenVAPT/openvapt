@@ -4,6 +4,7 @@ var applied = []Module{
 	{
 		ID: "A1", Title: "Running an Assessment", Level: Applied, Minutes: 20,
 		Summary: "Putting theory into practice: plan, preview, scan and triage an assessment of a machine you own.",
+		Prereqs: []string{"F2", "F3"},
 		Objectives: []string{
 			"Plan a safe assessment of your own machine.",
 			"Preview every action before scanning.",
@@ -18,6 +19,9 @@ var applied = []Module{
 			}},
 			{"Triage", []string{
 				"Start with Critical and High findings, then ask for each: is it real (check the evidence), is it reachable in my environment, and what would an attacker gain? Record false positives honestly instead of hiding them.",
+			}},
+			{"In Summary", []string{
+				"Plan, preview with a dry run, then scan. Triage by severity and by what an attacker could actually reach.",
 			}},
 		},
 		KeyTerms:      []string{"Triage", "Dry Run", "Evidence"},
@@ -35,6 +39,7 @@ var applied = []Module{
 	{
 		ID: "A2", Title: "Remediation and Verification", Level: Applied, Minutes: 20,
 		Summary: "Fixing findings safely, proving the fix worked, and tracking progress over time.",
+		Prereqs: []string{"A1"},
 		Objectives: []string{
 			"Apply a fix with change control and a rollback plan.",
 			"Verify a fix with a targeted re-scan.",
@@ -49,6 +54,9 @@ var applied = []Module{
 			}},
 			{"Track", []string{
 				"Keep each report.json and compare with openvapt diff old.json new.json, or scan with --baseline old.json. The diff lists what was fixed, what is new and what is still open.",
+			}},
+			{"In Summary", []string{
+				"Fix the highest risk and the easiest wins first. Change one thing at a time, with a way back. Verify with a targeted re-scan and a diff.",
 			}},
 		},
 		KeyTerms:      []string{"Remediation", "Verification", "Change Management", "Baseline"},
@@ -66,6 +74,7 @@ var applied = []Module{
 	{
 		ID: "A3", Title: "Reporting and Communication", Level: Applied, Minutes: 15,
 		Summary: "What a good assessment report contains, how to read OpenVAPT's report, and how to share results safely.",
+		Prereqs: []string{"A2"},
 		Objectives: []string{
 			"Describe the structure of an assessment report.",
 			"Explain why limitations belong in every report.",
@@ -80,6 +89,9 @@ var applied = []Module{
 			}},
 			{"Sharing Safely", []string{
 				"A report describes weaknesses of a real machine. Share it only with people who need it, review it for remaining secrets first, and sign it (the default) so recipients can confirm it was not edited with openvapt verify.",
+			}},
+			{"In Summary", []string{
+				"A report serves its reader. Lead with what matters, give evidence and say what was not tested. SARIF and signing make it machine readable and tamper evident.",
 			}},
 		},
 		KeyTerms:      []string{"SARIF", "Limitations", "Report Signing"},
@@ -97,6 +109,7 @@ var applied = []Module{
 	{
 		ID: "A4", Title: "Building Your Own Check", Level: Applied, Minutes: 30,
 		Summary: "The engineering view: how a detection is designed, kept read-only, tested against false results and documented.",
+		Prereqs: []string{"A1"},
 		Objectives: []string{
 			"Describe the parts of an OpenVAPT check.",
 			"Write a read-only detection through the System interface.",
@@ -111,6 +124,9 @@ var applied = []Module{
 			}},
 			{"Proving It", []string{
 				"Make the simulated vulnerable server trigger your check and the hardened server pass it, in internal/lab/lab.go. The engine tests fail until both behave. That is how false positives and false negatives are caught before release.",
+			}},
+			{"In Summary", []string{
+				"A check is a small Go file with full documentation and tests. It must fail on the vulnerable lab and pass on the hardened lab.",
 			}},
 		},
 		KeyTerms:      []string{"Detection Logic", "Test Fixture", "False Positive"},
