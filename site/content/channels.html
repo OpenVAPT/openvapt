@@ -33,7 +33,7 @@
 <tbody>
 <tr><td>Most Mature Channel</td><td>{{$c.Highest}}</td></tr>
 <tr><td>Next Stable Version</td><td class="font-mono">{{$c.State.Next}}</td></tr>
-<tr><td>Legal Review Record</td><td>{{if $c.Legal.Version}}{{$c.Legal.Version}}, reviewed {{$c.Legal.Reviewed}} by {{$c.Legal.Reviewer}}; open High legal risks: {{$c.Legal.OpenHighRisks}}{{else}}None recorded{{end}}</td></tr>
+<tr><td>Legal Review Record</td><td>{{if $c.Legal.Version}}{{$c.Legal.Version}}, reviewed {{$c.Legal.Reviewed}} by {{$c.Legal.Reviewer}}; open High legal risks: {{$c.Legal.OpenHighRisks}}; High risks accepted by the owner, not closed: {{len $c.Legal.AcceptedHighRisks}}{{else}}None recorded{{end}}</td></tr>
 </tbody>
 </table>
 </div>

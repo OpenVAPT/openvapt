@@ -1,6 +1,6 @@
 # End User Licence Agreement
 
-Version 2.3, effective 2026-10-13. Acknowledgements version 1.5. This Agreement was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
+Version 2.4, effective 2026-10-14. Acknowledgements version 1.7. This Agreement was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
 
 This End User Licence Agreement ("Agreement") applies to everyone who downloads, builds, installs, copies or uses OpenVAPT, including its source code, compiled programs, documentation and website (together, the "Software"). If you do not agree, do not download or use the Software.
 
@@ -34,7 +34,7 @@ OpenVAPT is **academic, non-commercial, open, source-available code built by AI 
 
 Before downloading, and again before every scan, you must read, study, understand, acknowledge, agree to and accept each of the following statements. By downloading, building, installing or using the Software you confirm every one of them:
 
-1. I have read, studied and understood the End User Licence Agreement, the Disclaimer, the Acceptable Use Policy and the Licence.
+1. I have read, studied and understood the End User Licence Agreement, the Disclaimer, the Acceptable Use Policy, the Licence, the Teaching With OpenVAPT terms and Citing OpenVAPT.
 2. I understand that OpenVAPT is an academic, non-commercial project made for learning, and that it is not a penetration test, an audit, a certification, a service or professional advice.
 3. I will download and use OpenVAPT only for my own use, personal or business, and only on computers and servers that I own or control, or that my employer owns or controls and has authorised me to assess.
 4. I will not sell OpenVAPT, include it in a product, or use it to provide services of any kind to anyone else, paid or unpaid.
@@ -43,8 +43,9 @@ Before downloading, and again before every scan, you must read, study, understan
 7. I agree that OpenVAPT is a free gift from people who are not in business, provided as is, without any warranty, and that, to the fullest extent the law allows, the developers and contributors owe me no duty and accept no responsibility or liability of any kind, and I release them from every claim.
 8. I am solely responsible for complying with all laws that apply to me, including the Computer Crimes Act 1997 and the Cyber Security Act 2024 in Malaysia, and the laws of my own country.
 9. I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI Cybersecurity Engineers (AI systems, not people or registered engineers) under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.
+10. I am at least 18 years old (or the age of majority where I live), or my parent or guardian has read these statements and accepts them for me in their own name; and where I act for an organisation, I am authorised to bind it.
 
-These statements are version 1.5 of the acknowledgements. The version shown by `openvapt terms` is the one you accept for that copy of the tool.
+These statements are version 1.7 of the acknowledgements (version 1.6 changed only the licence version number printed with them; version 1.7 adds statement 10 and names every document in statement 1). The version number also changes when the positioning text printed with the statements changes, for example a new licence version number. The version shown by `openvapt terms` is the one you accept for that copy of the tool.
 
 The website asks you to tick each statement before showing the download instructions. Before every scan, the tool shows the statements and asks you to type `I ACCEPT`, unless you run it with the `--accept-terms` option, which is intended for automated use. Using `--accept-terms` means that you, or the person who set up the automation, have read and accept every statement. Neither the website nor the tool stores or sends your answer anywhere.
 
@@ -60,7 +61,7 @@ The website asks you to tick each statement before showing the download instruct
 
 ## 6. Licence
 
-The Software is licensed to you only under the OpenVAPT Source-Available Licence 1.2 (file `LICENSE`; see the Licence page). In summary:
+The Software is licensed to you only under the OpenVAPT Source-Available Licence 1.3 (file `LICENSE`; see the Licence page). In summary:
 
 1. **Anyone may use it.** Individuals, students, educational institutions, government bodies and companies may download and use the Software free of charge.
 2. **Own Use only.** You may run the Software only for Own Use.
@@ -89,13 +90,13 @@ So that you can decide with full information, this is everything the Software do
 
 ## 9. How OpenVAPT Is Made (Built by AI Cybersecurity Engineers)
 
-All of the Software, including its design, code, tests, documentation, website, course material and these legal drafts, was **researched, developed and built by AI Cybersecurity Engineers**, directed and approved by the human project owner, who decides what is built and published but has not hand-written the code. The AI systems used are listed in `AI-DISCLOSURE.md`: Claude (by Anthropic, through Claude Code) produced the work, and OpenAI Codex reviewed the code and proposed and implemented fixes. These legal documents were reviewed by Claude acting as the project's legal reviewer (an AI lawyer). **No independent human security expert has audited the code, and no human lawyer has drafted or reviewed these documents.** Work built by AI Cybersecurity Engineers can contain mistakes, including security and legal mistakes. The full source code, tests and history are public so that anyone can review them. Commits made with AI assistance carry a `Co-Authored-By` line.
+All of the Software, including its design, code, tests, documentation, website, course material and these legal drafts, was **researched, developed and built by AI Cybersecurity Engineers**, directed and approved by the human project owner, who decides what is built and published but has not hand-written the code. The AI systems used are listed in `AI-DISCLOSURE.md`: Claude (by Anthropic, through Claude Code) produced the work, and OpenAI Codex reviewed the code, proposed and implemented fixes, and built parts of the code to Claude's specification (network, data-service and TLS checks, the report redesign and the vulnerability matching engine), each reviewed by Claude before merging. These legal documents were reviewed by Claude acting as the project's legal reviewer (an AI lawyer). **No independent human security expert has audited the code, and no human lawyer has drafted or reviewed these documents.** Work built by AI Cybersecurity Engineers can contain mistakes, including security and legal mistakes. The full source code, tests and history are public so that anyone can review them. Commits made with AI assistance carry a `Co-Authored-By` line.
 
 Because the Software was built by AI Cybersecurity Engineers, copyright may not exist in some parts under the laws of some countries. The licence and this Agreement apply to the Software to the extent that copyright and other rights exist in it. Your promises in this Agreement, including the promise not to sell the Software or use it to provide services, apply to all of the Software regardless of whether copyright exists in any particular part.
 
 ## 10. Third-Party Components and Sources
 
-The compiled program contains only OpenVAPT's own code and the Go standard library (BSD 3-Clause licence). The website additionally uses self-hosted copies of AG Grid Community (MIT), Apache ECharts (Apache-2.0), Lucide icons (ISC) and the IBM Plex fonts (SIL Open Font License 1.1). Each component's licence applies to that component. Every component, tool, standard and source used or referred to is listed in `CREDITS.md` and `THIRD_PARTY_NOTICES.md`.
+The compiled program contains OpenVAPT's own code, the Go standard library (BSD 3-Clause licence) and, in release builds, an embedded snapshot of public vulnerability advisory data (OSV ecosystem exports and the CISA Known Exploited Vulnerabilities catalogue). The advisory data belongs to its publishers and is used under their terms, listed in `THIRD_PARTY_NOTICES.md`; the snapshot in the source repository is a small test fixture. The website additionally uses self-hosted copies of AG Grid Community (MIT), Apache ECharts (Apache-2.0), Lucide icons (ISC) and the IBM Plex fonts (SIL Open Font License 1.1). Each component's licence applies to that component. Every component, tool, standard and source used or referred to is listed in `CREDITS.md` and `THIRD_PARTY_NOTICES.md`.
 
 **Hosting and the installer.** The source code, releases and the one-command installer (`scripts/install.sh`) are hosted by GitHub, a third party that we do not control. The installer is optional. It is designed to verify each download's checksum, scan nothing unless you pass `--run`, and never accept the terms for you, but running any script downloaded from the internet is your own decision and risk, and the installer is part of the Software for every purpose of this Agreement.
 
@@ -150,7 +151,7 @@ You are responsible for complying with all export control, sanctions and trade l
 
 ## 20. Contributions and Feedback
 
-**Contributions.** By submitting a contribution (code, documentation or other material) you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it, and you license it under the OpenVAPT Source-Available Licence 1.2 and grant the licensor the licence to relicense it set out in section 10 of the licence. You keep your copyright. You must disclose in your pull request if an AI Cybersecurity Engineer or other AI system produced any part of your contribution.
+**Contributions.** By submitting a contribution (code, documentation or other material) you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it, and you license it under the OpenVAPT Source-Available Licence 1.3 and grant the licensor the licence to relicense it set out in section 10 of the licence. You keep your copyright. You must disclose in your pull request if an AI Cybersecurity Engineer or other AI system produced any part of your contribution.
 
 **Feedback.** If you share an idea, suggestion or report (for example in a GitHub Issue or Discussion), you agree that we may use it freely, without payment, attribution or any obligation to you.
 
@@ -180,7 +181,7 @@ Headings are for convenience only and do not affect meaning; "including" and sim
 
 ## 27. Changes
 
-We may update this Agreement. Each version is dated and kept in the public Git history. Version 2.2 (2026-10-13) states plainly who stands behind the project (section 1) and changes no right or obligation. Version 2.3 (2026-10-13) refers to licence 1.2 and summarises its Credit condition and the citation request (section 6.4); the acknowledgements are unchanged. The version in force when you obtain a copy of the Software applies to that copy, and the version shown when you accept in the tool applies to that use.
+We may update this Agreement. Each version is dated and kept in the public Git history. Version 2.2 (2026-10-13) states plainly who stands behind the project (section 1) and changes no right or obligation. Version 2.3 (2026-10-13) refers to licence 1.2 and summarises its Credit condition and the citation request (section 6.4); the acknowledgements are unchanged. Version 2.4 (2026-10-14) corrects the stated acknowledgements version to the one the tool shows, adopts acknowledgements 1.7 (statement 1 names every document that forms this Agreement and statement 10 confirms age, guardian acceptance and authority to bind, matching section 5), refers to licence 1.3, describes OpenAI Codex's role accurately (section 9) and discloses the embedded advisory data (section 10); it changes no right or obligation. The version in force when you obtain a copy of the Software applies to that copy, and the version shown when you accept in the tool applies to that use.
 
 ## 28. How This Agreement Was Reviewed
 

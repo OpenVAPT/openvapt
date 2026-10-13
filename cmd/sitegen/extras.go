@@ -190,9 +190,9 @@ func writeCatalogueJSON(cs []*check.Check) {
 		URL:         pageURL("checks/catalogue.json"),
 		Homepage:    pageURL("checks/index.html"),
 		Repository:  repoURL,
-		Licence:     "LicenseRef-OpenVAPT-SAL-1.2",
+		Licence:     "LicenseRef-OpenVAPT-SAL-1.3",
 		LicenceURL:  pageURL("legal/licence-text.html"),
-		Credit:      "Data from OpenVAPT (openvapt.com), version " + citeVersion() + ", built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.2. Credit is required when you copy or adapt it; see " + pageURL("cite.html") + ".",
+		Credit:      "Data from OpenVAPT (openvapt.com), version " + citeVersion() + ", built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.3. Credit is required when you copy or adapt it; see " + pageURL("cite.html") + ".",
 		Count:       len(cs),
 		Checks:      entries,
 	}

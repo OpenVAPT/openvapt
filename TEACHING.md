@@ -1,6 +1,6 @@
 # Teaching With OpenVAPT
 
-Version 1.2, effective 2026-10-13. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.2 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
+Version 1.3, effective 2026-10-14. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.3 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
 
 OpenVAPT is academic, non-commercial, source-available code built by AI Cybersecurity Engineers, free to use and used 100% at your own risk. Teachers are welcome to use it. These terms say exactly how.
 
@@ -27,7 +27,7 @@ Ordinary tuition is fine. A fee for OpenVAPT is not.
 
 You may copy, adapt, shorten, translate and rearrange the OpenVAPT Academy modules, quizzes, worksheets, rubrics, course plans, glossary and documentation into your own slides, handouts, exams and learning management system, for your own students, free of charge. Every copy or adaptation must:
 
-1. Credit the source: "Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.2."
+1. Credit the source: "Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.3."
 2. Carry this notice: "OpenVAPT is not affiliated with, and is not endorsed by, this institution or any third party named in this material. Pre-release versions may be wrong or unstable. Use at your own risk."
 3. Say clearly where you changed the material.
 
@@ -80,7 +80,7 @@ The teacher and the institution are responsible for how OpenVAPT is used in thei
 
 These terms may be updated. Each version is dated and kept in the public Git history. The version provided with your copy of OpenVAPT applies to that copy.
 
-Version history: 1.0 (2026-10-13) first version. 1.1 (2026-10-13) states that answer keys are public in every release channel and how to set fair graded work (section 5). 1.2 (2026-10-13) refers to licence 1.2 in the credit line and adds section 11 on citing OpenVAPT in students' and teachers' work.
+Version history: 1.0 (2026-10-13) first version. 1.1 (2026-10-13) states that answer keys are public in every release channel and how to set fair graded work (section 5). 1.2 (2026-10-13) refers to licence 1.2 in the credit line and adds section 11 on citing OpenVAPT in students' and teachers' work. 1.3 (2026-10-14) refers to licence 1.3 in the credit line; no teaching term changed.
 
 ## 11. Citing OpenVAPT in Coursework, Theses and Teaching
 

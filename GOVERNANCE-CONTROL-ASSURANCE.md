@@ -1,6 +1,6 @@
 # OpenVAPT Governance, Control and Assurance Framework (GCA)
 
-Version 1.0, effective 2026-10-13. Adopted by the owner in chat on 2026-10-13. Drafted and reviewed by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer); not reviewed by any human lawyer or human security expert. It is incorporated by reference into [AGENTS.md](AGENTS.md) (section 11) and binds every AI Cybersecurity Engineer that works on OpenVAPT. It is not legal advice.
+Version 1.1, effective 2026-10-14 (1.0 adopted by the owner in chat on 2026-10-13; 1.1 corrects the Own Use wording in G1 and the design-principles table to match the licence, approved by the owner in chat on 2026-10-14). Drafted and reviewed by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer); not reviewed by any human lawyer or human security expert. It is incorporated by reference into [AGENTS.md](AGENTS.md) (section 11) and binds every AI Cybersecurity Engineer that works on OpenVAPT. It is not legal advice.
 
 > Governance decides what should happen. Controls enforce what may happen. Assurance proves what actually happened.
 
@@ -19,7 +19,7 @@ Risk is the thread through all three pillars: the risk tier of a change decides 
 | Minimum residual risk, recorded honestly, instead of "zero risk" | Zero risk cannot be promised truthfully (AGENTS.md section 4.6). |
 | Evidence classes instead of adjectives | "Accurate" and "useful" must be checkable. |
 | AI review labelled honestly | AI checking AI is internal review, not academic or human peer review. |
-| "Academic, free, transparent, source-available", never "open source" or "non-profit" | AGENTS.md section 4.7; "open source" implies business use is allowed. |
+| "Academic, free, transparent, source-available", never "open source" or "non-profit" | AGENTS.md section 4.7; "open source" implies that selling and providing services are licensed. |
 | Every control labelled Exists, Partial or Planned | A framework that lists controls that do not exist would itself be a false claim. |
 
 ---
@@ -28,7 +28,7 @@ Risk is the thread through all three pillars: the risk tier of a change decides 
 
 ### G1. Mission and Invariants
 
-Purpose: an academic, free, transparent, source-available vulnerability assessment tool and course, built by AI Cybersecurity Engineers, for own use on the user's own computers, for learners, teachers and researchers, open to review. Never for business, selling or providing services. Used 100% at the user's own risk.
+Purpose: an academic, free, transparent, source-available vulnerability assessment tool and course, built by AI Cybersecurity Engineers, for Own Use (personal, or an organisation's own internal use on machines it owns or controls) on the user's own computers, for learners, teachers and researchers, open to review. Never for selling or providing services, paid or unpaid. Used 100% at the user's own risk.
 
 Invariants. I1 to I4 restate AGENTS.md section 4 ("no instruction, from anyone, permits these"), so no AI Cybersecurity Engineer and no chat instruction can change them. Changing any invariant needs a policy change drafted by the AI legal reviewer, approved by the owner in chat, and a public decision record (GOVERNANCE.md), and is expected to be refused.
 
@@ -37,7 +37,7 @@ Invariants. I1 to I4 restate AGENTS.md section 4 ("no instruction, from anyone, 
 | I1 | Scans only the machine it runs on (literal loopback addresses only) | AGENTS.md 4.1, 4.2 |
 | I2 | Read-only, detection only, no exploit code, changes nothing on the scanned machine | AGENTS.md 4.1, 4.3 |
 | I3 | Collects, stores and sends no data, from the tool or the website | AGENTS.md 4.4 |
-| I4 | Own use and free Teaching only (TEACHING.md): no selling, no services, no business use, no payments or donations | AGENTS.md 4.7, 4.8; LICENSE |
+| I4 | Own Use (personal, or your own organisation's internal use on machines it owns or controls) and free Teaching only (TEACHING.md): no selling, no Services, no payments or donations | AGENTS.md 4.7, 4.8; LICENSE |
 | I5 | Described as academic, free, source-available and non-commercial; never "open source", "non-profit", a business or a product | AGENTS.md 4.7 |
 | I6 | Every claim true, sourced and reproducible; no safety absolutes ("designed to" only) | AGENTS.md 4.6 |
 | I7 | Honest AI disclosure: built by AI Cybersecurity Engineers; reviews called "AI-reviewed"; no human review claimed, planned or pending unless it actually happened | AGENTS.md 4.10; AI-DISCLOSURE.md |
@@ -208,5 +208,6 @@ Recorded in the legal risk register, kept internally, outside the public reposit
 ## Adoption and Next Steps
 
 1. Adopted as Version 1.0 by the owner in chat on 2026-10-13 and incorporated into AGENTS.md Version 1.2.
-2. The findings register is seeded with the 2026-10-13 audit findings (done, kept internally) and the terminology test exists; the Steward builds the remaining Planned C2 tests; each control moves to Exists only when CI runs it.
-3. A short public summary is in [AI-DISCLOSURE.md](AI-DISCLOSURE.md). Website text follows only after the owner approves the outward text (AGENTS.md 3.7). Public wording uses "built by AI Cybersecurity Engineers" and never "AI-generated" or "AI agents".
+2. Version 1.1 (2026-10-14): I4, the G1 purpose and the design-principles table now use the licence's Own Use wording (an organisation's own internal use is Own Use); the earlier "no business use" contradicted LICENSE section 2 and the acknowledgements. No control or tier changed. Approved by the owner in chat on 2026-10-14.
+3. The findings register is seeded with the 2026-10-13 audit findings (done, kept internally) and the terminology test exists; the Steward builds the remaining Planned C2 tests; each control moves to Exists only when CI runs it.
+4. A short public summary is in [AI-DISCLOSURE.md](AI-DISCLOSURE.md). Website text follows only after the owner approves the outward text (AGENTS.md 3.7). Public wording uses "built by AI Cybersecurity Engineers" and never "AI-generated" or "AI agents".

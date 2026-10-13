@@ -18,7 +18,7 @@
 # except the binary, and needs no root unless you choose a system folder.
 # Downloads come from GitHub, a third party. This script is part of OpenVAPT:
 # provided free, as is, with no warranty, and run 100% at your own risk under
-# the EULA and the OpenVAPT Source-Available Licence 1.2 (own use only).
+# the EULA and the OpenVAPT Source-Available Licence 1.3 (own use only).
 #
 # Options:
 #   --channel NAME     stable (default), rc, beta or alpha; pre-releases may be wrong

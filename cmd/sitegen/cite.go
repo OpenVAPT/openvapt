@@ -92,7 +92,7 @@ func bibSoftware(v, y string) string {
   version      = {` + v + `},
   url          = {` + repoURL + `},
   note         = {Built by AI Cybersecurity Engineers. https://openvapt.com},
-  license      = {LicenseRef-OpenVAPT-SAL-1.2}
+  license      = {LicenseRef-OpenVAPT-SAL-1.3}
 }`
 }
 
@@ -169,12 +169,12 @@ func citeStyles() []CiteStyle {
 			box("c-ack", "Acknowledgements Section of a Thesis or Paper", "", "This work used OpenVAPT (version "+v+", https://openvapt.com), an academic vulnerability assessment tool built by AI Cybersecurity Engineers.")}},
 		{"slide", "Slide or Poster", []CiteBox{
 			box("c-slide", "Slide, Poster or Figure Caption", "Add the full reference to your reference list or handout.", "Source: OpenVAPT "+v+", openvapt.com"),
-			box("c-adapted", "Adapted Figure, Table or Text", "", "Adapted from OpenVAPT (openvapt.com), version "+v+", under the OpenVAPT Source-Available Licence 1.2."),
+			box("c-adapted", "Adapted Figure, Table or Text", "", "Adapted from OpenVAPT (openvapt.com), version "+v+", under the OpenVAPT Source-Available Licence 1.3."),
 			box("c-spoken", "Spoken (Video, Talk or Podcast)", "", "This uses OpenVAPT, an academic vulnerability assessment tool from openvapt.com.")}},
 		{"code", "Code Header", []CiteBox{box("c-code", "In Source Code", "Use the comment syntax of your language (# for shell and Python). Remove the word \"Modified.\" only if you changed nothing. Keep every Required Notice: line.",
-			"// Contains code adapted from OpenVAPT ("+r+"), version "+v+",\n// Copyright (c) "+y+" OpenVAPT and contributors, used under the OpenVAPT Source-Available Licence 1.2\n// (LicenseRef-OpenVAPT-SAL-1.2). Modified.")}},
+			"// Contains code adapted from OpenVAPT ("+r+"), version "+v+",\n// Copyright (c) "+y+" OpenVAPT and contributors, used under the OpenVAPT Source-Available Licence 1.3\n// (LicenseRef-OpenVAPT-SAL-1.3). Modified.")}},
 		{"teaching", "Teaching Credit", []CiteBox{box("c-teaching", "Adapted Teaching Material", "Exact wording required by TEACHING.md section 2.",
-			"Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.2.")}},
+			"Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.3.")}},
 	}
 }
 

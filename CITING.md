@@ -1,6 +1,6 @@
 # Citing OpenVAPT
 
-Version 1.0, effective 2026-10-13. This is the canonical guide to crediting and citing OpenVAPT. It was drafted by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. It is not legal advice. The machine-readable version is `CITATION.cff`.
+Version 1.1, effective 2026-10-14 (1.0 was dated 2026-10-13; 1.1 refers to licence 1.3 and changes no guidance). This is the canonical guide to crediting and citing OpenVAPT. It was drafted by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. It is not legal advice. The machine-readable version is `CITATION.cff`.
 
 **Please cite us.** If OpenVAPT, its Academy, its documentation, its checks or its reports helped your work in any way, in a research paper, thesis, dissertation, coursework, assignment, presentation, poster, academic project, teaching material, book, article, blog post or video, please cite OpenVAPT. Copy any format below and fill in the version you used.
 
@@ -8,7 +8,7 @@ Version 1.0, effective 2026-10-13. This is the canonical guide to crediting and 
 
 There are two layers.
 
-**Required (licence condition).** Section 5.4 of the OpenVAPT Source-Available Licence 1.2 (`LICENSE`) requires Credit whenever you copy, quote, share, translate, adapt or present any OpenVAPT Material, in whole or in part, in any medium. OpenVAPT Material means the parts of OpenVAPT protected by copyright: source code, documentation, Academy modules, quizzes, worksheets, rubrics, course plans, glossary, check descriptions, report templates, website text, figures, diagrams and screenshots. Credit must:
+**Required (licence condition).** Section 5.4 of the OpenVAPT Source-Available Licence 1.3 (`LICENSE`) requires Credit whenever you copy, quote, share, translate, adapt or present any OpenVAPT Material, in whole or in part, in any medium. OpenVAPT Material means the parts of OpenVAPT protected by copyright: source code, documentation, Academy modules, quizzes, worksheets, rubrics, course plans, glossary, check descriptions, report templates, website text, figures, diagrams and screenshots. Credit must:
 
 1. name "OpenVAPT";
 2. give https://openvapt.com or https://github.com/OpenVAPT/openvapt;
@@ -104,7 +104,7 @@ OpenVAPT. OpenVAPT: an open academic vulnerability assessment tool [Internet]. V
   version      = {0.1.0-alpha.2},
   url          = {https://github.com/OpenVAPT/openvapt},
   note         = {Built by AI Cybersecurity Engineers. https://openvapt.com},
-  license      = {LicenseRef-OpenVAPT-SAL-1.2}
+  license      = {LicenseRef-OpenVAPT-SAL-1.3}
 }
 ```
 
@@ -224,13 +224,13 @@ Source: OpenVAPT 0.1.0-alpha.2, openvapt.com
 **Adapted figure, table or text**
 
 ```
-Adapted from OpenVAPT (openvapt.com), version 0.1.0-alpha.2, under the OpenVAPT Source-Available Licence 1.2.
+Adapted from OpenVAPT (openvapt.com), version 0.1.0-alpha.2, under the OpenVAPT Source-Available Licence 1.3.
 ```
 
 **Adapted teaching material** (exact wording required by `TEACHING.md` section 2)
 
 ```
-Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.2.
+Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.3.
 ```
 
 **Spoken (video, talk or podcast)**
@@ -249,8 +249,8 @@ This work used OpenVAPT (version 0.1.0-alpha.2, https://openvapt.com), an academ
 
 ```
 // Contains code adapted from OpenVAPT (https://github.com/OpenVAPT/openvapt), version 0.1.0-alpha.2,
-// Copyright (c) 2026 OpenVAPT and contributors, used under the OpenVAPT Source-Available Licence 1.2
-// (LicenseRef-OpenVAPT-SAL-1.2). Modified.
+// Copyright (c) 2026 OpenVAPT and contributors, used under the OpenVAPT Source-Available Licence 1.3
+// (LicenseRef-OpenVAPT-SAL-1.3). Modified.
 ```
 
 Use the comment syntax of your language (`#` for shell and Python). Remove the word "Modified." only if you changed nothing. Copied code must still keep every `Required Notice:` line (licence section 5.2), and copying code is permitted only within the licence (Own Use, contribution, Teaching or free sharing).
