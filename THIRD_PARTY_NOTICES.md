@@ -25,10 +25,14 @@ The openvapt.com website self-hosts these files, vendored by `site/scripts/vendo
 | Package | Used For | Licence |
 |---|---|---|
 | AG Grid Community | Check catalogue data grid | MIT |
-| Apache ECharts | Charts | Apache-2.0 |
-| Lucide (lucide-static) | Icons, inlined as SVG at build time | ISC |
+| Apache ECharts | Charts | Apache-2.0 (see its NOTICE) |
+| ZRender 6.1.0, bundled inside echarts.min.js | ECharts rendering engine | BSD 3-Clause, (c) 2017 Baidu Inc. |
+| d3.js-derived code, bundled inside echarts.min.js | Treemap, tree and force layouts and number utilities | BSD 3-Clause, (c) 2010-2016 Mike Bostock |
+| Lucide (lucide-static) | Icons, inlined as SVG at build time | ISC; icons derived from Feather are also MIT, (c) 2013-present Cole Bemis |
 | IBM Plex Sans and IBM Plex Mono | Typography | SIL Open Font License 1.1 |
-| Tailwind CSS | Build-time CSS generation (not shipped as code) | MIT |
+| Tailwind CSS | Build-time CSS generation; its preflight base styles are embedded in the generated site.css | MIT, (c) Tailwind Labs, Inc. |
 
 The design follows the public design guidance of Ant Design (MIT) and IBM Carbon (Apache-2.0); no code from those libraries is shipped.
 The IBM Plex npm packages contain an install-time telemetry configuration; the build installs with `--ignore-scripts`, so it never runs, and only the font files are copied.
+
+A file-by-file inventory with exact upstream paths, copyright holders and SHA-256 hashes is in CREDITS.md section 3a.

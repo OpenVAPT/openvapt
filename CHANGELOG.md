@@ -4,6 +4,9 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Docs
+- CREDITS.md: file-by-file inventory of every third-party file (upstream path, copyright, licence, SHA-256); cite ZRender, d3.js, Feather and Tailwind preflight, which are bundled inside shipped files; publish their licence texts.
+
 ### Audit and Fixes (Claude, with three independent AI review passes)
 - Severity now always matches the check's own CVSS v3.1 vector: a shared calculator (internal/check/cvss.go, tested against FIRST reference scores) is enforced at registration; 56 overstated or wrong vectors corrected and 12 severities adjusted to their honest scores.
 - Release pipeline: release.yml runs only from promote.yml (no gate bypass by tag push), re-runs the tests and installer test on exactly the shipped binaries, states the embedded snapshot checksum, covers every asset in SHA256SUMS, is safe to re-run, and pins every action to a commit; the record step retries on a moving main and refuses a version that differs from the published one; channel outputs are validated; promotion requires the exact tested commit and the same release cycle.
