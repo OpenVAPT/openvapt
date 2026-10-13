@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -46,7 +47,40 @@ func SSHD(ctx context.Context, s sys.System) (map[string]string, bool) {
 	}
 	cfg := map[string]string{}
 	found := parseSSHFile(ctx, s, "/etc/ssh/sshd_config", cfg, map[string]bool{}, 0)
+	if found {
+		cfg[SSHDSourceKey] = SSHDSourceFile
+	}
 	return cfg, found
+}
+
+// SSHDSourceKey marks where the sshd settings came from. It is only set to
+// SSHDSourceFile when sshd -T was unavailable (typically a non-root scan) and
+// the config files were parsed instead, in which case defaults sshd would
+// apply for unset keywords are not visible.
+const (
+	SSHDSourceKey  = "_source"
+	SSHDSourceFile = "file"
+)
+
+var opensshVersionRe = regexp.MustCompile(`^(?:\d+:)?(\d+)\.(\d+)`)
+
+// OpenSSHVersion reports the installed OpenSSH server version (major, minor)
+// from the package inventory, for example 9.6 from "1:9.6p1-3ubuntu13".
+func OpenSSHVersion(ctx context.Context, s sys.System) (major, minor int, raw string, ok bool) {
+	items, _ := HostInventory(ctx, s)
+	for _, p := range items {
+		if p.Package != "openssh-server" {
+			continue
+		}
+		m := opensshVersionRe.FindStringSubmatch(p.Version)
+		if m == nil {
+			return 0, 0, p.Version, false
+		}
+		major, _ = strconv.Atoi(m[1])
+		minor, _ = strconv.Atoi(m[2])
+		return major, minor, p.Version, true
+	}
+	return 0, 0, "", false
 }
 
 // addFileMatch copies the Match block settings ("match:" and "matchcond:"
