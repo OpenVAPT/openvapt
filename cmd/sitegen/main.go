@@ -49,7 +49,7 @@ const (
 var (
 	outDir      = flag.String("out", "dist/site", "output directory")
 	base        = flag.String("base", "/", "URL path the site is served under, e.g. /beta/")
-	noindex     = flag.Bool("noindex", false, "add noindex to every page (automatic until a signed-off Stable release exists)")
+	noindex     = flag.Bool("noindex", false, "add noindex to every page (automatic until the owner approves the public launch)")
 	unpinned    = flag.Bool("allow-unpinned", false, "build even when no git commit can be resolved (code citations then point at the main branch, not a pinned commit)")
 	commit      string
 	built       = time.Now().UTC()
@@ -62,7 +62,7 @@ type Page struct {
 	Base, Commit, CommitShort, Version string
 	Built                              string
 	NoIndex                            bool   // whole build is noindex (beta, pre-release)
-	NoIndexPage                        bool   // this page alone is noindex (answer keys, 404)
+	NoIndexPage                        bool   // this page alone is noindex (404)
 	Canonical                          string // absolute URL of this page; empty when it has none (404)
 	Root                               string // absolute URL of the site root, siteURL + base, no trailing slash
 	Channel                            string // most mature released channel, or Pre-Release
@@ -296,12 +296,6 @@ func pageURL(path string) string {
 	return root() + "/" + strings.TrimSuffix(path, "index.html")
 }
 
-// isKey reports whether a path is a teacher answer key, which stays out of
-// search engines and the sitemap so students do not find the answers first.
-func isKey(path string) bool {
-	return strings.HasPrefix(path, "academy/key-")
-}
-
 // newLayout parses a fresh copy of the layout (html/template forbids cloning
 // a template after it has executed).
 func newLayout() *template.Template {
@@ -348,8 +342,8 @@ func pageFor(path, title, desc, section string, body template.HTML, data any) Pa
 	p := Page{Title: title, Description: desc, Path: path, Section: section, Base: *base,
 		Commit: commit, CommitShort: commit[:min(12, len(commit))], Version: version.Version,
 		Built: built.Format("2006-01-02"), NoIndex: *noindex, Body: body, Data: data,
-		Channel: siteChannel.Highest, PreRelease: !siteChannel.Public,
-		NoIndexPage: isKey(path) || path == "404.html", Root: root()}
+		Channel: siteChannel.Highest, PreRelease: !siteChannel.Stable,
+		NoIndexPage: path == "404.html", Root: root()}
 	if path != "404.html" {
 		p.Canonical = pageURL(path)
 	}
@@ -754,7 +748,7 @@ func writeSEO(paths []string, cs []*check.Check) {
 	var sm strings.Builder
 	sm.WriteString(`<?xml version="1.0" encoding="UTF-8"?>` + "\n" + `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` + "\n")
 	for _, p := range paths {
-		if p == "404.html" || isKey(p) {
+		if p == "404.html" {
 			continue
 		}
 		fmt.Fprintf(&sm, "  <url><loc>%s/%s</loc><lastmod>%s</lastmod></url>\n", siteURL, strings.TrimSuffix(p, "index.html"), built.Format("2006-01-02"))

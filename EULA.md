@@ -1,6 +1,6 @@
 # End User Licence Agreement
 
-Version 2.1, effective 2026-10-13. Acknowledgements version 1.5. This Agreement was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
+Version 2.2, effective 2026-10-13. Acknowledgements version 1.5. This Agreement was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
 
 This End User Licence Agreement ("Agreement") applies to everyone who downloads, builds, installs, copies or uses OpenVAPT, including its source code, compiled programs, documentation and website (together, the "Software"). If you do not agree, do not download or use the Software.
 
@@ -8,7 +8,7 @@ This End User Licence Agreement ("Agreement") applies to everyone who downloads,
 
 "We", "us" and "the developers" mean OpenVAPT, meaning the individual who owns and runs the project and publishes it under that name, together with every person who has contributed to it. "You" means the individual, and any organisation on whose behalf that individual acts, who downloads or uses the Software.
 
-"OpenVAPT" is the name of the project and the name under which its rights are held and the Software is licensed. It is not a company, partnership, society or any other legal entity. The licensor of the Software is the individual who owns and runs the project and publishes it as OpenVAPT. References to "we" are made by that individual and for the benefit of every contributor.
+"OpenVAPT" is the name of the project and the name under which its rights are held and the Software is licensed. It is not a company, partnership, society or any other legal entity. The licensor of the Software is the individual who owns and runs the project and publishes it as OpenVAPT. References to "we" are made by that individual and for the benefit of every contributor. OpenVAPT is built by AI Cybersecurity Engineers under the direction of that one human owner, who in law is the licensor and bears personally any residual legal risk that is not excluded by this Agreement. The owner's identity is not published.
 
 ## 2. Definitions
 
@@ -179,7 +179,7 @@ Headings are for convenience only and do not affect meaning; "including" and sim
 
 ## 27. Changes
 
-We may update this Agreement. Each version is dated and kept in the public Git history. The version in force when you obtain a copy of the Software applies to that copy, and the version shown when you accept in the tool applies to that use.
+We may update this Agreement. Each version is dated and kept in the public Git history. Version 2.2 (2026-10-13) states plainly who stands behind the project (section 1) and changes no right or obligation. The version in force when you obtain a copy of the Software applies to that copy, and the version shown when you accept in the tool applies to that use.
 
 ## 28. How This Agreement Was Reviewed
 

@@ -18,6 +18,7 @@ import (
 	"errors"
 	"io"
 	"io/fs"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -128,10 +129,9 @@ func IsAllowed(name string, args []string) bool {
 	// connection is made. 192.0.2.1 is a reserved documentation address
 	// (RFC 5737) used only to evaluate Match rules for non-local clients.
 	if name == "sshd" && len(args) == 3 && args[0] == "-T" && args[1] == "-C" {
-		switch args[2] {
-		case "user=root,host=localhost,addr=127.0.0.1", "user=nobody,host=localhost,addr=127.0.0.1", "user=root,host=localhost,addr=192.0.2.1", "user=nobody,host=localhost,addr=192.0.2.1":
-			return true
-		}
+		// The context must be the fixed shape checked by ValidSSHDContext;
+		// callers build it only from validated Match values.
+		return ValidSSHDContext(args[2])
 	}
 	if name == "systemctl" && len(args) == 2 && (args[0] == "is-active" || args[0] == "is-enabled") {
 		return validUnit(args[1])
@@ -155,6 +155,28 @@ func IsAllowed(name string, args []string) bool {
 		}
 	}
 	return false
+}
+
+var sshdUserRe = regexp.MustCompile(`^[a-z_][a-z0-9_-]{0,31}$`)
+
+// ValidSSHDContext reports whether c is a connection context that sshd -T -C
+// may evaluate: exactly "user=<u>,host=localhost,addr=<a>", where u is a
+// plain POSIX-style user name and a is an IPv4 or IPv6 literal in canonical
+// form (no CIDR, zone or port). The value is passed to sshd as one argument
+// with no shell, and sshd only evaluates the configuration; nothing connects.
+func ValidSSHDContext(c string) bool {
+	parts := strings.Split(c, ",")
+	if len(parts) != 3 {
+		return false
+	}
+	u, ok1 := strings.CutPrefix(parts[0], "user=")
+	h, ok2 := strings.CutPrefix(parts[1], "host=")
+	a, ok3 := strings.CutPrefix(parts[2], "addr=")
+	if !ok1 || !ok2 || !ok3 || h != "localhost" || !sshdUserRe.MatchString(u) {
+		return false
+	}
+	ip := net.ParseIP(a)
+	return ip != nil && ip.String() == a
 }
 
 func validUnit(s string) bool {

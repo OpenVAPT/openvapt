@@ -22,10 +22,10 @@
 </div>
 
 <h2>Where OpenVAPT Stands</h2>
-{{if $c.Public}}
+{{if $c.Stable}}
 <div class="alert alert-info" role="note">{{icon "info"}}<span>A Stable release exists and its public release was signed off. Stable is the default for the installer and this website.</span></div>
 {{else}}
-<div class="alert alert-warn" role="note">{{icon "triangle-alert"}}<span>There is no Stable release yet, so this website is hidden from search engines and every build is a pre-release: it may be incomplete or wrong, so use it only on test machines, 100% at your own risk.</span></div>
+<div class="alert alert-warn" role="note">{{icon "triangle-alert"}}<span>There is no Stable release yet. Every build is a pre-release: it may be incomplete or wrong, so use it only on test machines, 100% at your own risk. Alpha, Beta and Release Candidate builds, their gates and their evidence are all public on this page, in the open.</span></div>
 {{end}}
 <div class="table-wrap mt-4">
 <table>

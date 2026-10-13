@@ -113,7 +113,7 @@ func init() {
 			Verify:    "sysctl " + r.key + "  should print " + r.want + ".",
 			Refs:      []check.Ref{r.ref},
 			Standards: check.Standards{CWE: []string{r.cwe}, NIST: sysctlNIST(r.id, r.key), CISTopic: "Kernel parameters: " + r.key},
-			Run: func(_ context.Context, s sys.System) []check.Result {
+			Run: func(ctx context.Context, s sys.System) []check.Result {
 				if combinedSysctl[r.id] != nil {
 					return runCombinedSysctl(s, r.id, r.key, r.want)
 				}
@@ -128,6 +128,9 @@ func init() {
 					if v == good {
 						return []check.Result{check.PassR(r.key, r.key+" = "+v)}
 					}
+				}
+				if r.id == "HOST-KRN-005" {
+					return []check.Result{runIPForward(ctx, s, r.key, v)}
 				}
 				return []check.Result{check.FailR(r.key, r.key+" = "+v+" (hardened value: "+r.want+")")}
 			},
@@ -173,6 +176,9 @@ var combinedDetection = map[string]string{
 }
 
 func sysctlDetection(r sysctlRule) string {
+	if r.id == "HOST-KRN-005" {
+		return "Reads /proc/sys/net/ipv4/ip_forward directly and compares it with the hardened value 0. When a container runtime or Kubernetes node is detected read-only (runtime sockets such as /var/run/docker.sock, /run/containerd/containerd.sock or /run/crio/crio.sock, /etc/kubernetes, or bridge interfaces such as docker0, cni0, cbr0 or flannel.1 in /sys/class/net), forwarding is required: the check then passes with context when the FORWARD path is filtered (iptables or nftables forward policy drop, or DROP/REJECT rules in DOCKER-USER), fails when forwarded traffic is accepted by default, and is incomplete when the policy cannot be read."
+	}
 	if d, ok := combinedDetection[r.id]; ok {
 		g := strings.Replace(slash(r.key), "/all/", "/*/", 1)
 		return "Reads /proc/sys/" + g + " directly (all, default for future interfaces, and every interface except loopback; no command is run) and combines the all value with each interface value as the kernel does. " + d

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Version 1.3, effective 2026-10-13. This policy was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. It is an information notice, not a contract.
+Version 1.4, effective 2026-10-13. This policy was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. It is an information notice, not a contract.
 
 ## Summary
 
@@ -8,7 +8,7 @@ Version 1.3, effective 2026-10-13. This policy was drafted by an AI Cybersecurit
 
 ## 1. Who "We" Are
 
-"We" means OpenVAPT, an academic, non-commercial project run by its project owner. Because we collect no personal data, there is no data controller holding any of your data. Questions can be raised publicly on GitHub (see section 9).
+"We" means OpenVAPT, an academic, non-commercial project run by its project owner. "OpenVAPT" is a project name, not a registered legal entity; the human owner who runs it is the person responsible in law. Because we collect no personal data, there is no data controller holding any of your data. Questions can be raised publicly on GitHub (see section 9).
 
 ## 2. This Website (openvapt.com)
 

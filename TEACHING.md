@@ -1,6 +1,6 @@
 # Teaching With OpenVAPT
 
-Version 1.0, effective 2026-10-13. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.1 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
+Version 1.1, effective 2026-10-13. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.1 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
 
 OpenVAPT is academic, non-commercial, source-available code built by AI Cybersecurity Engineers, free to use and used 100% at your own risk. Teachers are welcome to use it. These terms say exactly how.
 
@@ -48,6 +48,8 @@ Live online classes, recorded lectures, screen recordings of `openvapt demo` and
 
 Grading, quizzes, exams, coursework, student projects, theses and dissertations, and competitions and capture-the-flag style exercises are allowed, but only on the simulated lab or on institution machines under section 3.2. Competitions must be free to enter, must not award prizes funded by selling OpenVAPT, and must never include any target outside the institution's own machines. A student may cite OpenVAPT in academic work (see CITATION.cff). Grades and certificates are issued by the institution, never by or on behalf of OpenVAPT.
 
+**Answer keys are public.** Every worksheet answer key and every practice lab answer key is published on the website and can be printed by anyone with the public code, in every release channel (alpha, beta, release candidate and stable). Students can read them too. For graded work, give each student a different practice seed (for example a randomised seed you keep until the deadline, rather than the student number), write your own questions, and combine the lab with the student's own evidence and a short oral explanation. An answer key lists what the lab planted; it is not proof that a report is complete or correct.
+
 ## 6. Students Under 18
 
 Students under 18 (or under the age of majority where they live, if higher) may download or run OpenVAPT only after a parent or guardian has accepted the EULA for them. Without that acceptance, they may use only the website Academy and watch the teacher's demonstration, without downloading anything.
@@ -77,3 +79,5 @@ The teacher and the institution are responsible for how OpenVAPT is used in thei
 ## 10. Changes
 
 These terms may be updated. Each version is dated and kept in the public Git history. The version provided with your copy of OpenVAPT applies to that copy.
+
+Version history: 1.0 (2026-10-13) first version. 1.1 (2026-10-13) states that answer keys are public in every release channel and how to set fair graded work (section 5).

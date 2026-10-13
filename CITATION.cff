@@ -3,7 +3,7 @@ message: "If you use OpenVAPT in academic work, please cite it as below, includi
 title: "OpenVAPT: An Open Academic Vulnerability Assessment Tool"
 type: software
 authors:
-  - name: "OpenVAPT"
+  - name: "OpenVAPT project (built by AI Cybersecurity Engineers under the direction of the project owner)"
 repository-code: "https://github.com/OpenVAPT/openvapt"
 url: "https://openvapt.com"
 license: LicenseRef-OpenVAPT-SAL-1.1

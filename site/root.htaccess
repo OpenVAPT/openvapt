@@ -1,0 +1,28 @@
+# openvapt.com public site. Public launch approved by the owner 2026-10-13.
+# /beta/ has its own .htaccess (noindex). /tools/ is excluded from the rules
+# below so the server-side admin endpoint there keeps working unchanged.
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+<IfModule mod_headers.c>
+  <If "%{REQUEST_URI} !~ m#^/tools/#">
+    Header always set Strict-Transport-Security "max-age=31536000"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; object-src 'none'"
+    # The site sets no cookies; make sure nothing upstream does either.
+    Header always unset Set-Cookie
+  </If>
+</IfModule>
+
+# The public site is static. Refuse to run server-side code anywhere except
+# the admin endpoint in /tools/.
+<If "%{REQUEST_URI} !~ m#^/tools/#">
+  <FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh)$">
+    Require all denied
+  </FilesMatch>
+</If>

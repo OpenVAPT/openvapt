@@ -124,7 +124,7 @@ Planned (not yet true, do not describe as existing): site one-H1 and broken-link
 | T2 | All of T1 + Verifier from a different model family (fallback in A1) + Guardian + Security lens; E1, E2 or E4 evidence attached | Covered by the Guardian's version review in `release/legal-review.json` |
 | T3 | All of T2 + the owner's explicit approval in chat, recorded (AGENTS.md 9.1) | All of T2 + Red Team pass on the version |
 
-Release channel gates are exactly AGENTS.md section 5, enforced by `internal/channels` and `.github/workflows/promote.yml`, never bypassed, faked or backdated. In particular: beta needs `open_high_risks` equal to 0 in `release/legal-review.json` for that exact version; stable needs `public_launch_approved` true, which the Guardian sets only after the owner has decided the public launch (still open as of 2026-10-13). This framework adds no owner approval to routine promotions (AGENTS.md 5 delegates them) except where a T3 change is in the version.
+Release channel gates are exactly AGENTS.md section 5, enforced by `internal/channels` and `.github/workflows/promote.yml`, never bypassed, faked or backdated. In particular: beta needs `open_high_risks` equal to 0 in `release/legal-review.json` for that exact version; stable needs `public_launch_approved` true, which the Guardian sets only after the owner has decided the public launch (the owner decided the public launch in chat on 2026-10-13: website at the openvapt.com root, indexed, with pre-release banners; stable still needs every other gate and a fresh Guardian review of the stable candidate). This framework adds no owner approval to routine promotions (AGENTS.md 5 delegates them) except where a T3 change is in the version.
 
 ### C4. Prohibited Actions
 
@@ -188,11 +188,11 @@ Findings opened, closed, reopened; time to close Highs; seeded-defect catch rate
 
 ### A7. Human Oversight and Review
 
-The owner is the only human in the system and the approver for T3, AGENTS.md section 3 and residual risk acceptance. No human security expert or lawyer has reviewed OpenVAPT (AI-DISCLOSURE.md); documents say "AI-reviewed". Independent human review is invited through SECURITY.md and CONTRIBUTING.md. After the owner approves a public launch: GitHub issue templates for factual errors, check accuracy, teaching feedback and security reports; contributors credited; each release freezes checks, Academy and SOURCES.md together so teachers and researchers can cite a stable version through CITATION.cff.
+The owner is the only human in the system and the approver for T3, AGENTS.md section 3 and residual risk acceptance. No human security expert or lawyer has reviewed OpenVAPT (AI-DISCLOSURE.md); documents say "AI-reviewed". Independent human review is invited through SECURITY.md and CONTRIBUTING.md. Now that the owner has approved the public launch (2026-10-13): GitHub issue templates for factual errors, check accuracy, teaching feedback and security reports; contributors credited; each release freezes checks, Academy and SOURCES.md together so teachers and researchers can cite a stable version through CITATION.cff.
 
 ### A8. Residual Risk
 
-Recorded in the legal risk register, kept internally, outside the public repository, and publicly in `docs/THREAT_MODEL.md` and the website limits page. Open Highs in the Guardian's version entry block promotion beyond alpha (AGENTS.md 5.2). At Version 1.0 (2026-10-13): `release/legal-review.json` records `open_high_risks: 1` (no legal entity; the owner personally bears any claim). "No human lawyer review" is a High residual risk accepted by the owner.
+Recorded in the legal risk register, kept internally, outside the public repository, and publicly in `docs/THREAT_MODEL.md` and the website limits page. Open Highs in the Guardian's version entry block promotion beyond alpha (AGENTS.md 5.2). At Version 1.0 (2026-10-13): `release/legal-review.json` recorded `open_high_risks: 1` (no legal entity; the owner personally bears any claim). Status update, 2026-10-13: the owner accepted that risk in chat ("Accept personal risk, launch now"); it is accepted, not closed, and `release/legal-review.json` for v0.1.0-alpha.2 records `open_high_risks: 0` with `public_launch_approved: true`. OpenVAPT remains a project name, not a registered legal entity, and the owner remains the licensor in law. "No human lawyer review" is a High residual risk accepted by the owner.
 
 ### A9. Single Points of Failure
 

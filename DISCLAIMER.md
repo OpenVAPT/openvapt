@@ -1,6 +1,6 @@
 # Disclaimer
 
-Version 1.5, effective 2026-10-13. This disclaimer was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it (see section 12).
+Version 1.6, effective 2026-10-13. This disclaimer was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it (see section 12).
 
 **In one sentence:** OpenVAPT is academic, non-commercial, open, source-available code built by AI Cybersecurity Engineers, free to download and use for your own personal or business use, which you may not sell or use to provide any service, and which you use 100% at your own risk.
 
@@ -50,7 +50,7 @@ You are solely responsible for having the right to run OpenVAPT on a machine, fo
 
 ## 9. The Operator
 
-OpenVAPT is run by its project owner, who publishes the project and holds its rights under the name OpenVAPT. Contact is through GitHub only.
+OpenVAPT is run by its project owner, who publishes the project and holds its rights under the name OpenVAPT. "OpenVAPT" is a project name, not a company or other registered legal entity. The project is built by AI Cybersecurity Engineers under the direction of that one human owner, who in law is the licensor and bears personally any residual legal risk; the owner's identity is not published. Contact is through GitHub only.
 
 ## 10. Third-Party Names and Links
 

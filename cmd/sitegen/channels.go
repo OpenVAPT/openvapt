@@ -40,7 +40,8 @@ type siteChannels struct {
 	Views   []ChannelView
 	History []channels.Release
 	Highest string // display name of the most mature released channel
-	Public  bool   // a Stable release exists and public release is signed off
+	Public  bool   // the owner approved the public launch (site is indexed)
+	Stable  bool   // a Stable release exists (pre-release banners drop only then)
 }
 
 func loadChannels() siteChannels {
@@ -51,8 +52,11 @@ func loadChannels() siteChannels {
 	if h := s.Highest(); h != "" {
 		sc.Highest = channels.InfoFor(h).Name
 	}
-	_, hasStable := s.Current[channels.Stable]
-	sc.Public = hasStable && lerr == nil && lr.PublicLaunchApproved
+	// The site is indexed once the owner has approved the public launch and
+	// the AI legal reviewer has recorded it. Every page still carries the
+	// pre-release banner until a Stable release exists, so nothing is hidden.
+	sc.Public = lerr == nil && lr.PublicLaunchApproved
+	_, sc.Stable = s.Current[channels.Stable]
 	for i := len(channels.Order) - 1; i >= 0; i-- {
 		c := channels.Order[i]
 		v := ChannelView{Info: channels.InfoFor(c), Gates: gateText[c], Install: "--channel " + string(c)}
@@ -69,7 +73,7 @@ func loadChannels() siteChannels {
 		sc.History = append(sc.History, s.History[i])
 	}
 	if !sc.Public && !*noindex {
-		fmt.Fprintln(os.Stderr, "sitegen: no signed-off Stable release yet, so every page is built noindex")
+		fmt.Fprintln(os.Stderr, "sitegen: public launch not yet approved in release/legal-review.json, so every page is built noindex")
 		*noindex = true
 	}
 	return sc

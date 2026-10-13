@@ -36,6 +36,7 @@ func SSHD(ctx context.Context, s sys.System) (map[string]string, bool) {
 	}
 	if seen {
 		addFileMatch(ctx, s, merged)
+		addMatchContexts(ctx, s, merged, contexts)
 		return merged, true
 	}
 	if out, err := s.Run(ctx, "sshd", "-T"); err == nil && strings.Contains(strings.ToLower(out), "permitrootlogin") {
@@ -49,16 +50,153 @@ func SSHD(ctx context.Context, s sys.System) (map[string]string, bool) {
 }
 
 // addFileMatch copies the Match block settings ("match:" and "matchcond:"
-// keys) from the config files into an sshd -T result. The read-only
-// allow-list only permits sshd -T -C for four fixed connection contexts, so
-// Match User, Group or Address rules naming other users or networks are
-// seen only through the files.
+// keys) from the config files into an sshd -T result. Match rules naming
+// other users or networks are also evaluated by addMatchContexts, within the
+// validated context shape the read-only allow-list permits.
 func addFileMatch(ctx context.Context, s sys.System, dst map[string]string) {
 	files := map[string]string{}
 	parseSSHFile(ctx, s, "/etc/ssh/sshd_config", files, map[string]bool{}, 0)
 	for k, v := range files {
 		if strings.HasPrefix(k, "match:") || strings.HasPrefix(k, "matchcond:") {
 			dst[k] = v
+		}
+	}
+}
+
+// maxMatchContexts caps the extra sshd -T -C evaluations built from Match
+// lines, so a config with many Match blocks cannot cause many commands.
+const maxMatchContexts = 8
+
+// MatchContexts builds extra sshd -T -C connection contexts from the Match
+// User, Group and Address lines of the config files. Every value is
+// validated (sys.ValidSSHDContext) before use; patterns, negations and
+// anything else are skipped. A Group is represented by its first listed
+// member in /etc/group, read-only; a group with no listed member is skipped.
+// The host is always "localhost". At most maxMatchContexts are returned and
+// none of the skip list.
+func MatchContexts(ctx context.Context, s sys.System, skip []string) []string {
+	var conds []string
+	cond := ""
+	parseSSHFileM(ctx, s, "/etc/ssh/sshd_config", map[string]string{}, map[string]bool{}, 0, &cond, &conds)
+	seen := map[string]bool{}
+	for _, c := range skip {
+		seen[c] = true
+	}
+	var groups map[string]string
+	var out []string
+	for _, c := range conds {
+		f := strings.Fields(c)
+		user, addr := "", ""
+		for i := 0; i+1 < len(f); i += 2 {
+			crit, vals := f[i], strings.Split(f[i+1], ",")
+			for _, v := range vals {
+				if v == "" || strings.ContainsAny(v, "*?!") {
+					continue
+				}
+				switch crit {
+				case "user":
+					if user == "" && sshName(v) {
+						user = v
+					}
+				case "group":
+					if user == "" && sshName(v) {
+						if groups == nil {
+							groups = groupMembers(ctx, s)
+						}
+						if m := groups[v]; m != "" {
+							user = m
+						}
+					}
+				case "address":
+					if addr == "" {
+						addr = firstAddr(v)
+					}
+				}
+			}
+		}
+		if user == "" && addr == "" {
+			continue
+		}
+		if user == "" {
+			user = "nobody"
+		}
+		if addr == "" {
+			addr = "192.0.2.1"
+		}
+		cc := "user=" + user + ",host=localhost,addr=" + addr
+		if seen[cc] || !sys.ValidSSHDContext(cc) {
+			continue
+		}
+		seen[cc] = true
+		out = append(out, cc)
+		if len(out) == maxMatchContexts {
+			break
+		}
+	}
+	return out
+}
+
+func sshName(v string) bool {
+	return sys.ValidSSHDContext("user=" + v + ",host=localhost,addr=127.0.0.1")
+}
+
+// firstAddr returns the canonical address of an IP literal, or the first
+// (network) address of a CIDR, or "".
+func firstAddr(v string) string {
+	if strings.Contains(v, "/") {
+		_, n, err := net.ParseCIDR(v)
+		if err != nil {
+			return ""
+		}
+		return n.IP.String()
+	}
+	if ip := net.ParseIP(v); ip != nil {
+		return ip.String()
+	}
+	return ""
+}
+
+// groupMembers maps each group in /etc/group to its first valid listed member.
+func groupMembers(ctx context.Context, s sys.System) map[string]string {
+	m := map[string]string{}
+	r, err := s.ReadFile(ctx, "/etc/group")
+	if err != nil || !r.Complete {
+		return m
+	}
+	for _, line := range strings.Split(string(r.Data), "\n") {
+		f := strings.Split(strings.TrimSpace(line), ":")
+		if len(f) < 4 {
+			continue
+		}
+		for _, u := range strings.Split(f[3], ",") {
+			if u = strings.TrimSpace(u); sshName(u) {
+				m[f[0]] = u
+				break
+			}
+		}
+	}
+	return m
+}
+
+// addMatchContexts evaluates the extra Match contexts with sshd -T -C and
+// records any risky value that the base contexts did not show as a
+// conditional "match:" finding, with the context in "matchcond:".
+func addMatchContexts(ctx context.Context, s sys.System, dst map[string]string, base []string) {
+	for _, c := range MatchContexts(ctx, s, base) {
+		out, err := s.Run(ctx, "sshd", "-T", "-C", c)
+		if err != nil || !strings.Contains(strings.ToLower(out), "permitrootlogin") {
+			continue
+		}
+		for k, v := range parseKV(out) {
+			if !SSHDangerous(k, v) || SSHDangerous(k, dst[k]) {
+				continue
+			}
+			mk := "match:" + k
+			if old, ok := dst[mk]; ok && sshDanger(k, old) >= sshDanger(k, v) {
+				continue
+			}
+			dst[mk] = v
+			dst["matchcond:"+k] = "context " + c
 		}
 	}
 }
@@ -108,10 +246,10 @@ func sshDanger(k, v string) int {
 // with the condition of that Match line under "matchcond:<keyword>".
 func parseSSHFile(ctx context.Context, s sys.System, path string, cfg map[string]string, visiting map[string]bool, depth int) bool {
 	cond := ""
-	return parseSSHFileM(ctx, s, path, cfg, visiting, depth, &cond)
+	return parseSSHFileM(ctx, s, path, cfg, visiting, depth, &cond, nil)
 }
 
-func parseSSHFileM(ctx context.Context, s sys.System, path string, cfg map[string]string, visiting map[string]bool, depth int, cond *string) bool {
+func parseSSHFileM(ctx context.Context, s sys.System, path string, cfg map[string]string, visiting map[string]bool, depth int, cond *string, conds *[]string) bool {
 	if depth > 16 || visiting[path] {
 		return false
 	}
@@ -133,6 +271,9 @@ func parseSSHFileM(ctx context.Context, s sys.System, path string, cfg map[strin
 				*cond = ""
 			} else {
 				*cond = v
+				if conds != nil {
+					*conds = append(*conds, v)
+				}
 			}
 			continue
 		case "include":
@@ -144,7 +285,7 @@ func parseSSHFileM(ctx context.Context, s sys.System, path string, cfg map[strin
 				files, _ := s.Glob(pat)
 				sort.Strings(files)
 				for _, inc := range files {
-					if !parseSSHFileM(ctx, s, inc, cfg, visiting, depth+1, cond) {
+					if !parseSSHFileM(ctx, s, inc, cfg, visiting, depth+1, cond, conds) {
 						complete = false
 					}
 				}

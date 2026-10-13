@@ -17,12 +17,16 @@ on:
         type: string
         required: true
 permissions:
-  contents: write
-  id-token: write   # keyless Sigstore signing
-  attestations: write
+  contents: read
 jobs:
-  release:
+  # Unprivileged: runs the build, tests and third-party build tools with a
+  # read-only token and no OIDC, and hands the result over as an artifact.
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      exists: ${{ steps.existing.outputs.exists }}
     env:
       TAG: ${{ inputs.tag }}
       COMMIT: ${{ inputs.commit }}
@@ -94,9 +98,7 @@ jobs:
           cp dist/release/openvapt_linux_* dist/release/SHA256SUMS "$rel/"
           OPENVAPT_ALLOW_FILE=1 OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel" sh scripts/install.sh --version "$TAG" --dir "$RUNNER_TEMP/bin"
           "$RUNNER_TEMP/bin/openvapt" version | grep -F "$TAG"
-      - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
-        if: steps.existing.outputs.exists == 'false'
-      - name: Snapshot, source archive, SBOM, signatures and checksums
+      - name: Snapshot, source archive, SBOM and checksums
         if: steps.existing.outputs.exists == 'false'
         run: |
           set -eu
@@ -104,18 +106,61 @@ jobs:
           git archive --format=tar.gz --prefix="openvapt-${TAG}/" -o "dist/release/openvapt-${TAG}-source.tar.gz" "$COMMIT"
           go run github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@v1.8.0 app -main cmd/openvapt -output dist/release/sbom.cdx.json
           go version > dist/release/GO_VERSION.txt
+          cp CHANGELOG.md "$RUNNER_TEMP/CHANGELOG.md"
           cd dist/release
-          for f in openvapt_linux_*; do cosign sign-blob --yes --bundle "$f.sigstore.json" "$f"; done
           rm -f SHA256SUMS
           sha256sum openvapt_linux_* openvapt-*-source.tar.gz openvapt-*-vulndb-snapshot.json.gz sbom.cdx.json GO_VERSION.txt > SHA256SUMS
-      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+          cp "$RUNNER_TEMP/CHANGELOG.md" CHANGELOG.md
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: steps.existing.outputs.exists == 'false'
+        with:
+          name: release-${{ inputs.tag }}
+          path: dist/release/
+          if-no-files-found: error
+          retention-days: 3
+
+  # Privileged: signs, attests and publishes. It runs no repository or
+  # third-party build code, only cosign, the attestation action and gh.
+  publish:
+    needs: build
+    if: needs.build.outputs.exists == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write   # keyless Sigstore signing
+      attestations: write
+    env:
+      TAG: ${{ inputs.tag }}
+      COMMIT: ${{ inputs.commit }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Validate inputs
+        run: |
+          echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' || { echo "bad tag $TAG"; exit 1; }
+          echo "$COMMIT" | grep -Eq '^[0-9a-f]{40}$' || { echo "bad commit $COMMIT"; exit 1; }
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release-${{ inputs.tag }}
+          path: dist/release
+      - name: Re-verify the build output against SHA256SUMS
+        run: |
+          set -eu
+          mv dist/release/CHANGELOG.md CHANGELOG.md
+          cd dist/release
+          sha256sum -c --strict SHA256SUMS
+          for f in *; do grep -q "  $f\$" SHA256SUMS || [ "$f" = SHA256SUMS ] || { echo "unexpected file $f"; exit 1; }; done
+      - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
+      - name: Sign
+        run: |
+          set -eu
+          cd dist/release
+          for f in openvapt_linux_*; do cosign sign-blob --yes --bundle "$f.sigstore.json" "$f"; done
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: |
             dist/release/openvapt_linux_amd64
             dist/release/openvapt_linux_arm64
       - name: Publish release
-        if: steps.existing.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

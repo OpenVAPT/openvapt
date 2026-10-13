@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/openvapt/openvapt/internal/sys"
@@ -215,4 +216,17 @@ func baseHardened() *sys.Fake {
 			"443/" + site + "/1.3": {Version: tls.VersionTLS13, NotAfter: later, Subject: site, DNSNames: []string{site, "www." + site}, Trusted: true},
 		},
 	}
+}
+
+// ContainerHost returns the hardened server running as a container host:
+// Docker's bridge interface exists and IP forwarding is on, as the runtime
+// requires, with the forward path filtered by a DROP policy.
+func ContainerHost() *sys.Fake {
+	f := Hardened()
+	f.Files["/proc/sys/net/ipv4/ip_forward"] = "1"
+	f.Infos["/sys/class/net/docker0"] = sys.FileInfo{Path: "/sys/class/net/docker0", Mode: fs.ModeDir | fs.ModeSymlink | 0o777, IsDir: true}
+	if !strings.Contains(f.Commands["iptables -S"], "-P FORWARD") {
+		f.Commands["iptables -S"] = "-P INPUT DROP\n-P FORWARD DROP\n-P OUTPUT ACCEPT\n" + f.Commands["iptables -S"]
+	}
+	return f
 }
