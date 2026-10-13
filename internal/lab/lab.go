@@ -41,8 +41,50 @@ func hdr(kv ...string) http.Header {
 	return h
 }
 
+// Fixture adds files, metadata, command output or HTTP/TLS responses to a
+// simulated server. Fixtures for related checks live in their own files
+// (fixtures_*.go) and register themselves, so the labs grow with the checks.
+type Fixture func(f *sys.Fake)
+
+var vulnFixtures, hardFixtures []Fixture
+
+// Register adds a pair of fixtures: one that introduces a weakness into the
+// vulnerable lab, and one that adds the fixed configuration to the hardened
+// lab. Called from init functions.
+func Register(vulnerable, hardened Fixture) {
+	vulnFixtures = append(vulnFixtures, vulnerable)
+	hardFixtures = append(hardFixtures, hardened)
+}
+
+func apply(f *sys.Fake, fx []Fixture) *sys.Fake {
+	if f.Files == nil {
+		f.Files = map[string]string{}
+	}
+	if f.Infos == nil {
+		f.Infos = map[string]sys.FileInfo{}
+	}
+	if f.Commands == nil {
+		f.Commands = map[string]string{}
+	}
+	if f.HTTPResp == nil {
+		f.HTTPResp = map[string]sys.HTTPResponse{}
+	}
+	if f.TLSResp == nil {
+		f.TLSResp = map[string]sys.TLSInfo{}
+	}
+	for _, x := range fx {
+		x(f)
+	}
+	return f
+}
+
 // Vulnerable returns the misconfigured simulation.
-func Vulnerable() *sys.Fake {
+func Vulnerable() *sys.Fake { return apply(baseVulnerable(), vulnFixtures) }
+
+// Hardened returns the same server after every fix has been applied.
+func Hardened() *sys.Fake { return apply(baseHardened(), hardFixtures) }
+
+func baseVulnerable() *sys.Fake {
 	soon := time.Now().Add(9 * 24 * time.Hour)
 	return &sys.Fake{
 		Files: map[string]string{
@@ -110,8 +152,7 @@ func Vulnerable() *sys.Fake {
 	}
 }
 
-// Hardened returns the same server after every fix has been applied.
-func Hardened() *sys.Fake {
+func baseHardened() *sys.Fake {
 	later := time.Now().Add(80 * 24 * time.Hour)
 	secure := hdr("Content-Type", "text/html", "Server", "Apache",
 		"Strict-Transport-Security", "max-age=31536000; includeSubDomains",

@@ -77,6 +77,7 @@ type Standards struct {
 	CWE      []string `json:"cwe,omitempty"`       // e.g. "CWE-16"
 	OWASP    []string `json:"owasp,omitempty"`     // OWASP Top 10 2021, e.g. "A05:2021"
 	ASVS     []string `json:"asvs,omitempty"`      // OWASP ASVS 4.0.3 requirement ids
+	WSTG     []string `json:"wstg,omitempty"`      // OWASP Web Security Testing Guide test ids, e.g. "WSTG-CONF-04"
 	NIST     []string `json:"nist,omitempty"`      // NIST SP 800-53 Rev. 5 controls
 	CISTopic string   `json:"cis_topic,omitempty"` // CIS Benchmark topic, paraphrased, never copied
 }
@@ -87,6 +88,8 @@ type Check struct {
 	Title     string    `json:"title"`     // short name
 	Domain    Domain    `json:"domain"`    // host, network or web
 	Severity  Severity  `json:"severity"`  // severity when the check fails
+	Category  Category  `json:"category"`  // control area, mapped to CIS Controls v8 and NIST CSF 2.0
+	Effort    Effort    `json:"effort"`    // rough remediation effort, orders the remediation plan
 	CVSS      string    `json:"cvss"`      // representative CVSS v3.1 base vector
 	Summary   string    `json:"summary"`   // what the check looks for, one sentence
 	Rationale string    `json:"rationale"` // why the weakness matters
@@ -123,6 +126,10 @@ var (
 func Register(c *Check) {
 	if c.ID == "" || c.Title == "" || c.Run == nil || c.Fix == "" || c.Rationale == "" {
 		panic(fmt.Sprintf("check %q is missing required fields", c.ID))
+	}
+	applyLegacy(c)
+	if c.Category == "" || CategoryByID(c.Category).ID == "" || c.Effort == "" {
+		panic(fmt.Sprintf("check %q must have a valid Category and Effort", c.ID))
 	}
 	if len(c.Refs) == 0 {
 		panic(fmt.Sprintf("check %q must cite at least one reference", c.ID))
