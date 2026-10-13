@@ -227,7 +227,7 @@ func isKEV(r osvRecord, kev map[string]bool) bool {
 }
 
 func build(ecos []string, allow map[string]bool, get func(string) (string, error)) (vulndb.Snapshot, error) {
-	s := vulndb.Snapshot{Header: vulndb.Header{Schema: 1, Generated: time.Now().UTC().Format("2006-01-02"), Sources: []vulndb.Source{{Name: "OSV ecosystem exports", URL: "https://osv-vulnerabilities.storage.googleapis.com/", Licence: "check source"}, {Name: "CISA KEV", URL: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", Licence: "check source"}}}}
+	s := vulndb.Snapshot{Header: vulndb.Header{Schema: 1, Generated: time.Now().UTC().Format("2006-01-02"), Sources: []vulndb.Source{{Name: "OSV ecosystem exports", URL: "https://osv-vulnerabilities.storage.googleapis.com/", Licence: "Aggregated by OSV; each advisory licensed by its originating database (GitHub Advisory Database CC BY 4.0; distribution security teams' terms)"}, {Name: "CISA KEV", URL: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", Licence: "US Government work (public domain in the United States)"}}}}
 	kevPath, e := get("https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json")
 	if e != nil {
 		return s, e

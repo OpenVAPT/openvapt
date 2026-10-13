@@ -100,6 +100,12 @@ func main() {
 		if version.PreRelease() {
 			fmt.Println("This is a pre-release build: it may be incomplete or wrong and is used 100% at your own risk.")
 		}
+		if db, e := vulndb.Embedded(); e == nil {
+			fmt.Printf("Vulnerability data: snapshot %s (fixture: %t)\n", db.Header.Generated, db.Header.Fixture)
+			for _, src := range db.Header.Sources {
+				fmt.Printf("  %s - %s - licence: %s\n", src.Name, src.URL, src.Licence)
+			}
+		}
 	case "help", "-h", "--help":
 		usage(os.Stdout)
 	default:

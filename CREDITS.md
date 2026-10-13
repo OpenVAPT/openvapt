@@ -69,7 +69,7 @@ Everything else in the repository (all Go code under `cmd/` and `internal/`, tem
 
 | Text | How Used | Source |
 |---|---|---|
-| OpenVAPT Source-Available Licence 1.2 (1.0 before the Teaching terms, 1.1 before the Credit condition) | Original text drafted by an AI Cybersecurity Engineer in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
+| OpenVAPT Source-Available Licence 1.3 (1.0 before the Teaching terms, 1.1 before the Credit condition, 1.2 before the Disclaimer travelled with shared copies) | Original text drafted by an AI Cybersecurity Engineer in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
 | Go BSD 3-Clause licence | Included word for word in THIRD_PARTY_NOTICES.md | https://go.dev/LICENSE |
 | Contributor Covenant 2.1 | Adopted by reference (linked, not copied) | https://www.contributor-covenant.org/version/2/1/code_of_conduct/ |
 | Developer Certificate of Origin 1.1 | Referenced for commit sign-off | https://developercertificate.org/ |
@@ -116,8 +116,8 @@ OpenVAPT cites these sources by title, identifier and link and does not copy the
 
 | Source | Used For | Licence |
 |---|---|---|
-| OSV (osv.dev) ecosystem exports | Advisories for Debian, Ubuntu, AlmaLinux, Rocky Linux, Packagist and npm, downloaded only in the release pipeline by `cmd/vulndbgen` | Varies by originating source; each release records what the sources state (see docs/VULNDB.md) |
-| CISA Known Exploited Vulnerabilities catalogue | Marking advisories that are known to be exploited | See the CISA site; recorded per release |
+| OSV (osv.dev) ecosystem exports | Advisories for Debian, Ubuntu, AlmaLinux, Rocky Linux, Packagist and npm, downloaded only in the release pipeline by `cmd/vulndbgen` | Aggregated by OSV; each advisory is licensed by its originating database (GitHub Advisory Database CC BY 4.0; distribution security teams' terms). Recorded in the snapshot header and THIRD_PARTY_NOTICES.md (see docs/VULNDB.md) |
+| CISA Known Exploited Vulnerabilities catalogue | Marking advisories that are known to be exploited | Work of the United States Government (public domain in the United States); recorded in the snapshot header |
 
 The repository currently ships a small, hand-written **test fixture** snapshot whose versions are illustrative, not authoritative.
 
