@@ -60,7 +60,7 @@ var Courses = []Course{
 			{1, "Security Basics", []string{"F1"}, "Glossary quiz; set up the institution's isolated lab virtual machines."},
 			{2, "VAPT, Ethics and the Law", []string{"F2"}, "Case study discussion on unauthorised access; students accept the acknowledgements personally."},
 			{3, "Vulnerabilities and Scoring", []string{"F3"}, "CVSS scoring exercise."},
-			{4, "Linux Server Hardening", []string{"P1"}, "Practice lab with a personal seed."},
+			{4, "Linux Server Hardening", []string{"P1", "P15"}, "Practice lab with a personal seed; kernel, filesystem and boot findings explained."},
 			{5, "SSH, Identity and Privilege", []string{"P2", "P7"}, "Harden SSH on an isolated institution lab virtual machine the teacher has authorised, and verify with a targeted re-scan."},
 			{6, "Network Exposure and Firewall Policy", []string{"P3", "P12"}, "Firewall rule review against listening sockets."},
 			{7, "Mid-Semester Test", []string{"F1", "F2", "F3", "P1", "P2", "P3", "P7", "P12"}, "Printed worksheet questions; teacher answer keys."},
