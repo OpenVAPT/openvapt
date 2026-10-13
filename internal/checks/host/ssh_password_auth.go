@@ -17,10 +17,10 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:L/A:N",
 		Summary:   "Checks whether SSH accepts passwords instead of only keys.",
 		Rationale: "Internet-facing SSH receives constant automated password guessing. Public-key authentication cannot be guessed, phished as easily, or reused from another breached site.",
-		Detection: "Reads PasswordAuthentication and KbdInteractiveAuthentication (ChallengeResponseAuthentication on older versions) from the effective sshd configuration. Either set to 'yes' fails.",
+		Detection: "Reads PasswordAuthentication and KbdInteractiveAuthentication (ChallengeResponseAuthentication on older versions) from the effective sshd configuration. Either set to 'yes' fails. A risky value set inside a Match block in the config files fails as a conditional finding, with the Match condition in the evidence.",
 		Fix:       "Install your public key for each admin user (ssh-copy-id), confirm key login works in a second session, then set  PasswordAuthentication no  and  KbdInteractiveAuthentication no  in /etc/ssh/sshd_config and reload sshd.",
 		Verify:    "sshd -T | grep -Ei 'passwordauthentication|kbdinteractive'  should show 'no' for both.",
-		Refs:      []check.Ref{refSSHDManual, {Title: "NIST SP 800-63B, Digital Identity Guidelines: Authentication", URL: "https://pages.nist.gov/800-63-3/sp800-63b.html"}},
+		Refs:      []check.Ref{refSSHDManual, refNIST63B},
 		Standards: check.Standards{CWE: []string{"CWE-307", "CWE-521"}, NIST: []string{"IA-2(1)", "IA-5"}, CISTopic: "SSH server configuration: authentication methods"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			cfg, ok := collect.SSHD(ctx, s)
@@ -38,6 +38,9 @@ func init() {
 			if kbd == "yes" {
 				return []check.Result{check.FailR("sshd", "Keyboard-interactive (password-style) logins are accepted", "kbdinteractiveauthentication yes")}
 			}
+			if r, bad := sshMatchFail(cfg, "Password logins are accepted", "passwordauthentication", "kbdinteractiveauthentication", "challengeresponseauthentication"); bad {
+				return []check.Result{r}
+			}
 			return []check.Result{check.PassR("sshd", "Only key-based SSH authentication is accepted")}
 		},
 	})
@@ -48,4 +51,22 @@ func orDefault(v string) string {
 		return "(not set, default applies)"
 	}
 	return v
+}
+
+// sshMatchFail reports settings that are safe globally but turned back on
+// inside a Match block, as a conditional failure whose evidence names the
+// Match condition, for example "Match user deploy: passwordauthentication yes".
+func sshMatchFail(cfg map[string]string, what string, keys ...string) (check.Result, bool) {
+	var ev []string
+	for _, k := range keys {
+		v, ok := cfg["match:"+k]
+		if !ok || !collect.SSHDangerous(k, v) {
+			continue
+		}
+		ev = append(ev, "Match "+cfg["matchcond:"+k]+": "+k+" "+v)
+	}
+	if len(ev) == 0 {
+		return check.Result{}, false
+	}
+	return check.FailR("sshd", what+" for connections matching a Match block (conditional)", ev...), true
 }

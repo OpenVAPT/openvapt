@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"sort"
 
 	"github.com/openvapt/openvapt/internal/check"
 	"github.com/openvapt/openvapt/internal/sys"
@@ -106,9 +107,9 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Looks for files under /etc and in cron directories that any user can modify.",
 		Rationale: "A world-writable config or cron file lets any local user change how a root-owned service behaves, often leading straight to root.",
-		Detection: "Walks /etc (metadata only, up to 20000 files, symlinks not followed) and lists regular files with the 'other write' bit set.",
-		Fix:       "For each listed file: chmod o-w <file>. Then find out how it became writable (a deployment script or a careless chmod 777).",
-		Verify:    "find /etc -xdev -type f -perm -0002  should print nothing.",
+		Detection: "Walks /etc (metadata only, up to 20000 files, symlinks not followed) and lists regular files with the 'other write' bit set, plus directories up to three levels deep that are world-writable without the sticky bit (anyone could replace files inside them).",
+		Fix:       "For each listed file or directory: chmod o-w <path>. Then find out how it became writable (a deployment script or a careless chmod 777).",
+		Verify:    "find /etc -xdev \\( -type f -perm -0002 \\) -o \\( -type d -perm -0002 ! -perm -1000 \\)  should print nothing.",
 		Refs:      []check.Ref{refNIST800123},
 		Standards: check.Standards{CWE: []string{"CWE-732"}, NIST: []string{"AC-3", "CM-6"}, CISTopic: "File permissions: no world-writable files"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
@@ -123,6 +124,7 @@ func init() {
 					bad = append(bad, perm(f.Mode)+" "+f.Path)
 				}
 			}
+			bad = append(bad, worldWritableDirs(s, "/etc", 3, 5000)...)
 			if len(bad) > 0 {
 				if len(bad) > 25 {
 					bad = append(bad[:25], fmt.Sprintf("... and %d more", len(bad)-25))
@@ -211,4 +213,32 @@ func init() {
 			return []check.Result{check.PassR("cron", "Cron files are root-owned and not group/other writable")}
 		},
 	})
+}
+
+// worldWritableDirs lists directories under root, up to depth levels, that
+// are writable by others and lack the sticky bit. Stat does not follow
+// symlinks, so a symlink is never reported as a directory.
+func worldWritableDirs(s sys.System, root string, depth, limit int) []string {
+	var bad []string
+	pat := root
+	seen := 0
+	for d := 0; d < depth; d++ {
+		pat += "/*"
+		paths, _ := s.Glob(pat)
+		sort.Strings(paths)
+		for _, p := range paths {
+			if seen >= limit {
+				return bad
+			}
+			st, err := s.Stat(p)
+			if err != nil || !st.IsDir {
+				continue
+			}
+			seen++
+			if st.Mode.Perm()&0o002 != 0 && st.Mode&fs.ModeSticky == 0 {
+				bad = append(bad, perm(st.Mode)+" "+p+"/ (directory, no sticky bit)")
+			}
+		}
+	}
+	return bad
 }

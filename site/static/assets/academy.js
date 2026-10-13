@@ -7,8 +7,8 @@
     fs.addEventListener('change', function (e) {
       if (!e.target || e.target.type !== 'radio') return;
       var ok = e.target.value === answer;
-      out.classList.remove('hidden', 'text-green-7', 'text-red-7');
-      out.classList.add(ok ? 'text-green-7' : 'text-red-7');
+      out.classList.remove('hidden', 'text-green-8', 'text-red-7');
+      out.classList.add(ok ? 'text-green-8' : 'text-red-7');
       out.textContent = (ok ? 'Correct. ' : 'Not quite. The answer is: ' + out.getAttribute('data-correct') + '. ') + out.getAttribute('data-explain');
     });
   });

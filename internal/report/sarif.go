@@ -2,6 +2,8 @@ package report
 
 import (
 	"encoding/json"
+	"net/url"
+	"path"
 	"strings"
 
 	"github.com/openvapt/openvapt/internal/check"
@@ -27,13 +29,15 @@ func (r *Report) SARIF() ([]byte, error) {
 		PhysicalLocation map[string]any `json:"physicalLocation"`
 	}
 	type result struct {
-		RuleID    string     `json:"ruleId"`
-		Level     string     `json:"level"`
-		Message   msg        `json:"message"`
-		Locations []location `json:"locations"`
+		RuleID     string         `json:"ruleId"`
+		Level      string         `json:"level"`
+		Message    msg            `json:"message"`
+		Locations  []location     `json:"locations,omitempty"`
+		Properties map[string]any `json:"properties,omitempty"`
 	}
-	var rules []rule
-	var results []result
+	// SARIF requires arrays, never null, even when nothing was found.
+	rules := []rule{}
+	results := []result{}
 	for _, f := range r.Findings {
 		rules = append(rules, rule{
 			ID: f.ID, Name: f.Title,
@@ -49,10 +53,16 @@ func (r *Report) SARIF() ([]byte, error) {
 			if res.Status != check.Fail {
 				level = "warning"
 			}
-			results = append(results, result{
-				RuleID: f.ID, Level: level, Message: msg{capitalise(string(res.Status)) + ": " + res.Message},
-				Locations: []location{{PhysicalLocation: map[string]any{"artifactLocation": map[string]string{"uri": res.Target}}}},
-			})
+			out := result{RuleID: f.ID, Level: level, Message: msg{capitalise(string(res.Status)) + ": " + res.Message}}
+			if uri, ok := fileURI(res.Target); ok {
+				out.Locations = []location{{PhysicalLocation: map[string]any{"artifactLocation": map[string]string{"uri": uri}}}}
+			} else if res.Target != "" {
+				// Ports, vhosts and URLs are not files: keep them out of
+				// artifactLocation, where dashboards would treat them as paths.
+				out.Message.Text += " (target: " + res.Target + ")"
+				out.Properties = map[string]any{"target": res.Target}
+			}
+			results = append(results, out)
 		}
 	}
 	doc := map[string]any{
@@ -101,4 +111,14 @@ func capitalise(s string) string {
 		return s
 	}
 	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+// fileURI turns an absolute, clean file path into a percent-encoded file://
+// URI. Anything else (relative paths, host:port, vhosts, URLs) is not a
+// file location.
+func fileURI(p string) (string, bool) {
+	if !strings.HasPrefix(p, "/") || strings.ContainsAny(p, "\t\r\n\x00") || path.Clean(p) != p {
+		return "", false
+	}
+	return (&url.URL{Scheme: "file", Path: p}).String(), true
 }

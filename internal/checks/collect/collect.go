@@ -7,7 +7,9 @@ import (
 	"bufio"
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"io/fs"
 	"net"
 	"sort"
 	"strconv"
@@ -33,14 +35,42 @@ func SSHD(ctx context.Context, s sys.System) (map[string]string, bool) {
 		}
 	}
 	if seen {
+		addFileMatch(ctx, s, merged)
 		return merged, true
 	}
 	if out, err := s.Run(ctx, "sshd", "-T"); err == nil && strings.Contains(strings.ToLower(out), "permitrootlogin") {
-		return parseKV(out), true
+		cfg := parseKV(out)
+		addFileMatch(ctx, s, cfg)
+		return cfg, true
 	}
 	cfg := map[string]string{}
 	found := parseSSHFile(ctx, s, "/etc/ssh/sshd_config", cfg, map[string]bool{}, 0)
 	return cfg, found
+}
+
+// addFileMatch copies the Match block settings ("match:" and "matchcond:"
+// keys) from the config files into an sshd -T result. The read-only
+// allow-list only permits sshd -T -C for four fixed connection contexts, so
+// Match User, Group or Address rules naming other users or networks are
+// seen only through the files.
+func addFileMatch(ctx context.Context, s sys.System, dst map[string]string) {
+	files := map[string]string{}
+	parseSSHFile(ctx, s, "/etc/ssh/sshd_config", files, map[string]bool{}, 0)
+	for k, v := range files {
+		if strings.HasPrefix(k, "match:") || strings.HasPrefix(k, "matchcond:") {
+			dst[k] = v
+		}
+	}
+}
+
+// SSHDangerous reports whether an sshd setting value is the risky one for
+// that keyword (for example PermitRootLogin yes, X11Forwarding yes).
+func SSHDangerous(k, v string) bool {
+	switch k {
+	case "maxauthtries", "logingracetime":
+		return false
+	}
+	return sshDanger(k, v) >= 10
 }
 
 func mergeSSHD(dst, src map[string]string) {
@@ -55,8 +85,9 @@ func mergeSSHD(dst, src map[string]string) {
 func sshDanger(k, v string) int {
 	v = strings.ToLower(v)
 	switch k {
-	case "permitrootlogin", "passwordauthentication", "permitemptypasswords", "x11forwarding", "allowtcpforwarding", "allowagentforwarding", "permittunnel", "gatewayports":
-		if v == "yes" || v == "any" {
+	case "permitrootlogin", "passwordauthentication", "kbdinteractiveauthentication", "challengeresponseauthentication", "permitemptypasswords", "x11forwarding", "allowtcpforwarding", "allowagentforwarding", "permittunnel", "gatewayports":
+		switch v {
+		case "yes", "any", "all", "point-to-point", "ethernet", "clientspecified", "local", "remote":
 			return 10
 		}
 	case "maxauthtries":
@@ -69,7 +100,18 @@ func sshDanger(k, v string) int {
 	return 0
 }
 
+// parseSSHFile applies sshd's first-value-wins rule to one config file and
+// its Include files. Keywords may be written "Key value" or "Key=value".
+// Settings after the first Match line apply only to some connections, so
+// they never override global values; they are recorded under the key
+// "match:<keyword>" (most dangerous value wins) for checks that want them,
+// with the condition of that Match line under "matchcond:<keyword>".
 func parseSSHFile(ctx context.Context, s sys.System, path string, cfg map[string]string, visiting map[string]bool, depth int) bool {
+	cond := ""
+	return parseSSHFileM(ctx, s, path, cfg, visiting, depth, &cond)
+}
+
+func parseSSHFileM(ctx context.Context, s sys.System, path string, cfg map[string]string, visiting map[string]bool, depth int, cond *string) bool {
 	if depth > 16 || visiting[path] {
 		return false
 	}
@@ -79,35 +121,69 @@ func parseSSHFile(ctx context.Context, s sys.System, path string, cfg map[string
 	if err != nil || !r.Complete {
 		return false
 	}
-	found := true
 	complete := true
 	for _, raw := range strings.Split(string(r.Data), "\n") {
-		line := strings.TrimSpace(strings.SplitN(raw, "#", 2)[0])
-		f := strings.Fields(line)
-		if len(f) < 2 {
+		k, v, ok := sshKeyword(raw)
+		if !ok {
 			continue
 		}
-		if strings.EqualFold(f[0], "Match") {
-			break
-		}
-		if strings.EqualFold(f[0], "Include") {
-			for _, pat := range f[1:] {
+		switch k {
+		case "match":
+			if strings.EqualFold(v, "all") {
+				*cond = ""
+			} else {
+				*cond = v
+			}
+			continue
+		case "include":
+			for _, pat := range strings.Fields(v) {
+				if !strings.HasPrefix(pat, "/") {
+					// sshd resolves relative Include paths against /etc/ssh.
+					pat = "/etc/ssh/" + pat
+				}
 				files, _ := s.Glob(pat)
 				sort.Strings(files)
 				for _, inc := range files {
-					if !parseSSHFile(ctx, s, inc, cfg, visiting, depth+1) {
+					if !parseSSHFileM(ctx, s, inc, cfg, visiting, depth+1, cond) {
 						complete = false
 					}
 				}
 			}
 			continue
 		}
-		k := strings.ToLower(f[0])
-		if _, ok := cfg[k]; !ok {
-			cfg[k] = strings.ToLower(strings.Join(f[1:], " "))
+		if *cond != "" {
+			mk := "match:" + k
+			if old, seen := cfg[mk]; !seen || sshDanger(k, v) > sshDanger(k, old) {
+				cfg[mk] = v
+				cfg["matchcond:"+k] = *cond
+			}
+			continue
+		}
+		if _, seen := cfg[k]; !seen {
+			cfg[k] = v
 		}
 	}
-	return found && complete
+	return complete
+}
+
+// sshKeyword splits one sshd_config line into a lower-case keyword and a
+// lower-case value, accepting both whitespace and "=" as the separator.
+func sshKeyword(raw string) (string, string, bool) {
+	line := strings.TrimSpace(strings.SplitN(raw, "#", 2)[0])
+	if line == "" {
+		return "", "", false
+	}
+	i := strings.IndexAny(line, " \t=")
+	if i <= 0 {
+		return "", "", false
+	}
+	k := strings.ToLower(line[:i])
+	rest := strings.TrimSpace(line[i:])
+	rest = strings.TrimSpace(strings.TrimPrefix(rest, "="))
+	if rest == "" {
+		return "", "", false
+	}
+	return k, strings.ToLower(strings.Join(strings.Fields(rest), " ")), true
 }
 
 func parseKV(text string) map[string]string {
@@ -176,6 +252,11 @@ func Listeners(s sys.System) ([]Listener, error) {
 		{"/proc/net/udp", "udp", "07"}, {"/proc/net/udp6", "udp6", "07"},
 	} {
 		r, err := s.ReadFile(context.Background(), p.file)
+		if err != nil && strings.HasSuffix(p.file, "6") && errors.Is(err, fs.ErrNotExist) {
+			// A kernel built or booted without IPv6 has no tcp6/udp6 file:
+			// that means no IPv6 sockets, not an unreadable input.
+			continue
+		}
 		if err != nil {
 			lastErr = err
 			complete = false

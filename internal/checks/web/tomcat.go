@@ -117,7 +117,7 @@ func init() {
 		fix:       "Remove accounts you do not need. Give the remaining ones long random passwords and store them as digests: configure a CredentialHandler (for example SecretKeyCredentialHandler with PBKDF2) in the Realm and generate hashes with bin/digest.sh. Restart Tomcat.",
 		verify:    "Re-run this check; no administrative user should be listed.",
 		refs:      []check.Ref{refTomcatSec, {Title: "Apache Tomcat 10.1, Realm Configuration How-To (digested passwords)", URL: "https://tomcat.apache.org/tomcat-10.1-doc/realm-howto.html"}},
-		std:       check.Standards{CWE: []string{"CWE-1392", "CWE-521", "CWE-256"}, OWASP: []string{"A07:2021"}, ASVS: []string{"2.1.1", "2.5.4"}, NIST: []string{"IA-5"}},
+		std:       check.Standards{CWE: []string{"CWE-1392", "CWE-521", "CWE-256"}, OWASP: []string{"A07:2021"}, ASVS: []string{"2.1.1", "2.5.4"}, WSTG: []string{"WSTG-ATHN-02"}, NIST: []string{"IA-5"}},
 		eval: func(ctx context.Context, s sys.System, t collect.TomcatInstance) []string {
 			doc := readText(ctx, s, t.Conf+"/tomcat-users.xml")
 			digest := regexp.MustCompile(`(?i)CredentialHandler`).MatchString(readText(ctx, s, t.Conf+"/server.xml"))

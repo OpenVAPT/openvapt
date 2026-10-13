@@ -5,7 +5,7 @@
 <p class="lead">{{$m.Summary}}</p>
 <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
 <div class="min-w-0">
-  <div class="card-layer mt-6"><h3 class="mt-0">You Will Be Able To</h3><ul class="mb-0">{{range $m.Objectives}}<li>{{.}}</li>{{end}}</ul></div>
+  <div class="card-layer mt-6"><h2 class="mt-0 mb-2 text-[1.25rem] leading-[1.4]">You Will Be Able To</h2><ul class="mb-0">{{range $m.Objectives}}<li>{{.}}</li>{{end}}</ul></div>
   {{range $m.Sections}}<h2>{{.Heading}}</h2>{{range .Body}}<p>{{.}}</p>{{end}}{{end}}
 
   {{with .Data.Checks}}<h2>{{icon "list-checks"}} Apply It</h2>
@@ -34,8 +34,8 @@
   <ul>{{range $m.Refs}}<li><a href="{{.URL}}" rel="noreferrer">{{.Title}}</a></li>{{end}}</ul>
 
   <div class="mt-10 flex flex-wrap justify-between gap-3 border-t border-line-2 pt-6">
-    {{with .Data.Prev}}<a class="btn btn-default" href="{{lower .ID}}.html">Previous: {{.ID}} {{.Title}}</a>{{else}}<span></span>{{end}}
-    {{with .Data.Next}}<a class="btn btn-primary" href="{{lower .ID}}.html">Next: {{.ID}} {{.Title}}</a>{{end}}
+    {{with .Data.Prev}}<a class="btn btn-default min-w-0 max-w-full" href="{{lower .ID}}.html"><span class="truncate">Previous: {{.ID}} {{.Title}}</span></a>{{else}}<span></span>{{end}}
+    {{with .Data.Next}}<a class="btn btn-primary min-w-0 max-w-full" href="{{lower .ID}}.html"><span class="truncate">Next: {{.ID}} {{.Title}}</span></a>{{end}}
   </div>
 </div>
 <aside class="min-w-0">

@@ -18,6 +18,10 @@ func DocRoots(ctx context.Context, s sys.System) []string {
 	for _, pat := range vhostPatterns {
 		files, _ := s.Glob(pat)
 		for _, f := range files {
+			// These are root-owned server configuration files, where links
+			// are normal (nginx sites-enabled), so links are followed here.
+			// Files found under the roots returned below are read with
+			// sys.ReadFileNoFollow by their callers.
 			r, err := s.ReadFile(ctx, f)
 			if err != nil {
 				continue

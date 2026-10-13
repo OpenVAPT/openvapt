@@ -60,11 +60,17 @@ To install and then start an interactive scan of this machine in the same comman
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh)" -- --run
 ```
 
-Options: `--version vX.Y.Z` pins a release, `--dir DIR` chooses the folder. Until a release exists the installer says so and points here.
+Options: `--version vX.Y.Z` pins a release, `--dir DIR` chooses the folder. If the chosen channel has no release yet, the installer says so and lists the channels that have one.
+
+The installer downloads only over HTTPS with TLS 1.2 or newer, including redirects. To refuse installation unless the Sigstore signature is verified (instead of continuing with the checksum alone when `cosign` is missing), set `OPENVAPT_REQUIRE_SIGNATURE=1`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | OPENVAPT_REQUIRE_SIGNATURE=1 sh
+```
 
 ### Verify
 
-**Optional verified binaries.** For machines without Go, each release will also publish Linux binaries built only by GitHub Actions from the tagged commit, with `SHA256SUMS`, Sigstore signature bundles, build provenance, an SBOM and a source archive. You can rebuild the same bytes yourself with `make release VERSION=<tag>` using the same Go version, and compare checksums.
+**Optional verified binaries.** For machines without Go, each release publishes Linux binaries built only by GitHub Actions through the promotion workflow (promote.yml, after every channel gate passed), with `SHA256SUMS`, Sigstore signature bundles, build provenance, an SBOM and a source archive. See [docs/REPORT_SIGNING.md](docs/REPORT_SIGNING.md) for the `gh attestation verify` and `cosign verify-blob` commands. You can rebuild the same bytes yourself with `make release VERSION=<tag>` using the same Go version, and compare checksums.
 
 ## Commands
 

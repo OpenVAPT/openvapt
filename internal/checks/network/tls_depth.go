@@ -25,7 +25,7 @@ func init() {
 		Fix:       "Allow only modern AEAD suites for TLS 1.2 and prefer TLS 1.3. Remove RC4, 3DES, NULL, EXPORT, anonymous, and CBC with SHA-1 suites.",
 		Verify:    "Use an approved local TLS scanner and confirm each prohibited TLS 1.2 suite is rejected. Implicit TLS mail ports 465, 993, and 995 are included; STARTTLS is out of scope.",
 		Refs:      refTLS,
-		Standards: check.Standards{CWE: []string{"CWE-326", "CWE-327"}, OWASP: []string{"A02:2021"}, ASVS: []string{"9.1.3"}, NIST: []string{"SC-8", "SC-13"}},
+		Standards: check.Standards{CWE: []string{"CWE-326", "CWE-327"}, OWASP: []string{"A02:2021"}, WSTG: []string{"WSTG-CRYP-01"}, ASVS: []string{"9.1.3"}, NIST: []string{"SC-8", "SC-13"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			targets := tlsTargets(s)
 			if len(targets) == 0 {
@@ -63,9 +63,9 @@ func init() {
 		Fix:       "Replace the certificate and private key with RSA 2048 bits or stronger, or an approved EC key of at least 256 bits.",
 		Verify:    "Inspect the renewed leaf certificate key size on ports 443, 465, 993, 995, 8443, and 10000. STARTTLS is out of scope.",
 		Refs:      []check.Ref{{Title: "NIST SP 800-131A Rev. 2, Transitioning the Use of Cryptographic Algorithms and Key Lengths", URL: "https://csrc.nist.gov/pubs/sp/800/131/a/r2/final"}},
-		Standards: check.Standards{CWE: []string{"CWE-326"}, OWASP: []string{"A02:2021"}, NIST: []string{"SC-12", "SC-13"}},
+		Standards: check.Standards{CWE: []string{"CWE-326"}, OWASP: []string{"A02:2021"}, WSTG: []string{"WSTG-CRYP-01"}, NIST: []string{"SC-12", "SC-13"}},
 		Run: certDepthRun(func(i sys.TLSInfo) bool {
-			return strings.EqualFold(i.PublicKeyAlgorithm, "RSA") && i.PublicKeyBits < 2048 || strings.Contains(strings.ToLower(i.PublicKeyAlgorithm), "elliptic") && i.PublicKeyBits < 256
+			return strings.EqualFold(i.PublicKeyAlgorithm, "RSA") && i.PublicKeyBits < 2048 || (strings.EqualFold(i.PublicKeyAlgorithm, "ECDSA") || strings.Contains(strings.ToLower(i.PublicKeyAlgorithm), "elliptic")) && i.PublicKeyBits < 256
 		}, "Leaf certificate public key is too small")})
 	check.Register(&check.Check{
 		ID:        "NET-TLS-006",
@@ -81,7 +81,7 @@ func init() {
 		Fix:       "Reissue the certificate with SHA-256 or stronger and deploy the complete updated chain.",
 		Verify:    "Inspect the signature algorithm on each implicit TLS service. STARTTLS is out of scope.",
 		Refs:      []check.Ref{{Title: "NIST Transitioning Away from SHA-1", URL: "https://csrc.nist.gov/News/2022/nist-transitioning-away-from-sha-1-for-all-apps"}},
-		Standards: check.Standards{CWE: []string{"CWE-327"}, OWASP: []string{"A02:2021"}, NIST: []string{"SC-12", "SC-13"}},
+		Standards: check.Standards{CWE: []string{"CWE-327"}, OWASP: []string{"A02:2021"}, WSTG: []string{"WSTG-CRYP-01"}, NIST: []string{"SC-12", "SC-13"}},
 		Run: certDepthRun(func(i sys.TLSInfo) bool {
 			return strings.Contains(strings.ToLower(i.SignatureAlgorithm), "sha-1") || strings.Contains(strings.ToLower(i.SignatureAlgorithm), "sha1")
 		}, "Leaf certificate uses a SHA-1 signature")})

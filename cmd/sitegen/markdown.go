@@ -120,6 +120,10 @@ var (
 	reLink = regexp.MustCompile(`\[([^\]]+)\]\((https?://[^)\s]+|[a-zA-Z0-9_./#-]+)\)`)
 )
 
+// mdPages maps a repository Markdown file to the file name of the legal page
+// it is rendered as, so links between legal documents resolve on the site.
+var mdPages = map[string]string{}
+
 func inline(s string) string {
 	s = html.EscapeString(s)
 	s = reCode.ReplaceAllString(s, "<code>$1</code>")
@@ -127,7 +131,12 @@ func inline(s string) string {
 	s = reLink.ReplaceAllStringFunc(s, func(m string) string {
 		p := reLink.FindStringSubmatch(m)
 		href := p[2]
-		if strings.HasSuffix(href, ".md") {
+		if strings.HasPrefix(href, "//") {
+			return m // protocol-relative URL: could point at any site, so leave it as plain text
+		}
+		if page, ok := mdPages[href]; ok {
+			href = page // a repository document that has its own legal page
+		} else if strings.HasSuffix(href, ".md") {
 			href = strings.TrimSuffix(strings.ToLower(strings.ReplaceAll(href, "_", "-")), ".md") + ".html"
 		}
 		return `<a href="` + href + `" rel="noreferrer">` + p[1] + `</a>`

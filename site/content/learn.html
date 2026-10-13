@@ -37,7 +37,7 @@ openvapt diff lab-before/report.json lab-after/report.json</pre>
 <p>Questions to discuss: Which findings would matter most on an internet-facing shop? Which CVSS ratings would you change for a server on a private network, and why?</p>
 
 <h2 id="scope">Why Scope Is Enforced in Code</h2>
-<p>A policy that says "only scan your own machine" can be ignored. A dialer that refuses non-loopback addresses cannot. Read <code>CheckAddr</code> in the <a href="how-it-works.html#internal/scope">walkthrough</a> and its unit test, then consider why host names such as <code>localhost</code> are deliberately rejected.</p>
+<p>A policy that says "only scan your own machine" can be ignored. A dialer that refuses non-loopback addresses cannot. Read <code>CheckAddr</code> in the <a href="how-it-works.html#internal-scope">walkthrough</a> and its unit test, then consider why host names such as <code>localhost</code> are deliberately rejected.</p>
 
 <h2 id="write">Write Your Own Check</h2>
 <ol>

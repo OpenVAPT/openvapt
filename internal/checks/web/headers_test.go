@@ -8,7 +8,7 @@ func TestHSTSMaxAgeAdversarial(t *testing.T) {
 		ok bool
 	}{
 		{"Max-Age=31536000", true}, {" max-age = 31536000 ; includeSubDomains", true},
-		{"max-age=0", true}, {"max-age=invalid", false}, {"max-age=\"31536000\"", false},
+		{"max-age=0", true}, {"max-age=invalid", false}, {"max-age=\"31536000\"", true}, {"max-age=\"", false}, {"max-age=\"\"", false},
 		{"includeSubDomains", false}, {"max-age=1; MAX-AGE=2", false}, {"max-age=18446744073709551616", false},
 	} {
 		if _, ok := hstsMaxAge(tc.h); ok != tc.ok {

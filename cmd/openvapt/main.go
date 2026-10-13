@@ -156,9 +156,70 @@ func splitList(s string) []string {
 }
 
 type scanFlags struct {
-	out, formats, only, skip, baseline string
-	dryRun, accept, noSign, quiet      bool
-	parallel                           int
+	out, formats, only, skip, baseline  string
+	dryRun, accept, noSign, quiet, demo bool
+	parallel                            int
+
+	// Filled by prepare before any scanning starts.
+	formatList []string
+	old        *report.Report
+}
+
+var knownFormats = map[string]bool{"html": true, "json": true, "sarif": true, "md": true}
+
+// parseFormats validates --format: trims, lower-cases and de-duplicates the
+// list, and rejects unknown or empty values as a usage error (exit 2).
+func parseFormats(s string) ([]string, error) {
+	var out []string
+	seen := map[string]bool{}
+	for _, f := range strings.Split(s, ",") {
+		f = strings.ToLower(strings.TrimSpace(f))
+		if f == "" {
+			continue
+		}
+		if !knownFormats[f] {
+			return nil, usageErr("unknown report format %q (use html, json, sarif, md)", f)
+		}
+		if !seen[f] {
+			seen[f] = true
+			out = append(out, f)
+		}
+	}
+	if len(out) == 0 {
+		return nil, usageErr("--format needs at least one of html, json, sarif, md")
+	}
+	return out, nil
+}
+
+// prepare validates flags and loads the baseline before scanning, so a typo
+// fails in a second instead of after a full scan.
+func (f *scanFlags) prepare() error {
+	list, err := parseFormats(f.formats)
+	if err != nil {
+		return err
+	}
+	f.formatList = list
+	if f.baseline != "" {
+		old, err := report.Load(f.baseline)
+		if err != nil {
+			return usageErr("cannot use --baseline: %v", err)
+		}
+		f.old = old
+	}
+	return nil
+}
+
+// defaultOutDir creates a fresh private report folder named after the time.
+func defaultOutDir(prefix string) (string, error) {
+	dir, err := os.MkdirTemp(".", prefix+time.Now().Format("20060102-150405")+"-")
+	if err != nil {
+		return "", err
+	}
+	// A private directory needs the execute bit; 0700 is owner-only.
+	if err := os.Chmod(dir, 0o700); err != nil { // #nosec G302 -- directory, not a file
+		return "", err
+	}
+	return dir, nil
 }
 
 func addScanFlags(fs *flag.FlagSet, f *scanFlags, defOut string) {
@@ -179,6 +240,9 @@ func cmdScan(ctx context.Context, args []string) error {
 	fs.BoolVar(&f.dryRun, "dry-run", false, "print every file, command and request the scan would use, then exit")
 	fs.BoolVar(&f.accept, "accept-terms", false, "confirm you have read and accept every acknowledgement in 'openvapt terms' (for automation)")
 	_ = fs.Parse(args)
+	if err := f.prepare(); err != nil {
+		return err
+	}
 
 	opts := engine.Options{Only: splitList(f.only), Skip: splitList(f.skip), Parallel: f.parallel}
 	if f.dryRun {
@@ -208,8 +272,12 @@ func cmdDemo(ctx context.Context, args []string) error {
 	var which string
 	fs.StringVar(&which, "lab", "vulnerable", "which simulated server to scan: vulnerable, hardened or practice")
 	seed := fs.String("seed", "", "practice lab seed, for example a student number (with --lab practice)")
-	addScanFlags(fs, &f, "openvapt-demo-report")
+	addScanFlags(fs, &f, "")
 	_ = fs.Parse(args)
+	if err := f.prepare(); err != nil {
+		return err
+	}
+	f.demo = true
 	if which == "practice" {
 		if strings.TrimSpace(*seed) == "" {
 			return usageErr("--lab practice needs --seed, for example your student number")
@@ -225,7 +293,7 @@ func cmdDemo(ctx context.Context, args []string) error {
 	case "hardened":
 		s = lab.Hardened()
 	default:
-		return fmt.Errorf("unknown lab %q (vulnerable, hardened or practice)", which)
+		return usageErr("unknown lab %q (vulnerable, hardened or practice)", which)
 	}
 	fmt.Printf("Demo: scanning the simulated %q lab server (in memory, your machine is not touched).\n", which)
 	r := engine.Run(ctx, s, engine.Options{Only: splitList(f.only), Skip: splitList(f.skip), Parallel: f.parallel})
@@ -234,37 +302,38 @@ func cmdDemo(ctx context.Context, args []string) error {
 }
 
 func finish(r *report.Report, f scanFlags) error {
+	if f.formatList == nil {
+		if err := f.prepare(); err != nil {
+			return err
+		}
+	}
 	if !f.noSign {
-		key, err := sign.LoadOrCreateKey(sign.KeyPath())
-		if err != nil {
+		if path, err := sign.KeyPath(); err != nil {
+			fmt.Fprintln(os.Stderr, "warning: report not signed:", err)
+		} else if key, err := sign.LoadOrCreateKey(path); err != nil {
 			fmt.Fprintln(os.Stderr, "warning: report not signed:", err)
 		} else if err := sign.Sign(r, key); err != nil {
 			fmt.Fprintln(os.Stderr, "warning: report not signed:", err)
 		}
 	}
 	if f.out == "" {
-		dir, err := os.MkdirTemp(".", "openvapt-report-"+time.Now().Format("20060102-150405")+"-")
-		if err != nil {
-			return err
+		prefix := "openvapt-report-"
+		if f.demo {
+			prefix = "openvapt-demo-report-"
 		}
-		// A private directory needs the execute bit; 0700 is owner-only.
-		err = os.Chmod(dir, 0o700) // #nosec G302 -- directory, not a file
+		dir, err := defaultOutDir(prefix)
 		if err != nil {
-			return err
+			return &exitError{code: 6, err: err}
 		}
 		f.out = dir
 	}
-	files, err := r.WriteAll(f.out, splitList(f.formats))
+	files, err := r.WriteAll(f.out, f.formatList)
 	if err != nil {
 		return &exitError{code: 6, err: err}
 	}
 	r.PrintSummary(os.Stdout)
-	if f.baseline != "" {
-		old, err := report.Load(f.baseline)
-		if err != nil {
-			return err
-		}
-		report.PrintDiff(os.Stdout, old, r)
+	if f.old != nil {
+		report.PrintDiff(os.Stdout, f.old, r)
 	}
 	fmt.Println("Report written (only on this machine):")
 	for _, p := range files {
@@ -364,11 +433,8 @@ func cmdVerify(args []string) error {
 	if path == "" {
 		return errors.New("usage: openvapt verify <report.json> [--key-id ID]")
 	}
-	r, err := report.Load(path)
+	r, err := sign.VerifyFile(path, *keyID)
 	if err != nil {
-		return err
-	}
-	if err := sign.Verify(r, *keyID); err != nil {
 		return fmt.Errorf("NOT VERIFIED: %w", err)
 	}
 	fmt.Printf("Verified: unchanged since it was signed by key %s on %s.\n", r.Integrity.KeyID, r.Scan.Finished.Format("2006-01-02 15:04 UTC"))

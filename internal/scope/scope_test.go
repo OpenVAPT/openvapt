@@ -3,6 +3,7 @@ package scope
 import (
 	"context"
 	"errors"
+	"net"
 	"testing"
 )
 
@@ -28,5 +29,16 @@ func TestDialerRefusesRemote(t *testing.T) {
 	_, err := Dialer{}.DialContext(context.Background(), "tcp", "1.1.1.1:443")
 	if !errors.Is(err, ErrNotLocal) {
 		t.Fatalf("remote dial must be refused before any packet is sent, got %v", err)
+	}
+}
+
+func TestPeerCheckFailsClosed(t *testing.T) {
+	if !peerIsLoopback(&net.TCPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 80}) {
+		t.Fatal("loopback TCP peer refused")
+	}
+	for _, a := range []net.Addr{nil, (*net.TCPAddr)(nil), &net.TCPAddr{IP: net.IPv4(10, 0, 0, 1)}, &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)}, &net.UnixAddr{Name: "/tmp/x", Net: "unix"}} {
+		if peerIsLoopback(a) {
+			t.Errorf("%v must fail closed", a)
+		}
 	}
 }

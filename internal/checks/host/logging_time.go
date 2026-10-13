@@ -66,6 +66,10 @@ func init() {
 		Fix:       "Enable one time service, for example: systemctl enable --now systemd-timesyncd  (or install chrony).",
 		Verify:    "timedatectl  should show 'System clock synchronized: yes'.",
 		Refs:      []check.Ref{refNIST80053},
+		// No CWE is listed on purpose: CWE describes software weaknesses, and
+		// none matches an unsynchronised clock. CWE-778 (Insufficient Logging)
+		// is about security events that are not recorded at all, which is a
+		// different problem from events recorded with a wrong time.
 		Standards: check.Standards{NIST: []string{"AU-8"}, CISTopic: "Time synchronisation"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			if u, ok := collect.ServiceActive(ctx, s, "chronyd", "chrony", "systemd-timesyncd", "ntpd", "ntp", "ntpsec"); ok {

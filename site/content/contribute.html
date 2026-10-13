@@ -2,9 +2,9 @@
 <h1>Review, Report and Contribute</h1>
 <p class="lead">Everything happens in the open on GitHub. There is no email address and no contact form: the repository is the only channel.</p>
 <div class="grid gap-6 lg:grid-cols-3">
-  <div class="card"><div class="card-icon">{{icon "git-pull-request"}}</div><h3>Report a Bug or False Result</h3><p>Open an issue with the Bug, False Positive or False Negative template. Include the check id and the redacted evidence line, never secrets or full reports.</p><p><a href="{{repo}}/issues/new/choose" rel="noreferrer">Open an Issue</a></p></div>
-  <div class="card"><div class="card-icon">{{icon "book-open"}}</div><h3>Ask or Discuss</h3><p>Questions and academic discussion go to GitHub Discussions. There is no private support.</p><p><a href="{{repo}}/discussions" rel="noreferrer">Discussions</a></p></div>
-  <div class="card"><div class="card-icon">{{icon "lock"}}</div><h3>Security Flaw in OpenVAPT</h3><p>Use GitHub Private Vulnerability Reporting. It is published as an advisory once fixed.</p><p><a href="{{repo}}/security/advisories/new" rel="noreferrer">Report Privately</a></p></div>
+  <div class="card"><div class="card-icon">{{icon "git-pull-request"}}</div><h2 class="mt-8 mb-2 text-[1.25rem] leading-[1.4]">Report a Bug or False Result</h2><p>Open an issue with the Bug, False Positive or False Negative template. Include the check id and the redacted evidence line, never secrets or full reports.</p><p><a href="{{repo}}/issues/new/choose" rel="noreferrer">Open an Issue</a></p></div>
+  <div class="card"><div class="card-icon">{{icon "book-open"}}</div><h2 class="mt-8 mb-2 text-[1.25rem] leading-[1.4]">Ask or Discuss</h2><p>Questions and academic discussion go to GitHub Discussions. There is no private support.</p><p><a href="{{repo}}/discussions" rel="noreferrer">Discussions</a></p></div>
+  <div class="card"><div class="card-icon">{{icon "lock"}}</div><h2 class="mt-8 mb-2 text-[1.25rem] leading-[1.4]">Security Flaw in OpenVAPT</h2><p>Use GitHub Private Vulnerability Reporting. It is published as an advisory once fixed.</p><p><a href="{{repo}}/security/advisories/new" rel="noreferrer">Report Privately</a></p></div>
 </div>
 
 <h2>Pull Requests</h2>
@@ -19,7 +19,7 @@
 <ul>
 <li><strong>Semantic Versioning</strong>: MAJOR for breaking changes to the CLI or report schema, MINOR for new checks, PATCH for fixes.</li>
 <li><strong>Conventional Commits</strong> feed the changelog.</li>
-<li>Releases are built only by GitHub Actions from a signed tag, with SHA-256 checksums, Sigstore signatures and a software bill of materials (SBOM).</li>
+<li>Releases are built only by GitHub Actions through the promotion workflow, after every release channel gate has passed, with SHA-256 checksums, Sigstore signatures, build provenance and a software bill of materials (SBOM). Each release is created as a draft and published only after every file is verified.</li>
 <li>Any fixes are voluntary and, if made, go only into the latest minor version. There is no obligation to fix anything.</li>
 <li>Each report records the tool version and commit it was produced with.</li>
 </ul>

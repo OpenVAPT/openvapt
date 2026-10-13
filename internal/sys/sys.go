@@ -171,9 +171,9 @@ func validUnit(s string) bool {
 
 // safePHP permits only expressions built from echo and ini_get, so the
 // php -r entry can never be used to run arbitrary code.
-func safePHP(expr string) bool {
-	return regexp.MustCompile(`^(echo ini_get\('[A-Za-z0-9_.]+'\)(,"\\n")?;)+$`).MatchString(expr)
-}
+var safePHPRe = regexp.MustCompile(`^(echo ini_get\('[A-Za-z0-9_.]+'\)(,"\\n")?;)+$`)
+
+func safePHP(expr string) bool { return safePHPRe.MatchString(expr) }
 
 // Live is the real implementation used by "openvapt scan".
 type Live struct {
@@ -198,22 +198,67 @@ func NewLive() *Live {
 	}}
 }
 
+// ErrNotRegular is returned when a path is not a regular file (a FIFO,
+// device, socket or directory), or is a symlink where none is allowed.
+var ErrNotRegular = errors.New("refused: not a regular file")
+
+const maxRead = 4 << 20
+
+// ReadFile reads a system path. Symlinks are followed, because legitimate
+// configuration often lives behind them (for example
+// /etc/nginx/sites-enabled), but only a regular file is ever read and the
+// open never blocks.
 func (l *Live) ReadFile(ctx context.Context, path string) (ReadResult, error) {
-	f, err := os.Open(path)
+	return readRegular(ctx, path, false)
+}
+
+// ReadFileNoFollow reads path only if it is a regular file and the final
+// component is not a symlink. Use it for files found under web document
+// roots, which a web user could replace with a link to /etc/shadow.
+func (l *Live) ReadFileNoFollow(ctx context.Context, path string) (ReadResult, error) {
+	return readRegular(ctx, path, true)
+}
+
+// NoFollowReader is implemented by systems that can refuse symlinks.
+type NoFollowReader interface {
+	ReadFileNoFollow(ctx context.Context, path string) (ReadResult, error)
+}
+
+// ReadFileNoFollow reads path through s without following a final symlink
+// when s supports it. Fakes and the dry-run recorder fall back to ReadFile.
+func ReadFileNoFollow(ctx context.Context, s System, path string) (ReadResult, error) {
+	if n, ok := s.(NoFollowReader); ok {
+		return n.ReadFileNoFollow(ctx, path)
+	}
+	return s.ReadFile(ctx, path)
+}
+
+func readRegular(ctx context.Context, path string, noFollow bool) (ReadResult, error) {
+	if err := ctx.Err(); err != nil {
+		return ReadResult{}, err
+	}
+	f, err := openRead(path, noFollow)
 	if err != nil {
 		return ReadResult{}, err
 	}
 	defer f.Close()
-	b, err := io.ReadAll(io.LimitReader(f, (4<<20)+1))
+	st, err := f.Stat()
+	if err != nil {
+		return ReadResult{}, err
+	}
+	if !st.Mode().IsRegular() {
+		return ReadResult{}, ErrNotRegular
+	}
+	b, err := io.ReadAll(io.LimitReader(f, maxRead+1))
 	if err != nil {
 		return ReadResult{}, err
 	}
 	if err := ctx.Err(); err != nil {
 		return ReadResult{}, err
 	}
-	complete := len(b) <= 4<<20
+	complete := len(b) <= maxRead
 	if !complete {
-		b = b[:4<<20]
+		b = b[:maxRead]
 	}
 	return ReadResult{Data: b, Complete: complete}, nil
 }

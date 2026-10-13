@@ -31,7 +31,7 @@ func readAny(ctx context.Context, s sys.System, paths ...string) (string, string
 }
 func simpleFileCheck(id, title string, sev check.Severity, cat check.Category, summary, rationale, detection, fix, verify, cvss string, paths []string, ref check.Ref, bad func(string) []string) {
 	check.Register(&check.Check{
-		ID: id, Title: title, Domain: check.DomainNetwork, Severity: sev, Category: cat, Effort: check.EffortLow, CVSS: cvss, Summary: summary, Rationale: rationale, Detection: detection, Fix: fix, Verify: verify, Refs: []check.Ref{ref}, Standards: check.Standards{CWE: []string{"CWE-16", "CWE-284"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-3", "CM-6", "SC-7"}}, Run: func(ctx context.Context, s sys.System) []check.Result {
+		ID: id, Title: title, Domain: check.DomainNetwork, Severity: sev, Category: cat, Effort: check.EffortLow, CVSS: cvss, Summary: summary, Rationale: rationale, Detection: detection, Fix: fix, Verify: verify, Refs: []check.Ref{ref}, Standards: dataStandards(id), Run: func(ctx context.Context, s sys.System) []check.Result {
 			p, text, complete, ok := readAny(ctx, s, paths...)
 			if !ok {
 				return []check.Result{check.SkipR(strings.Join(paths, ", "), "Configuration was not found")}

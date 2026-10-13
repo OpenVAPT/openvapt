@@ -40,7 +40,7 @@ func init() {
 		Fix:       "Move each listed file outside the document root (for example to a 700 folder in the account's home), delete what is not needed, and rotate any secret or key that was exposed. Keep backups in a dedicated location outside every web root.",
 		Verify:    "Re-run this check; no files should be listed.",
 		Refs:      []check.Ref{refWSTGConf04, {Title: "OWASP Secrets Management Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"}},
-		Standards: check.Standards{CWE: []string{"CWE-530", "CWE-538", "CWE-312"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.2"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"SC-28", "CM-6"}},
+		Standards: check.Standards{CWE: []string{"CWE-530", "CWE-538", "CWE-312"}, OWASP: []string{"A05:2021"}, ASVS: []string{"12.5.1"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"SC-28", "CM-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			roots := collect.DocRoots(ctx, s)
 			if len(roots) == 0 {
@@ -134,7 +134,7 @@ func init() {
 		Fix:       "Return Access-Control-Allow-Origin only for an explicit allow-list of trusted origins, never '*' or 'null' together with credentials, and add Vary: Origin.",
 		Verify:    "curl -sI https://<site>/ | grep -i access-control",
 		Refs:      []check.Ref{{Title: "OWASP WSTG-CLNT-07, Testing Cross Origin Resource Sharing", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/11-Client-side_Testing/07-Testing_Cross_Origin_Resource_Sharing"}, refMDN("Access-Control-Allow-Origin")},
-		Standards: check.Standards{CWE: []string{"CWE-942"}, OWASP: []string{"A05:2021", "A01:2021"}, ASVS: []string{"14.5.3"}, WSTG: []string{"WSTG-CLNT-07"}},
+		Standards: check.Standards{CWE: []string{"CWE-942"}, OWASP: []string{"A05:2021", "A01:2021"}, ASVS: []string{"14.5.3"}, WSTG: []string{"WSTG-CLNT-07"}, NIST: []string{"AC-4", "CM-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {
 				o := strings.TrimSpace(st.Home.Header.Get("Access-Control-Allow-Origin"))
@@ -157,7 +157,7 @@ func init() {
 		Fix:       "Publish /.well-known/security.txt with at least Contact: and Expires: fields (see securitytxt.org).",
 		Verify:    "curl -s https://<site>/.well-known/security.txt",
 		Refs:      []check.Ref{{Title: "RFC 9116, A File Format to Aid in Security Vulnerability Disclosure", URL: "https://www.rfc-editor.org/rfc/rfc9116"}},
-		Standards: check.Standards{CWE: []string{"CWE-1059"}, NIST: []string{"RA-5(11)"}},
+		Standards: check.Standards{NIST: []string{"RA-5(11)"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {
 				r, err := st.Get(ctx, s, "/.well-known/security.txt")

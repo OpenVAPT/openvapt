@@ -4,15 +4,15 @@
 <div class="grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)]">
   <nav aria-label="Modules" class="min-w-0">
     <p class="foot-h">Modules</p>
-    <ul class="m-0 list-none p-0 text-[14px]">{{range $d.Walkthrough}}<li class="border-l-2 border-line-2 py-1.5 pl-3"><a href="#{{.Path}}">{{.Name}}</a> <span class="muted">{{.Lines}} lines</span></li>{{end}}</ul>
+    <ul class="m-0 list-none p-0 text-[14px]">{{range $d.Walkthrough}}<li class="border-l-2 border-line-2 py-1.5 pl-3"><a href="#{{slug .Path}}">{{.Name}}</a> <span class="muted">{{.Lines}} lines</span></li>{{end}}</ul>
   </nav>
   <div class="min-w-0">
     <div class="card-layer">
-      <h3 class="mt-0">Design in One Paragraph</h3>
+      <h2 class="mt-0 mb-2 text-[1.25rem] leading-[1.4]">Design in One Paragraph</h2>
       <p class="m-0">Checks are small Go files that describe one weakness and how to detect it. They never touch the operating system directly. Instead they receive a read-only <code>System</code>, whose network access is confined by the scope guard to this machine. The engine runs the checks, redacts secrets and writes the report to the local disk. The same checks run against simulated lab servers in the tests, which proves each one detects its weakness and stays silent once it is fixed.</p>
     </div>
     {{range $d.Walkthrough}}
-    <section class="mt-14 border-t border-line-2 pt-8" id="{{.Path}}">
+    <section class="mt-14 border-t border-line-2 pt-8" id="{{slug .Path}}">
       <p class="muted m-0 font-mono"><a href="{{blob .Path}}" rel="noreferrer">{{.Path}}</a></p>
       <h2 class="mt-2">{{.Name}}</h2>
       <p>{{.Purpose}}</p>

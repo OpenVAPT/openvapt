@@ -17,7 +17,7 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Checks whether SSH lets accounts with an empty password log in.",
 		Rationale: "Any account without a password becomes an open door to anyone on the network.",
-		Detection: "Reads PermitEmptyPasswords from the effective sshd configuration; 'yes' fails.",
+		Detection: "Reads PermitEmptyPasswords from the effective sshd configuration; 'yes' fails. A risky value set inside a Match block in the config files fails as a conditional finding, with the Match condition in the evidence.",
 		Fix:       "Set  PermitEmptyPasswords no  in /etc/ssh/sshd_config, reload sshd, and give every account a password or lock it (passwd -l <user>).",
 		Verify:    "sshd -T | grep -i permitemptypasswords  should print 'no'.",
 		Refs:      []check.Ref{refSSHDManual},
@@ -29,6 +29,9 @@ func init() {
 			}
 			if cfg["permitemptypasswords"] == "yes" {
 				return []check.Result{check.FailR("sshd", "Empty passwords are accepted", "permitemptypasswords yes")}
+			}
+			if r, bad := sshMatchFail(cfg, "Empty passwords are accepted", "permitemptypasswords"); bad {
+				return []check.Result{r}
 			}
 			return []check.Result{check.PassR("sshd", "Empty passwords are refused")}
 		},

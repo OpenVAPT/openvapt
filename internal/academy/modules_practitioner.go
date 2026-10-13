@@ -228,7 +228,7 @@ var practitioner = []Module{
 			{"Why is membership of the docker group dangerous?", []string{"It slows the server", "It allows starting containers that mount the host filesystem, which is root access", "It disables SSH"}, 1, "Docker control is equivalent to root on the host."},
 			{"What does an account lockout policy defend against?", []string{"Password guessing", "Disk failure", "TLS downgrade"}, 0, "Lockout limits repeated guesses."},
 		},
-		Refs: []Ref{{"NIST SP 800-63B, Authentication and Lifecycle Management", "https://pages.nist.gov/800-63-3/sp800-63b.html"}, {"MITRE ATT&CK T1548, Abuse Elevation Control Mechanism", "https://attack.mitre.org/techniques/T1548/"}},
+		Refs: []Ref{{"NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management", "https://pages.nist.gov/800-63-4/sp800-63b.html"}, {"MITRE ATT&CK T1548, Abuse Elevation Control Mechanism", "https://attack.mitre.org/techniques/T1548/"}},
 	},
 	{
 		ID: "P8", Title: "Data Services: Databases, File Shares, DNS and Mail", Level: Practitioner, Minutes: 30,

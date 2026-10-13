@@ -2,7 +2,7 @@
 
 Generated from the code by `internal/sources` (regenerate with `go test ./internal/sources -update`); do not edit by hand. Every reference that any check or Academy module cites is listed here, grouped by publisher, with the publisher's terms and any credit line those terms ask for. OpenVAPT cites sources by title, identifier and link; it does not copy their text. Use of a source does not imply that its publisher endorses OpenVAPT.
 
-Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Academy modules.
+Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Academy modules.
 
 ## NIST (National Institute of Standards and Technology)
 
@@ -22,7 +22,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [NIST SP 800-41 Rev. 1, Guidelines on Firewalls and Firewall Policy](https://csrc.nist.gov/pubs/sp/800/41/r1/final) | Academy P12, Academy P3, NET-FW-001, NET-FW-003, NET-FW-004, NET-FW-005, NET-FW-006 |
 | [NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations](https://csrc.nist.gov/pubs/sp/800/52/r2/final) | Academy P4, NET-TLS-001, NET-TLS-002, NET-TLS-003, NET-TLS-004 |
 | [NIST SP 800-53 Rev. 5, Security and Privacy Controls](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | HOST-IDS-001, HOST-PWD-004, HOST-TIME-001, HOST-USR-001 |
-| [NIST SP 800-63B, Digital Identity Guidelines: Authentication and Lifecycle Management](https://pages.nist.gov/800-63-3/sp800-63b.html) | Academy P7, HOST-PWD-001, HOST-PWD-002, HOST-PWD-003, HOST-PWD-005, HOST-SSH-002 |
+| [NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html) | Academy P7, HOST-PWD-001, HOST-PWD-002, HOST-PWD-003, HOST-PWD-005, HOST-SSH-002 |
 | [NIST SP 800-92, Guide to Computer Security Log Management](https://csrc.nist.gov/pubs/sp/800/92/final) | HOST-LOG-001, HOST-LOG-003 |
 | [NIST Transitioning Away from SHA-1](https://csrc.nist.gov/News/2022/nist-transitioning-away-from-sha-1-for-all-apps) | NET-TLS-006 |
 | [NVD](https://nvd.nist.gov/) | HOST-CVE-001, HOST-CVE-002, HOST-CVE-003, WEB-CVE-001 |
@@ -84,6 +84,15 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [OWASP WSTG-ERRH-01, Testing for Improper Error Handling](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling) | WEB-EXP-012 |
 | [OWASP WSTG-INFO-02, Fingerprint Web Server](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server) | WEB-EXP-010 |
 | [OWASP Web Security Testing Guide](https://owasp.org/www-project-web-security-testing-guide/) | Academy F2 |
+
+## Center for Internet Security (CIS)
+
+- Terms: CIS Controls v8 is published by the Center for Internet Security, Inc. under CC BY-NC-ND 4.0. Referred to by Control number and link only; no CIS text is reproduced.
+- Credit: CIS Controls® is a trademark of the Center for Internet Security, Inc. Use does not imply endorsement by CIS.
+
+| Source | Cited By |
+|---|---|
+| [CIS Critical Security Controls v8, Control 5 (Account Management)](https://www.cisecurity.org/controls/account-management) | HOST-PWD-005 |
 
 ## IETF / RFC Editor
 
@@ -148,7 +157,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 |---|---|
 | [Penetration Testing Execution Standard](http://www.pentest-standard.org/) | Academy F2 |
 
-## Linux kernel documentation
+## Linux Kernel Documentation
 
 - Terms: Kernel documentation is generally distributed under GPL-2.0; individual files may carry other licences. Cited by title and link only.
 
@@ -160,7 +169,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [Linux kernel documentation, Linux Security Module development and LSMs](https://docs.kernel.org/admin-guide/LSM/index.html) | HOST-MAC-001 |
 | [Linux kernel documentation, Yama LSM](https://docs.kernel.org/admin-guide/LSM/Yama.html) | HOST-KRN-010 |
 
-## Linux man-pages project (man7.org) and Ubuntu manpages
+## Linux man-pages Project (man7.org) and Ubuntu Manpages
 
 - Terms: Man pages carry per-page licences. Cited by page name and link only.
 
@@ -184,7 +193,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [ufw(8) manual (Ubuntu)](https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html) | NET-FW-003 |
 | [umask(2), Linux man-pages](https://man7.org/linux/man-pages/man2/umask.2.html) | HOST-FS-009 |
 
-## OpenBSD (OpenSSH manual pages)
+## OpenBSD (OpenSSH Manual Pages)
 
 - Terms: Manual pages generally under BSD or ISC style licences. Cited by page name and link only.
 
@@ -212,7 +221,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 |---|---|
 | [GNU GRUB Manual, Security](https://www.gnu.org/software/grub/manual/grub/html_node/Security.html) | HOST-FS-006 |
 
-## sudo project
+## sudo Project
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 
@@ -220,7 +229,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 |---|---|
 | [sudoers(5) manual](https://www.sudo.ws/docs/man/sudoers.man/) | HOST-SUDO-001, HOST-USR-003 |
 
-## nftables project
+## nftables Project
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 
@@ -228,7 +237,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 |---|---|
 | [nftables wiki](https://wiki.nftables.org/) | NET-FW-001 |
 
-## chrony project
+## chrony Project
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 
@@ -236,7 +245,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 |---|---|
 | [chrony Documentation - Access Control](https://chrony-project.org/doc/4.6/chrony.conf.html) | NET-SVC-003 |
 
-## Linux distributions (Debian, Ubuntu, Red Hat)
+## Linux Distributions (Debian, Ubuntu, Red Hat)
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 
@@ -248,7 +257,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [Red Hat Enterprise Linux life cycle](https://access.redhat.com/support/policy/updates/errata) | HOST-OS-001 |
 | [Ubuntu release cycle](https://ubuntu.com/about/release-cycle) | HOST-OS-001 |
 
-## endoflife.date (community-maintained)
+## endoflife.date (Community-Maintained)
 
 - Terms: Community-maintained data, published by the project under its stated open licence, consulted for release dates, cross-checked with vendor pages.
 
@@ -257,7 +266,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [endoflife.date (community-maintained lifecycle data)](https://endoflife.date/) | HOST-OS-001 |
 | [endoflife.date, Node.js (community-maintained lifecycle data)](https://endoflife.date/nodejs) | WEB-NODE-001 |
 
-## Mozilla (MDN Web Docs and Mozilla wiki)
+## Mozilla (MDN Web Docs and Mozilla Wiki)
 
 - Terms: MDN prose is published by Mozilla Contributors under CC BY-SA 2.5; Mozilla wiki pages carry the licence stated on the wiki. Cited by title and link only.
 
@@ -294,7 +303,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [Apache Tomcat 10.1, Realm Configuration How-To (digested passwords)](https://tomcat.apache.org/tomcat-10.1-doc/realm-howto.html) | WEB-TOM-002 |
 | [Apache Tomcat 10.1, Security Considerations](https://tomcat.apache.org/tomcat-10.1-doc/security-howto.html) | Academy P13, WEB-TOM-001, WEB-TOM-002, WEB-TOM-003, WEB-TOM-004, WEB-TOM-005 |
 
-## PHP documentation
+## PHP Documentation
 
 - Terms: The PHP manual is published under CC BY 3.0. Cited by title and link only.
 
@@ -305,7 +314,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [PHP manual, phpinfo()](https://www.php.net/manual/en/function.phpinfo.php) | WEB-EXP-003 |
 | [PHP, Supported Versions](https://www.php.net/supported-versions.php) | WEB-PHP-004 |
 
-## Web frameworks and runtimes (Django, Flask, Werkzeug, Node.js, Express, Gunicorn)
+## Web Frameworks and Runtimes (Django, Flask, Werkzeug, Node.js, Express, Gunicorn)
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 
@@ -323,7 +332,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [Node.js documentation, Debugging guide (security implications)](https://nodejs.org/en/learn/getting-started/debugging) | WEB-NODE-002 |
 | [Werkzeug documentation, Debugging Applications](https://werkzeug.palletsprojects.com/en/stable/debug/) | WEB-PY-004 |
 
-## Content management systems (WordPress, Drupal, Joomla)
+## Content Management Systems (WordPress, Drupal, Joomla)
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 
@@ -340,7 +349,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [WordPress Developer Resources, Hardening WordPress](https://developer.wordpress.org/advanced-administration/security/hardening/) | Academy P14, WEB-CMS-001, WEB-CMS-004, WEB-CMS-005, WEB-CMS-007 |
 | [WordPress Developer Resources, REST API Users endpoint](https://developer.wordpress.org/rest-api/reference/users/) | WEB-CMS-003 |
 
-## Containers and orchestration (Docker, Kubernetes)
+## Containers and Orchestration (Docker, Kubernetes)
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 
@@ -355,7 +364,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [Kubernetes documentation, Operating etcd clusters for Kubernetes](https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/) | HOST-K8S-002 |
 | [Kubernetes documentation, Securing a cluster](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/) | HOST-K8S-001, HOST-K8S-002, HOST-K8S-003 |
 
-## Databases and data services (MySQL, PostgreSQL, MongoDB, Redis, Memcached, Elastic)
+## Databases and Data Services (MySQL, PostgreSQL, MongoDB, Redis, Memcached, Elastic)
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 
@@ -368,7 +377,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [Redis security](https://redis.io/docs/latest/operate/oss_and_stack/management/security/) | Academy P8, NET-DB-001, NET-DB-002 |
 | [memcached Configuration](https://docs.memcached.org/serverguide/configuring/) | NET-DB-006 |
 
-## Network services (BIND 9, Samba, Postfix, Dovecot)
+## Network Services (BIND 9, Samba, Postfix, Dovecot)
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 
@@ -380,7 +389,7 @@ Totals: 165 distinct sources from 31 publishers, cited by 165 checks and 21 Acad
 | [Postfix SMTP Relay and Access Control](https://www.postfix.org/SMTPD_ACCESS_README.html) | NET-DB-012 |
 | [Samba smb.conf Manual](https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html) | NET-DB-009 |
 
-## Projects hosted on GitHub (publisher named in each title)
+## Projects Hosted on GitHub (Publisher Named in Each Title)
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
 

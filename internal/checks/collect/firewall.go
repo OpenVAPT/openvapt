@@ -109,6 +109,9 @@ func parseUFW(out string) []FWRule {
 		if p, pr, ok := strings.Cut(to, "/"); ok {
 			to, proto = p, pr
 		}
+		if strings.EqualFold(to, "anywhere") {
+			to = allPorts // "Anywhere ALLOW IN 10.0.0.5" admits that source on every port
+		}
 		src := strings.TrimSpace(strings.Replace(cols[2], "(v6)", "", 1))
 		if strings.EqualFold(src, "anywhere") {
 			src = "anywhere"
@@ -124,6 +127,9 @@ var nftDport = regexp.MustCompile(`\b(tcp|udp) dport (\{[^}]*\}|\S+)`)
 var nftSaddr = regexp.MustCompile(`\bip6? saddr (!=\s*)?(\{[^}]*\}|\S+)`)
 var nftAccept = regexp.MustCompile(`\baccept\b`)
 var nftLoopback = regexp.MustCompile(`\biif(name)? "?lo"?(\s|$)`)
+
+// nftIface matches an input interface (iif or iifname) that is not negated.
+var nftIface = regexp.MustCompile(`\biif(?:name)? (?:==\s*)?("[^"]+"|\{[^}]*\}|[^\s!=]\S*)`)
 
 // parseNFT reads accept rules with a destination port in input-hook chains.
 func parseNFT(out string) (bool, []FWRule) {
@@ -153,11 +159,27 @@ func parseNFT(out string) (bool, []FWRule) {
 		}
 		m := nftDport.FindStringSubmatch(verdict)
 		if m == nil {
-			continue
+			// An accept with no destination port admits every port, unless it
+			// only matches return traffic, ICMP or another non-port protocol.
+			if nftPortless(verdict) {
+				m = []string{"", "", allPorts}
+			} else {
+				continue
+			}
 		}
 		src := "anywhere"
 		if sm := nftSaddr.FindStringSubmatch(verdict); sm != nil && sm[1] == "" {
 			src = strings.Trim(sm[2], "{} ") // "saddr != X" admits everyone else, so it stays anywhere
+			if strings.HasPrefix(src, "@") {
+				src = "set " + src
+			}
+		}
+		// A port-less accept limited to one non-loopback input interface
+		// (a VPN or container bridge) admits only that interface's traffic.
+		if src == "anywhere" && m[2] == allPorts {
+			if im := nftIface.FindStringSubmatch(verdict); im != nil {
+				src = "interface " + strings.Trim(im[1], `"{} `)
+			}
 		}
 		for _, r := range portRanges(strings.Trim(m[2], "{} ")) {
 			rules = append(rules, FWRule{Engine: "nftables", Proto: m[1], From: r[0], To: r[1], Source: src, Raw: verdict})
@@ -180,7 +202,7 @@ func parseIPTables(out string) []FWRule {
 		if chain != "INPUT" && !strings.HasPrefix(chain, "ufw-user-input") && !strings.HasPrefix(chain, "ufw-before-input") {
 			continue
 		}
-		var proto, ports, src string
+		var proto, ports, src, iface, ipset string
 		loopback, negPort := false, false
 		for i := 0; i+1 < len(f); i++ {
 			neg := i > 0 && f[i-1] == "!" // iptables prints negation as "! -s X"
@@ -195,10 +217,42 @@ func parseIPTables(out string) []FWRule {
 				}
 			case "-i":
 				loopback = f[i+1] == "lo" && !neg
+				if !neg {
+					iface = f[i+1]
+				}
+			case "--match-set":
+				// "-m set --match-set NAME src" admits only the set's members.
+				if !neg && i+2 < len(f) && strings.Contains(f[i+2], "src") {
+					ipset = f[i+1]
+				}
 			}
 		}
-		if ports == "" || loopback || negPort {
+		if loopback || negPort {
 			continue
+		}
+		if ports == "" {
+			// A port-less ACCEPT in INPUT or ufw-user-input admits every port,
+			// unless it only matches return traffic or a non-port protocol.
+			// ufw-before-input holds ufw's own boilerplate (ICMP, DHCP,
+			// mDNS, established traffic), so it is not treated this way.
+			if strings.HasPrefix(chain, "ufw-before-input") || !iptPortless(line, proto) {
+				continue
+			}
+			ports = allPorts
+			if src == "" && ipset != "" {
+				src = "ipset " + ipset
+			}
+			if src == "" && iface != "" {
+				src = "interface " + iface
+			}
+		}
+		switch strings.ToLower(proto) {
+		case "all":
+			proto = ""
+		case "6":
+			proto = "tcp"
+		case "17":
+			proto = "udp"
 		}
 		if src == "" || src == "0.0.0.0/0" || src == "::/0" {
 			src = "anywhere"
@@ -208,6 +262,44 @@ func parseIPTables(out string) []FWRule {
 		}
 	}
 	return rules
+}
+
+// allPorts is the port list used for a rule that names no port.
+const allPorts = "1:65535"
+
+var nftNonPort = regexp.MustCompile(`\bct state\b|\bct status\b|\bicmp(v6)?\b|\bipv6-icmp\b|\bl4proto\b|\bip6? protocol\b|\bnexthdr\b|\bsport\b|\bigmp\b|\besp\b|\bah\b|\bsctp\b|\bgre\b`)
+
+var nftCtState = regexp.MustCompile(`\bct state (\{[^}]*\}|\S+)`)
+
+// nftPortless reports whether an nftables accept rule without a dport
+// matches new connections to every port.
+func nftPortless(rule string) bool {
+	if m := nftCtState.FindStringSubmatch(rule); m != nil {
+		return strings.Contains(m[1], "new") && !nftNonPort.MatchString(strings.Replace(rule, m[0], "", 1))
+	}
+	return !nftNonPort.MatchString(rule)
+}
+
+// iptPortless reports whether an iptables ACCEPT rule without --dport
+// matches new TCP or UDP connections to every port.
+func iptPortless(line, proto string) bool {
+	switch strings.ToLower(proto) {
+	case "", "all", "tcp", "udp", "6", "17":
+	default:
+		return false // icmp, esp, gre and other protocols have no ports
+	}
+	if strings.Contains(line, "--sport") || strings.Contains(line, "--icmp-type") {
+		return false
+	}
+	f := strings.Fields(line)
+	for i := 0; i+1 < len(f); i++ {
+		if f[i] == "--state" || f[i] == "--ctstate" {
+			if !strings.Contains(strings.ToUpper(f[i+1]), "NEW") {
+				return false // only return traffic (ESTABLISHED, RELATED)
+			}
+		}
+	}
+	return true
 }
 
 // portRanges parses "22", "80,443", "8000:8100" and "8000-8100" lists.

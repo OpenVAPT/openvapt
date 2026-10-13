@@ -84,6 +84,8 @@ sha256sum dist/release/openvapt_linux_amd64   # compare with the published SHA25
   <div class="alert alert-info" role="note">{{icon "info"}}<span>Works once the chosen channel has a release. Until then the installer stops and lists the channels that have one.</span></div>
   <p>Read the script first: <a href="{{$d.Repo}}/blob/main/scripts/install.sh">scripts/install.sh</a>. It checks that the machine is Linux on amd64 or arm64, downloads the release binary and <code>SHA256SUMS</code> from GitHub Releases, refuses to install if the SHA-256 checksum does not match, also verifies the Sigstore signature when <code>cosign</code> is installed, and installs to <code>~/.local/bin</code> (or <code>/usr/local/bin</code> as root). It sends nothing anywhere and scans nothing.</p>
 <pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh</pre>
+  <p>The installer downloads only over HTTPS with TLS 1.2 or newer, including redirects. When <code>cosign</code> is missing it continues with the checksum alone; to refuse installation unless the Sigstore signature is verified, set <code>OPENVAPT_REQUIRE_SIGNATURE=1</code>:</p>
+<pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | OPENVAPT_REQUIRE_SIGNATURE=1 sh</pre>
   <p>The installer installs Stable by default. To test a pre-release on a test machine, choose a channel with <code>--channel</code>. Current builds per <a href="channels.html">release channel</a>:</p>
   <div class="table-wrap">
   <table>
@@ -103,12 +105,13 @@ less install.sh
 sh install.sh</pre>
 
   <h3>Option 3: Verified Linux Binary (Optional)</h3>
-  <div class="alert alert-info" role="note">{{icon "info"}}<span>No binary has been released yet. When releases start, they will appear on the GitHub Releases page with <code>SHA256SUMS</code>, a <code>.sigstore.json</code> signature bundle per binary, a source archive and an SBOM. Always verify before running.</span></div>
+  <div class="alert alert-info" role="note">{{icon "info"}}<span>Releases appear on the GitHub Releases page, built only through the promotion workflow after every channel gate passed, with <code>SHA256SUMS</code>, a <code>.sigstore.json</code> signature bundle per binary, build provenance, a source archive and an SBOM. Always verify before running.</span></div>
 <pre class="term">sha256sum -c SHA256SUMS --ignore-missing
-cosign verify-blob --certificate-identity-regexp 'https://github.com/OpenVAPT/openvapt/' \
+cosign verify-blob --certificate-identity-regexp '^https://github\.com/OpenVAPT/openvapt/\.github/workflows/release\.yml@refs/heads/main$' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   --bundle openvapt_linux_amd64.sigstore.json openvapt_linux_amd64
-gh attestation verify openvapt_linux_amd64 --repo OpenVAPT/openvapt</pre>
+gh attestation verify openvapt_linux_amd64 --repo OpenVAPT/openvapt \
+  --signer-workflow OpenVAPT/openvapt/.github/workflows/release.yml</pre>
 
   <h3>Try It Safely First</h3>
 <pre class="term">./openvapt demo                    # scans a simulated vulnerable server, in memory

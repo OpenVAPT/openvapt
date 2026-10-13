@@ -34,23 +34,44 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ inputs.commit }}
+          persist-credentials: false
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
-          go-version: "1.26.x"
-          check-latest: true
+          go-version-file: go.mod
+          check-latest: false
           cache: false
-      - name: Existing release (re-runs complete the record instead of publishing twice)
+      - name: Existing release (re-runs complete the record only when the release is complete)
         id: existing
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            target=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq .object.sha)
-            if [ "$target" != "$COMMIT" ]; then echo "release $TAG exists at $target, not $COMMIT"; exit 1; fi
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
+          set -eu
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
+          # A draft is what an interrupted earlier run leaves behind. It was
+          # never published and is never trusted or published here. Deleting
+          # a release needs the owner's approval (AGENTS.md 3.3), so the run
+          # stops with clear instructions instead of deleting it.
+          if [ "$(gh release view "$TAG" --json isDraft -q .isDraft)" = "true" ]; then
+            echo "::error::release $TAG is an unpublished draft left by an earlier run. With the owner's approval, delete it (gh release delete $TAG) and re-run."
+            exit 1
+          fi
+          target=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq .object.sha)
+          if [ "$target" != "$COMMIT" ]; then echo "release $TAG exists at $target, not $COMMIT"; exit 1; fi
+          # Every expected asset must be present, and match SHA256SUMS, or
+          # record must not run on this release.
+          assets=$(gh release view "$TAG" --json assets -q '.assets[].name')
+          missing=""
+          for a in openvapt_linux_amd64 openvapt_linux_arm64 openvapt_linux_amd64.sigstore.json openvapt_linux_arm64.sigstore.json \
+                   SHA256SUMS sbom.cdx.json GO_VERSION.txt "openvapt-${TAG}-vulndb-snapshot.json.gz" "openvapt-${TAG}-source.tar.gz"; do
+            echo "$assets" | grep -qxF "$a" || missing="$missing $a"
+          done
+          if [ -n "$missing" ]; then echo "release $TAG is incomplete, missing:$missing"; exit 1; fi
+          d="$RUNNER_TEMP/existing"; mkdir -p "$d"
+          gh release download "$TAG" -D "$d"
+          (cd "$d" && sha256sum -c --strict SHA256SUMS)
+          echo "exists=true" >> "$GITHUB_OUTPUT"
       - name: Build the vulnerability snapshot from public OSV and CISA KEV data (owner decision A; see docs/VULNDB.md)
         if: steps.existing.outputs.exists == 'false'
         run: |
@@ -61,7 +82,7 @@ jobs:
         if: steps.existing.outputs.exists == 'false'
         run: |
           go vet ./...
-          go test -race ./internal/vulndb/... ./internal/checks/... ./internal/report/... ./internal/sys/... ./internal/scope/... ./cmd/...
+          go test -race ./...
       - name: Build
         if: steps.existing.outputs.exists == 'false'
         run: make release VERSION="$TAG" COMMIT="$COMMIT"
@@ -71,7 +92,7 @@ jobs:
           set -eu
           rel="$RUNNER_TEMP/rel/download/$TAG"; mkdir -p "$rel"
           cp dist/release/openvapt_linux_* dist/release/SHA256SUMS "$rel/"
-          OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel" sh scripts/install.sh --version "$TAG" --dir "$RUNNER_TEMP/bin"
+          OPENVAPT_ALLOW_FILE=1 OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel" sh scripts/install.sh --version "$TAG" --dir "$RUNNER_TEMP/bin"
           "$RUNNER_TEMP/bin/openvapt" version | grep -F "$TAG"
       - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
         if: steps.existing.outputs.exists == 'false'
@@ -90,7 +111,9 @@ jobs:
       - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         if: steps.existing.outputs.exists == 'false'
         with:
-          subject-path: dist/release/openvapt_linux_*
+          subject-path: |
+            dist/release/openvapt_linux_amd64
+            dist/release/openvapt_linux_arm64
       - name: Publish release
         if: steps.existing.outputs.exists == 'false'
         env:
@@ -109,5 +132,16 @@ jobs:
             echo "Verify before use: SHA256SUMS, Sigstore bundles, build provenance and SBOM are attached."
             echo; cat CHANGELOG.md
           } > notes.md
+          # Created as a draft, so nobody sees a release with missing
+          # assets; checked complete and verified, then published.
           # shellcheck disable=SC2086
-          gh release create "$TAG" dist/release/* --title "OpenVAPT $TAG" --notes-file notes.md --target "$COMMIT" $pre
+          gh release create "$TAG" --draft --title "OpenVAPT $TAG" --notes-file notes.md --target "$COMMIT" $pre
+          for f in dist/release/*; do gh release upload "$TAG" "$f"; done
+          d="$RUNNER_TEMP/published"; mkdir -p "$d"
+          gh release download "$TAG" -D "$d"
+          for a in openvapt_linux_amd64 openvapt_linux_arm64 openvapt_linux_amd64.sigstore.json openvapt_linux_arm64.sigstore.json \
+                   SHA256SUMS sbom.cdx.json GO_VERSION.txt "openvapt-${TAG}-vulndb-snapshot.json.gz" "openvapt-${TAG}-source.tar.gz"; do
+            test -s "$d/$a" || { echo "draft $TAG is missing $a; left as draft"; exit 1; }
+          done
+          (cd "$d" && sha256sum -c --strict SHA256SUMS)
+          gh release edit "$TAG" --draft=false

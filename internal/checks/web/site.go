@@ -77,3 +77,26 @@ func HTML(r sys.HTTPResponse) bool {
 	return strings.Contains(strings.ToLower(r.Header.Get("Content-Type")), "text/html") ||
 		strings.Contains(strings.ToLower(r.Body[:min(len(r.Body), 512)]), "<html")
 }
+
+// Redirected reports whether the home page answered with a redirect. Body
+// and header checks then skip the site (WEB-CK-001 and WEB-HDR-001 do not,
+// because browsers store cookies and honour HSTS on redirects): a redirect response says little
+// about the headers of the page users finally see, and following it would
+// leave the fixed set of local requests this scan makes.
+func (st Site) Redirected() (check.Result, bool) {
+	if st.Home.Status >= 300 && st.Home.Status < 400 {
+		loc := st.Home.Header.Get("Location")
+		return check.SkipR(st.Name, "Home page redirects (HTTP "+itoa(st.Home.Status)+") to "+orNone(loc)+"; headers of the final page were not evaluated"), true
+	}
+	return check.Result{}, false
+}
+
+func orNone(s string) string {
+	if s == "" {
+		return "(no Location header)"
+	}
+	if len(s) > 200 {
+		return s[:200] + "..."
+	}
+	return s
+}

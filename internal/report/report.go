@@ -84,10 +84,15 @@ type Finding struct {
 // written. See package sign.
 type Integrity struct {
 	Algorithm string `json:"algorithm"`  // "ed25519"
-	SHA256    string `json:"sha256"`     // of the report with Integrity = nil
+	SHA256    string `json:"sha256"`     // of the canonical report bytes, see Format
 	PublicKey string `json:"public_key"` // base64
 	KeyID     string `json:"key_id"`     // short fingerprint of the public key
 	Signature string `json:"signature"`  // base64 signature over the SHA-256 digest
+	// Format names how the digest was computed. "openvapt.sign/2": SHA-256 of
+	// CanonicalJSON, and the file must be exactly the canonical JSON of the
+	// report. Empty: the earlier compact form, still verifiable for files in
+	// canonical form.
+	Format string `json:"format,omitempty"`
 }
 
 // FromCheck copies the static metadata of a check into a finding.

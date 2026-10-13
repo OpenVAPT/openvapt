@@ -18,7 +18,7 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:L/I:L/A:N",
 		Summary:   "Checks whether SSH forwards graphical X11 sessions.",
 		Rationale: "Servers rarely need X11. Forwarding it exposes the connecting user's display to anyone with root on the server, and widens the attack surface of sshd.",
-		Detection: "Reads X11Forwarding from the effective sshd configuration; 'yes' fails.",
+		Detection: "Reads X11Forwarding from the effective sshd configuration; 'yes' fails. A risky value set inside a Match block in the config files fails as a conditional finding, with the Match condition in the evidence.",
 		Fix:       "Set  X11Forwarding no  in /etc/ssh/sshd_config and reload sshd.",
 		Verify:    "sshd -T | grep -i x11forwarding  should print 'no'.",
 		Refs:      []check.Ref{refSSHDManual},
@@ -30,6 +30,9 @@ func init() {
 			}
 			if cfg["x11forwarding"] == "yes" {
 				return []check.Result{check.FailR("sshd", "X11 forwarding is enabled", "x11forwarding yes")}
+			}
+			if r, bad := sshMatchFail(cfg, "X11 forwarding is enabled", "x11forwarding"); bad {
+				return []check.Result{r}
 			}
 			return []check.Result{check.PassR("sshd", "X11 forwarding is disabled")}
 		},

@@ -184,24 +184,42 @@ func rpmRelease(s string) (string, string) {
 	}
 	return s[:i], s[i+1:]
 }
+
+// numericParts compares dot-separated numeric version cores of any length;
+// a missing part counts as 0, so 1.2 equals 1.2.0 and 1.2.0.1 is newer.
+func numericParts(a, b string) int {
+	ap, bp := strings.Split(a, "."), strings.Split(b, ".")
+	for i := 0; i < len(ap) || i < len(bp); i++ {
+		var x, y string
+		if i < len(ap) {
+			x = strings.TrimLeft(ap[i], "0")
+		}
+		if i < len(bp) {
+			y = strings.TrimLeft(bp[i], "0")
+		}
+		if len(x) != len(y) {
+			return sign(len(x) - len(y))
+		}
+		if c := strings.Compare(x, y); c != 0 {
+			return sign(c)
+		}
+	}
+	return 0
+}
+
+// SemverCompare orders npm style versions (Semantic Versioning 2.0.0), but
+// accepts any number of numeric parts, treating a missing part as 0.
 func SemverCompare(a, b string) int {
-	parse := func(s string) ([]int, string) {
-		s = strings.TrimPrefix(s, "v")
+	parse := func(s string) (string, string) {
+		s = strings.TrimPrefix(strings.TrimSpace(s), "v")
 		s = strings.SplitN(s, "+", 2)[0]
 		base, pre, _ := strings.Cut(s, "-")
-		p := strings.Split(base, ".")
-		n := make([]int, 3)
-		for i := 0; i < 3 && i < len(p); i++ {
-			n[i], _ = strconv.Atoi(p[i])
-		}
-		return n, pre
+		return base, pre
 	}
 	an, ap := parse(a)
 	bn, bp := parse(b)
-	for i := 0; i < 3; i++ {
-		if an[i] != bn[i] {
-			return sign(an[i] - bn[i])
-		}
+	if x := numericParts(an, bn); x != 0 {
+		return x
 	}
 	if ap == "" && bp != "" {
 		return 1
@@ -227,4 +245,72 @@ func SemverCompare(a, b string) int {
 		}
 	}
 	return sign(len(aa) - len(bb))
+}
+
+// composerStability ranks Composer stability flags: dev < alpha < beta <
+// RC < stable < patch (pl, p).
+func composerStability(s string) (int, bool) {
+	switch strings.ToLower(s) {
+	case "dev":
+		return 0, true
+	case "alpha", "a":
+		return 1, true
+	case "beta", "b":
+		return 2, true
+	case "rc":
+		return 3, true
+	case "", "stable":
+		return 4, true
+	case "patch", "pl", "p":
+		return 5, true
+	}
+	return 0, false
+}
+
+// splitComposer splits "v2.0.0-beta10" into "2.0.0", stability "beta" and
+// number "10".
+func splitComposer(s string) (core, flag, num string) {
+	s = strings.TrimPrefix(strings.TrimPrefix(strings.TrimSpace(s), "v"), "V")
+	s = strings.SplitN(s, "+", 2)[0]
+	i := 0
+	for i < len(s) && (digit(s[i]) || s[i] == '.') {
+		i++
+	}
+	core = strings.TrimRight(s[:i], ".")
+	rest := strings.TrimLeft(s[i:], "-_.")
+	j := 0
+	for j < len(rest) && letter(rest[j]) {
+		j++
+	}
+	flag = rest[:j]
+	num = strings.TrimLeft(rest[j:], "-_.")
+	k := 0
+	for k < len(num) && (digit(num[k]) || num[k] == '.') {
+		k++
+	}
+	return core, flag, num[:k]
+}
+
+// ComposerCompare orders Packagist versions the way Composer does: any
+// number of numeric parts (missing = 0), then stability dev < alpha < beta <
+// RC < stable < patch, then the stability number (beta10 > beta9).
+func ComposerCompare(a, b string) int {
+	ac, af, an := splitComposer(a)
+	bc, bf, bn := splitComposer(b)
+	if x := numericParts(ac, bc); x != 0 {
+		return x
+	}
+	// An unknown flag ranks with dev, the lowest stability, so it can never
+	// hide a vulnerable release; two unknown flags compare as text.
+	as, aok := composerStability(af)
+	bs, bok := composerStability(bf)
+	if !aok && !bok {
+		if x := strings.Compare(strings.ToLower(af), strings.ToLower(bf)); x != 0 {
+			return sign(x)
+		}
+	}
+	if as != bs {
+		return sign(as - bs)
+	}
+	return numericParts(an, bn)
 }

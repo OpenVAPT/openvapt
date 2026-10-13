@@ -58,7 +58,7 @@ func evidence(fs []collect.ConfigFile, keys ...string) []string {
 func registerConfig(r configRule) {
 	check.Register(&check.Check{ID: r.id, Title: r.title, Domain: check.DomainNetwork, Severity: r.severity, Category: check.CatData, Effort: check.EffortLow, CVSS: r.cvss,
 		Summary: r.summary, Rationale: r.rationale, Detection: r.detection, Fix: r.fix, Verify: r.verify, Refs: []check.Ref{r.ref},
-		Standards: check.Standards{CWE: []string{"CWE-16", "CWE-284"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-3", "CM-6", "SC-7"}, CISTopic: "Secure data service configuration"},
+		Standards: dataStandards(r.id),
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			fs := collect.ReadConfigs(ctx, s, r.patterns...)
 			if len(fs) == 0 {
@@ -202,4 +202,38 @@ func flattenValues(fs []collect.ConfigFile) []string {
 		out = append(out, flatten(f.Values)...)
 	}
 	return out
+}
+
+// dataCWE gives each data service check the weakness it actually detects:
+// missing authentication on an insecure default, unsafe sharing permissions,
+// amplification, information exposure or an unintended relay.
+var dataCWE = map[string][]string{
+	"NET-DB-002": {"CWE-306", "CWE-1188"}, // Redis
+	"NET-DB-003": {"CWE-306", "CWE-1188"}, // MongoDB
+	"NET-DB-004": {"CWE-306", "CWE-1188"}, // PostgreSQL trust
+	"NET-DB-005": {"CWE-306", "CWE-1188"}, // MySQL skip-grant-tables, local_infile
+	"NET-DB-006": {"CWE-406", "CWE-1188"}, // memcached UDP amplification
+	"NET-DB-007": {"CWE-306", "CWE-1188"}, // Elasticsearch
+	"NET-DB-008": {"CWE-732", "CWE-306"},  // NFS exports
+	"NET-DB-009": {"CWE-732", "CWE-306"},  // Samba guest
+	"NET-DB-010": {"CWE-406"},             // open recursion
+	"NET-DB-011": {"CWE-200", "CWE-668"},  // zone transfer
+	"NET-DB-012": {"CWE-441"},             // open relay
+	"NET-DB-013": {"CWE-319", "CWE-523"},  // cleartext mail authentication
+}
+
+func dataStandards(id string) check.Standards {
+	st := check.Standards{CWE: dataCWE[id], OWASP: []string{"A05:2021"}, NIST: []string{"AC-3", "CM-6", "SC-7"}, CISTopic: "Secure data service configuration"}
+	switch id {
+	case "NET-DB-006", "NET-DB-010":
+		st.NIST = []string{"SC-5", "CM-6", "SC-7"}
+	case "NET-DB-013":
+		st.OWASP = []string{"A02:2021"}
+		st.NIST = []string{"SC-8", "IA-5(1)"}
+		st.ASVS = []string{"9.1.1"}
+	}
+	if len(st.CWE) == 0 {
+		st.CWE = []string{"CWE-1188"}
+	}
+	return st
 }

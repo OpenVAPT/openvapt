@@ -19,14 +19,14 @@
 
 @theme {
   /* Primitives: Ant Design 5 palettes */
-  --color-blue-1:#e6f4ff; --color-blue-2:#bae0ff; --color-blue-5:#4096ff; --color-blue-6:#1677ff; --color-blue-7:#0958d9;
+  --color-blue-1:#e6f4ff; --color-blue-2:#bae0ff; --color-blue-5:#4096ff; --color-blue-6:#1677ff; --color-blue-7:#0958d9; --color-blue-8:#003eb3;
   --color-red-1:#fff1f0; --color-red-3:#ffa39e; --color-red-7:#cf1322;
-  --color-volcano-1:#fff2e8; --color-volcano-3:#ffbb96; --color-volcano-7:#d4380d;
-  --color-gold-1:#fffbe6; --color-gold-3:#ffe58f; --color-gold-7:#d48806;
+  --color-volcano-1:#fff2e8; --color-volcano-3:#ffbb96; --color-volcano-7:#d4380d; --color-volcano-8:#ad2102;
+  --color-gold-1:#fffbe6; --color-gold-3:#ffe58f; --color-gold-7:#d48806; --color-gold-8:#ad6800; --color-gold-9:#874d00;
   --color-geek-1:#f0f5ff; --color-geek-3:#adc6ff; --color-geek-6:#2f54eb;
-  --color-green-1:#f6ffed; --color-green-3:#b7eb8f; --color-green-7:#389e0d;
+  --color-green-1:#f6ffed; --color-green-3:#b7eb8f; --color-green-7:#389e0d; --color-green-8:#237804;
   /* Neutrals: Ant colorText / colorBorder family, Carbon gray-10 layer */
-  --color-ink:rgba(0,0,0,.88); --color-ink-2:rgba(0,0,0,.65); --color-ink-3:rgba(0,0,0,.45);
+  --color-ink:rgba(0,0,0,.88); --color-ink-2:rgba(0,0,0,.65); --color-ink-3:rgba(0,0,0,.57); /* WCAG AA: >=4.96:1 on white, layer, blue-1, gold-1 */
   --color-line:#d9d9d9; --color-line-2:#f0f0f0; --color-layer:#f4f4f4; --color-page:#ffffff;
 
   --font-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -47,7 +47,7 @@
   h2{font-size:1.75rem;line-height:1.25;margin:56px 0 16px}
   h3{font-size:1.25rem;line-height:1.4;margin:32px 0 8px}
   p,li{max-width:72ch}
-  a{@apply text-blue-6 no-underline hover:text-blue-5 hover:underline}
+  a{@apply text-blue-7 no-underline hover:text-blue-8 hover:underline}
   code{@apply font-mono text-[0.86em] bg-layer rounded px-1.5 py-px}
   p code,li code,dd code,td code{overflow-wrap:anywhere}
   :focus-visible{outline:2px solid var(--color-blue-6);outline-offset:2px;border-radius:4px}
@@ -63,7 +63,7 @@
   .brand{@apply flex items-center gap-2.5 font-semibold text-ink text-[17px] hover:no-underline hover:text-ink}
   .nav{@apply flex flex-wrap gap-x-1}
   .nav a{@apply text-ink-2 text-[14px] px-2.5 py-2 md:px-3 md:py-4 hover:text-ink hover:no-underline border-b-2 border-transparent}
-  .nav a[aria-current=page]{@apply text-blue-6 border-blue-6}
+  .nav a[aria-current=page]{@apply text-blue-7 border-blue-7}
 
   /* Ant Alert */
   .alert{@apply flex items-start gap-2 rounded-card border px-4 py-2.5 text-[14px] leading-[1.57]}
@@ -75,14 +75,14 @@
   /* Ant Button */
   .btn{@apply inline-flex h-ctl-lg items-center justify-center gap-2 whitespace-nowrap rounded-ctl border px-[15px] text-[16px] font-medium leading-none transition-[background,border-color,color,transform] duration-150 select-none hover:no-underline active:scale-[.98]}
   .btn svg{@apply size-4}
-  .btn-primary{@apply bg-blue-6 border-blue-6 text-white shadow-[0_2px_0_rgba(5,145,255,.1)] hover:bg-blue-5 hover:border-blue-5 hover:text-white active:bg-blue-7}
-  .btn-default{@apply bg-white border-line text-ink shadow-[0_2px_0_rgba(0,0,0,.02)] hover:text-blue-5 hover:border-blue-5}
+  .btn-primary{@apply bg-blue-7 border-blue-7 text-white shadow-[0_2px_0_rgba(5,145,255,.1)] hover:bg-blue-8 hover:border-blue-8 hover:text-white active:bg-blue-8}
+  .btn-default{@apply bg-white border-line text-ink shadow-[0_2px_0_rgba(0,0,0,.02)] hover:text-blue-7 hover:border-blue-7}
 
   /* Ant Tag, used for severity */
   .tag{@apply inline-flex items-center rounded-[4px] border px-[7px] text-[12px] leading-5 font-medium whitespace-nowrap}
   .tag-critical{@apply bg-red-1 border-red-3 text-red-7}
-  .tag-high{@apply bg-volcano-1 border-volcano-3 text-volcano-7}
-  .tag-medium{@apply bg-gold-1 border-gold-3 text-gold-7}
+  .tag-high{@apply bg-volcano-1 border-volcano-3 text-volcano-8}
+  .tag-medium{@apply bg-gold-1 border-gold-3 text-gold-9}
   .tag-low{@apply bg-geek-1 border-geek-3 text-geek-6}
   .tag-info{@apply bg-layer border-line text-ink-2}
   .tag-plain{@apply bg-layer border-line text-ink-2 font-mono}
@@ -119,7 +119,7 @@
   /* Ant Steps (vertical-ish, horizontal on desktop) */
   .steps{@apply grid gap-6 md:grid-cols-4}
   .step{@apply flex gap-3}
-  .step-dot{@apply flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-6 text-white text-[14px] font-medium}
+  .step-dot{@apply flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-7 text-white text-[14px] font-medium}
   .step b{@apply block text-ink font-semibold}
   .step p{@apply m-0 text-[14px] text-ink-2}
 
@@ -148,14 +148,14 @@
   .muted{@apply text-[14px] text-ink-3}
   .section-icon{@apply inline-flex size-5 align-[-3px] text-blue-6 mr-2}
 
-  .legal{@apply max-w-[80ch]}
+  .legal{@apply max-w-[80ch] min-w-0;overflow-wrap:anywhere}
   .legal h2{@apply text-[1.35rem] mt-10}
   .legal blockquote{@apply my-4 rounded-card border border-blue-2 bg-blue-1 px-4 py-3}
 
   .chart{@apply h-[300px] w-full}
 
   .foot{@apply mt-16 border-t border-line-2 bg-layer py-12 text-[14px]}
-  .foot a{@apply block py-1 text-ink-2 hover:text-blue-6}
+  .foot a{@apply block py-1 text-ink-2 hover:text-blue-7}
   .foot-h{@apply mb-2 font-semibold text-ink}
 }
 

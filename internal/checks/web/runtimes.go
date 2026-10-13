@@ -86,7 +86,9 @@ type djangoFile struct{ path, text string }
 func djangoSettings(ctx context.Context, s sys.System) map[string][]djangoFile {
 	out := map[string][]djangoFile{}
 	for _, p := range collect.ProjectFiles(ctx, s, "settings.py", "settings/*.py") {
-		r, err := s.ReadFile(ctx, p)
+		// Project folders are writable by site users, who could replace
+		// settings.py with a link to /etc/shadow, so links are refused.
+		r, err := sys.ReadFileNoFollow(ctx, s, p)
 		if err != nil || !djMarker.Match(r.Data) && !djDebugOn.Match(r.Data) {
 			continue
 		}
@@ -268,7 +270,7 @@ func init() {
 		Fix:       "List the real domain names: ALLOWED_HOSTS = ['example.com', 'www.example.com'], and restart the application.",
 		Verify:    "python manage.py check --deploy",
 		Refs:      []check.Ref{refDjangoDeploy, {Title: "Django settings reference, ALLOWED_HOSTS", URL: "https://docs.djangoproject.com/en/stable/ref/settings/#allowed-hosts"}},
-		Standards: check.Standards{CWE: []string{"CWE-644", "CWE-20"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-INPV-17"}, NIST: []string{"CM-6", "SI-10"}},
+		Standards: check.Standards{CWE: []string{"CWE-20"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-INPV-17"}, NIST: []string{"CM-6", "SI-10"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return djangoCheck(ctx, s, func(fs []djangoFile) []string { return matching(fs, djHostsAny, "ALLOWED_HOSTS allows any host") }, "Django accepts any Host header")
 		},

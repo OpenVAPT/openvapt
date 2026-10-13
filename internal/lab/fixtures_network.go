@@ -58,6 +58,12 @@ func networkHardened(f *sys.Fake) {
 	f.Files["/etc/bind/named.conf.options"] = "options { recursion no; allow-transfer { none; }; };\n"
 	f.Files["/etc/postfix/main.cf"] = "mynetworks = 127.0.0.0/8\nsmtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination\nsmtpd_tls_auth_only = yes\n"
 	f.Files["/etc/dovecot/conf.d/10-auth.conf"] = "disable_plaintext_auth = yes\n"
+	// Apache also listens on IPv6 port 443, behind a default-deny ip6tables
+	// policy, and ntpd serves time with queries refused (noquery).
+	f.Files["/proc/net/tcp6"] = procTCP([2]string{"00000000000000000000000000000000", "01BB"})
+	f.Commands["ip6tables -S"] = "-P INPUT DROP\n-P FORWARD DROP\n-P OUTPUT ACCEPT\n-A INPUT -i lo -j ACCEPT\n-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT\n"
+	f.Files["/proc/net/udp"] = procUDP([2]string{"00000000", "007B"})
+	f.Files["/etc/ntp.conf"] = "restrict default kod limited nomodify notrap nopeer noquery\nrestrict 127.0.0.1\nrestrict ::1\n"
 	i := f.TLSResp["443/"+site+"/1.3"]
 	i.PublicKeyAlgorithm = "RSA"
 	i.PublicKeyBits = 3072

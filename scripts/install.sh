@@ -28,6 +28,8 @@
 #   --help             show this help
 # Environment: OPENVAPT_CHANNEL, OPENVAPT_VERSION, OPENVAPT_INSTALL_DIR, OPENVAPT_BASE_URL
 # (releases location) and OPENVAPT_CHANNELS_URL (channel list location), for mirrors and tests.
+# OPENVAPT_REQUIRE_SIGNATURE=1 refuses to install unless cosign verifies the Sigstore signature.
+# OPENVAPT_ALLOW_FILE=1 permits file:// locations (offline tests only); otherwise HTTPS only.
 
 # Everything runs inside main, called on the last line, so a partially
 # downloaded script does nothing at all.
@@ -66,10 +68,24 @@ EOF_USAGE
 }
 
 fetch() { # fetch URL FILE
+	# HTTPS only, also across redirects. file:// is accepted only when
+	# OPENVAPT_ALLOW_FILE=1, for the installer's own offline tests.
+	case "$1" in
+	https://*) ;;
+	file://*) [ "${OPENVAPT_ALLOW_FILE:-0}" = 1 ] || die "file:// URLs need OPENVAPT_ALLOW_FILE=1 (tests only)" ;;
+	*) die "refusing a non-HTTPS URL" ;;
+	esac
 	if command -v curl >/dev/null 2>&1; then
-		curl -fsSL --proto '=https,file' --tlsv1.2 --retry 2 -o "$2" "$1"
+		if [ "${OPENVAPT_ALLOW_FILE:-0}" = 1 ]; then
+			curl -fsSL --proto '=https,file' --proto-redir '=https' --tlsv1.2 --retry 2 -o "$2" "$1"
+		else
+			curl -fsSL --proto '=https' --proto-redir '=https' --tlsv1.2 --retry 2 -o "$2" "$1"
+		fi
 	elif command -v wget >/dev/null 2>&1; then
-		wget -q --https-only -O "$2" "$1"
+		case "$1" in
+		https://*) wget -q --https-only --secure-protocol=TLSv1_2 --max-redirect=5 -O "$2" "$1" ;;
+		*) die "wget can fetch only https:// URLs; install curl for file:// tests" ;;
+		esac
 	else
 		die "curl or wget is required"
 	fi
@@ -89,6 +105,10 @@ sha256() { # sha256 FILE -> hex digest
 # the repository: "<channel> <version> <commit> <date>" per line) and prints
 # the version currently published in the requested channel, or nothing.
 channel_version() {
+	case "$1" in
+	stable | rc | beta | alpha) ;;
+	*) return 0 ;;
+	esac
 	list="$TMP/channels.txt"
 	fetch "$CHANNELS_URL" "$list" 2>/dev/null || return 0
 	tr -d '\r' <"$list" | awk -v c="$1" '$1 == c { print $2; exit }'
@@ -134,18 +154,15 @@ main() {
 	if [ -z "$VERSION" ]; then
 		VERSION=$(channel_version "$CHANNEL")
 		if [ -z "$VERSION" ]; then
-			avail=$(awk '!/^#/ && NF { printf "%s%s", sep, $1; sep=", " }' "$TMP/channels.txt" 2>/dev/null || true)
+			avail=$(awk '!/^#/ && NF && $1 ~ /^(stable|rc|beta|alpha)$/ { printf "%s%s", sep, $1; sep=", " }' "$TMP/channels.txt" 2>/dev/null || true)
 			[ -n "$avail" ] || avail="none yet"
 			die "no $CHANNEL release is published (channels with a release: $avail). Choose one with --channel, or build from source: $REPO_URL#build-from-source"
 		fi
 	fi
-	case "$VERSION" in
-	v[0-9]*) ;;
-	*) die "version must look like v1.2.3, got: $VERSION" ;;
-	esac
-	case "$VERSION" in
-	*[!A-Za-z0-9._-]*) die "version contains unexpected characters: $VERSION" ;;
-	esac
+	if ! printf '%s\n' "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$'; then
+		safe=$(printf '%s' "$VERSION" | tr -cd 'A-Za-z0-9._-' | cut -c1-40)
+		die "version must look like v1.2.3 or v1.2.3-rc.1, got: $safe"
+	fi
 
 	if [ -z "$DIR" ]; then
 		if [ "$(id -u)" -eq 0 ]; then
@@ -180,6 +197,8 @@ main() {
 			--bundle "$TMP/$BIN.sigstore.json" "$TMP/$BIN" >/dev/null 2>&1 ||
 			die "Sigstore signature verification failed for $BIN. Nothing was installed."
 		say "  Sigstore signature verified (built by the OpenVAPT GitHub release workflow)"
+	elif [ "${OPENVAPT_REQUIRE_SIGNATURE:-0}" = 1 ]; then
+		die "OPENVAPT_REQUIRE_SIGNATURE=1 but cosign is not installed, so the Sigstore signature cannot be checked. Nothing was installed."
 	else
 		say "  note: cosign is not installed, so the Sigstore signature was not checked."
 		say "        The checksum came from the same release. For a second, independent check see $REPO_URL#verify"

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"sort"
 	"strings"
 	"time"
 )
@@ -30,9 +31,13 @@ type Header struct {
 	Sources   []Source
 	Counts    Counts
 }
+
+// Event is one OSV range event. Exactly one field is normally set.
 type Event struct {
-	Introduced string
-	Fixed      string
+	Introduced   string
+	Fixed        string
+	LastAffected string `json:"last_affected,omitempty"`
+	Limit        string `json:"limit,omitempty"`
 }
 type Range struct {
 	Type   string
@@ -125,21 +130,95 @@ func affected(a Affected, v string) bool {
 		if cmp == nil {
 			continue
 		}
-		open := false
-		for _, ev := range r.Events {
-			if ev.Introduced != "" {
-				open = ev.Introduced == "0" || cmp(v, ev.Introduced) >= 0
-			}
-			if ev.Fixed != "" && open && cmp(v, ev.Fixed) >= 0 {
-				open = false
-			}
+		if a.Ecosystem == "Packagist" && strings.HasPrefix(strings.ToLower(v), "dev-") {
+			continue // a branch name has no place on a version line
 		}
-		if open {
+		if rangeAffects(r.Events, v, cmp) {
 			return true
 		}
 	}
 	return false
 }
+
+// eventVersion returns the version an event refers to and its kind.
+func eventVersion(e Event) (string, string) {
+	switch {
+	case e.Introduced != "":
+		return e.Introduced, "introduced"
+	case e.Fixed != "":
+		return e.Fixed, "fixed"
+	case e.LastAffected != "":
+		return e.LastAffected, "last_affected"
+	case e.Limit != "":
+		return e.Limit, "limit"
+	}
+	return "", ""
+}
+
+// rangeAffects implements the OSV evaluation algorithm: sort the events by
+// version with the ecosystem comparator, then v is affected when the last
+// event at or below v is "introduced" (a "last_affected" event closes the
+// range only for versions above it). "limit" events bound the range from
+// above. See https://ossf.github.io/osv-schema/#evaluation
+func rangeAffects(events []Event, v string, cmp func(string, string) int) bool {
+	type ev struct{ ver, kind string }
+	var evs, limits []ev
+	for _, e := range events {
+		ver, kind := eventVersion(e)
+		switch kind {
+		case "":
+			continue
+		case "limit":
+			limits = append(limits, ev{ver, kind})
+		default:
+			evs = append(evs, ev{ver, kind})
+		}
+	}
+	vcmp := func(a, b string) int {
+		if a == b {
+			return 0
+		}
+		if a == "0" {
+			return -1
+		}
+		if b == "0" {
+			return 1
+		}
+		return cmp(a, b)
+	}
+	sort.SliceStable(evs, func(i, j int) bool { return vcmp(evs[i].ver, evs[j].ver) < 0 })
+	if len(limits) > 0 {
+		under := false
+		for _, l := range limits {
+			if l.ver == "*" || vcmp(v, l.ver) < 0 {
+				under = true
+				break
+			}
+		}
+		if !under {
+			return false
+		}
+	}
+	affected := false
+	for _, e := range evs {
+		switch e.kind {
+		case "introduced":
+			if vcmp(v, e.ver) >= 0 {
+				affected = true
+			}
+		case "fixed":
+			if vcmp(v, e.ver) >= 0 {
+				affected = false
+			}
+		case "last_affected":
+			if vcmp(v, e.ver) > 0 {
+				affected = false
+			}
+		}
+	}
+	return affected
+}
+
 func comparator(eco, kind string) func(string, string) int {
 	if kind != "ECOSYSTEM" && kind != "SEMVER" {
 		return nil
@@ -149,8 +228,10 @@ func comparator(eco, kind string) func(string, string) int {
 		return DebianCompare
 	case strings.HasPrefix(eco, "AlmaLinux:"), strings.HasPrefix(eco, "Rocky Linux:"):
 		return RPMCompare
-	case eco == "npm", eco == "Packagist":
+	case eco == "npm":
 		return SemverCompare
+	case eco == "Packagist":
+		return ComposerCompare
 	}
 	return nil
 }

@@ -100,7 +100,7 @@ func WebInventory(ctx context.Context, s sys.System) ([]Installed, bool) {
 			if strings.HasPrefix(base, "jquery") && !strings.HasSuffix(base, ".js") {
 				continue
 			}
-			r, e := s.ReadFile(ctx, p)
+			r, e := sys.ReadFileNoFollow(ctx, s, p)
 			if e != nil || !r.Complete {
 				complete = false
 				continue

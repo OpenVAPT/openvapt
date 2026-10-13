@@ -157,3 +157,26 @@ func TestDropInsSortAcrossDirectories(t *testing.T) {
 		t.Errorf("drop-ins must apply by file name across directories: %v user=%q", u.DropIns, u.Get("service.user"))
 	}
 }
+
+func TestPortlessAcceptOnInterfaceOrSetIsRestricted(t *testing.T) {
+	ipt := parseIPTables("-A INPUT -i wg0 -j ACCEPT\n-A INPUT -m set --match-set trusted src -j ACCEPT\n-A INPUT -m set ! --match-set blocked src -j ACCEPT\n-A INPUT ! -i eth0 -j ACCEPT\n")
+	want := []string{"interface wg0", "ipset trusted", "anywhere", "anywhere"}
+	if len(ipt) != len(want) {
+		t.Fatalf("iptables rules: %+v", ipt)
+	}
+	for i, w := range want {
+		if ipt[i].Source != w || ipt[i].From != 1 || ipt[i].To != 65535 {
+			t.Errorf("iptables rule %d: want source %q, got %+v", i, w, ipt[i])
+		}
+	}
+	_, nft := parseNFT("chain input {\n type filter hook input priority 0; policy drop;\n iifname \"docker0\" accept\n ip saddr @allowed accept\n iifname != \"eth0\" accept\n meta l4proto tcp accept\n}")
+	wantN := []string{"interface docker0", "set @allowed", "anywhere"}
+	if len(nft) != len(wantN) {
+		t.Fatalf("nft rules: %+v", nft)
+	}
+	for i, w := range wantN {
+		if nft[i].Source != w {
+			t.Errorf("nft rule %d: want source %q, got %+v", i, w, nft[i])
+		}
+	}
+}

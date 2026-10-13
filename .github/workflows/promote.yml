@@ -32,10 +32,11 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
-          go-version: "1.26.x"
-          check-latest: true
+          go-version-file: go.mod
+          check-latest: false
           cache: false
       - name: Which current releases carry signatures, provenance and an SBOM
         id: signed
@@ -44,12 +45,20 @@ jobs:
         run: |
           signed=""
           for v in $(awk '!/^#/ && NF { print $2 }' release/channels.txt); do
+            echo "$v" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' || continue
             assets=$(gh release view "$v" --json assets -q '.assets[].name' 2>/dev/null || true)
-            echo "$assets" | grep -qx 'openvapt_linux_amd64.sigstore.json' || continue
-            echo "$assets" | grep -qx 'sbom.cdx.json' || continue
-            gh release download "$v" -p openvapt_linux_amd64 -D "$RUNNER_TEMP/$v" || continue
-            gh attestation verify "$RUNNER_TEMP/$v/openvapt_linux_amd64" --repo "$GITHUB_REPOSITORY" \
-              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml" >/dev/null || continue
+            ok=1
+            for a in openvapt_linux_amd64 openvapt_linux_arm64 openvapt_linux_amd64.sigstore.json openvapt_linux_arm64.sigstore.json SHA256SUMS sbom.cdx.json; do
+              echo "$assets" | grep -qx "$a" || { ok=0; break; }
+            done
+            [ "$ok" = 1 ] || continue
+            for arch in amd64 arm64; do
+              gh release download "$v" -p "openvapt_linux_$arch" -p "openvapt_linux_$arch.sigstore.json" -D "$RUNNER_TEMP/$v" || { ok=0; break; }
+              gh attestation verify "$RUNNER_TEMP/$v/openvapt_linux_$arch" --repo "$GITHUB_REPOSITORY" \
+                --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml" >/dev/null || { ok=0; break; }
+              test -s "$RUNNER_TEMP/$v/openvapt_linux_$arch.sigstore.json" || { ok=0; break; }
+            done
+            [ "$ok" = 1 ] || continue
             signed="$signed,$v"
           done
           echo "signed=${signed#,}" >> "$GITHUB_OUTPUT"
@@ -71,10 +80,11 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ needs.plan.outputs.commit }}
+          persist-credentials: false
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
-          go-version: "1.26.x"
-          check-latest: true
+          go-version-file: go.mod
+          check-latest: false
           cache: false
       - name: Format
         run: test -z "$(gofmt -l .)"
@@ -93,13 +103,15 @@ jobs:
       - name: Installer end to end (verified install, tamper refusal)
         run: |
           set -eu
-          rel="$RUNNER_TEMP/rel/download/v0.0.0-ci"; mkdir -p "$rel"
+          rel="$RUNNER_TEMP/rel/download/v0.0.0-alpha.0"; mkdir -p "$rel"
           cp dist/release/openvapt_linux_* dist/release/SHA256SUMS "$rel/"
           export OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel"
-          sh scripts/install.sh --version v0.0.0-ci --dir "$RUNNER_TEMP/bin"
+          if sh scripts/install.sh --version v0.0.0-alpha.0 --dir "$RUNNER_TEMP/bin0"; then echo "file:// accepted without OPENVAPT_ALLOW_FILE"; exit 1; fi
+          export OPENVAPT_ALLOW_FILE=1
+          sh scripts/install.sh --version v0.0.0-alpha.0 --dir "$RUNNER_TEMP/bin"
           "$RUNNER_TEMP/bin/openvapt" version
           printf 'x' >> "$rel/openvapt_linux_amd64"
-          if sh scripts/install.sh --version v0.0.0-ci --dir "$RUNNER_TEMP/bin2"; then echo "tampered binary was installed"; exit 1; fi
+          if sh scripts/install.sh --version v0.0.0-alpha.0 --dir "$RUNNER_TEMP/bin2"; then echo "tampered binary was installed"; exit 1; fi
 
   release:
     needs: [plan, verify]
@@ -121,10 +133,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
+          # Kept: this job pushes the record. It runs no third-party code
+          # beyond setup-go and the repository's own go run ./cmd/channel.
+          persist-credentials: true
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
-          go-version: "1.26.x"
-          check-latest: true
+          go-version-file: go.mod
+          check-latest: false
           cache: false
       - name: Re-check every gate with the verified evidence, record the promotion and push
         env:

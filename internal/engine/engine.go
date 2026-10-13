@@ -133,25 +133,45 @@ func statusRank(s string) int {
 }
 
 // runOne runs a single check with a timeout and turns a panic into an Error
-// result, so one broken check can never stop the whole scan.
-func runOne(parent context.Context, s sys.System, c *check.Check, timeout time.Duration) (f report.Finding) {
-	f = report.FromCheck(c)
+// result, so one broken check can never stop the whole scan. The check runs
+// in its own goroutine: a check that ignores its context (for example one
+// stuck in a blocking read) is abandoned when the timeout fires instead of
+// stalling the scan.
+func runOne(parent context.Context, s sys.System, c *check.Check, timeout time.Duration) report.Finding {
+	f := report.FromCheck(c)
 	ctx, cancel := context.WithTimeout(parent, timeout)
 	defer cancel()
-	defer func() {
-		if p := recover(); p != nil {
-			f.Results = []check.Result{{Status: check.Error, Target: c.ID, Message: fmt.Sprintf("internal error: %v", p)}}
-			f.Status = string(check.Error)
-			if os.Getenv("OPENVAPT_DEBUG") != "" {
-				fmt.Fprintln(os.Stderr, string(debug.Stack()))
+	type outcome struct {
+		res      []check.Result
+		panicked any
+	}
+	done := make(chan outcome, 1) // buffered: an abandoned check never blocks on send
+	go func() {
+		defer func() {
+			if p := recover(); p != nil {
+				if os.Getenv("OPENVAPT_DEBUG") != "" {
+					fmt.Fprintln(os.Stderr, string(debug.Stack()))
+				}
+				done <- outcome{panicked: p}
 			}
-		}
+		}()
+		done <- outcome{res: c.Run(ctx, s)}
 	}()
-	res := c.Run(ctx, s)
-	if ctx.Err() != nil {
+	var res []check.Result
+	select {
+	case o := <-done:
+		if o.panicked != nil {
+			res = []check.Result{{Status: check.Error, Target: c.ID, Message: fmt.Sprintf("internal error: %v", o.panicked)}}
+		} else if ctx.Err() != nil {
+			res = []check.Result{{Status: check.Error, Target: c.ID, Message: "timed out after " + timeout.String()}}
+		} else {
+			res = o.res
+		}
+	case <-ctx.Done():
 		res = []check.Result{{Status: check.Error, Target: c.ID, Message: "timed out after " + timeout.String()}}
 	}
 	for i := range res {
+		res[i].Target = redact.String(res[i].Target)
 		res[i].Message = redact.String(res[i].Message)
 		res[i].Evidence = redact.All(res[i].Evidence)
 	}

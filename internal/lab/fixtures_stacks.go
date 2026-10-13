@@ -66,6 +66,7 @@ func stacksVulnerable(f *sys.Fake) {
 		"-A DOCKER -d 172.17.0.2/32 ! -i docker0 -o docker0 -p tcp -m tcp --dport 80 -j ACCEPT\n-A DOCKER-USER -j RETURN\n"
 
 	// One web root holding WordPress, Joomla and Drupal configuration.
+	file(f, "/var/www/shop/configuration.php", "<?php\nclass JConfig {\n\tpublic $debug = '0';\n\tpublic $error_reporting = 'none';\n\tpublic $password = 'hunter2';\n}\n", 0o640)
 	file(f, "/var/www/shop/wp-config.php", "<?php\ndefine('DB_NAME', 'shop');\ndefine('DB_PASSWORD', 'hunter2');\n"+
 		"define('WP_DEBUG', true);\ndefine('AUTOMATIC_UPDATER_DISABLED', true);\n", 0o666)
 	file(f, "/var/www/shop/configuration.php", "<?php\nclass JConfig {\n\tpublic $debug = '1';\n\tpublic $error_reporting = 'maximum';\n\tpublic $password = 'hunter2';\n}\n", 0o644)
@@ -109,6 +110,7 @@ func stacksHardened(f *sys.Fake) {
 		"To                         Action      From\n--                         ------      ----\n" +
 		"22/tcp                     LIMIT IN    Anywhere\n80/tcp                     ALLOW IN    Anywhere\n443/tcp                    ALLOW IN    Anywhere\n"
 
+	file(f, "/var/www/shop/configuration.php", "<?php\nclass JConfig {\n\tpublic $debug = '0';\n\tpublic $error_reporting = 'none';\n\tpublic $password = 'hunter2';\n}\n", 0o640)
 	file(f, "/var/www/shop/wp-config.php", "<?php\ndefine('DB_NAME', 'shop');\ndefine('DB_PASSWORD', 'hunter2');\n"+
 		"define('WP_DEBUG', false);\ndefine('DISALLOW_FILE_EDIT', true);\ndefine('WP_AUTO_UPDATE_CORE', 'minor');\n", 0o640)
 }

@@ -57,7 +57,7 @@ func init() {
 		Fix:       "Apache: SSLProtocol -all +TLSv1.2 +TLSv1.3 . nginx: ssl_protocols TLSv1.2 TLSv1.3; . Postfix/Dovecot: set the minimum protocol to TLSv1.2. Reload the service afterwards.",
 		Verify:    "openssl s_client -connect 127.0.0.1:443 -tls1_1 </dev/null  should fail to connect.",
 		Refs:      refTLS,
-		Standards: check.Standards{CWE: []string{"CWE-326", "CWE-327"}, OWASP: []string{"A02:2021"}, ASVS: []string{"9.1.3"}, NIST: []string{"SC-8", "SC-13"}, CISTopic: "TLS protocol versions"},
+		Standards: check.Standards{CWE: []string{"CWE-326", "CWE-327"}, OWASP: []string{"A02:2021"}, WSTG: []string{"WSTG-CRYP-01"}, ASVS: []string{"9.1.3"}, NIST: []string{"SC-8", "SC-13"}, CISTopic: "TLS protocol versions"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			targets := tlsTargets(s)
 			if len(targets) == 0 {
@@ -106,7 +106,7 @@ func init() {
 		Fix:       "Renew the certificate (certbot renew, or your provider's process) and make sure renewal is automated (systemctl list-timers | grep certbot).",
 		Verify:    "echo | openssl s_client -connect 127.0.0.1:443 -servername <site> 2>/dev/null | openssl x509 -noout -enddate",
 		Refs:      append([]check.Ref{{Title: "Let's Encrypt, certificate lifetimes and renewal", URL: "https://letsencrypt.org/docs/faq/"}}, refTLS[1]),
-		Standards: check.Standards{CWE: []string{"CWE-298"}, OWASP: []string{"A02:2021"}, ASVS: []string{"9.2.1"}, NIST: []string{"SC-12", "SC-17"}, CISTopic: "Certificate validity"},
+		Standards: check.Standards{CWE: []string{"CWE-298"}, OWASP: []string{"A02:2021"}, WSTG: []string{"WSTG-CRYP-01"}, ASVS: []string{"9.2.1"}, NIST: []string{"SC-12", "SC-17"}, CISTopic: "Certificate validity"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			targets := tlsTargets(s)
 			if len(targets) == 0 {
@@ -149,7 +149,7 @@ func init() {
 		Fix:       "Issue a certificate from a public CA covering every site name, for example with certbot --apache or certbot --nginx -d example.com -d www.example.com.",
 		Verify:    "openssl s_client -connect 127.0.0.1:443 -servername <site> </dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName",
 		Refs:      append([]check.Ref{{Title: "RFC 6125, Representation and Verification of Domain-Based Application Service Identity", URL: "https://www.rfc-editor.org/rfc/rfc6125"}}, refTLS[1]),
-		Standards: check.Standards{CWE: []string{"CWE-295", "CWE-297"}, OWASP: []string{"A02:2021", "A07:2021"}, ASVS: []string{"9.2.1"}, NIST: []string{"SC-17"}, CISTopic: "Certificate trust"},
+		Standards: check.Standards{CWE: []string{"CWE-295", "CWE-297"}, OWASP: []string{"A02:2021", "A07:2021"}, WSTG: []string{"WSTG-CRYP-01"}, ASVS: []string{"9.2.1"}, NIST: []string{"SC-17"}, CISTopic: "Certificate trust"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			var out []check.Result
 			for _, t := range tlsTargets(s) {

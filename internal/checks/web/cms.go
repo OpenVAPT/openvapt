@@ -24,7 +24,7 @@ func init() {
 		Fix:       "Keep WordPress updated (automatic minor updates on). Remove the generator tag (remove_action('wp_head','wp_generator')) and delete readme.html after each update, or block it at the web server.",
 		Verify:    "curl -s https://<site>/ | grep -i 'name=\"generator\"'",
 		Refs:      []check.Ref{{Title: "WordPress Developer Resources, Hardening WordPress", URL: "https://developer.wordpress.org/advanced-administration/security/hardening/"}},
-		Standards: check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021", "A06:2021"}, ASVS: []string{"14.3.3"}},
+		Standards: check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021", "A06:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-08"}, NIST: []string{"CM-7", "SI-11"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			gen := regexp.MustCompile(`(?i)<meta name="generator" content="WordPress ([\d.]+)"`)
 			return ForEachSite(ctx, s, func(st Site) check.Result {
@@ -55,7 +55,7 @@ func init() {
 		Fix:       "Block it at the web server (<Files xmlrpc.php> Require all denied </Files>) or disable it with a security plugin, unless Jetpack or the mobile app needs it.",
 		Verify:    "curl -s https://<site>/xmlrpc.php  should return 403 or 404.",
 		Refs:      []check.Ref{{Title: "WordPress Developer Resources, Brute Force Attacks (XML-RPC)", URL: "https://developer.wordpress.org/advanced-administration/security/brute-force/"}},
-		Standards: check.Standards{CWE: []string{"CWE-307"}, OWASP: []string{"A07:2021"}},
+		Standards: check.Standards{CWE: []string{"CWE-307"}, OWASP: []string{"A07:2021"}, NIST: []string{"AC-7", "CM-7"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {
 				r, err := st.Get(ctx, s, "/xmlrpc.php")

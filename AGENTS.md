@@ -1,6 +1,6 @@
 # AI Cybersecurity Engineer Governance Policy
 
-Version 1.1, effective 2026-10-13. Issued by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer) under the owner's mandate. It binds every AI Cybersecurity Engineer that works on OpenVAPT: Claude, OpenAI Codex, any sub-agent, and any other model or tool. It is not legal advice.
+Version 1.2, effective 2026-10-13. Issued by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer) under the owner's mandate. It binds every AI Cybersecurity Engineer that works on OpenVAPT: Claude, OpenAI Codex, any sub-agent, and any other model or tool. It is not legal advice.
 
 OpenVAPT is academic, non-commercial, source-available code built by AI Cybersecurity Engineers, free for Own Use only, used 100% at the user's own risk. Every AI Cybersecurity Engineer action must keep that true.
 
@@ -120,3 +120,19 @@ OpenVAPT has one codebase and one website, with four channels in this order: alp
 ## 10. Changes to This Policy
 
 Only the AI legal reviewer may draft changes to this policy, and only the owner may approve them in chat. Each version is dated and kept in the Git history.
+
+Version history:
+
+| Version | Effective | Change |
+|---|---|---|
+| 1.2 | 2026-10-13 | Adopted the Governance, Control and Assurance Framework 1.0 and incorporated it by reference (section 11). Drafted by the AI legal reviewer; approved by the owner in chat. Precedence in section 1.3 unchanged. |
+| 1.1 | 2026-10-13 | Earlier version, kept in the Git history. |
+
+## 11. Governance, Control and Assurance Framework
+
+1. [GOVERNANCE-CONTROL-ASSURANCE.md](GOVERNANCE-CONTROL-ASSURANCE.md) (GCA), Version 1.0, is incorporated into this policy by reference and binds every AI Cybersecurity Engineer as part of this policy. It sets the invariants (I1 to I7), decision seats, risk tiers (T0 to T3), controls, approval gates by tier, independence rules, evidence classes and audit programme.
+2. The order of precedence in section 1.3 is unchanged. The GCA sits at the level of this policy. Where the GCA and the other sections of this policy differ, the stricter rule applies, and the text of this policy wins on any conflict of meaning. Nothing in the GCA loosens sections 3, 4 or 5.
+3. Every change of tier T1 or higher is described by a Task Card using [docs/TASK-CARD.md](docs/TASK-CARD.md).
+4. A GCA control is described as existing only when its status is Exists. Partial and Planned controls are never presented as working, in public text or in records.
+5. Changes to the GCA follow section 10 and are tier T3.
+

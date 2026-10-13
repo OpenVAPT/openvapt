@@ -50,6 +50,7 @@ var (
 	outDir      = flag.String("out", "dist/site", "output directory")
 	base        = flag.String("base", "/", "URL path the site is served under, e.g. /beta/")
 	noindex     = flag.Bool("noindex", false, "add noindex to every page (automatic until a signed-off Stable release exists)")
+	unpinned    = flag.Bool("allow-unpinned", false, "build even when no git commit can be resolved (code citations then point at the main branch, not a pinned commit)")
 	commit      string
 	built       = time.Now().UTC()
 	siteChannel siteChannels
@@ -60,7 +61,10 @@ type Page struct {
 	Title, Description, Path, Section  string
 	Base, Commit, CommitShort, Version string
 	Built                              string
-	NoIndex                            bool
+	NoIndex                            bool   // whole build is noindex (beta, pre-release)
+	NoIndexPage                        bool   // this page alone is noindex (answer keys, 404)
+	Canonical                          string // absolute URL of this page; empty when it has none (404)
+	Root                               string // absolute URL of the site root, siteURL + base, no trailing slash
 	Channel                            string // most mature released channel, or Pre-Release
 	PreRelease                         bool
 	JSONLD                             template.JS
@@ -131,21 +135,21 @@ func main() {
 		"RubricLevels": academy.RubricLevels,
 	}
 	pages := []struct{ file, path, title, desc, section string }{
-		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "OpenVAPT is an academic, non-commercial project with source-available code built by AI Cybersecurity Engineers. Free to download and use on your own Linux server, for personal or business own use, 100% at your own risk.", "home"},
+		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "Academic, non-commercial VAPT tool with source-available code built by AI Cybersecurity Engineers. Free for own use on your Linux server, 100% at your own risk.", "home"},
 		{"how-it-works.html", "how-it-works.html", "How OpenVAPT Is Built", "A module by module walkthrough of the OpenVAPT source code, with every function cited to the exact file and line.", "built"},
 		{"standards.html", "standards.html", "Standards and Methodology", "How OpenVAPT maps to NIST SP 800-115, CVSS v3.1, OWASP Top 10, OWASP ASVS, CWE and NIST SP 800-53.", "standards"},
 		{"limits.html", "limits.html", "What OpenVAPT Does Not Do", "The deliberate limits of OpenVAPT: no exploitation, no remote targets, no data collection, not a penetration test.", "limits"},
 		{"learn.html", "learn.html", "Learn Vulnerability Assessment", "Lessons on vulnerability assessment using OpenVAPT and its safe simulated lab servers.", "learn"},
 		{"download.html", "download.html", "Download and Run OpenVAPT", "Build OpenVAPT from source or download a release, verify it, and run it on your own Linux machine.", "download"},
 		{"contribute.html", "contribute.html", "Review, Report and Contribute", "Report bugs, false positives and new check ideas on GitHub, and how OpenVAPT versions and releases work.", "contribute"},
-		{"cite.html", "cite.html", "Cite OpenVAPT", "How to cite OpenVAPT in academic work.", "cite"},
-		{"coverage.html", "coverage.html", "Coverage Dashboard: What OpenVAPT Assesses", "Interactive coverage of OpenVAPT's checks by control category and severity, mapped to CIS Controls v8, NIST CSF 2.0, OWASP Top 10 and OWASP WSTG.", "coverage"},
-		{"teach.html", "teach.html", "For Teachers: Teach Vulnerability Assessment With OpenVAPT", "Free course plans, printable worksheets and answer keys, a marking rubric and per-student practice labs for teaching vulnerability assessment with OpenVAPT.", "teach"},
-		{"channels.html", "channels.html", "Release Channels: Alpha, Beta, Release Candidate and Stable", "How OpenVAPT moves from Alpha to Beta, Release Candidate and Stable, the evidence each gate requires, and the current build in every channel.", "channels"},
-		{"faq.html", "faq.html", "OpenVAPT FAQ: Free Academic VAPT Tool Questions Answered", "Answers about OpenVAPT, the free academic vulnerability assessment tool for Linux: cost, licence, company use, scope, safety, standards and data.", "faq"},
-		{"compare.html", "compare.html", "OpenVAPT Compared With Lynis, OpenSCAP, OpenVAS, Nuclei and ZAP", "How OpenVAPT, a free academic VAPT learning tool, compares with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy and OWASP ZAP, and when to use each.", "compare"},
+		{"cite.html", "cite.html", "Cite OpenVAPT", "How to cite OpenVAPT in academic work, with ready-made citation formats.", "cite"},
+		{"coverage.html", "coverage.html", "Coverage Dashboard: What It Assesses", "Interactive coverage of OpenVAPT's checks by control category and severity, mapped to CIS Controls v8, NIST CSF 2.0, OWASP Top 10 and OWASP WSTG.", "coverage"},
+		{"teach.html", "teach.html", "For Teachers: Teach Vulnerability Assessment", "Free course plans, printable worksheets and answer keys, a marking rubric and per-student practice labs for teaching vulnerability assessment with OpenVAPT.", "teach"},
+		{"channels.html", "channels.html", "Release Channels: Alpha to Stable", "How OpenVAPT moves from Alpha to Beta, Release Candidate and Stable, the evidence each gate requires, and the current build in every channel.", "channels"},
+		{"faq.html", "faq.html", "FAQ: Free Academic VAPT Tool Questions", "Answers about OpenVAPT, the free academic vulnerability assessment tool for Linux: cost, licence, company use, scope, safety, standards and data.", "faq"},
+		{"compare.html", "compare.html", "Compared With Lynis, OpenSCAP, OpenVAS and ZAP", "How OpenVAPT, a free academic VAPT learning tool, compares with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy and OWASP ZAP, and when to use each.", "compare"},
 		{"privacy-notice.html", "no-data.html", "We Collect No Data", "OpenVAPT and openvapt.com collect no data: no cookies, no analytics, no logs, no forms, no accounts.", "nodata"},
-		{"404.html", "404.html", "Page Not Found", "This page does not exist.", ""},
+		{"404.html", "404.html", "Page Not Found", "This page does not exist. Try the OpenVAPT check catalogue or the home page.", ""},
 	}
 	for _, p := range pages {
 		g.content(p.file, p.path, p.title, p.desc, p.section, data)
@@ -154,12 +158,12 @@ func main() {
 	// Check catalogue.
 	g.content("checks.html", "checks/index.html", "Check Catalogue", fmt.Sprintf("All %d OpenVAPT checks with their rationale, detection logic, fix, references and source code.", len(checks)), "checks", data)
 	for _, c := range checks {
-		g.render("check.html", "checks/"+c.ID+".html", c.ID+": "+c.Title, c.Summary, "checks",
+		g.render("check.html", "checks/"+c.ID+".html", shortTitle(c.ID+" "+c.Title), padDesc(c.Summary, "Detection, fix and verification steps."), "checks",
 			map[string]any{"C": c, "Cite": cites[c.ID], "Learn": academy.ForCheck(c.ID)})
 	}
 
 	// OpenVAPT Academy: course index, one page per module, and the glossary.
-	g.render("academy.html", "academy/index.html", "OpenVAPT Academy: Learn VAPT From Theory to Application", fmt.Sprintf("A free %d-module course that teaches", len(academy.Modules))+"  vulnerability assessment from security basics to running, fixing, reporting and building checks, using OpenVAPT and a safe simulated lab.", "academy", data)
+	g.render("academy.html", "academy/index.html", "Academy: Learn VAPT From Theory to Application", trimDesc(fmt.Sprintf("A free %d-module course that teaches vulnerability assessment from security basics to running, fixing, reporting and building checks, with a safe simulated lab.", len(academy.Modules))), "academy", data)
 	for i := range academy.Modules {
 		m := &academy.Modules[i]
 		var prev, next *academy.Module
@@ -169,38 +173,48 @@ func main() {
 		if i+1 < len(academy.Modules) {
 			next = &academy.Modules[i+1]
 		}
-		g.render("module.html", "academy/"+strings.ToLower(m.ID)+".html", m.ID+": "+m.Title+" - OpenVAPT Academy", m.Summary, "academy",
+		g.render("module.html", "academy/"+strings.ToLower(m.ID)+".html", shortTitle(m.ID+": "+m.Title), padDesc(trimDesc(m.Summary), "A free OpenVAPT Academy module."), "academy",
 			map[string]any{"M": m, "Checks": checksFor(m), "Prev": prev, "Next": next, "Glossary": academy.Glossary})
 		// Printable worksheet and teacher answer key for every module.
 		for _, w := range []struct {
 			answers   bool
 			prefix, t string
-		}{{false, "worksheet-", "Worksheet"}, {true, "key-", "Teacher Answer Key"}} {
+		}{{false, "worksheet-", "Worksheet"}, {true, "key-", "Answer Key"}} {
 			path := "academy/" + w.prefix + strings.ToLower(m.ID) + ".html"
-			g.page(path, path, m.ID+" "+w.t+": "+m.Title+" - OpenVAPT Academy", "Printable "+strings.ToLower(w.t)+" for OpenVAPT Academy module "+m.ID+", "+m.Title+", for free teaching use.", "teach",
-				template.HTML(`<div class="legal worksheet"><p class="muted no-print"><a href="../teach.html">For Teachers</a> &middot; <a href="`+strings.ToLower(m.ID)+`.html">Back to the Module</a> &middot; Print with your browser's Print command.</p><h1>`+template.HTMLEscapeString(m.ID+" "+w.t+": "+m.Title)+`</h1>`+markdown(academy.Worksheet(m, w.answers))+`</div>`)) // #nosec G203 -- markdown() HTML-escapes all text first
+			g.page(path, path, shortTitle(m.ID+" "+w.t+": "+m.Title), trimDesc("Printable "+strings.ToLower(w.t)+" for OpenVAPT Academy module "+m.ID+", "+m.Title+", for free teaching use."), "teach",
+				template.HTML(`<div class="legal worksheet"><p class="muted no-print"><a href="../teach.html">For Teachers</a> &middot; <a href="`+strings.ToLower(m.ID)+`.html">Back to the Module</a> &middot; Print with your browser's Print command.</p><h1>`+template.HTMLEscapeString(m.ID+" "+map[bool]string{false: "Worksheet", true: "Teacher Answer Key"}[w.answers]+": "+m.Title)+`</h1>`+markdown(academy.Worksheet(m, w.answers))+`</div>`)) // #nosec G203 -- markdown() HTML-escapes all text first
 		}
 	}
-	g.render("glossary.html", "glossary.html", "VAPT Glossary: Vulnerability Assessment Terms Explained", "Plain-language definitions of vulnerability assessment and penetration testing terms, from ASLR and CVSS to TLS and VAPT.", "academy", data)
+	g.render("glossary.html", "glossary.html", "VAPT Glossary: Assessment Terms Explained", "Plain-language definitions of vulnerability assessment and penetration testing terms, from ASLR and CVSS to TLS and VAPT.", "academy", data)
 
 	// Legal pages are rendered from the Markdown files in the repository root,
 	// so the website and the repository always say the same thing.
-	for _, l := range []struct{ md, path, title, desc string }{
-		{"EULA.md", "legal/eula.html", "End User Licence Agreement", "Terms for downloading and using OpenVAPT."},
+	legal := []struct{ md, path, title, desc string }{
+		{"EULA.md", "legal/eula.html", "End User Licence Agreement", "Terms for downloading and using OpenVAPT, free for own use at your own risk."},
 		{"DISCLAIMER.md", "legal/disclaimer.html", "Disclaimer", "OpenVAPT is an academic project provided as is, at your own risk."},
-		{"PRIVACY.md", "legal/privacy.html", "Privacy Policy", "OpenVAPT collects no personal data at all."},
-		{"ACCEPTABLE_USE.md", "legal/acceptable-use.html", "Acceptable Use Policy", "How OpenVAPT may and may not be used."},
+		{"PRIVACY.md", "legal/privacy.html", "Privacy Policy", "OpenVAPT and openvapt.com collect no personal data: no cookies, no analytics, no forms."},
+		{"ACCEPTABLE_USE.md", "legal/acceptable-use.html", "Acceptable Use Policy", "How OpenVAPT may and may not be used: only on machines you own or control."},
 		{"LICENSING.md", "legal/licence.html", "Licence", "How OpenVAPT is licensed: the OpenVAPT Source-Available Licence 1.1, for own use only, with no services and no selling."},
 		{"LICENSE", "legal/licence-text.html", "OpenVAPT Source-Available Licence 1.1", "The full text of the OpenVAPT Source-Available Licence 1.1, the only licence under which OpenVAPT is made available."},
-		{"AI-DISCLOSURE.md", "legal/ai-disclosure.html", "AI Disclosure", "OpenVAPT is researched, developed and built entirely by AI Cybersecurity Engineers under human direction. Which AI systems produced it, what the human owner did, and what has not been reviewed."},
+		{"AI-DISCLOSURE.md", "legal/ai-disclosure.html", "AI Disclosure", "OpenVAPT is built entirely by AI Cybersecurity Engineers under human direction: which AI systems built it, what the owner did and what is not reviewed."},
 		{"TEACHING.md", "legal/teaching.html", "Teaching With OpenVAPT", "What teachers, schools, colleges and universities may do with OpenVAPT and its Academy, free, and what stays excluded."},
 		{"CREDITS.md", "legal/credits.html", "Credits, Sources and Citations", "Every component, tool, standard, source and AI system OpenVAPT uses or refers to, cited precisely."},
 		{"SOURCES.md", "legal/sources.html", "Sources Cited by Checks and the Academy", "Every public source OpenVAPT's checks and Academy cite, grouped by publisher, with terms, credit lines and the checks citing each. Generated from code."},
-	} {
+		{"GOVERNANCE-CONTROL-ASSURANCE.md", "legal/governance.html", "Governance, Control and Assurance", "How OpenVAPT's AI Cybersecurity Engineers and its owner decide, what controls enforce, and how outcomes are verified and audited."},
+		{"AGENTS.md", "legal/agents.html", "AI Cybersecurity Engineer Policy", "The binding policy for every AI Cybersecurity Engineer working on OpenVAPT: what is always allowed, what needs the owner, and what is never allowed."},
+	}
+	for _, l := range legal {
+		mdPages[l.md] = filepath.Base(l.path)
+	}
+	for _, l := range legal {
 		b, err := os.ReadFile(l.md)
 		must(err)
 		g.page("legal/"+filepath.Base(l.path), l.path, l.title, l.desc, "legal",
 			template.HTML(`<div class="legal"><h1>`+template.HTMLEscapeString(l.title)+`</h1>`+markdown(string(b))+`</div>`)) // #nosec G203 -- markdown() HTML-escapes all text first
+	}
+
+	if len(g.problems) > 0 {
+		log.Fatalf("%d page(s) break the title or description length rules (title with suffix <= %d, description %d to %d characters); fix them above", len(g.problems), maxTitle, minDesc, maxDesc)
 	}
 
 	writeSampleReports()
@@ -210,7 +224,82 @@ func main() {
 }
 
 type gen struct {
-	paths []string
+	paths    []string
+	problems []string
+}
+
+// Search snippet limits checked at build time for every page.
+const (
+	maxTitle = 65  // whole <title>, including the " - OpenVAPT" suffix
+	minDesc  = 50  // shortest useful meta description
+	maxDesc  = 160 // longest meta description before search engines cut it
+	titleFit = 60 - len(titleSuffix)
+)
+
+const titleSuffix = " - OpenVAPT"
+
+// fullTitle is the text of the <title> element the layout renders.
+func fullTitle(path, title string) string {
+	if path == "index.html" {
+		return title
+	}
+	return title + titleSuffix
+}
+
+// shortTitle cuts a title at a word boundary so the whole <title> stays within
+// 60 characters. It is used for <title> only; the page heading keeps the full text.
+func shortTitle(s string) string {
+	return cutWords(s, titleFit, "")
+}
+
+// trimDesc cuts a description at a word boundary to at most maxDesc characters.
+func trimDesc(s string) string {
+	s = strings.Join(strings.Fields(s), " ")
+	if len(s) <= maxDesc {
+		return s
+	}
+	return cutWords(strings.TrimRight(s, "."), maxDesc-1, ".")
+}
+
+// padDesc appends a fixed sentence when a description is too short to be useful.
+func padDesc(s, extra string) string {
+	s = strings.Join(strings.Fields(s), " ")
+	if len(s) >= minDesc {
+		return s
+	}
+	if !strings.HasSuffix(s, ".") {
+		s += "."
+	}
+	return trimDesc(s + " " + extra)
+}
+
+// cutWords shortens s to at most n bytes (including end) at a word boundary.
+func cutWords(s string, n int, end string) string {
+	if len(s) <= n {
+		return s
+	}
+	cut := s[:n-len(end)]
+	if i := strings.LastIndex(cut, " "); i > 0 {
+		cut = cut[:i]
+	}
+	return strings.TrimRight(cut, " ,:;-") + end
+}
+
+// root is the absolute URL the site is served from, without a trailing slash:
+// https://openvapt.com in production, https://openvapt.com/beta for -base /beta/.
+func root() string {
+	return siteURL + strings.TrimSuffix(*base, "/")
+}
+
+// pageURL is the absolute URL of a generated file, with index.html dropped.
+func pageURL(path string) string {
+	return root() + "/" + strings.TrimSuffix(path, "index.html")
+}
+
+// isKey reports whether a path is a teacher answer key, which stays out of
+// search engines and the sitemap so students do not find the answers first.
+func isKey(path string) bool {
+	return strings.HasPrefix(path, "academy/key-")
 }
 
 // newLayout parses a fresh copy of the layout (html/template forbids cloning
@@ -233,8 +322,18 @@ func (g *gen) render(file, path, title, desc, section string, data any) {
 }
 
 func (g *gen) page(_, path, title, desc, section string, body template.HTML) {
+	if t := fullTitle(path, title); len(t) > maxTitle {
+		g.problems = append(g.problems, path)
+		log.Printf("%s: title is %d characters (max %d): %q", path, len(t), maxTitle, t)
+	}
+	if len(desc) < minDesc || len(desc) > maxDesc {
+		g.problems = append(g.problems, path)
+		log.Printf("%s: description is %d characters (want %d to %d): %q", path, len(desc), minDesc, maxDesc, desc)
+	}
 	p := pageFor(path, title, desc, section, body, nil)
-	p.JSONLD = jsonLD(p)
+	if path != "404.html" {
+		p.JSONLD = jsonLD(p)
+	}
 	var out bytes.Buffer
 	if err := newLayout().ExecuteTemplate(&out, "layout", p); err != nil {
 		log.Fatalf("%s: %v", path, err)
@@ -246,10 +345,15 @@ func (g *gen) page(_, path, title, desc, section string, body template.HTML) {
 }
 
 func pageFor(path, title, desc, section string, body template.HTML, data any) Page {
-	return Page{Title: title, Description: desc, Path: path, Section: section, Base: *base,
+	p := Page{Title: title, Description: desc, Path: path, Section: section, Base: *base,
 		Commit: commit, CommitShort: commit[:min(12, len(commit))], Version: version.Version,
 		Built: built.Format("2006-01-02"), NoIndex: *noindex, Body: body, Data: data,
-		Channel: siteChannel.Highest, PreRelease: !siteChannel.Public}
+		Channel: siteChannel.Highest, PreRelease: !siteChannel.Public,
+		NoIndexPage: isKey(path) || path == "404.html", Root: root()}
+	if path != "404.html" {
+		p.Canonical = pageURL(path)
+	}
+	return p
 }
 
 func funcs() template.FuncMap {
@@ -301,11 +405,21 @@ func icon(name string) template.HTML {
 
 // ---------- code citation ----------
 
+// gitCommit pins every code citation to the commit being built. A build that
+// cannot resolve one fails, because unpinned links would silently drift from
+// the quoted code; -allow-unpinned opts out for builds outside a git checkout.
 func gitCommit() string {
 	if out, err := exec.Command("git", "rev-parse", "HEAD").Output(); err == nil {
-		return strings.TrimSpace(string(out))
+		if c := strings.TrimSpace(string(out)); c != "" {
+			return c
+		}
 	}
-	return "main"
+	if *unpinned {
+		log.Print("warning: no git commit found; code citations point at the main branch (-allow-unpinned)")
+		return "main"
+	}
+	log.Fatal("cannot resolve the git commit (git rev-parse HEAD failed); run inside the git checkout, or pass -allow-unpinned to build with links to the main branch")
+	return ""
 }
 
 func readLines(file string) []string {
@@ -551,14 +665,15 @@ func cisKey(name string) int {
 // ---------- SEO / GEO artefacts ----------
 
 func jsonLD(p Page) template.JS {
-	url := siteURL + "/" + strings.TrimSuffix(p.Path, "index.html")
+	siteURL := root() // production: https://openvapt.com; -base /beta/: https://openvapt.com/beta
+	url := pageURL(p.Path)
 	org := map[string]any{"@type": "Organization", "@id": siteURL + "/#org", "name": "OpenVAPT",
-		"url": siteURL, "logo": siteURL + "/assets/icon.svg", "sameAs": []string{"https://github.com/OpenVAPT", repoURL},
+		"url": siteURL + "/", "logo": siteURL + "/assets/icon.svg", "sameAs": []string{"https://github.com/OpenVAPT", repoURL},
 		"description": "An academic, non-commercial project that publishes OpenVAPT, a free vulnerability assessment learning tool with source-available code, researched, developed and built by AI Cybersecurity Engineers under human direction. Not a business; provides no services."}
-	site := map[string]any{"@type": "WebSite", "@id": siteURL + "/#website", "name": "OpenVAPT", "url": siteURL, "publisher": map[string]string{"@id": siteURL + "/#org"}, "inLanguage": "en"}
+	site := map[string]any{"@type": "WebSite", "@id": siteURL + "/#website", "name": "OpenVAPT", "url": siteURL + "/", "publisher": map[string]string{"@id": siteURL + "/#org"}, "inLanguage": "en"}
 	app := map[string]any{"@type": "SoftwareApplication", "@id": siteURL + "/#software", "name": "OpenVAPT",
 		"applicationCategory": "SecurityApplication", "applicationSubCategory": "Vulnerability Assessment Tool",
-		"operatingSystem": "Linux", "url": siteURL, "downloadUrl": siteURL + "/download.html", "softwareVersion": p.Version,
+		"operatingSystem": "Linux", "url": siteURL + "/", "downloadUrl": siteURL + "/download.html", "softwareVersion": p.Version,
 		"description":         terms.Tagline + " Read-only checks for the Linux machine it runs on: server, network exposure and websites.",
 		"isAccessibleForFree": true, "offers": map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD"},
 		"license": siteURL + "/legal/licence-text.html", "publisher": map[string]string{"@id": siteURL + "/#org"},
@@ -577,14 +692,16 @@ func jsonLD(p Page) template.JS {
 		graph = append(graph, map[string]any{"@type": "FAQPage", "url": url, "mainEntity": qs})
 	case p.Path == "academy/index.html":
 		var parts []any
+		mins := 0
 		for _, m := range academy.Modules {
+			mins += m.Minutes
 			parts = append(parts, map[string]any{"@type": "LearningResource", "name": m.ID + ": " + m.Title, "url": siteURL + "/academy/" + strings.ToLower(m.ID) + ".html", "educationalLevel": string(m.Level), "timeRequired": fmt.Sprintf("PT%dM", m.Minutes)})
 		}
 		graph = append(graph, map[string]any{"@type": "Course", "name": "OpenVAPT Academy", "url": url, "description": p.Description,
 			"provider": map[string]string{"@id": siteURL + "/#org"}, "isAccessibleForFree": true, "inLanguage": "en", "educationalLevel": "Beginner to Intermediate",
 			"teaches": "Vulnerability assessment (VAPT) from theory to application", "hasPart": parts,
 			"offers":            map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free"},
-			"hasCourseInstance": map[string]any{"@type": "CourseInstance", "courseMode": "online", "courseWorkload": "PT5H"}})
+			"hasCourseInstance": map[string]any{"@type": "CourseInstance", "courseMode": "online", "courseWorkload": isoDuration(mins)}})
 	case strings.HasPrefix(p.Path, "academy/"):
 		graph = append(graph, map[string]any{"@type": "LearningResource", "name": p.Title, "description": p.Description, "url": url,
 			"isPartOf": map[string]string{"@type": "Course", "name": "OpenVAPT Academy", "url": siteURL + "/academy/"}, "isAccessibleForFree": true,
@@ -620,11 +737,24 @@ func jsonLD(p Page) template.JS {
 	return template.JS(b) // #nosec G203 -- json.Marshal escapes <, > and &
 }
 
+// isoDuration formats minutes as an ISO 8601 duration such as PT5H30M.
+func isoDuration(mins int) string {
+	d := "PT"
+	if h := mins / 60; h > 0 {
+		d += fmt.Sprintf("%dH", h)
+	}
+	if m := mins % 60; m > 0 || mins == 0 {
+		d += fmt.Sprintf("%dM", m)
+	}
+	return d
+}
+
 func writeSEO(paths []string, cs []*check.Check) {
+	siteURL := root()
 	var sm strings.Builder
 	sm.WriteString(`<?xml version="1.0" encoding="UTF-8"?>` + "\n" + `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` + "\n")
 	for _, p := range paths {
-		if p == "404.html" {
+		if p == "404.html" || isKey(p) {
 			continue
 		}
 		fmt.Fprintf(&sm, "  <url><loc>%s/%s</loc><lastmod>%s</lastmod></url>\n", siteURL, strings.TrimSuffix(p, "index.html"), built.Format("2006-01-02"))
@@ -645,7 +775,7 @@ func writeSEO(paths []string, cs []*check.Check) {
 	var l strings.Builder
 	l.WriteString("# OpenVAPT\n\n> OpenVAPT is a free, academic, non-commercial vulnerability assessment (VA) tool for Linux servers with source-available code, researched, developed and built entirely by AI Cybersecurity Engineers under human direction. AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude Code, and OpenAI Codex) acting in a cyber security engineering role. They are not people, not registered or professional engineers, and provide no professional engineering or security service. It runs read-only checks on the machine it is installed on (and only that machine) to identify weaknesses in the server, its network exposure and its websites, rates findings with CVSS v3.1 and proposes cited fixes. It is made for learning how a VAPT tool works. It is not a business, not a penetration testing service and collects no data.\n\n")
 	l.WriteString("Key facts:\n- Price: free. No account, no licence key.\n- Use: anyone, including companies, may use it on machines they own or control, for their own use. It may not be sold or used to provide services.\n- Risk: a free gift provided as is, with no warranty; users carry 100% of the risk.\n- Licence: OpenVAPT Source-Available Licence 1.1 (LicenseRef-OpenVAPT-SAL-1.1): own use only, no services, no selling.\n- Platform: Linux. Single static Go binary, standard library only.\n- Scope: designed to be loopback-only, enforced in code. Detection only, no exploit code.\n- Standards: NIST SP 800-115, CVSS v3.1, OWASP Top 10 2021, OWASP ASVS 4.0.3, CWE, NIST SP 800-53.\n- Source: " + repoURL + "\n- Researched, developed and built entirely by AI Cybersecurity Engineers (Claude by Anthropic via Claude Code, with OpenAI Codex) under the owner's direction; not audited by a human security expert or reviewed by a human lawyer.\n- Third-party names identify those projects only; their owners do not sponsor, endorse or have any connection with OpenVAPT.\n\n## Docs\n\n")
-	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How It Is Built, With Code Citations"}, {"checks/", "Check Catalogue"}, {"standards.html", "Standards and Methodology"}, {"compare.html", "Comparison With Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What It Does Not Do"}, {"learn.html", "Lessons and Lab"}, {"teach.html", "For Teachers: Course Plans, Worksheets, Rubric, Practice Labs"}, {"legal/teaching.html", "Teaching Terms"}, {"download.html", "Download and Acknowledgements"}, {"channels.html", "Release Channels and Promotion Gates"}, {"no-data.html", "No Data Collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}, {"legal/licence.html", "Licence"}, {"legal/credits.html", "Credits, Sources and Citations"}, {"legal/sources.html", "Every Source Cited, by Publisher"}} {
+	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How It Is Built, With Code Citations"}, {"checks/", "Check Catalogue"}, {"standards.html", "Standards and Methodology"}, {"compare.html", "Comparison With Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What It Does Not Do"}, {"learn.html", "Lessons and Lab"}, {"teach.html", "For Teachers: Course Plans, Worksheets, Rubric, Practice Labs"}, {"legal/teaching.html", "Teaching Terms"}, {"download.html", "Download and Acknowledgements"}, {"channels.html", "Release Channels and Promotion Gates"}, {"no-data.html", "No Data Collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}, {"legal/licence.html", "Licence"}, {"legal/credits.html", "Credits, Sources and Citations"}, {"legal/sources.html", "Every Source Cited, by Publisher"}, {"legal/governance.html", "Governance, Control and Assurance Framework"}} {
 		l.WriteString("- [" + p[1] + "](" + siteURL + "/" + p[0] + ")\n")
 	}
 	l.WriteString("\n## FAQ\n\n")

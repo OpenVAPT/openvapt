@@ -32,6 +32,24 @@ func TestNoCheckFiresOnHardenedLab(t *testing.T) {
 	}
 }
 
+// These checks have hardened fixtures, so they must reach a real Pass rather
+// than Skip on the hardened lab.
+func TestHardenedLabPassesNotSkips(t *testing.T) {
+	want := map[string]bool{"HOST-DKR-001": true, "NET-FW-002": true, "NET-SVC-003": true, "WEB-CMS-009": true}
+	r := Run(context.Background(), lab.Hardened(), Options{})
+	for _, f := range r.Findings {
+		if want[f.ID] {
+			delete(want, f.ID)
+			if f.Status != string(check.Pass) {
+				t.Errorf("%s should pass on the hardened lab, got %s: %+v", f.ID, f.Status, f.Results)
+			}
+		}
+	}
+	for id := range want {
+		t.Errorf("%s was not run", id)
+	}
+}
+
 func TestEveryCheckIsDocumented(t *testing.T) {
 	for _, c := range check.All() {
 		if c.Summary == "" || c.Detection == "" || c.Verify == "" || c.CVSS == "" || c.SourceFile == "" {

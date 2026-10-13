@@ -30,7 +30,7 @@ func init() {
 		Title:     "Network Time Service Amplification Risk",
 		Domain:    check.DomainNetwork,
 		Severity:  check.High,
-		Category:  check.CatLogging,
+		Category:  check.CatNetwork,
 		Effort:    check.EffortLow,
 		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
 		Summary:   "NTP or chrony serves broad clients or permits legacy monitoring commands that can amplify traffic.",

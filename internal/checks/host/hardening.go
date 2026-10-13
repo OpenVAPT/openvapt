@@ -64,7 +64,7 @@ var fileModeRules = []fileModeRule{
 		rationale: "A stolen private key lets an attacker impersonate your websites and, with older key exchange, decrypt recorded traffic.",
 		fix:       "chown root:root <key> && chmod 600 <key>  (or 640 with a dedicated group the web server runs in). Rotate any key that was exposed.",
 		verify:    "stat -c '%a %U:%G %n' /etc/ssl/private/* /etc/pki/tls/private/* /etc/letsencrypt/archive/*/privkey*.pem",
-		patterns:  []string{"/etc/ssl/private/*", "/etc/pki/tls/private/*", "/etc/letsencrypt/archive/*/privkey*.pem"}, bad: 0o004 | 0o002, why: "readable or writable by others", cwe: "CWE-312",
+		patterns:  []string{"/etc/ssl/private/*", "/etc/pki/tls/private/*", "/etc/letsencrypt/archive/*/privkey*.pem"}, bad: 0o004 | 0o002, why: "readable or writable by others", cwe: "CWE-732",
 		refs: []check.Ref{{Title: "OWASP Key Management Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Key_Management_Cheat_Sheet.html"}},
 	},
 	{

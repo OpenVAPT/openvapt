@@ -4,7 +4,7 @@
 <div class="table-wrap"><table class="table">
 <thead><tr><th>It Does Not</th><th>Why</th><th>How It Is Enforced</th></tr></thead>
 <tbody>
-<tr><td>Scan any other machine, network or website</td><td>You may only assess machines you own or control, or that your employer owns or controls and has authorised you to assess. Scanning others without permission can be a crime (for example Malaysia's Computer Crimes Act 1997).</td><td>The scope guard refuses every non-loopback address before connecting. Host names are not resolved. <a href="how-it-works.html#internal/scope">See the code</a>.</td></tr>
+<tr><td>Scan any other machine, network or website</td><td>You may only assess machines you own or control, or that your employer owns or controls and has authorised you to assess. Scanning others without permission can be a crime (for example Malaysia's Computer Crimes Act 1997).</td><td>The scope guard refuses every non-loopback address before connecting. Host names are not resolved. <a href="how-it-works.html#internal-scope">See the code</a>.</td></tr>
 <tr><td>Exploit, attack or brute-force anything</td><td>It is an assessment tool for learning, not an attack tool.</td><td>No exploit code exists in the repository. Only fixed-path GET requests are sent.</td></tr>
 <tr><td>Change your system</td><td>A scan is designed not to change a server.</td><td>The System interface has no write, delete or restart operation. Commands come from a read-only allow-list.</td></tr>
 <tr><td>Send any data anywhere</td><td>Your weaknesses are your business.</td><td>No telemetry, no update check, no upload code. Proxies are disabled. Reports are written to your disk with mode 0600.</td></tr>

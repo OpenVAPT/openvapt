@@ -147,6 +147,12 @@ func updateCitation(path string, s *channels.State) error {
 		if !ok {
 			continue
 		}
+		if !citationVersion.Match(b) {
+			return fmt.Errorf("%s has no version: line to update", path)
+		}
+		if !citationDate.Match(b) {
+			return fmt.Errorf("%s has no date-released: line to update", path)
+		}
 		out := citationVersion.ReplaceAllString(string(b), `version: "`+strings.TrimPrefix(r.Version, "v")+`"`)
 		out = citationDate.ReplaceAllString(out, `date-released: "`+r.Date+`"`)
 		return os.WriteFile(path, []byte(out), 0o644) // #nosec G306 -- public citation file

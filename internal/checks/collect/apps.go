@@ -136,7 +136,7 @@ func CMSConfigs(ctx context.Context, s sys.System) []CMSConfig {
 		if seen[p] {
 			return
 		}
-		r, err := s.ReadFile(ctx, p)
+		r, err := sys.ReadFileNoFollow(ctx, s, p)
 		if err != nil || !strings.Contains(string(r.Data), marker) {
 			return
 		}

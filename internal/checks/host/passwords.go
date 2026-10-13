@@ -13,7 +13,7 @@ import (
 
 var (
 	refLoginDefs = check.Ref{Title: "login.defs(5), Linux man-pages", URL: "https://man7.org/linux/man-pages/man5/login.defs.5.html"}
-	refNIST63B   = check.Ref{Title: "NIST SP 800-63B, Digital Identity Guidelines: Authentication and Lifecycle Management", URL: "https://pages.nist.gov/800-63-3/sp800-63b.html"}
+	refNIST63B   = check.Ref{Title: "NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management", URL: "https://pages.nist.gov/800-63-4/sp800-63b.html"}
 	refPwquality = check.Ref{Title: "pwquality.conf(5), libpwquality", URL: "https://man7.org/linux/man-pages/man5/pwquality.conf.5.html"}
 	refFaillock  = check.Ref{Title: "pam_faillock(8), Linux-PAM", URL: "https://man7.org/linux/man-pages/man8/pam_faillock.8.html"}
 )
@@ -127,43 +127,43 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
 		Summary:   "Checks that PAM temporarily locks accounts after repeated failed logins.",
 		Rationale: "Without lockout, local and PAM-backed remote logins can be guessed indefinitely. A temporary lock after a few failures slows attacks and makes them visible.",
-		Detection: "Reads the PAM authentication stacks (/etc/pam.d/common-auth, /etc/pam.d/system-auth, /etc/pam.d/password-auth) and looks for pam_faillock or pam_tally2.",
+		Detection: "Reads the PAM authentication stacks (/etc/pam.d/common-auth, /etc/pam.d/system-auth, /etc/pam.d/password-auth) and requires pam_faillock in both the preauth and authfail positions (or pam_tally2) with deny set to 10 or fewer failures (pam_faillock defaults to 3; deny is read from the module line or /etc/security/faillock.conf).",
 		Fix:       "Enable pam_faillock (authselect enable-feature with-faillock on RHEL family; pam-auth-update or a faillock profile on Debian/Ubuntu) with settings such as deny=5 unlock_time=900 in /etc/security/faillock.conf. Test carefully in a second session first.",
 		Verify:    "grep -E 'pam_faillock|pam_tally2' /etc/pam.d/common-auth /etc/pam.d/system-auth",
 		Refs:      []check.Ref{refFaillock, refNIST80053},
 		Standards: check.Standards{CWE: []string{"CWE-307"}, OWASP: []string{"A07:2021"}, NIST: []string{"AC-7"}, CISTopic: "Lockout for failed password attempts"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			found := false
+			var notes []string
 			for _, p := range []string{"/etc/pam.d/common-auth", "/etc/pam.d/system-auth", "/etc/pam.d/password-auth"} {
 				text, _, ok := readText(ctx, s, p)
 				if !ok {
 					continue
 				}
 				found = true
-				for _, line := range strings.Split(text, "\n") {
-					t := strings.TrimSpace(line)
-					if !strings.HasPrefix(t, "#") && (strings.Contains(t, "pam_faillock") || strings.Contains(t, "pam_tally2")) {
-						return []check.Result{check.PassR(p, "Account lockout module configured", t)}
-					}
+				good, why := lockoutConfigured(ctx, s, text)
+				if good {
+					return []check.Result{check.PassR(p, "Account lockout configured: "+why)}
 				}
+				notes = append(notes, p+": "+why)
 			}
 			if !found {
 				return []check.Result{check.SkipR("pam", "PAM authentication stack not found")}
 			}
-			return []check.Result{check.FailR("pam", "No pam_faillock or pam_tally2 in the authentication stack")}
+			return []check.Result{check.FailR("pam", "No effective account lockout in the authentication stack", notes...)}
 		},
 	})
 
 	check.Register(&check.Check{
-		ID: "HOST-PWD-005", Title: "Passwords Never Expire by Default", Domain: check.DomainHost,
-		Severity: check.Low, Category: check.CatIdentity, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
-		Summary:   "Checks that a maximum password age is set for new accounts.",
-		Rationale: "NIST no longer recommends routine forced rotation, but an upper bound (for example 365 days) still limits how long a silently compromised password stays valid, and many policies require one.",
-		Detection: "Reads PASS_MAX_DAYS from /etc/login.defs. Unset, 99999, or more than 365 fails.",
-		Fix:       "Set  PASS_MAX_DAYS 365  (or your policy's value) in /etc/login.defs; apply to existing users with chage --maxdays 365 <user>.",
+		ID: "HOST-PWD-005", Title: "Forced Periodic Password Rotation Configured", Domain: check.DomainHost,
+		Severity: check.Info, Category: check.CatIdentity, Effort: check.EffortLow,
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:N",
+		Summary:   "Reports whether new accounts are forced to change passwords on a short fixed schedule.",
+		Rationale: "NIST SP 800-63B-4 (section 3.1.1.2) says verifiers should not require periodic password changes, and should force a change only on evidence of compromise. Frequent forced rotation pushes users toward predictable variations. CIS Controls v8 safeguard 5.2 asks for unique passwords with a minimum length (8 characters where multi-factor authentication is used, 14 where it is not) and does not ask for periodic changes. This finding is informational: a short PASS_MAX_DAYS is not a vulnerability, but it is worth reviewing against current guidance.",
+		Detection: "Reads PASS_MAX_DAYS from /etc/login.defs. A value below 365 days is reported. Unset, 99999 (no expiry) or 365 and above passes.",
+		Fix:       "Prefer long passphrases, a breached-password blocklist and multi-factor authentication over forced rotation. If policy allows, set  PASS_MAX_DAYS 365  or  99999  in /etc/login.defs and change passwords when compromise is suspected.",
 		Verify:    "grep '^PASS_MAX_DAYS' /etc/login.defs",
-		Refs:      []check.Ref{refLoginDefs, refNIST63B},
+		Refs:      []check.Ref{refLoginDefs, refNIST63B, {Title: "CIS Critical Security Controls v8, Control 5 (Account Management)", URL: "https://www.cisecurity.org/controls/account-management"}},
 		Standards: check.Standards{CWE: []string{"CWE-262"}, NIST: []string{"IA-5(1)"}, CISTopic: "Password expiration"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			cfg := collect.ReadConfigs(ctx, s, "/etc/login.defs")
@@ -171,11 +171,17 @@ func init() {
 				return []check.Result{check.SkipR("/etc/login.defs", "File not found")}
 			}
 			v, _, ok := collect.First(cfg, "pass_max_days")
-			n, err := strconv.Atoi(strings.TrimSpace(v))
-			if !ok || err != nil || n > 365 {
-				return []check.Result{check.FailR("/etc/login.defs", fmt.Sprintf("PASS_MAX_DAYS is %q (recommended 365 or less)", v))}
+			if !ok {
+				return []check.Result{check.PassR("/etc/login.defs", "PASS_MAX_DAYS not set: no forced periodic rotation")}
 			}
-			return []check.Result{check.PassR("/etc/login.defs", "PASS_MAX_DAYS "+v)}
+			n, err := strconv.Atoi(strings.TrimSpace(v))
+			if err != nil {
+				return []check.Result{check.IncompleteR("/etc/login.defs", fmt.Sprintf("PASS_MAX_DAYS %q is not a number", v))}
+			}
+			if n >= 0 && n < 365 {
+				return []check.Result{check.FailR("/etc/login.defs", fmt.Sprintf("PASS_MAX_DAYS %d forces a password change every %d days; NIST SP 800-63B-4 advises against periodic rotation", n, n))}
+			}
+			return []check.Result{check.PassR("/etc/login.defs", "PASS_MAX_DAYS "+v+": no short forced rotation")}
 		},
 	})
 
@@ -223,9 +229,9 @@ func init() {
 		ID: "HOST-USR-005", Title: "System Accounts With Login Shells", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatIdentity, Effort: check.EffortLow,
 		CVSS:      "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:N",
-		Summary:   "Checks that service accounts (UID below 1000, other than root) cannot log in interactively.",
+		Summary:   "Checks that service accounts (UID below UID_MIN, usually 1000, other than root) cannot log in interactively.",
 		Rationale: "Service accounts should never need a shell. A login shell gives an attacker who compromises the service, or guesses its password, an interactive foothold.",
-		Detection: "Reads /etc/passwd and lists accounts with UID 1 to 999 whose shell is not nologin, false, sync, halt or shutdown.",
+		Detection: "Reads UID_MIN from /etc/login.defs (default 1000) and /etc/passwd, and lists accounts with UID 1 to UID_MIN minus 1 whose shell is not nologin, false, sync, halt or shutdown.",
 		Fix:       "usermod -s /usr/sbin/nologin <account>  for each listed account (use /sbin/nologin on RHEL family).",
 		Verify:    "awk -F: '$3>0 && $3<1000 {print $1, $7}' /etc/passwd",
 		Refs:      []check.Ref{{Title: "nologin(8), Linux man-pages", URL: "https://man7.org/linux/man-pages/man8/nologin.8.html"}},
@@ -235,6 +241,12 @@ func init() {
 			if !ok {
 				return []check.Result{check.SkipR("/etc/passwd", "Not readable")}
 			}
+			uidMin := 1000
+			if v, _, ok := collect.First(collect.ReadConfigs(ctx, s, "/etc/login.defs"), "uid_min"); ok {
+				if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && n > 0 {
+					uidMin = n
+				}
+			}
 			var bad []string
 			for _, line := range strings.Split(text, "\n") {
 				f := strings.Split(line, ":")
@@ -242,7 +254,7 @@ func init() {
 					continue
 				}
 				uid, err := strconv.Atoi(f[2])
-				if err != nil || uid < 1 || uid >= 1000 {
+				if err != nil || uid < 1 || uid >= uidMin {
 					continue
 				}
 				sh := f[6]
@@ -323,4 +335,70 @@ func init() {
 			return []check.Result{check.PassR("home directories", "No .rhosts, .shosts or .netrc files")}
 		},
 	})
+}
+
+// lockoutConfigured reports whether a PAM auth stack locks accounts after at
+// most 10 failures. pam_faillock must appear with both preauth and authfail;
+// its deny value comes from the module line, then faillock.conf, then the
+// built-in default of 3. pam_tally2 needs an explicit deny (it has no limit
+// by default).
+func lockoutConfigured(ctx context.Context, s sys.System, stack string) (bool, string) {
+	pre, fail := false, false
+	deny := -1
+	tally := -1
+	for _, line := range strings.Split(stack, "\n") {
+		t := strings.TrimSpace(line)
+		if t == "" || strings.HasPrefix(t, "#") {
+			continue
+		}
+		f := strings.Fields(t)
+		switch {
+		case strings.Contains(t, "pam_faillock"):
+			for _, a := range f {
+				switch {
+				case a == "preauth":
+					pre = true
+				case a == "authfail":
+					fail = true
+				case strings.HasPrefix(a, "deny="):
+					if n, err := strconv.Atoi(strings.TrimPrefix(a, "deny=")); err == nil {
+						deny = n
+					}
+				}
+			}
+		case strings.Contains(t, "pam_tally2"):
+			tally = 0
+			for _, a := range f {
+				if strings.HasPrefix(a, "deny=") {
+					if n, err := strconv.Atoi(strings.TrimPrefix(a, "deny=")); err == nil {
+						tally = n
+					}
+				}
+			}
+		}
+	}
+	if pre || fail {
+		if !pre || !fail {
+			return false, "pam_faillock is missing its preauth or authfail line, so failures are not counted or not enforced"
+		}
+		if deny < 0 {
+			deny = 3
+			if v, _, ok := collect.First(collect.ReadConfigs(ctx, s, "/etc/security/faillock.conf"), "deny"); ok {
+				if n, err := strconv.Atoi(strings.TrimSpace(v)); err == nil {
+					deny = n
+				}
+			}
+		}
+		if deny < 1 || deny > 10 {
+			return false, fmt.Sprintf("pam_faillock deny=%d (need 1 to 10)", deny)
+		}
+		return true, fmt.Sprintf("pam_faillock preauth and authfail, deny=%d", deny)
+	}
+	if tally >= 0 {
+		if tally < 1 || tally > 10 {
+			return false, fmt.Sprintf("pam_tally2 deny=%d (need 1 to 10)", tally)
+		}
+		return true, fmt.Sprintf("pam_tally2 deny=%d", tally)
+	}
+	return false, "no pam_faillock or pam_tally2"
 }

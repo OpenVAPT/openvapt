@@ -25,7 +25,7 @@ func appendSSHD(f *sys.Fake, extra string) {
 
 func init() {
 	Register(func(f *sys.Fake) {
-		f.Files["/etc/login.defs"] = "ENCRYPT_METHOD MD5\nPASS_MAX_DAYS 99999\nUMASK 022\n"
+		f.Files["/etc/login.defs"] = "ENCRYPT_METHOD MD5\nPASS_MAX_DAYS 90\nUMASK 022\n"
 		f.Files["/etc/passwd"] += "daemon:x:1:1:daemon:/usr/sbin:/bin/bash\n+::::::\n"
 		f.Files["/etc/shadow"] += "olduser:$1$saltsalt$abcdefghijklmnopqrstuv:19000:0:99999:7:::\n"
 		f.Files["/etc/group"] = "root:x:0:\ndocker:x:999:deploy\n"
@@ -55,6 +55,9 @@ func init() {
 	}, func(f *sys.Fake) {
 		f.Files["/etc/login.defs"] = "ENCRYPT_METHOD YESCRYPT\nPASS_MAX_DAYS 365\nUMASK 027\n"
 		f.Files["/etc/group"] = "root:x:0:\ndocker:x:999:\n"
+		// Docker is installed (see the container fixtures) with an empty
+		// docker group and the socket at its default 660 root:docker.
+		f.Infos["/var/run/docker.sock"] = sys.FileInfo{Path: "/var/run/docker.sock", Mode: fs.ModeSocket | 0o660}
 		f.Files["/etc/security/pwquality.conf"] = "minlen = 14\n"
 		f.Files["/etc/pam.d/common-auth"] = "auth required pam_faillock.so preauth\nauth [success=1 default=ignore] pam_unix.so\nauth [default=die] pam_faillock.so authfail\n"
 		file(f, "/etc/ssh/ssh_host_ed25519_key", "", 0o600)
