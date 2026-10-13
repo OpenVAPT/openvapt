@@ -37,32 +37,61 @@
 
 <section id="gated">
   <noscript><div class="alert alert-warn mt-6">{{icon "triangle-alert"}}<span>By using any download or command below, you confirm that you have read, studied, understood, acknowledged, agreed to and accepted every statement in the <a href="legal/eula.html">EULA</a>, including that you use OpenVAPT 100% at your own risk.</span></div></noscript>
-  <h2 tabindex="-1">Download</h2>
-  <div class="alert alert-info" role="note">{{icon "info"}}<span>Public releases start soon. Until then, build from source as shown below. Each release will publish SHA-258 checksums and signatures produced by the public build pipeline.</span></div>
+  <h2 tabindex="-1">Get OpenVAPT</h2>
+  <p>There are two ways. <strong>Building from source is recommended</strong>: you run exactly the code you can read, it needs nothing but Go, and building it is part of learning how it works. Ready-made binaries are an optional convenience, built publicly from the same source.</p>
 
-  <h3>Build From Source</h3>
-  <p>You need Go 1.22 or newer (1.26 or newer recommended). OpenVAPT uses only the Go standard library, so nothing else is downloaded.</p>
-<pre class="term">git clone https://github.com/openvapt/openvapt.git
+  <div class="mt-6 grid gap-6 lg:grid-cols-2">
+    <div class="card border-blue-2">
+      <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-low">Recommended</span><span class="tag tag-plain">Most Transparent</span></div>
+      <h3 class="mt-0">Option 1: Build From Source</h3>
+      <p class="text-ink-2">Read the code, then build it yourself. OpenVAPT uses only the Go standard library, so nothing else is downloaded or trusted.</p>
+    </div>
+    <div class="card">
+      <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-info">Optional</span><span class="tag tag-plain">Convenience</span></div>
+      <h3 class="mt-0">Option 2: Verified Linux Binary</h3>
+      <p class="text-ink-2">For machines without Go. Built only by GitHub Actions from a public tagged commit, with checksums, Sigstore signatures, build provenance and a software bill of materials.</p>
+    </div>
+  </div>
+
+  <h3>Option 1: Build From Source (Recommended)</h3>
+  <p>You need Go 1.22 or newer (1.26 or newer recommended, because older Go versions have known standard-library vulnerabilities). Get the source with git, or download a source archive from the GitHub repository or a release.</p>
+<pre class="term"># 1. Get the source
+git clone https://github.com/OpenVAPT/openvapt.git
 cd openvapt
+
+# 2. Read it (start with README.md, internal/scope and internal/sys)
+
+# 3. Run the tests, including the simulated lab tests
 go test ./...
+
+# 4. Build a single static binary
 CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
-./openvapt terms      # read the acknowledgements again
+
+# 5. Read the acknowledgements again, then check the version
+./openvapt terms
 ./openvapt version</pre>
+  <p>To build exactly a released version, check out its tag first, for example <code>git checkout v1.0.0</code>. To build the same bytes as the official release binary, use the same Go version and flags as the release (shown in its release notes and in the <code>Makefile</code>):</p>
+<pre class="term">git checkout v1.0.0
+make release VERSION=v1.0.0
+sha256sum dist/release/openvapt_linux_amd64   # compare with the published SHA256SUMS</pre>
+
+  <h3>Option 2: Verified Linux Binary (Optional)</h3>
+  <div class="alert alert-info" role="note">{{icon "info"}}<span>No binary has been released yet. When releases start, they will appear on the GitHub Releases page with <code>SHA256SUMS</code>, a <code>.sigstore.json</code> signature bundle per binary, a source archive and an SBOM. Always verify before running.</span></div>
+<pre class="term">sha256sum -c SHA256SUMS --ignore-missing
+cosign verify-blob --certificate-identity-regexp 'https://github.com/OpenVAPT/openvapt/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --bundle openvapt_linux_amd64.sigstore.json openvapt_linux_amd64
+gh attestation verify openvapt_linux_amd64 --repo OpenVAPT/openvapt</pre>
 
   <h3>Try It Safely First</h3>
 <pre class="term">./openvapt demo                    # scans a simulated vulnerable server, in memory
 ./openvapt scan --dry-run          # lists every file, command and request a real scan would use
+./openvapt learn                   # the OpenVAPT Academy, offline
 ./openvapt explain HOST-SSH-001    # documentation for one check</pre>
 
   <h3>Scan Your Own Linux Machine</h3>
 <pre class="term">sudo ./openvapt scan --out ~/openvapt-report</pre>
-  <p>Before every scan the tool shows the acknowledgements again and continues only when you type <code>I ACCEPT</code>. Running as root lets checks read protected files such as <code>/etc/shadow</code>; without root those checks are skipped. The report is written only to the folder you choose, with private permissions, and the command exits with code 3 when Critical or High findings exist.</p>
-
-  <h3>Verify a Release Download</h3>
-<pre class="term">sha256sum -c openvapt_linux_amd64.sha256
-cosign verify-blob --certificate-identity-regexp 'https://github.com/openvapt/openvapt/' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --bundle openvapt_linux_amd64.sigstore.json openvapt_linux_amd64</pre>
+  <p>Before every scan the tool shows the acknowledgements again and continues only when you type <code>I ACCEPT</code> (or you pass <code>--accept-terms</code> for automation, which counts as the same acceptance). Running as root lets checks read protected files such as <code>/etc/shadow</code>; without root those checks are skipped or marked Incomplete. The report is written only to the folder you choose, with private permissions. Exit codes: 0 success, 2 invalid arguments, 3 Critical or High findings, 4 incomplete coverage, 5 scan errors, 6 report write failure.</p>
 
   <h3>Uninstall</h3>
   <p>OpenVAPT installs nothing. Delete the binary and your report folders. If you signed reports, also delete <code>~/.config/openvapt/report-key</code>.</p>

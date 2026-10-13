@@ -25,15 +25,22 @@ Before downloading or running OpenVAPT, read, study and understand the [EULA](EU
 
 Website: https://openvapt.com (generated from this repository; every check page cites its source file and line numbers). Every component, standard, source and AI tool used is credited in [CREDITS.md](CREDITS.md).
 
-## Quick Start
+## Get OpenVAPT
+
+**Building from source is the recommended, most transparent way**: you run exactly the code you can read, and it needs nothing but Go (1.26 or newer recommended; 1.22 minimum).
 
 ```bash
-go test ./...
+git clone https://github.com/OpenVAPT/openvapt.git && cd openvapt
+go test ./...                                         # unit tests and simulated lab tests
 CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
-./openvapt demo                       # scan the simulated vulnerable lab server (safe, in memory)
-./openvapt scan --dry-run             # list every file, command and request a real scan would use
-sudo ./openvapt scan --out ~/report   # assess this Linux machine
+./openvapt terms                                      # read the acknowledgements
+./openvapt demo                                       # scan the simulated vulnerable lab (safe, in memory)
+./openvapt learn                                      # the OpenVAPT Academy, offline
+./openvapt scan --dry-run                             # preview every file, command and request
+sudo ./openvapt scan --out ~/report                   # assess this Linux machine
 ```
+
+**Optional verified binaries.** For machines without Go, each release will also publish Linux binaries built only by GitHub Actions from the tagged commit, with `SHA256SUMS`, Sigstore signature bundles, build provenance, an SBOM and a source archive. You can rebuild the same bytes yourself with `make release VERSION=<tag>` using the same Go version, and compare checksums.
 
 ## Commands
 

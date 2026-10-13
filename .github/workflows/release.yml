@@ -18,6 +18,11 @@ jobs:
           cache: false
       - run: go test ./...
       - run: make release VERSION=${GITHUB_REF_NAME}
+      - name: Source archive (the recommended way to use OpenVAPT is to build from source)
+        run: |
+          git archive --format=tar.gz --prefix="openvapt-${GITHUB_REF_NAME}/" -o "dist/release/openvapt-${GITHUB_REF_NAME}-source.tar.gz" "${GITHUB_REF_NAME}"
+          cd dist/release && sha256sum openvapt_linux_* openvapt-*-source.tar.gz > SHA256SUMS
+          go version > GO_VERSION.txt
       - uses: sigstore/cosign-installer@v3
       - name: Sign binaries (keyless, bound to this workflow)
         run: |
