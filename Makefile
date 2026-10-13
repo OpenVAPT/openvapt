@@ -1,11 +1,17 @@
 VERSION ?= v0.1.0-dev
-COMMIT  := $(shell git rev-parse HEAD 2>/dev/null || echo unknown)
-LDFLAGS := -s -w -X github.com/openvapt/openvapt/internal/version.Version=$(VERSION) -X github.com/openvapt/openvapt/internal/version.Commit=$(COMMIT)
+COMMIT  ?= $(shell git rev-parse HEAD 2>/dev/null || echo unknown)
+# Reproducible: no build paths (-trimpath), no VCS stamp (-buildvcs=false, the
+# commit is passed explicitly), no cgo, fixed ldflags and no timestamps. The
+# release workflow builds twice on separate runners and refuses to publish if
+# the two builds differ byte for byte; `make release VERSION=<tag> COMMIT=<sha>`
+# reproduces a published binary.
+LDFLAGS   := -s -w -X github.com/openvapt/openvapt/internal/version.Version=$(VERSION) -X github.com/openvapt/openvapt/internal/version.Commit=$(COMMIT)
+GOBUILD   := CGO_ENABLED=0 go build -trimpath -buildvcs=false -ldflags "$(LDFLAGS)"
 
 .PHONY: build check test site release vulndb clean
 
 build:
-	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o openvapt ./cmd/openvapt
+	$(GOBUILD) -o openvapt ./cmd/openvapt
 
 check:
 	test -z "$$(gofmt -l .)"
@@ -30,7 +36,7 @@ vulndb:
 release:
 	mkdir -p dist/release
 	for arch in amd64 arm64; do \
-	  CGO_ENABLED=0 GOOS=linux GOARCH=$$arch go build -trimpath -ldflags "$(LDFLAGS)" -o dist/release/openvapt_linux_$$arch ./cmd/openvapt; \
+	  GOOS=linux GOARCH=$$arch $(GOBUILD) -o dist/release/openvapt_linux_$$arch ./cmd/openvapt; \
 	done
 	cd dist/release && sha256sum openvapt_linux_* > SHA256SUMS
 

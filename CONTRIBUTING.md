@@ -27,7 +27,7 @@ Thank you for helping. OpenVAPT is an academic project, so clear explanations ma
 
 ## Reporting Bugs
 
-Use the issue templates: Bug, False Positive, False Negative, New Check, Documentation.
+Use the issue templates: Bug Report, False Positive, False Negative, New Check, Documentation, Factual Error, Teaching Feedback. Security flaws go through GitHub Private Vulnerability Reporting, never a public issue.
 
 ## Code of Conduct
 

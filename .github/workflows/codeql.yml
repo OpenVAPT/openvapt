@@ -1,0 +1,47 @@
+name: codeql
+# Static analysis of the Go code and of the workflow files themselves with
+# GitHub's CodeQL (first-party action, pinned to the commit of tag v4.38.3;
+# the SHA was resolved with `gh api repos/github/codeql-action/git/ref/tags/v4.38.3`
+# and dereferenced to the commit). Results appear under Security > Code scanning;
+# no data leaves GitHub.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "41 3 * * 1" # weekly
+permissions:
+  contents: read
+jobs:
+  analyze:
+    name: codeql (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write # upload results to code scanning
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [go, actions]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        if: matrix.language == 'go'
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: false
+      - uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
+      - name: Build
+        if: matrix.language == 'go'
+        run: CGO_ENABLED=0 go build ./...
+      - uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: /language:${{ matrix.language }}

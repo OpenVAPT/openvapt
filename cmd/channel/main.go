@@ -3,13 +3,18 @@
 // see where every channel stands:
 //
 //	go run ./cmd/channel status
+//	go run ./cmd/channel head
 //	go run ./cmd/channel plan    --head <sha> [--signed v0.1.0-beta.1,...]
+//	go run ./cmd/channel notes
 //	go run ./cmd/channel promote <channel> --commit <sha> --ci-green --lab-pass [--installer-e2e] [--signed ...]
 //
-// plan picks the most mature channel whose time, legal and history gates
-// pass, assuming the candidate build will pass verification. The workflow
-// then verifies that exact commit and calls promote with the real evidence;
-// promote evaluates every gate again and refuses if any fails.
+// head prints the newest commit that changed a build file: a commit that only
+// records a promotion (release/, CITATION.cff, CHANGELOG.md) is never a new
+// build. plan picks the most mature channel whose time, legal and history
+// gates pass, assuming the candidate build will pass verification. The
+// workflow then verifies that exact commit and calls promote with the real
+// evidence; promote evaluates every gate again and refuses if any fails.
+// notes prints the CHANGELOG.md [Unreleased] section as release notes.
 package main
 
 import (
@@ -33,6 +38,7 @@ func main() {
 	legal := fs.String("legal", "release/legal-review.json", "AI legal review record")
 	text := fs.String("text", "release/channels.txt", "plain channel list for the installer")
 	citation := fs.String("citation", "CITATION.cff", "citation file whose version follows the most advanced release")
+	changelog := fs.String("changelog", "CHANGELOG.md", "changelog whose [Unreleased] section becomes the released version's section")
 	head := fs.String("head", "", "commit at the tip of main (plan)")
 	commit := fs.String("commit", "", "commit that was verified (promote)")
 	ci := fs.Bool("ci-green", false, "CI passed on the commit")
@@ -72,6 +78,16 @@ func main() {
 	}
 
 	switch cmd {
+	case "head":
+		h, err := gitHead(".")
+		must(err)
+		output("head", h)
+		return
+	case "notes":
+		b, err := os.ReadFile(*changelog) // #nosec G304 -- fixed repository file chosen by the operator
+		must(err)
+		fmt.Println(releaseNotes(string(b)))
+		return
 	case "status":
 		fmt.Printf("Next stable: %s\n", s.Next)
 		for _, c := range channels.Order {
@@ -128,6 +144,11 @@ func main() {
 		must(s.Save(*state))
 		must(os.WriteFile(*text, []byte(s.Text()), 0o644)) // #nosec G306 -- public release list
 		must(updateCitation(*citation, s))
+		note := "No changelog entry was written for this build (commit " + r.Commit[:min(12, len(r.Commit))] + ")."
+		if p := channels.Previous(c); p != "" {
+			note = "Same build as " + s.Current[p].Version + " (commit " + r.Commit[:min(12, len(r.Commit))] + "), promoted to " + channels.InfoFor(c).Name + "."
+		}
+		must(updateChangelog(*changelog, r.Version, r.Date, note))
 		fmt.Printf("Promoted %s to %s (%s)\n", r.Commit, channels.InfoFor(c).Name, r.Version)
 	default:
 		usage()
@@ -201,7 +222,7 @@ func output(k, v string) {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: channel status | plan --head <sha> | promote <alpha|beta|rc|stable> --commit <sha> [evidence flags]")
+	fmt.Fprintln(os.Stderr, "usage: channel status | head | notes | plan --head <sha> | promote <alpha|beta|rc|stable> --commit <sha> [evidence flags]")
 	os.Exit(2)
 }
 

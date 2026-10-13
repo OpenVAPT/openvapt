@@ -1,0 +1,30 @@
+# Code owners for review routing. The owner publishes under the organisation
+# only, so no personal handle appears here. GitHub resolves a team owner only
+# when the team exists and has write access: create the team "maintainers" in
+# the OpenVAPT organisation (Settings > Teams > New team, add the owner, give
+# it Write on this repository), then the ruleset may require a code owner
+# review for the paths below (docs/adr/0007-branch-ruleset.md).
+# Until the team exists these lines resolve to nobody and do not block.
+
+# Release pipeline, channel gates and the evidence they trust
+/.github/                 @OpenVAPT/maintainers
+/cmd/channel/             @OpenVAPT/maintainers
+/internal/channels/       @OpenVAPT/maintainers
+/release/                 @OpenVAPT/maintainers
+/scripts/install.sh       @OpenVAPT/maintainers
+/Makefile                 @OpenVAPT/maintainers
+
+# Safety boundaries (AGENTS.md section 4)
+/internal/scope/          @OpenVAPT/maintainers
+/internal/sys/            @OpenVAPT/maintainers
+/internal/redact/         @OpenVAPT/maintainers
+
+# Legal texts (AGENTS.md section 3.6)
+/LICENSE                  @OpenVAPT/maintainers
+/EULA.md                  @OpenVAPT/maintainers
+/ACCEPTABLE_USE.md        @OpenVAPT/maintainers
+/DISCLAIMER.md            @OpenVAPT/maintainers
+/PRIVACY.md               @OpenVAPT/maintainers
+/LICENSING.md             @OpenVAPT/maintainers
+/NOTICE                   @OpenVAPT/maintainers
+/internal/terms/          @OpenVAPT/maintainers
