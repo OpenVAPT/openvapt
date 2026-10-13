@@ -2,6 +2,7 @@ package report
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,14 +10,27 @@ import (
 	"strings"
 
 	"github.com/openvapt/openvapt/internal/check"
+	"github.com/openvapt/openvapt/internal/sys"
 )
 
 // JSON returns the indented JSON form of the report.
 func (r *Report) JSON() ([]byte, error) { return json.MarshalIndent(r, "", "  ") }
 
+// ReadFile reads a report file the operator named: a regular file only,
+// opened without blocking, at most MaxReportSize bytes. It is shared by
+// Load (--baseline, diff) and sign.VerifyFile so every path into a report
+// has the same guard.
+func ReadFile(path string) ([]byte, error) {
+	b, err := sys.ReadLocalFile(path, MaxReportSize)
+	if errors.Is(err, sys.ErrTooLarge) {
+		return nil, errors.New("report file is too large")
+	}
+	return b, err
+}
+
 // Load reads a JSON report from disk.
 func Load(path string) (*Report, error) {
-	b, err := os.ReadFile(path)
+	b, err := ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +132,7 @@ func (r *Report) Markdown() string {
 	fmt.Fprintf(&b, "> %s\n\n", r.Disclaimer)
 	fmt.Fprintf(&b, "| Item | Value |\n|---|---|\n| Host | %s |\n| Operating System | %s |\n| Scan Time (UTC) | %s |\n| Run As Root | %v |\n| Tool | %s %s (%s, %s channel) |\n\n",
 		mdTable(r.Scan.Host), mdTable(r.Scan.OS), r.Scan.Started.Format("2006-01-02 15:04:05"), r.Scan.AsRoot, mdTable(r.Tool.Name), mdTable(r.Tool.Version), mdTable(short(r.Tool.Commit)), mdTable(r.Tool.Channel))
+	fmt.Fprintf(&b, "%s\n\n", mdText(r.Scan.VulnDB.Notice()))
 	fmt.Fprintf(&b, "## Executive Summary\n\n%s\n\n| Critical | High | Medium | Low | Passed | Incomplete | Skipped | Errors |\n|---|---|---|---|---|---|---|---|\n| %d | %d | %d | %d | %d | %d | %d | %d |\n\n",
 		mdText(r.Posture()),
 		s.Critical, s.High, s.Medium, s.Low, s.Passed, s.Incomplete, s.Skipped, s.Errors)
@@ -153,8 +168,11 @@ func (r *Report) Markdown() string {
 			}
 		}
 		fmt.Fprintf(&b, "\n**Fix:** %s\n\n**Verify:** %s\n\n", mdText(f.Fix), mdText(f.Verify))
-		if len(f.Standards.CWE) > 0 {
-			fmt.Fprintf(&b, "**Standards:** %s\n\n", strings.Join(append(append([]string{}, f.Standards.CWE...), f.Standards.OWASP...), ", "))
+		if st := standardsLine(f.Standards); st != "" {
+			fmt.Fprintf(&b, "**Standards:** %s\n\n", mdText(st))
+		}
+		for _, m := range f.Academy {
+			fmt.Fprintf(&b, "**Learn:** %s: %s, %s (offline: `openvapt learn %s`)\n\n", mdText(m.ID), mdText(m.Title), m.URL, mdText(m.ID))
 		}
 	}
 	fmt.Fprintf(&b, "## Passed and Skipped Checks\n\n| ID | Title | Status |\n|---|---|---|\n")
@@ -183,6 +201,28 @@ func (r *Report) Markdown() string {
 	return b.String()
 }
 
+// standardsLine renders every framework mapping of a finding (D-03: the
+// Markdown report used to omit WSTG and ASVS).
+func standardsLine(st check.Standards) string {
+	var parts []string
+	if len(st.CWE) > 0 {
+		parts = append(parts, strings.Join(st.CWE, ", "))
+	}
+	if len(st.OWASP) > 0 {
+		parts = append(parts, "OWASP Top 10 "+strings.Join(st.OWASP, ", "))
+	}
+	if len(st.ASVS) > 0 {
+		parts = append(parts, "ASVS "+strings.Join(st.ASVS, ", "))
+	}
+	if len(st.WSTG) > 0 {
+		parts = append(parts, strings.Join(st.WSTG, ", "))
+	}
+	if len(st.NIST) > 0 {
+		parts = append(parts, "NIST SP 800-53 "+strings.Join(st.NIST, ", "))
+	}
+	return strings.Join(parts, "; ")
+}
+
 func mdText(s string) string {
 	s = strings.Map(func(r rune) rune {
 		if r < 0x20 && r != '\t' {
@@ -206,7 +246,8 @@ func short(c string) string {
 func (r *Report) PrintSummary(w io.Writer) {
 	s := r.Summary
 	fmt.Fprintf(w, "\n  Checks run:  %d   Passed: %d   Failed: %d   Incomplete: %d   Skipped: %d   Errors: %d\n", r.Scan.Checks, s.Passed, s.Failed, s.Incomplete, s.Skipped, s.Errors)
-	fmt.Fprintf(w, "  Failed by severity:  Critical %d   High %d   Medium %d   Low %d\n\n", s.Critical, s.High, s.Medium, s.Low)
+	fmt.Fprintf(w, "  Failed by severity:  Critical %d   High %d   Medium %d   Low %d\n", s.Critical, s.High, s.Medium, s.Low)
+	fmt.Fprintf(w, "  %s\n\n", r.Scan.VulnDB.Notice())
 	for _, f := range r.Findings {
 		if f.Status == string(check.Fail) {
 			fmt.Fprintf(w, "  %-9s %-13s %s\n", strings.ToUpper(f.Severity), f.ID, f.Title)

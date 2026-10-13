@@ -46,6 +46,16 @@ CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
 sudo ./openvapt scan --out ~/report                   # assess this Linux machine
 ```
 
+**Vulnerability snapshot.** The repository embeds only a tiny test fixture in `internal/vulndb/data/`, so a plain source build has no advisory data: `HOST-CVE-001`, `HOST-CVE-002`, `HOST-CVE-003` and `WEB-CVE-001` then report Incomplete (never Pass), and `openvapt vulndb` prints `Fixture: true`. To match real advisories, generate the snapshot from the public OSV exports and the CISA KEV feed before building:
+
+```bash
+make vulndb                                           # downloads OSV and KEV data, writes internal/vulndb/data/snapshot.json.gz
+make build                                            # embeds it
+./openvapt vulndb                                     # shows the snapshot date and Fixture: false
+```
+
+Release builds run the same generator (see `docs/VULNDB.md`). Every report header shows the snapshot date and age; a snapshot older than 90 days is marked in the header and fails only the Low check `HOST-CVE-003`.
+
 ### One-Command Install
 
 One command downloads the Linux binary of the chosen release channel (Stable by default, or `--channel rc|beta|alpha` on test machines) for your CPU, verifies its SHA-256 checksum (always) and its Sigstore signature (when `cosign` is installed), and installs it to `~/.local/bin` without root. It scans nothing. Read [scripts/install.sh](scripts/install.sh) first; it is short.
@@ -84,11 +94,24 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 | `openvapt verify report.json [--key-id ID]` | Confirm a signed report was not edited |
 | `openvapt terms` / `version` | Terms of use, version |
 
-Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--parallel`. Exit code 3 means Critical or High findings exist.
+Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`).
+
+Exit codes, for scripts and CI:
+
+| Code | Meaning |
+|---|---|
+| 0 | Completed; no finding at or above the `--fail-on` severity, and no coverage gap |
+| 2 | Invalid arguments or usage |
+| 3 | Findings at or above the `--fail-on` severity (default: Critical or High) |
+| 4 | Incomplete coverage: at least one check could not observe enough to decide |
+| 5 | Internal error, a check ended with an error, or the scan was interrupted |
+| 6 | The report could not be written |
+
+Checked in order 5, 4, 3: an error or coverage gap is reported before findings, so a clean exit 0 means every selected check reached a verdict. `--fail-on none` never returns 3.
 
 ## What It Covers
 
-165 checks in three domains and ten control categories mapped to CIS Controls v8 and NIST CSF 2.0: server (patching and lifecycle, accounts and password policy, SSH, sudo, file and key permissions, mount options, kernel hardening, mandatory access control, services, systemd service hardening, logging and auditing), network and data services (listening services, firewalls including IPv6, firewall rules compared with what is actually listening, Docker firewall bypass, exposed application server ports, Redis, MongoDB, PostgreSQL, MySQL, Memcached, Elasticsearch, NFS, Samba, DNS and mail configuration, admin ports, TLS versions, ciphers, keys and certificates), containers (Docker daemon, privileged containers, socket mounts, kubelet, etcd), known vulnerabilities (offline matching of OS packages and web libraries against OSV and CISA KEV data) and web apps (security headers, cookies, CORS, HTTPS, exposed files, logs, debug pages and admin tools, secrets and backups inside web roots on disk, PHP and WordPress hygiene), application stacks (Apache Tomcat Manager, AJP, users and sample apps; Node.js runtime lifecycle, inspector and production mode; Django and Flask debug, host and secret key settings, development servers) and deeper CMS checks (WordPress, Joomla and Drupal configuration permissions, debug output, file editor, automatic updates and version files). Run `openvapt checks` for the full list.
+168 checks in three domains and ten control categories mapped to CIS Controls v8 and NIST CSF 2.0: server (patching and lifecycle, accounts and password policy, SSH, sudo, file and key permissions, mount options, kernel hardening, mandatory access control, services, systemd service hardening, logging and auditing), network and data services (listening services rated by service identity and how they are bound, firewalls including IPv6, firewall rules compared with what is actually listening, Docker firewall bypass, exposed debugger and application server ports, Redis, MongoDB, PostgreSQL, MySQL, Memcached, Elasticsearch, NFS, Samba, DNS and mail configuration, admin ports, TLS versions, ciphers, keys and certificates), containers (Docker daemon, privileged containers, socket mounts, kubelet, etcd), known vulnerabilities (offline matching of OS packages, web libraries and WordPress core against OSV and CISA KEV data, each match labelled with its matcher) and web apps (security headers, cookies, CORS, HTTPS, exposed files, logs, debug pages and admin tools, secrets and backups inside web roots on disk, PHP and WordPress hygiene), application stacks (Apache Tomcat Manager, AJP, users and sample apps; Node.js runtime lifecycle, inspector and production mode; Django and Flask debug, host and secret key settings, development servers) and deeper CMS checks (WordPress, Joomla and Drupal configuration permissions, debug output, file editor, automatic updates and version files). Run `openvapt checks` for the full list.
 
 ## What It Does Not Do
 

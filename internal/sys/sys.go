@@ -335,16 +335,109 @@ func isPseudoFS(p string) bool {
 	return false
 }
 
+// commandDirs are the only directories an allow-listed command may be
+// started from. exec.Command would otherwise resolve the name through the
+// caller's PATH, where a writable directory ahead of /usr/bin could plant a
+// fake sshd or iptables (S-01).
+var commandDirs = []string{"/usr/sbin", "/usr/bin", "/sbin", "/bin"}
+
+// ErrNotFound is returned when an allow-listed command is not installed in
+// any of the fixed system directories.
+var ErrNotFound = errors.New("command not found in /usr/sbin, /usr/bin, /sbin or /bin")
+
+// maxCommandOutput bounds what one command may print into memory (S-03).
+const maxCommandOutput = 8 << 20
+
+// resolveCommand returns the absolute path of name inside commandDirs, or
+// ErrNotFound. Names with a path separator are refused outright.
+func resolveCommand(name string) (string, error) {
+	if name == "" || strings.ContainsAny(name, "/\\") {
+		return "", ErrNotAllowed
+	}
+	for _, d := range commandDirs {
+		p := filepath.Join(d, name)
+		if st, err := os.Stat(p); err == nil && st.Mode().IsRegular() && st.Mode().Perm()&0o111 != 0 {
+			return p, nil
+		}
+	}
+	return "", ErrNotFound
+}
+
+// Run executes one allow-listed, read-only command from a fixed system
+// directory, with a 60 second limit, a bounded output buffer and a grace
+// period after the kill so a grandchild holding the pipe cannot stall the
+// scan.
 func (l *Live) Run(ctx context.Context, name string, args ...string) (string, error) {
 	if !IsAllowed(name, args) {
 		return "", ErrNotAllowed
 	}
+	path, err := resolveCommand(name)
+	if err != nil {
+		return "", err
+	}
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, name, args...)
+	cmd := exec.CommandContext(ctx, path, args...)
 	cmd.Env = []string{"LC_ALL=C", "PATH=/usr/sbin:/usr/bin:/sbin:/bin"}
-	out, err := cmd.CombinedOutput()
-	return string(out), err
+	cmd.WaitDelay = 5 * time.Second
+	var out boundedBuffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	err = cmd.Run()
+	if out.truncated && err == nil {
+		err = errors.New("command output exceeded the 8 MiB limit and was truncated")
+	}
+	return out.String(), err
+}
+
+// boundedBuffer keeps at most maxCommandOutput bytes and drops the rest.
+type boundedBuffer struct {
+	b         []byte
+	truncated bool
+}
+
+func (w *boundedBuffer) Write(p []byte) (int, error) {
+	room := maxCommandOutput - len(w.b)
+	if room <= 0 {
+		w.truncated = true
+		return len(p), nil
+	}
+	if len(p) > room {
+		w.truncated = true
+		p = p[:room]
+	}
+	w.b = append(w.b, p...)
+	return len(p), nil
+}
+func (w *boundedBuffer) String() string { return string(w.b) }
+
+// ErrTooLarge is returned by ReadLocalFile for a file over its limit.
+var ErrTooLarge = errors.New("file is larger than the permitted size")
+
+// ReadLocalFile reads a file the operator named on the command line (a
+// report to verify, diff or use as a baseline): the open never blocks, only
+// a regular file is read, and at most max bytes are accepted (S-02).
+func ReadLocalFile(path string, max int64) ([]byte, error) {
+	f, err := openRead(path, false)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	st, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !st.Mode().IsRegular() {
+		return nil, ErrNotRegular
+	}
+	b, err := io.ReadAll(io.LimitReader(f, max+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(b)) > max {
+		return nil, ErrTooLarge
+	}
+	return b, nil
 }
 
 func (l *Live) HTTP(ctx context.Context, scheme, vhost, path string) (HTTPResponse, error) {

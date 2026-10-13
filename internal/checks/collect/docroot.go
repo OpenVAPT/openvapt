@@ -55,3 +55,69 @@ func DocRoots(ctx context.Context, s sys.System) []string {
 	}
 	return out
 }
+
+// statusConfigPatterns are the files where Apache and nginx status pages
+// are configured, in addition to the virtual host files.
+var statusConfigPatterns = []string{"/etc/apache2/mods-enabled/status.conf", "/etc/apache2/conf-enabled/*.conf", "/etc/httpd/conf.d/*.conf", "/etc/httpd/conf.modules.d/*.conf"}
+
+// StatusPageLocalOnly reports whether the web server configuration limits
+// its status pages (/server-status, /server-info, /nginx_status, stub_status)
+// to local clients: a <Location> or location block for them that carries
+// Require local, Require ip 127..., or allow 127.0.0.1 with deny all. The
+// scan itself requests from 127.0.0.1, so a status page that answers can
+// still be invisible to every other machine; this is how a check tells the
+// two apart. The restricting directive is returned as evidence.
+func StatusPageLocalOnly(ctx context.Context, s sys.System) (string, bool) {
+	seen := map[string]bool{}
+	for _, pat := range append(append([]string{}, vhostPatterns...), statusConfigPatterns...) {
+		files, _ := s.Glob(pat)
+		for _, f := range files {
+			if seen[f] {
+				continue
+			}
+			seen[f] = true
+			r, err := s.ReadFile(ctx, f)
+			if err != nil {
+				continue
+			}
+			if ev, ok := statusBlockLocalOnly(string(r.Data)); ok {
+				return f + ": " + ev, true
+			}
+		}
+	}
+	return "", false
+}
+
+// statusBlockLocalOnly inspects every block that names a status page.
+func statusBlockLocalOnly(text string) (string, bool) {
+	lower := strings.ToLower(text)
+	for _, marker := range []string{"server-status", "server-info", "nginx_status", "stub_status"} {
+		from := 0
+		for {
+			i := strings.Index(lower[from:], marker)
+			if i < 0 {
+				break
+			}
+			i += from
+			from = i + len(marker)
+			end := len(lower)
+			for _, closer := range []string{"</location>", "</locationmatch>", "}"} {
+				if j := strings.Index(lower[i:], closer); j >= 0 && i+j < end {
+					end = i + j
+				}
+			}
+			block := lower[i:end]
+			switch {
+			case strings.Contains(block, "require local"):
+				return "Require local", true
+			case strings.Contains(block, "require ip 127.") || strings.Contains(block, "require ip ::1"):
+				return "Require ip 127.0.0.1", true
+			case strings.Contains(block, "allow 127.0.0.1") && strings.Contains(block, "deny all"):
+				return "allow 127.0.0.1; deny all", true
+			case strings.Contains(block, "allow from 127.0.0.1") && (strings.Contains(block, "deny from all") || strings.Contains(block, "order deny,allow")):
+				return "Allow from 127.0.0.1", true
+			}
+		}
+	}
+	return "", false
+}

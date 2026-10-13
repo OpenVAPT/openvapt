@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/openvapt/openvapt/internal/check"
+	"github.com/openvapt/openvapt/internal/checks/collect"
 	"github.com/openvapt/openvapt/internal/sys"
 )
 
@@ -114,7 +115,7 @@ var exposureRules = []exposureRule{
 		cvss:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		summary:   "Checks whether Apache server-status/server-info or nginx stub_status are reachable for each site.",
 		rationale: "Status pages show live requests (including URLs with tokens), client IPs, virtual hosts and modules.",
-		detection: "Requests /server-status, /server-info and /nginx_status for each site through 127.0.0.1. Note: these pages are often allowed from localhost only, so a hit is confirmed only when the web server configuration does not restrict by IP; review the result manually.",
+		detection: "Requests /server-status, /server-info and /nginx_status for each site through 127.0.0.1. Because the scan itself comes from 127.0.0.1, a page that answers is checked against the web server configuration: when the status location carries Require local, Require ip 127.0.0.1 or allow 127.0.0.1 with deny all, the page is reachable from this machine only and the check passes with that noted (confirm from another machine); otherwise it fails.",
 		fix:       "Restrict to administrators: <Location /server-status> Require local </Location> (Apache), or allow 127.0.0.1; deny all; (nginx). Remove the module if unused.",
 		verify:    "From another machine: curl -s -o /dev/null -w '%{http_code}' https://<site>/server-status  should print 403 or 404.",
 		refs:      []check.Ref{{Title: "Apache HTTP Server, mod_status", URL: "https://httpd.apache.org/docs/2.4/mod/mod_status.html"}},
@@ -147,6 +148,12 @@ func registerExposure(r exposureRule) {
 						}
 					}
 					if len(hits) > 0 {
+						if r.id == "WEB-EXP-006" {
+							if ev, ok := collect.StatusPageLocalOnly(ctx, s); ok {
+								return check.PassR(st.Name, "Status page answers from 127.0.0.1 but the configuration restricts it to local clients; confirm from another machine", append(hits, "restriction: "+ev)...)
+							}
+							hits = append(hits, "no local-only restriction (Require local, Require ip 127.0.0.1 or allow 127.0.0.1 with deny all) found in the web server configuration; the scan requests from 127.0.0.1, so confirm from another machine")
+						}
 						return check.FailR(st.Name, "Exposed: "+strings.Join(hits, ", "), hits...)
 					}
 					return check.PassR(st.Name, "Not exposed")

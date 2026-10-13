@@ -2,7 +2,7 @@
 
 Generated from the code by `internal/sources` (regenerate with `go test ./internal/sources -update`); do not edit by hand. Every reference that any check or Academy module cites is listed here, grouped by publisher, with the publisher's terms and any credit line those terms ask for. OpenVAPT cites sources by title, identifier and link; it does not copy their text. Use of a source does not imply that its publisher endorses OpenVAPT.
 
-Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Academy modules.
+Totals: 170 distinct sources from 33 publishers, cited by 168 checks and 21 Academy modules.
 
 ## NIST (National Institute of Standards and Technology)
 
@@ -69,16 +69,16 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [OWASP HTTP Headers Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html) | WEB-HDR-001, WEB-HDR-007 |
 | [OWASP Key Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Key_Management_Cheat_Sheet.html) | HOST-FS-007 |
 | [OWASP Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html) | WEB-EXP-008 |
-| [OWASP Node.js Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html) | Academy P13, NET-APP-001, WEB-NODE-002, WEB-NODE-003 |
+| [OWASP Node.js Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html) | Academy P13, NET-APP-002, WEB-NODE-002, WEB-NODE-003 |
 | [OWASP PHP Configuration Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/PHP_Configuration_Cheat_Sheet.html) | WEB-PHP-001, WEB-PHP-002, WEB-PHP-003 |
-| [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html) | Academy P6, WEB-DOC-001, WEB-EXP-002 |
+| [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html) | Academy P6, WEB-DOC-001, WEB-DOC-003, WEB-EXP-002 |
 | [OWASP Secure Headers Project](https://owasp.org/projects/secure-headers-project) | Academy P5, WEB-HDR-004, WEB-HDR-005, WEB-HDR-006 |
 | [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) | Academy P5, WEB-CK-001 |
 | [OWASP Top 10 2021, A05 Security Misconfiguration](https://top10.owasp.org/2021/A05_2021-Security_Misconfiguration/) | Academy P6 |
 | [OWASP Transport Layer Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html) | WEB-TLS-001 |
 | [OWASP WSTG-CLNT-07, Testing Cross Origin Resource Sharing](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/11-Client-side_Testing/07-Testing_Cross_Origin_Resource_Sharing/) | WEB-COR-001 |
 | [OWASP WSTG-CONF-02, Test Application Platform Configuration](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration/) | WEB-TOM-005 |
-| [OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files for Sensitive Information](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/) | WEB-DOC-001, WEB-EXP-001, WEB-EXP-004, WEB-EXP-007, WEB-EXP-008, WEB-EXP-009 |
+| [OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files for Sensitive Information](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/) | WEB-DOC-001, WEB-DOC-003, WEB-EXP-001, WEB-EXP-004, WEB-EXP-007, WEB-EXP-008, WEB-EXP-009 |
 | [OWASP WSTG-CONF-05, Enumerate Infrastructure and Application Admin Interfaces](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces/) | WEB-EXP-011 |
 | [OWASP WSTG-CONF-09, Test File Permission](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/09-Test_File_Permission/) | WEB-DOC-002 |
 | [OWASP WSTG-ERRH-01, Testing for Improper Error Handling](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling/) | WEB-EXP-012 |
@@ -117,12 +117,13 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [CISA KEV](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) | Academy P10, HOST-CVE-001, HOST-CVE-002, HOST-CVE-003 |
 | [CISA, DNS Amplification Attacks (Alert TA13-088A)](https://www.cisa.gov/news-events/alerts/2013/03/29/dns-amplification-attacks) | Academy P8 |
 
-## OSV (Open Source Vulnerabilities, osv.dev)
+## OSV (Open Source Vulnerabilities, osv.dev) and the OSV Schema (OpenSSF)
 
 - Terms: Cited by link. Advisory data is downloaded only by the release pipeline; licences vary by originating database and are recorded per release (docs/VULNDB.md).
 
 | Source | Cited By |
 |---|---|
+| [OSV schema, defined ecosystems (WordPress)](https://ossf.github.io/osv-schema/) | WEB-CVE-001 |
 | [OSV vulnerability database](https://osv.dev/) | Academy P10, HOST-CVE-001, HOST-CVE-002, HOST-CVE-003, WEB-CVE-001 |
 
 ## OASIS Open
@@ -147,7 +148,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [IANA Service Name and Transport Protocol Port Number Registry](https://www.iana.org/assignments/service-names-port-numbers) | NET-SVC-002 |
+| [IANA Service Name and Transport Protocol Port Number Registry](https://www.iana.org/assignments/service-names-port-numbers) | NET-SVC-002, NET-SVC-004 |
 
 ## PTES (Penetration Testing Execution Standard)
 
@@ -302,6 +303,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [Apache Tomcat 10.1, Manager App How-To](https://tomcat.apache.org/tomcat-10.1-doc/manager-howto.html) | WEB-TOM-001 |
 | [Apache Tomcat 10.1, Realm Configuration How-To (digested passwords)](https://tomcat.apache.org/tomcat-10.1-doc/realm-howto.html) | WEB-TOM-002 |
 | [Apache Tomcat 10.1, Security Considerations](https://tomcat.apache.org/tomcat-10.1-doc/security-howto.html) | Academy P13, WEB-TOM-001, WEB-TOM-002, WEB-TOM-003, WEB-TOM-004, WEB-TOM-005 |
+| [Apache Tomcat 9, AJP Connector](https://tomcat.apache.org/tomcat-9.0-doc/config/ajp.html) | NET-APP-001 |
 
 ## PHP Documentation
 
@@ -328,8 +330,9 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [Express documentation, Production best practices: performance and reliability](https://expressjs.com/en/advanced/best-practice-performance/) | WEB-NODE-003 |
 | [Flask documentation, Debug mode](https://flask.palletsprojects.com/en/stable/quickstart/#debug-mode) | WEB-PY-004 |
 | [Flask documentation, Deploying to Production](https://flask.palletsprojects.com/en/stable/deploying/) | WEB-PY-005 |
-| [Gunicorn documentation, Deploying Gunicorn (behind a proxy)](https://gunicorn.org/deploy/) | NET-APP-001 |
+| [Gunicorn documentation, Deploying Gunicorn (behind a proxy)](https://gunicorn.org/deploy/) | NET-APP-002 |
 | [Node.js documentation, Debugging guide (security implications)](https://nodejs.org/learn/getting-started/debugging) | WEB-NODE-002 |
+| [Node.js, Inspector security implications](https://nodejs.org/en/learn/getting-started/debugging#security-implications) | NET-APP-001 |
 | [Werkzeug documentation, Debugging Applications](https://werkzeug.palletsprojects.com/en/stable/debug/) | WEB-PY-004 |
 
 ## Content Management Systems (WordPress, Drupal, Joomla)
@@ -363,6 +366,14 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [Kubernetes documentation, Kubelet authentication and authorization](https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/) | Academy P9, HOST-K8S-001 |
 | [Kubernetes documentation, Operating etcd clusters for Kubernetes](https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/) | HOST-K8S-002 |
 | [Kubernetes documentation, Securing a cluster](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/) | HOST-K8S-001, HOST-K8S-002, HOST-K8S-003 |
+
+## Prometheus (The Linux Foundation)
+
+- Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
+
+| Source | Cited By |
+|---|---|
+| [Prometheus, Security model](https://prometheus.io/docs/operating/security/) | NET-SVC-004 |
 
 ## Databases and Data Services (MySQL, PostgreSQL, MongoDB, Redis, Memcached, Elastic)
 

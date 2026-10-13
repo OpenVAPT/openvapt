@@ -97,7 +97,7 @@ var stacks = []Module{
 			}},
 		},
 		KeyTerms:      []string{"Reverse Proxy", "Debug Mode", "Default Credentials", "End of Life"},
-		RelatedChecks: []string{"NET-APP-001", "WEB-TOM-", "WEB-NODE-", "WEB-PY-"},
+		RelatedChecks: []string{"NET-APP-", "WEB-TOM-", "WEB-NODE-", "WEB-PY-"},
 		Lab: []string{
 			"Run: openvapt demo --only NET-APP-,WEB-TOM-,WEB-NODE-,WEB-PY- --out p13",
 			"For each vulnerable service in internal/lab/fixtures_stacks.go, write the corrected ExecStart= and Environment= lines.",

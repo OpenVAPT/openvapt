@@ -54,9 +54,16 @@ var rules = []struct {
 	{regexp.MustCompile(`(?m)^([a-z_][a-z0-9_.-]*\$?):[./0-9A-Za-z]{13}:`), `$1:[REDACTED HASH]:`},
 }
 
+// secretKey names a key that carries a secret. Password, token and key words
+// may sit anywhere in the key (DB_PASSWORD, rootpassword, api-key), but the
+// short word "auth" must be its own token separated by _ . or - (basic_auth,
+// auth-token), so sshd and PAM settings such as authenticationmethods,
+// authorizedkeysfile or preauth keep their harmless values in the report.
+const secretKey = `[A-Z0-9_.-]*(?:pass(?:word|wd|phrase)?|pwd|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|credential|salt)[A-Z0-9_.-]*|(?:[A-Z0-9]+[_.-])*auth(?:[_.-][A-Z0-9]+)*`
+
 // keyValue matches key = value, key: value, "key": "value" and
 // "key value" pairs whose key names a secret.
-var keyValue = regexp.MustCompile(`(?i)\b([A-Z0-9_.-]*(?:` + secret + `)[A-Z0-9_.-]*)(["']?)(\s*[:=]\s*|\s+)(` + dq + `|` + sq + `|[^\s,;}]+)`)
+var keyValue = regexp.MustCompile(`(?i)\b(` + secretKey + `)(["']?)(\s*[:=]\s*|\s+)(` + dq + `|` + sq + `|[^\s,;}]+)`)
 
 // harmless values are kept after a secret-looking key: they are setting
 // values such as "PasswordAuthentication no", never credible secrets.
