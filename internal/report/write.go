@@ -2,6 +2,7 @@ package report
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,14 +10,27 @@ import (
 	"strings"
 
 	"github.com/openvapt/openvapt/internal/check"
+	"github.com/openvapt/openvapt/internal/sys"
 )
 
 // JSON returns the indented JSON form of the report.
 func (r *Report) JSON() ([]byte, error) { return json.MarshalIndent(r, "", "  ") }
 
+// ReadFile reads a report file the operator named: a regular file only,
+// opened without blocking, at most MaxReportSize bytes. It is shared by
+// Load (--baseline, diff) and sign.VerifyFile so every path into a report
+// has the same guard.
+func ReadFile(path string) ([]byte, error) {
+	b, err := sys.ReadLocalFile(path, MaxReportSize)
+	if errors.Is(err, sys.ErrTooLarge) {
+		return nil, errors.New("report file is too large")
+	}
+	return b, err
+}
+
 // Load reads a JSON report from disk.
 func Load(path string) (*Report, error) {
-	b, err := os.ReadFile(path)
+	b, err := ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -153,8 +167,8 @@ func (r *Report) Markdown() string {
 			}
 		}
 		fmt.Fprintf(&b, "\n**Fix:** %s\n\n**Verify:** %s\n\n", mdText(f.Fix), mdText(f.Verify))
-		if len(f.Standards.CWE) > 0 {
-			fmt.Fprintf(&b, "**Standards:** %s\n\n", strings.Join(append(append([]string{}, f.Standards.CWE...), f.Standards.OWASP...), ", "))
+		if st := standardsLine(f.Standards); st != "" {
+			fmt.Fprintf(&b, "**Standards:** %s\n\n", mdText(st))
 		}
 	}
 	fmt.Fprintf(&b, "## Passed and Skipped Checks\n\n| ID | Title | Status |\n|---|---|---|\n")
@@ -181,6 +195,28 @@ func (r *Report) Markdown() string {
 		fmt.Fprintf(&b, "- %s\n", m)
 	}
 	return b.String()
+}
+
+// standardsLine renders every framework mapping of a finding (D-03: the
+// Markdown report used to omit WSTG and ASVS).
+func standardsLine(st check.Standards) string {
+	var parts []string
+	if len(st.CWE) > 0 {
+		parts = append(parts, strings.Join(st.CWE, ", "))
+	}
+	if len(st.OWASP) > 0 {
+		parts = append(parts, "OWASP Top 10 "+strings.Join(st.OWASP, ", "))
+	}
+	if len(st.ASVS) > 0 {
+		parts = append(parts, "ASVS "+strings.Join(st.ASVS, ", "))
+	}
+	if len(st.WSTG) > 0 {
+		parts = append(parts, strings.Join(st.WSTG, ", "))
+	}
+	if len(st.NIST) > 0 {
+		parts = append(parts, "NIST SP 800-53 "+strings.Join(st.NIST, ", "))
+	}
+	return strings.Join(parts, "; ")
 }
 
 func mdText(s string) string {

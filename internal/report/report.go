@@ -294,7 +294,7 @@ var Methodology = []string{
 var Limitations = []string{
 	"An automated self-assessment is not a penetration test. It does not prove that the machine is secure; absence of findings is not proof of absence of vulnerabilities.",
 	"Only the checks listed in this report were performed. Application logic flaws (for example SQL injection, broken access control or business logic errors) require manual testing or code review.",
-	"Some checks need root to read protected files. Checks that could not read what they needed are marked Skipped.",
+	"Some checks need root to read protected files or the real daemon state. A check that could not read what it needed is marked Skipped (it did not apply or could not start) or Incomplete (it ran, but part of its input was unreadable, truncated or missing); neither is a Pass.",
 	"Results reflect the machine at the time of the scan. Configuration drift after the scan is not covered.",
 	"End-of-life and version tables are dated and may be out of date for releases newer than this version of OpenVAPT.",
 }
