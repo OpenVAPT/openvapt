@@ -1,0 +1,23 @@
+name: Teaching Feedback
+description: Feedback from using OpenVAPT, the Academy, worksheets or practice labs in a course
+labels: [teaching]
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for teaching with OpenVAPT. Please do not name students or include institution account details. Answer keys are public (TEACHING.md), so ask here about setting fair graded work."
+  - type: dropdown
+    id: material
+    attributes:
+      label: Material
+      options: [Academy module, Worksheet or answer key, Practice lab, Course plan or rubric, openvapt teach command, Teaching terms, Other]
+    validations: {required: true}
+  - type: input
+    id: which
+    attributes: {label: Which Module, Worksheet or Lab}
+  - type: textarea
+    id: feedback
+    attributes: {label: What Worked and What Did Not}
+    validations: {required: true}
+  - type: textarea
+    id: level
+    attributes: {label: Course Level and Setting, description: Optional. For example second year undergraduate, lab of 20, simulated lab only.}

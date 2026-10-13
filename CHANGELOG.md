@@ -4,6 +4,15 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Stream: pipeline
+- Promote: a commit that only records a promotion (release/, CITATION.cff, CHANGELOG.md) is no longer treated as a new build, so a record commit never becomes the next alpha and the beta soak clock is not reset every day (`cmd/channel head`, with tests that reproduce the fault).
+- Release: the binaries are built twice on two separate runners from the same commit and the same vulnerability snapshot, built once and shared; publishing stops if the two builds differ. The Makefile builds with `-trimpath -buildvcs=false`, `CGO_ENABLED=0` and fixed ldflags, so `make release VERSION=<tag> COMMIT=<sha>` reproduces a published binary.
+- Release: the SBOM is CycloneDX JSON with the main component named by the release tag (checked before upload); SHA256SUMS, the vulnerability snapshot and the SBOM carry Sigstore bundles and build provenance alongside the binaries; tags are annotated; release notes hold only the changes of that version and state how to verify the assets.
+- Changelog: `cmd/channel promote` turns the [Unreleased] section into the released version's section (keep-a-changelog style) and opens a fresh [Unreleased]; the record commit is signed off.
+- CI: every commit in a push or pull request must carry a Signed-off-by trailer (DCO), with historical exceptions listed by hash and reason in release/dco-exceptions.txt; the check run is named `ci`; every job has a timeout.
+- Added .github/dependabot.yml (weekly, grouped: GitHub Actions and the site's npm packages), a CodeQL workflow for Go and the workflow files (pinned by commit), .github/CODEOWNERS naming the maintainers team for pipeline, safety-boundary and legal paths, and ADR 0007 with the main branch ruleset.
+- CITATION.cff: the `license` key is removed because CFF 1.2.0 accepts only SPDX identifiers there; `license-url` points at LICENSE. New issue forms: Documentation, Factual Error, Teaching Feedback.
+
 ### Website
 - How to Cite OpenVAPT (cite.html) redesigned around CITING.md: credit required versus citation requested, a Copy a Citation card with a keyboard-accessible style switcher (APA 7, IEEE, Harvard, MLA 9, Chicago, Vancouver, BibTeX, BibLaTeX, RIS, CSL-JSON, Plain Text, Slide or Poster, Code Header, Teaching Credit), version and commit filled from the build, a When to Cite table, version and commit citing, Academy, module and check patterns, and "Use does not imply endorsement". The unsupported claim that archived releases may receive a DOI is removed. Copy buttons use the clipboard with a select-all fallback and announce "Copied" to screen readers; access dates show the reader's date.
 - Every check page and Academy module page ends with a Cite This Page box (APA 7 and BibTeX with the page's exact address and version).
