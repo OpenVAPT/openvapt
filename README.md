@@ -81,7 +81,7 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 
 ### Verify
 
-**Optional verified binaries.** For machines without Go, each release publishes Linux binaries built only by GitHub Actions through the promotion workflow (promote.yml, after every channel gate passed), with `SHA256SUMS`, Sigstore signature bundles, build provenance, an SBOM and a source archive. See [docs/REPORT_SIGNING.md](docs/REPORT_SIGNING.md) for the `gh attestation verify` and `cosign verify-blob` commands. You can rebuild the same bytes yourself with `make release VERSION=<tag>` using the same Go version, and compare checksums.
+**Optional verified binaries.** For machines without Go, each release publishes Linux binaries built only by GitHub Actions through the promotion workflow (promote.yml, after every channel gate passed), with `SHA256SUMS`, Sigstore signature bundles, build provenance, an SBOM and a source archive. See [docs/REPORT_SIGNING.md](docs/REPORT_SIGNING.md) for the `gh attestation verify` and `cosign verify-blob` commands. You can rebuild the same bytes yourself with `GOTOOLCHAIN=go1.26.9 make release VERSION=<tag>` using the same Go version, and compare checksums.
 
 ## Commands
 

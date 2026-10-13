@@ -32,3 +32,7 @@ Use the issue templates: Bug Report, False Positive, False Negative, New Check, 
 ## Code of Conduct
 
 Participation is governed by [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## Release Heads
+
+The promotion workflow treats a commit that changes only `CHANGELOG.md`, `CITATION.cff` or files under `release/` as a record commit, not a new release head, so a CHANGELOG-only commit never starts a new alpha on its own.

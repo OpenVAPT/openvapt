@@ -36,7 +36,6 @@ Save as `ruleset-main.json`:
   "rules": [
     { "type": "deletion" },
     { "type": "non_fast_forward" },
-    { "type": "required_linear_history" },
     {
       "type": "pull_request",
       "parameters": {
@@ -99,3 +98,7 @@ Update an existing ruleset with `--method PUT repos/OpenVAPT/openvapt/rulesets/<
 - Any workflow in this repository with `contents: write` could use the same bypass. Today only `record` has it; CODEOWNERS and the pull request rule put every change to `.github/` in front of a reviewer.
 - History cannot be rewritten or deleted through the API or git by any user; AGENTS.md 3.3 (no force push, no history rewrite) is now enforced at the technical layer.
 - Branch protection rules (the older API at `branches/main/protection`) are not used; rulesets supersede them and support the Integration bypass actor.
+
+## Note (2026-10-14, second verifier)
+
+`required_linear_history` was removed from the ruleset: the project merges work branches with `--no-ff` on purpose (merge commits are the audit trail, and `channel head` reads first-parent history), so a linear-history rule would reject every integration merge. Force pushes and deletions stay blocked.
