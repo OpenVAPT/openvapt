@@ -33,6 +33,9 @@ var kernelFSBoot = []Module{
 			{"Integrity Monitoring, Prelink and Core Dumps", []string{
 				"After a compromise the question is which files changed. A file integrity tool such as AIDE records a baseline of hashes and permissions and compares against it on a schedule; a tool that is installed but never scheduled protects nothing, so the check wants both. Prelink rewrites binaries in place, which breaks those hashes and package verification, so it should be absent. Core dumps are copies of a crashed program's memory, including any passwords or keys it held; a hard core 0 limit in PAM, and Storage=none where systemd-coredump collects dumps, keep them from being written at all.",
 			}},
+			{"In Summary", []string{
+				"The kernel, the mounts and the boot chain decide what a process may do before any application code runs. Read sysctl values from /proc/sys, give temporary and shared directories noexec, nosuid and nodev, keep the SUID list short and known, protect the boot loader and the module list, and let an integrity tool and a core dump policy show when something changed.",
+			}},
 		},
 		KeyTerms:      []string{"Sysctl", "Mount Option", "Sticky Bit", "SUID", "Umask", "Secure Boot", "Kernel Module", "File Integrity Monitoring", "Core Dump", "Hardening"},
 		RelatedChecks: []string{"HOST-KRN-019", "HOST-KRN-020", "HOST-KRN-021", "HOST-KRN-022", "HOST-KRN-023", "HOST-KRN-024", "HOST-KRN-025", "HOST-KRN-026", "HOST-KRN-027", "HOST-KRN-028", "HOST-KRN-029", "HOST-KRN-030", "HOST-KRN-031", "HOST-FS-010", "HOST-FS-011", "HOST-FS-012", "HOST-FS-013", "HOST-FS-014", "HOST-FS-015", "HOST-FS-016", "HOST-FS-017", "HOST-FS-018", "HOST-FS-019", "HOST-FS-020", "HOST-FS-021", "HOST-FS-022", "HOST-BOOT-"},

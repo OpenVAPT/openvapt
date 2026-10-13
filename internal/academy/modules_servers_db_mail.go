@@ -47,6 +47,9 @@ var serversDBMail = []Module{
 				"A .git folder rebuilds the source and its history; a .env file holds the database password. Debian's Apache default protects only .ht* files. One rule per server covers the whole class: nginx location ~ /\\. { deny all; } with a more specific location for /.well-known/ above it; Apache <DirectoryMatch \"/\\.(git|svn|hg)\"> and <FilesMatch \"^\\.(env|git)\"> with Require all denied. This also protects files deployed by mistake next year.",
 				"client_max_body_size and limit_req_zone in nginx bound what one client can upload and how fast it can hit a login page. ModSecurity with the OWASP Core Rule Set, or mod_evasive, adds request filtering to Apache. These are informational in OpenVAPT because the right numbers depend on the application; a filter that is never tuned breaks sites, and one that is never deployed blocks nothing.",
 			}},
+			{"In Summary", []string{
+				"A web server is only as hard as its merged configuration. Hide banners and listings, disable TRACE, allow only TLS 1.2 and 1.3 with modern ciphers and stapling, keep .htaccess overrides narrow, deny dot files everywhere, and bound request sizes and rates.",
+			}},
 		},
 		KeyTerms:      []string{"Cipher Suite", "OCSP Stapling", "Directory Listing", "Web Application Firewall", "TLS", "Fingerprinting"},
 		RelatedChecks: []string{"WEB-NGX-", "WEB-APA-"},
@@ -87,6 +90,9 @@ var serversDBMail = []Module{
 			}},
 			{"DNS: Hide the Version, Validate the Answers", []string{
 				"A CHAOS query for version.bind returns the exact BIND release unless options sets a version string. DNSSEC validation (dnssec-validation auto) lets a recursive resolver reject forged answers for signed zones; BIND 9.16 and newer enable it by default, so an explicit no is a deliberate weakening and the one state OpenVAPT flags.",
+			}},
+			{"In Summary", []string{
+				"Databases, mail and DNS fail the same way: they listen too widely, trust too much and say too much. Bind to what you need, require strong password verifiers and TLS on the wire, rename or restrict dangerous commands, offer and require TLS for mail, hide the DNS version and validate answers with DNSSEC.",
 			}},
 		},
 		KeyTerms:      []string{"SCRAM-SHA-256", "DNSSEC", "STARTTLS", "Least Privilege", "Open Relay", "Hardening"},

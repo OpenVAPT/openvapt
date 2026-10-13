@@ -32,6 +32,9 @@ var auditPamPkg = []Module{
 				"systemd-journald keeps the journal in memory unless Storage=persistent (or auto with /var/log/journal present); a reboot or a crash then erases it. Compression keeps a persistent journal small enough to retain for weeks (HOST-AUD-010).",
 				"Every local log can be edited by root. A copy that already left the machine, through rsyslog forwarding, syslog-ng or systemd-journal-upload, is the record an investigation can trust (HOST-AUD-011). Forward over TLS so the logs are not readable in transit. This is AU-9(2), storing audit records on a separate system, and CIS Controls v8 safeguard 8.9.",
 			}},
+			{"In Summary", []string{
+				"Running auditd is not the same as recording. Load rules for identity files, logins, time changes, modules and privileged commands, lock the configuration, protect the log directory, make the daemon act when the disk fills, keep the journal persistent and send a copy somewhere an attacker cannot reach.",
+			}},
 		},
 		KeyTerms:      []string{"Audit Rule", "Audit Trail", "Immutable Audit Configuration", "Log Forwarding", "Persistent Journal"},
 		RelatedChecks: []string{"HOST-AUD-001", "HOST-AUD-002", "HOST-AUD-003", "HOST-AUD-004", "HOST-AUD-005", "HOST-AUD-006", "HOST-AUD-007", "HOST-AUD-008", "HOST-AUD-009", "HOST-AUD-010", "HOST-AUD-011"},
@@ -80,6 +83,9 @@ var auditPamPkg = []Module{
 			}},
 			{"Services That Came Along", []string{
 				"A service that is installed but stopped comes back with the next upgrade or reboot and is one command away from running. HOST-SVC-001 asks what is active now; HOST-SVC-002 to 012 read the package database and the systemd boot links for Telnet, the r-services and finger, TFTP, FTP, NIS, Avahi and CUPS, NFS and rpcbind, DHCP and DNS servers, Samba, SNMP and Squid, and inetd super-servers. The cleartext protocols (Telnet, rsh, TFTP, FTP, NIS) rate Medium because they send credentials or data unencrypted; the rest rate Low as attack surface with no purpose on a typical server. Where a machine legitimately runs one, the suppression file records the reason so the finding stays visible but accepted. This is NIST SP 800-123's advice to remove or disable unnecessary services, NIST SP 800-53 CM-7, and CIS Controls v8 safeguard 4.8.",
+			}},
+			{"In Summary", []string{
+				"Password policy is enforced by PAM and login.defs together, so check both. Keep root's PATH clean, expire and warn on schedule, only install packages from signed repositories you recognise, refresh package lists, retire old kernels and remove the legacy services that arrived with the image.",
 			}},
 		},
 		KeyTerms: []string{"PAM", "Password History", "Path Interception", "Repository Signing", "Legacy Service", "Idle Timeout"},
