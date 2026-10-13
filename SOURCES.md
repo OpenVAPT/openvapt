@@ -2,7 +2,7 @@
 
 Generated from the code by `internal/sources` (regenerate with `go test ./internal/sources -update`); do not edit by hand. Every reference that any check or Academy module cites is listed here, grouped by publisher, with the publisher's terms and any credit line those terms ask for. OpenVAPT cites sources by title, identifier and link; it does not copy their text. Use of a source does not imply that its publisher endorses OpenVAPT.
 
-Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Academy modules.
+Totals: 203 distinct sources from 34 publishers, cited by 201 checks and 24 Academy modules.
 
 ## NIST (National Institute of Standards and Technology)
 
@@ -11,22 +11,23 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
+| [NIST IR 7966, Security of Interactive and Automated Access Management Using Secure Shell (SSH)](https://csrc.nist.gov/pubs/ir/7966/final) | HOST-SSH-013 |
 | [NIST SP 800-115, Technical Guide to Information Security Testing and Assessment](https://csrc.nist.gov/pubs/sp/800/115/final) | Academy A1, Academy A3, Academy F2, NET-FW-006, NET-LSN-001 |
 | [NIST SP 800-119, Guidelines for the Secure Deployment of IPv6](https://csrc.nist.gov/pubs/sp/800/119/final) | NET-FW-002 |
 | [NIST SP 800-12 Rev. 1, An Introduction to Information Security](https://csrc.nist.gov/pubs/sp/800/12/r1/final) | Academy F1 |
-| [NIST SP 800-123, Guide to General Server Security](https://csrc.nist.gov/pubs/sp/800/123/final) | Academy P1, HOST-FS-001, HOST-FS-003, HOST-SSH-001, HOST-SVC-001, HOST-SYSD-001, NET-SVC-001 |
+| [NIST SP 800-123, Guide to General Server Security](https://csrc.nist.gov/pubs/sp/800/123/final) | Academy P1, HOST-FS-001, HOST-FS-003, HOST-SEC-001, HOST-SSH-001, HOST-SVC-001, HOST-SYSD-001, HOST-USR-010, NET-SVC-001 |
 | [NIST SP 800-131A Rev. 2, Transitioning Cryptographic Algorithms](https://csrc.nist.gov/pubs/sp/800/131/a/r2/final) | HOST-SSH-004, NET-TLS-005 |
-| [NIST SP 800-190, Application Container Security Guide](https://csrc.nist.gov/pubs/sp/800/190/final) | Academy P9, HOST-CTR-002, HOST-CTR-003, HOST-CTR-004 |
+| [NIST SP 800-190, Application Container Security Guide](https://csrc.nist.gov/pubs/sp/800/190/final) | Academy A5, Academy P9, HOST-CTR-002, HOST-CTR-003, HOST-CTR-004, HOST-CTR-005, HOST-CTR-009, HOST-CTR-010, HOST-CTR-011, HOST-CTR-012, HOST-CTR-013, HOST-CTR-014 |
 | [NIST SP 800-30 Rev. 1, Guide for Conducting Risk Assessments](https://csrc.nist.gov/pubs/sp/800/30/r1/final) | Academy F1 |
 | [NIST SP 800-40 Rev. 4, Guide to Enterprise Patch Management Planning](https://csrc.nist.gov/pubs/sp/800/40/r4/final) | Academy A2, Academy P1, HOST-PKG-001, HOST-UPD-001, HOST-UPD-002 |
 | [NIST SP 800-41 Rev. 1, Guidelines on Firewalls and Firewall Policy](https://csrc.nist.gov/pubs/sp/800/41/r1/final) | Academy P12, Academy P3, NET-FW-001, NET-FW-003, NET-FW-004, NET-FW-005, NET-FW-006 |
 | [NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations](https://csrc.nist.gov/pubs/sp/800/52/r2/final) | Academy P4, NET-TLS-001, NET-TLS-002, NET-TLS-003, NET-TLS-004 |
-| [NIST SP 800-53 Rev. 5, Security and Privacy Controls](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | HOST-IDS-001, HOST-PWD-004, HOST-TIME-001, HOST-USR-001 |
+| [NIST SP 800-53 Rev. 5, Security and Privacy Controls](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | Academy P15, HOST-IDS-001, HOST-PWD-004, HOST-SEC-001, HOST-TIME-001, HOST-USR-001 |
 | [NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html) | Academy P7, HOST-PWD-001, HOST-PWD-002, HOST-PWD-003, HOST-PWD-005, HOST-SSH-002 |
 | [NIST SP 800-92, Guide to Computer Security Log Management](https://csrc.nist.gov/pubs/sp/800/92/final) | HOST-LOG-001, HOST-LOG-003 |
 | [NIST Transitioning Away from SHA-1](https://csrc.nist.gov/News/2022/nist-transitioning-away-from-sha-1-for-all-apps) | NET-TLS-006 |
 | [NVD](https://nvd.nist.gov/) | HOST-CVE-001, HOST-CVE-002, HOST-CVE-003, WEB-CVE-001 |
-| [NVD, CVE-2018-7600](https://nvd.nist.gov/vuln/detail/cve-2018-7600) | WEB-CMS-011 |
+| [NVD, CVE-2018-7600](https://nvd.nist.gov/vuln/detail/cve-2018-7600) | WEB-CMS-011, WEB-CMS-012 |
 | [NVD, CVE-2020-1938](https://nvd.nist.gov/vuln/detail/cve-2020-1938) | WEB-TOM-004 |
 | [NVD, CVE-2023-23752](https://nvd.nist.gov/vuln/detail/cve-2023-23752) | WEB-CMS-010 |
 
@@ -38,11 +39,12 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | Source | Cited By |
 |---|---|
 | [CVE Program](https://www.cve.org/) | Academy F3 |
-| [MITRE ATT&CK T1053.003, Cron](https://attack.mitre.org/techniques/T1053/003/) | HOST-FS-005 |
+| [MITRE ATT&CK T1053.003, Scheduled Task/Job: Cron](https://attack.mitre.org/techniques/T1053/003/) | Academy P15, HOST-CRON-001, HOST-FS-005 |
 | [MITRE ATT&CK T1543.002, Create or Modify System Process: Systemd Service](https://attack.mitre.org/techniques/T1543/002/) | Academy P11, HOST-SYSD-003 |
 | [MITRE ATT&CK T1548, Abuse Elevation Control Mechanism](https://attack.mitre.org/techniques/T1548/) | Academy P7 |
 | [MITRE ATT&CK T1548.001, Setuid and Setgid](https://attack.mitre.org/techniques/T1548/001/) | HOST-FS-004 |
 | [MITRE ATT&CK T1552.001, Unsecured Credentials: Credentials In Files](https://attack.mitre.org/techniques/T1552/001/) | HOST-USR-007 |
+| [MITRE ATT&CK T1574.007, Hijack Execution Flow: Path Interception by PATH Environment Variable](https://attack.mitre.org/techniques/T1574/007/) | Academy P15, HOST-CRON-002 |
 | [MITRE ATT&CK T1574.010, Hijack Execution Flow: Services File Permissions Weakness](https://attack.mitre.org/techniques/T1574/010/) | HOST-SYSD-004 |
 | [MITRE CWE](https://cwe.mitre.org/) | Academy F3 |
 
@@ -65,24 +67,27 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [OWASP Clickjacking Defense Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html) | WEB-HDR-003 |
 | [OWASP Content Security Policy Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html) | WEB-HDR-002 |
 | [OWASP Database Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html) | Academy P3, Academy P8, NET-DB-001 |
-| [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html) | Academy P9, HOST-CTR-001, HOST-CTR-003 |
+| [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html) | Academy A5, Academy P9, HOST-CTR-001, HOST-CTR-003, HOST-CTR-008, HOST-CTR-013 |
 | [OWASP HTTP Headers Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html) | WEB-HDR-001, WEB-HDR-007 |
 | [OWASP Key Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Key_Management_Cheat_Sheet.html) | HOST-FS-007 |
 | [OWASP Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html) | WEB-EXP-008 |
 | [OWASP Node.js Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html) | Academy P13, NET-APP-001, WEB-NODE-002, WEB-NODE-003 |
 | [OWASP PHP Configuration Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/PHP_Configuration_Cheat_Sheet.html) | WEB-PHP-001, WEB-PHP-002, WEB-PHP-003 |
-| [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html) | Academy P6, WEB-DOC-001, WEB-EXP-002 |
+| [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html) | Academy P15, Academy P6, HOST-SEC-001, WEB-APP-002, WEB-APP-004, WEB-APP-009, WEB-DOC-001, WEB-EXP-002 |
 | [OWASP Secure Headers Project](https://owasp.org/projects/secure-headers-project) | Academy P5, WEB-HDR-004, WEB-HDR-005, WEB-HDR-006 |
 | [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) | Academy P5, WEB-CK-001 |
 | [OWASP Top 10 2021, A05 Security Misconfiguration](https://top10.owasp.org/2021/A05_2021-Security_Misconfiguration/) | Academy P6 |
-| [OWASP Transport Layer Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html) | WEB-TLS-001 |
+| [OWASP Top 10 2021, A06 Vulnerable and Outdated Components](https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/) | WEB-APP-008 |
+| [OWASP Transport Layer Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html) | WEB-CMS-016, WEB-TLS-001 |
+| [OWASP Vulnerable Dependency Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Vulnerable_Dependency_Management_Cheat_Sheet.html) | WEB-APP-008 |
 | [OWASP WSTG-CLNT-07, Testing Cross Origin Resource Sharing](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/11-Client-side_Testing/07-Testing_Cross_Origin_Resource_Sharing/) | WEB-COR-001 |
-| [OWASP WSTG-CONF-02, Test Application Platform Configuration](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration/) | WEB-TOM-005 |
-| [OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files for Sensitive Information](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/) | WEB-DOC-001, WEB-EXP-001, WEB-EXP-004, WEB-EXP-007, WEB-EXP-008, WEB-EXP-009 |
+| [OWASP WSTG-CONF-02, Test Application Platform Configuration](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration/) | Academy A6, WEB-APP-006, WEB-TOM-005 |
+| [OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/) | WEB-APP-009, WEB-DOC-001, WEB-EXP-001, WEB-EXP-004, WEB-EXP-007, WEB-EXP-008, WEB-EXP-009 |
 | [OWASP WSTG-CONF-05, Enumerate Infrastructure and Application Admin Interfaces](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces/) | WEB-EXP-011 |
-| [OWASP WSTG-CONF-09, Test File Permission](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/09-Test_File_Permission/) | WEB-DOC-002 |
+| [OWASP WSTG-CONF-09, Test File Permission](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/09-Test_File_Permission/) | WEB-APP-010, WEB-DOC-002 |
 | [OWASP WSTG-ERRH-01, Testing for Improper Error Handling](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling/) | WEB-EXP-012 |
 | [OWASP WSTG-INFO-02, Fingerprint Web Server](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server/) | WEB-EXP-010 |
+| [OWASP WSTG-INPV-17, Testing for Host Header Injection](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/07-Input_Validation_Testing/17-Testing_for_Host_Header_Injection/) | WEB-CMS-013 |
 | [OWASP Web Security Testing Guide](https://owasp.org/projects/web-security-testing-guide) | Academy F2 |
 
 ## Center for Internet Security (CIS)
@@ -93,6 +98,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | Source | Cited By |
 |---|---|
 | [CIS Critical Security Controls v8, Control 5 (Account Management)](https://www.cisecurity.org/controls/account-management) | HOST-PWD-005 |
+| [CIS Docker Benchmark (referenced by recommendation number)](https://www.cisecurity.org/benchmark/docker) | Academy A5, HOST-CTR-005, HOST-CTR-006, HOST-CTR-007, HOST-CTR-008, HOST-CTR-010, HOST-CTR-012, HOST-CTR-013, HOST-CTR-015 |
 
 ## IETF / RFC Editor
 
@@ -178,18 +184,20 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [Linux exports(5)](https://man7.org/linux/man-pages/man5/exports.5.html) | NET-DB-008 |
 | [auditd(8), Linux man-pages](https://man7.org/linux/man-pages/man8/auditd.8.html) | HOST-LOG-002 |
 | [chmod(1), Linux man-pages (restricted deletion flag)](https://man7.org/linux/man-pages/man1/chmod.1.html) | HOST-FS-002 |
-| [crontab(5), Linux man-pages](https://man7.org/linux/man-pages/man5/crontab.5.html) | HOST-FS-005 |
+| [crontab(5), Linux man-pages](https://man7.org/linux/man-pages/man5/crontab.5.html) | HOST-CRON-001, HOST-CRON-002, HOST-FS-005 |
 | [crypt(5), libxcrypt, Debian trixie manual pages (hashing methods)](https://manpages.debian.org/trixie/libcrypt-dev/crypt.5.en.html) | HOST-PWD-002 |
-| [login.defs(5), Linux man-pages](https://man7.org/linux/man-pages/man5/login.defs.5.html) | HOST-FS-009, HOST-PWD-001, HOST-PWD-005 |
+| [group(5), Linux man-pages](https://man7.org/linux/man-pages/man5/group.5.html) | HOST-USR-008 |
+| [login.defs(5), Linux man-pages](https://man7.org/linux/man-pages/man5/login.defs.5.html) | HOST-FS-009, HOST-PWD-001, HOST-PWD-005, HOST-USR-010 |
 | [logrotate(8), Linux man-pages](https://man7.org/linux/man-pages/man8/logrotate.8.html) | HOST-LOG-004 |
 | [mount(8), Linux man-pages (nodev, nosuid, noexec)](https://man7.org/linux/man-pages/man8/mount.8.html) | HOST-FS-008 |
 | [nologin(8), Linux man-pages](https://man7.org/linux/man-pages/man8/nologin.8.html) | HOST-USR-005 |
 | [nsswitch.conf(5), Linux man-pages (compat mode)](https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html) | HOST-USR-006 |
 | [pam_faillock(8), Linux-PAM](https://man7.org/linux/man-pages/man8/pam_faillock.8.html) | HOST-PWD-004 |
-| [passwd(5), Linux man-pages](https://man7.org/linux/man-pages/man5/passwd.5.html) | HOST-USR-001, HOST-USR-004 |
+| [passwd(5), Linux man-pages](https://man7.org/linux/man-pages/man5/passwd.5.html) | HOST-USR-001, HOST-USR-004, HOST-USR-008, HOST-USR-009 |
 | [proc_net(5), Linux man-pages](https://man7.org/linux/man-pages/man5/proc_net.5.html) | NET-LSN-001 |
+| [pwck(8), Linux man-pages](https://man7.org/linux/man-pages/man8/pwck.8.html) | Academy P15, HOST-USR-009 |
 | [pwquality.conf(5), libpwquality, Debian trixie manual pages](https://manpages.debian.org/trixie/libpwquality-common/pwquality.conf.5.en.html) | HOST-PWD-003 |
-| [shadow(5), Linux man-pages](https://man7.org/linux/man-pages/man5/shadow.5.html) | HOST-FS-001, HOST-USR-002 |
+| [shadow(5), Linux man-pages](https://man7.org/linux/man-pages/man5/shadow.5.html) | HOST-FS-001, HOST-USR-002, HOST-USR-009 |
 | [ufw(8) manual (Ubuntu)](https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html) | NET-FW-003 |
 | [umask(2), Linux man-pages](https://man7.org/linux/man-pages/man2/umask.2.html) | HOST-FS-009 |
 
@@ -200,6 +208,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | Source | Cited By |
 |---|---|
 | [OpenBSD, sshd_config(5) manual page](https://man.openbsd.org/sshd_config) | Academy P2, HOST-SSH-001, HOST-SSH-002, HOST-SSH-003, HOST-SSH-004, HOST-SSH-005, HOST-SSH-006, HOST-SSH-007, HOST-SSH-008, HOST-SSH-009, HOST-SSH-010, HOST-SSH-011, HOST-SSH-012 |
+| [sshd(8), AUTHORIZED_KEYS FILE FORMAT, OpenBSD manual pages](https://man.openbsd.org/sshd.8#AUTHORIZED_KEYS_FILE_FORMAT) | Academy P15, HOST-SSH-013 |
 
 ## freedesktop.org and systemd
 
@@ -326,8 +335,8 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [Django settings reference, DEBUG](https://docs.djangoproject.com/en/6.1/ref/settings/#debug) | WEB-PY-001 |
 | [Django settings reference, SECRET_KEY](https://docs.djangoproject.com/en/6.1/ref/settings/#secret-key) | WEB-PY-003 |
 | [Express documentation, Production best practices: performance and reliability](https://expressjs.com/en/advanced/best-practice-performance/) | WEB-NODE-003 |
-| [Flask documentation, Debug mode](https://flask.palletsprojects.com/en/stable/quickstart/#debug-mode) | WEB-PY-004 |
-| [Flask documentation, Deploying to Production](https://flask.palletsprojects.com/en/stable/deploying/) | WEB-PY-005 |
+| [Flask documentation, Debug mode](https://flask.palletsprojects.com/en/stable/quickstart/#debug-mode) | WEB-APP-007, WEB-PY-004 |
+| [Flask documentation, Deploying to Production](https://flask.palletsprojects.com/en/stable/deploying/) | WEB-APP-007, WEB-PY-005 |
 | [Gunicorn documentation, Deploying Gunicorn (behind a proxy)](https://gunicorn.org/deploy/) | NET-APP-001 |
 | [Node.js documentation, Debugging guide (security implications)](https://nodejs.org/learn/getting-started/debugging) | WEB-NODE-002 |
 | [Werkzeug documentation, Debugging Applications](https://werkzeug.palletsprojects.com/en/stable/debug/) | WEB-PY-004 |
@@ -338,16 +347,48 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [Drupal.org, Securing file permissions and ownership](https://www.drupal.org/docs/administering-a-drupal-site/security-in-drupal/securing-file-permissions-and-ownership) | Academy P14, WEB-CMS-004, WEB-CMS-005 |
+| [Drupal.org, Drupal core release cycle and end of life](https://www.drupal.org/about/core/policies/core-release-cycles/schedule) | WEB-CMS-012 |
+| [Drupal.org, Running update.php (update_free_access)](https://www.drupal.org/docs/updating-drupal/update-core-via-drush-or-manually) | WEB-CMS-019 |
+| [Drupal.org, Securing file permissions and ownership](https://www.drupal.org/docs/administering-a-drupal-site/security-in-drupal/securing-file-permissions-and-ownership) | Academy P14, WEB-CMS-004, WEB-CMS-005, WEB-CMS-019 |
 | [Drupal.org, Security advisories](https://www.drupal.org/security) | WEB-CMS-011 |
-| [Joomla Documentation, Security Checklist](https://docs.joomla.org/Security_Checklist) | Academy P14, WEB-CMS-010 |
+| [Drupal.org, Trusted Host settings](https://www.drupal.org/docs/getting-started/installing-drupal/trusted-host-settings) | Academy A6, WEB-CMS-013 |
+| [Joomla Documentation, Joomla Release and Support Cycle](https://docs.joomla.org/Joomla!_CMS_versions) | WEB-CMS-014 |
+| [Joomla Documentation, Security Checklist](https://docs.joomla.org/Security_Checklist) | Academy P14, WEB-CMS-010, WEB-CMS-014 |
 | [Joomla Documentation, Security Checklist: Site Administration](https://docs.joomla.org/Security_Checklist/Site_Administration) | WEB-CMS-009 |
-| [WordPress Developer Resources, Brute Force Attacks (XML-RPC)](https://developer.wordpress.org/advanced-administration/security/brute-force/) | WEB-CMS-002 |
+| [WordPress Developer Resources, Brute Force Attacks (XML-RPC)](https://developer.wordpress.org/advanced-administration/security/brute-force/) | WEB-CMS-002, WEB-CMS-018 |
 | [WordPress Developer Resources, Configuring Automatic Background Updates](https://developer.wordpress.org/advanced-administration/upgrade/upgrading/#configuring-automatic-background-updates) | WEB-CMS-008 |
 | [WordPress Developer Resources, Debugging in WordPress](https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/) | WEB-CMS-006 |
 | [WordPress Developer Resources, Editing wp-config.php](https://developer.wordpress.org/advanced-administration/wordpress/wp-config/) | WEB-CMS-007 |
-| [WordPress Developer Resources, Hardening WordPress](https://developer.wordpress.org/advanced-administration/security/hardening/) | Academy P14, WEB-CMS-001, WEB-CMS-004, WEB-CMS-005, WEB-CMS-007 |
+| [WordPress Developer Resources, Hardening WordPress](https://developer.wordpress.org/advanced-administration/security/hardening/) | Academy P14, WEB-CMS-001, WEB-CMS-004, WEB-CMS-005, WEB-CMS-007, WEB-CMS-017, WEB-CMS-018 |
+| [WordPress Developer Resources, Hooking WP-Cron Into the System Task Scheduler](https://developer.wordpress.org/plugins/cron/hooking-wp-cron-into-the-system-task-scheduler/) | WEB-CMS-017 |
 | [WordPress Developer Resources, REST API Users endpoint](https://developer.wordpress.org/rest-api/reference/users/) | WEB-CMS-003 |
+
+## Application Frameworks (Laravel, Symfony, Ruby on Rails, Spring Boot)
+
+- Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
+
+| Source | Cited By |
+|---|---|
+| [Laravel documentation, Configuration (debug mode, environment files)](https://laravel.com/docs/12.x/configuration) | WEB-APP-001 |
+| [Laravel documentation, Deployment](https://laravel.com/docs/12.x/deployment) | Academy A6, WEB-APP-001, WEB-APP-010 |
+| [Ruby on Rails Guides, Configuring Rails Applications](https://guides.rubyonrails.org/configuring.html) | WEB-APP-005 |
+| [Ruby on Rails Guides, Custom Credentials](https://guides.rubyonrails.org/security.html#custom-credentials) | WEB-APP-004 |
+| [Ruby on Rails Guides, Securing Rails Applications](https://guides.rubyonrails.org/security.html) | Academy A6, WEB-APP-004, WEB-APP-005 |
+| [Spring Boot documentation, Actuator endpoints](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html) | Academy A6, WEB-APP-006 |
+| [Spring Boot documentation, Securing HTTP endpoints](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.security) | WEB-APP-006 |
+| [Symfony documentation, Configuring Symfony (environments)](https://symfony.com/doc/current/configuration.html) | WEB-APP-003 |
+| [Symfony documentation, How to Deploy a Symfony Application](https://symfony.com/doc/current/deployment.html) | Academy A6, WEB-APP-003 |
+| [Symfony documentation, Setting up or Fixing File Permissions](https://symfony.com/doc/current/setup/file_permissions.html) | WEB-APP-010 |
+
+## Commerce and Publishing Platforms (Adobe Commerce, Ghost)
+
+- Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
+
+| Source | Cited By |
+|---|---|
+| [Adobe Commerce documentation, Security best practices](https://experienceleague.adobe.com/en/docs/commerce-admin/systems/security/security-best-practices) | WEB-CMS-015 |
+| [Adobe Commerce documentation, Set the Magento mode](https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cli/set-mode) | WEB-CMS-015 |
+| [Ghost documentation, Configuration (url)](https://ghost.org/docs/config/) | WEB-CMS-016 |
 
 ## Containers and Orchestration (Docker, Kubernetes)
 
@@ -355,10 +396,17 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [Docker documentation, Docker Engine security](https://docs.docker.com/engine/security/) | HOST-CTR-002 |
+| [Docker documentation, AppArmor security profiles](https://docs.docker.com/engine/security/apparmor/) | HOST-CTR-011 |
+| [Docker documentation, Configure logging drivers](https://docs.docker.com/engine/logging/configure/) | HOST-CTR-005 |
+| [Docker documentation, Content trust in Docker](https://docs.docker.com/engine/security/trust/) | HOST-CTR-015 |
+| [Docker documentation, Docker Engine security](https://docs.docker.com/engine/security/) | Academy A5, HOST-CTR-002 |
 | [Docker documentation, Docker daemon attack surface](https://docs.docker.com/engine/security/#docker-daemon-attack-surface) | HOST-DKR-001 |
 | [Docker documentation, Packet filtering and firewalls](https://docs.docker.com/engine/network/packet-filtering-firewalls/) | Academy P12, NET-FW-005 |
-| [Docker documentation, Protect the Docker daemon socket](https://docs.docker.com/engine/security/protect-access/) | HOST-CTR-001, HOST-CTR-004, NET-SVC-002 |
+| [Docker documentation, Protect the Docker daemon socket](https://docs.docker.com/engine/security/protect-access/) | HOST-CTR-001, HOST-CTR-004, HOST-CTR-008, NET-SVC-002 |
+| [Docker documentation, Resource constraints](https://docs.docker.com/engine/containers/resource_constraints/) | HOST-CTR-012 |
+| [Docker documentation, Rootless mode](https://docs.docker.com/engine/security/rootless/) | Academy A5, HOST-CTR-009 |
+| [Docker documentation, Seccomp security profiles](https://docs.docker.com/engine/security/seccomp/) | HOST-CTR-011 |
+| [Docker documentation, dockerd daemon reference](https://docs.docker.com/reference/cli/dockerd/) | HOST-CTR-006, HOST-CTR-007, HOST-CTR-010 |
 | [Kubernetes Ports and Protocols](https://kubernetes.io/docs/reference/networking/ports-and-protocols/) | NET-SVC-002 |
 | [Kubernetes documentation, Kubelet authentication and authorization](https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/) | Academy P9, HOST-K8S-001 |
 | [Kubernetes documentation, Operating etcd clusters for Kubernetes](https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/) | HOST-K8S-002 |
@@ -396,6 +444,9 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | Source | Cited By |
 |---|---|
 | [Node.js Release Working Group, release schedule](https://github.com/nodejs/Release) | WEB-NODE-001 |
+| [OWASP ASVS 4.0.3, V14 Configuration](https://github.com/OWASP/ASVS/blob/v4.0.3/4.0/en/0x22-V14-Config.md) | Academy A6, WEB-APP-001, WEB-APP-002, WEB-APP-003 |
 | [OpenVAPT source code](https://github.com/OpenVAPT/openvapt) | Academy A4 |
+| [containerd documentation, Operations (configuration)](https://github.com/containerd/containerd/blob/main/docs/ops.md) | HOST-CTR-014 |
+| [containers.conf(5), Podman configuration](https://github.com/containers/common/blob/main/docs/containers.conf.5.md) | HOST-CTR-014 |
 | [fail2ban project](https://github.com/fail2ban/fail2ban) | HOST-IDS-001 |
 
