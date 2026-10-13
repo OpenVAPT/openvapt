@@ -8,6 +8,11 @@ DirectoryIndex index.html
 ErrorDocument 404 /404.html
 ErrorDocument 410 /404.html
 
+# Citation files offered on /cite.html.
+AddType application/x-research-info-systems .ris
+AddType application/x-bibtex .bib
+AddType text/plain .cff
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   # One canonical origin: https://openvapt.com (HTTP and www redirect here).
