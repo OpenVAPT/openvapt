@@ -218,7 +218,7 @@ func init() {
 		Fix:       "Bind the application to 127.0.0.1 (Node.js: app.listen(3000, '127.0.0.1'); Gunicorn: --bind 127.0.0.1:8000; Tomcat: address=\"127.0.0.1\" on the Connector; PHP-FPM: listen = 127.0.0.1:9000 or a Unix socket) and publish it only through nginx or Apache. Never expose a debugger.",
 		Verify:    "ss -tlnp  shows these ports on 127.0.0.1 or ::1 only.",
 		Refs: []check.Ref{{Title: "OWASP Node.js Security Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html"},
-			{Title: "Gunicorn documentation, Deploying Gunicorn (behind a proxy)", URL: "https://docs.gunicorn.org/en/stable/deploy.html"}},
+			{Title: "Gunicorn documentation, Deploying Gunicorn (behind a proxy)", URL: "https://gunicorn.org/deploy/"}},
 		Standards: check.Standards{CWE: []string{"CWE-668", "CWE-1188"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Expose applications only through a hardened front end"},
 		Run: func(_ context.Context, s sys.System) []check.Result {
 			pub, inc := publicListeners(s)

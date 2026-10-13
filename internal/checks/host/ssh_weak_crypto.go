@@ -34,7 +34,7 @@ func init() {
 		Fix:       "Remove the listed algorithms. On OpenSSH 8.x and later the defaults are already strong: delete any custom Ciphers/MACs/KexAlgorithms lines, or set explicit modern lists such as  Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com  then reload sshd.",
 		Verify:    "sshd -T | grep -Ei '^(ciphers|macs|kexalgorithms)'  should list no cbc, arcfour, md5 or sha1 entries, and hostkeyalgorithms should not list ssh-rsa.",
 		Refs: []check.Ref{refSSHDManual,
-			{Title: "RFC 9142, Key Exchange Method Updates for SSH", URL: "https://www.rfc-editor.org/rfc/rfc9142"},
+			{Title: "RFC 9142, Key Exchange Method Updates for SSH", URL: "https://www.rfc-editor.org/rfc/rfc9142.html"},
 			{Title: "NIST SP 800-131A Rev. 2, Transitioning Cryptographic Algorithms", URL: "https://csrc.nist.gov/pubs/sp/800/131/a/r2/final"}},
 		Standards: check.Standards{CWE: []string{"CWE-327"}, OWASP: []string{"A02:2021"}, NIST: []string{"SC-8", "SC-13"}, CISTopic: "SSH server configuration: approved ciphers, MACs and KEX"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {

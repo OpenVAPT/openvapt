@@ -1,6 +1,6 @@
 # End User Licence Agreement
 
-Version 2.2, effective 2026-10-13. Acknowledgements version 1.5. This Agreement was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
+Version 2.3, effective 2026-10-13. Acknowledgements version 1.5. This Agreement was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
 
 This End User Licence Agreement ("Agreement") applies to everyone who downloads, builds, installs, copies or uses OpenVAPT, including its source code, compiled programs, documentation and website (together, the "Software"). If you do not agree, do not download or use the Software.
 
@@ -60,11 +60,12 @@ The website asks you to tick each statement before showing the download instruct
 
 ## 6. Licence
 
-The Software is licensed to you only under the OpenVAPT Source-Available Licence 1.1 (file `LICENSE`; see the Licence page). In summary:
+The Software is licensed to you only under the OpenVAPT Source-Available Licence 1.2 (file `LICENSE`; see the Licence page). In summary:
 
 1. **Anyone may use it.** Individuals, students, educational institutions, government bodies and companies may download and use the Software free of charge.
 2. **Own Use only.** You may run the Software only for Own Use.
 3. **No services and no Commercial Exploitation.** You may not use the Software to provide services to anyone else, whether paid or unpaid, and you may not sell it, rent it, include it in a product or service, or otherwise commercially exploit it.
+4. **Credit and citation.** If you copy, quote, share, adapt or present any OpenVAPT material, you must credit OpenVAPT as set out in section 5.4 of the licence. We also ask you to cite OpenVAPT in any academic or other work it helped, as explained in `CITING.md`.
 
 The licence sets out your copyright permissions, and providing services or selling is not licensed under it. This Agreement and the Acceptable Use Policy are conditions of the licence, and this Agreement also sets out the promises you make to us. Where any document appears to permit something that another document prohibits, the narrower rule applies.
 
@@ -149,7 +150,7 @@ You are responsible for complying with all export control, sanctions and trade l
 
 ## 20. Contributions and Feedback
 
-**Contributions.** By submitting a contribution (code, documentation or other material) you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it, and you license it under the OpenVAPT Source-Available Licence 1.1 and grant the licensor the licence to relicense it set out in section 10 of the licence. You keep your copyright. You must disclose in your pull request if an AI Cybersecurity Engineer or other AI system produced any part of your contribution.
+**Contributions.** By submitting a contribution (code, documentation or other material) you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it, and you license it under the OpenVAPT Source-Available Licence 1.2 and grant the licensor the licence to relicense it set out in section 10 of the licence. You keep your copyright. You must disclose in your pull request if an AI Cybersecurity Engineer or other AI system produced any part of your contribution.
 
 **Feedback.** If you share an idea, suggestion or report (for example in a GitHub Issue or Discussion), you agree that we may use it freely, without payment, attribution or any obligation to you.
 
@@ -179,7 +180,7 @@ Headings are for convenience only and do not affect meaning; "including" and sim
 
 ## 27. Changes
 
-We may update this Agreement. Each version is dated and kept in the public Git history. Version 2.2 (2026-10-13) states plainly who stands behind the project (section 1) and changes no right or obligation. The version in force when you obtain a copy of the Software applies to that copy, and the version shown when you accept in the tool applies to that use.
+We may update this Agreement. Each version is dated and kept in the public Git history. Version 2.2 (2026-10-13) states plainly who stands behind the project (section 1) and changes no right or obligation. Version 2.3 (2026-10-13) refers to licence 1.2 and summarises its Credit condition and the citation request (section 6.4); the acknowledgements are unchanged. The version in force when you obtain a copy of the Software applies to that copy, and the version shown when you accept in the tool applies to that use.
 
 ## 28. How This Agreement Was Reviewed
 

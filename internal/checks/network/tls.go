@@ -13,7 +13,7 @@ import (
 )
 
 var refTLS = []check.Ref{
-	{Title: "RFC 8996, Deprecating TLS 1.0 and TLS 1.1", URL: "https://www.rfc-editor.org/rfc/rfc8996"},
+	{Title: "RFC 8996, Deprecating TLS 1.0 and TLS 1.1", URL: "https://www.rfc-editor.org/rfc/rfc8996.html"},
 	{Title: "NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations", URL: "https://csrc.nist.gov/pubs/sp/800/52/r2/final"},
 	{Title: "Mozilla Server Side TLS guidelines", URL: "https://wiki.mozilla.org/Security/Server_Side_TLS"},
 }
@@ -148,7 +148,7 @@ func init() {
 		Detection: "Reads the leaf certificate from a loopback handshake per site name. Issuer equal to subject means self-signed; the site name must appear in the certificate's DNS names (wildcards honoured).",
 		Fix:       "Issue a certificate from a public CA covering every site name, for example with certbot --apache or certbot --nginx -d example.com -d www.example.com.",
 		Verify:    "openssl s_client -connect 127.0.0.1:443 -servername <site> </dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName",
-		Refs:      append([]check.Ref{{Title: "RFC 6125, Representation and Verification of Domain-Based Application Service Identity", URL: "https://www.rfc-editor.org/rfc/rfc6125"}}, refTLS[1]),
+		Refs:      append([]check.Ref{{Title: "RFC 6125, Representation and Verification of Domain-Based Application Service Identity", URL: "https://www.rfc-editor.org/rfc/rfc6125.html"}}, refTLS[1]),
 		Standards: check.Standards{CWE: []string{"CWE-295", "CWE-297"}, OWASP: []string{"A02:2021", "A07:2021"}, WSTG: []string{"WSTG-CRYP-01"}, ASVS: []string{"9.2.1"}, NIST: []string{"SC-17"}, CISTopic: "Certificate trust"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			var out []check.Result

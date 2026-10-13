@@ -27,4 +27,4 @@ OpenVAPT is for academic, learning and Own Use only. It is not a business and mu
 
 ## Consequences
 
-This policy is a condition of the OpenVAPT Source-Available Licence 1.1. Using OpenVAPT outside this policy is outside your licence, which then ends automatically as described in section 6 of the licence. You alone are responsible for any consequences.
+This policy is a condition of the OpenVAPT Source-Available Licence 1.2. Using OpenVAPT outside this policy is outside your licence, which then ends automatically as described in section 6 of the licence. You alone are responsible for any consequences.

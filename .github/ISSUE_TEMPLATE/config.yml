@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security Flaw in OpenVAPT
-    url: https://github.com/openvapt/openvapt/security/advisories/new
+    url: https://github.com/OpenVAPT/openvapt/security/advisories/new
     about: Report privately through GitHub Private Vulnerability Reporting.
   - name: Questions and Discussion
-    url: https://github.com/openvapt/openvapt/discussions
+    url: https://github.com/OpenVAPT/openvapt/discussions
     about: Ask questions and discuss the project in public.

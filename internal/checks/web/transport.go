@@ -50,7 +50,7 @@ func init() {
 		Detection: "Inspects every Set-Cookie header on each site's home page for the Secure (HTTPS sites), HttpOnly and SameSite attributes. Cookies being deleted (expired or Max-Age 0) are ignored, and anti-CSRF cookies such as XSRF-TOKEN are not required to be HttpOnly because scripts must read them. Cookies set on redirect responses are evaluated too, because browsers store them. Cookie values are never recorded.",
 		Fix:       "PHP: session.cookie_secure=1, session.cookie_httponly=1, session.cookie_samesite=Lax in php.ini . Frameworks have equivalent settings (e.g. Laravel config/session.php). Use HttpOnly for every cookie JavaScript does not need to read.",
 		Verify:    "curl -sI https://<site>/ | grep -i set-cookie",
-		Refs:      []check.Ref{{Title: "OWASP Session Management Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"}, {Title: "RFC 6265, HTTP State Management Mechanism", URL: "https://www.rfc-editor.org/rfc/rfc6265"}},
+		Refs:      []check.Ref{{Title: "OWASP Session Management Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"}, {Title: "RFC 6265, HTTP State Management Mechanism", URL: "https://www.rfc-editor.org/rfc/rfc6265.html"}},
 		Standards: check.Standards{CWE: []string{"CWE-614", "CWE-1004", "CWE-1275"}, OWASP: []string{"A05:2021", "A07:2021"}, ASVS: []string{"3.4.1", "3.4.2", "3.4.3"}, WSTG: []string{"WSTG-SESS-02"}, NIST: []string{"SC-8", "SC-23"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {

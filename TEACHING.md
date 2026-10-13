@@ -1,6 +1,6 @@
 # Teaching With OpenVAPT
 
-Version 1.1, effective 2026-10-13. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.1 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
+Version 1.2, effective 2026-10-13. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.2 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
 
 OpenVAPT is academic, non-commercial, source-available code built by AI Cybersecurity Engineers, free to use and used 100% at your own risk. Teachers are welcome to use it. These terms say exactly how.
 
@@ -27,7 +27,7 @@ Ordinary tuition is fine. A fee for OpenVAPT is not.
 
 You may copy, adapt, shorten, translate and rearrange the OpenVAPT Academy modules, quizzes, worksheets, rubrics, course plans, glossary and documentation into your own slides, handouts, exams and learning management system, for your own students, free of charge. Every copy or adaptation must:
 
-1. Credit the source: "Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.1."
+1. Credit the source: "Adapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.2."
 2. Carry this notice: "OpenVAPT is not affiliated with, and is not endorsed by, this institution or any third party named in this material. Pre-release versions may be wrong or unstable. Use at your own risk."
 3. Say clearly where you changed the material.
 
@@ -80,4 +80,13 @@ The teacher and the institution are responsible for how OpenVAPT is used in thei
 
 These terms may be updated. Each version is dated and kept in the public Git history. The version provided with your copy of OpenVAPT applies to that copy.
 
-Version history: 1.0 (2026-10-13) first version. 1.1 (2026-10-13) states that answer keys are public in every release channel and how to set fair graded work (section 5).
+Version history: 1.0 (2026-10-13) first version. 1.1 (2026-10-13) states that answer keys are public in every release channel and how to set fair graded work (section 5). 1.2 (2026-10-13) refers to licence 1.2 in the credit line and adds section 11 on citing OpenVAPT in students' and teachers' work.
+
+## 11. Citing OpenVAPT in Coursework, Theses and Teaching
+
+Please cite OpenVAPT wherever it is used in academic work. `CITING.md` gives ready-to-copy citations in APA 7, IEEE, Harvard, MLA 9, Chicago, Vancouver, BibTeX, BibLaTeX, RIS and CSL-JSON, with short credit lines for slides and posters.
+
+1. **Required.** Copying, quoting, adapting or presenting any OpenVAPT Material (text, code, Academy modules, worksheets, figures or screenshots) requires Credit under section 5.4 of the licence. For adapted teaching materials, the credit line in section 2 is that Credit.
+2. **Requested.** Students and teachers are asked to cite OpenVAPT whenever they ran it, reported its results, or learned from the Academy, in coursework, assignments, lab reports, theses, dissertations, presentations, posters, academic projects and competition write-ups, even where nothing was copied. Most institutions' academic integrity rules require acknowledging tools and sources anyway.
+3. **Teachers may require it.** A teacher may make citing OpenVAPT part of an assignment's marking criteria. A missing citation is a matter for the institution's own academic integrity rules; OpenVAPT takes no part in marking or discipline.
+4. **No endorsement.** Citing OpenVAPT does not mean OpenVAPT has reviewed, approved or endorsed the work, and students must not say that it has.

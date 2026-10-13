@@ -17,7 +17,7 @@ import (
 	"github.com/openvapt/openvapt/internal/sys"
 )
 
-var refSecureHeaders = check.Ref{Title: "OWASP Secure Headers Project", URL: "https://owasp.org/www-project-secure-headers/"}
+var refSecureHeaders = check.Ref{Title: "OWASP Secure Headers Project", URL: "https://owasp.org/projects/secure-headers-project"}
 var refHTTPHeadersCS = check.Ref{Title: "OWASP HTTP Headers Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html"}
 var refMDN = func(h string) check.Ref {
 	return check.Ref{Title: "MDN Web Docs, " + h, URL: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/" + h}

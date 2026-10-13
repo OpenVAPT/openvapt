@@ -1,11 +1,12 @@
 # openvapt.com public site. Public launch approved by the owner 2026-10-13.
 # Everything is public here for every channel (Alpha, Beta, RC, Stable); the
-# old /beta/ preview was retired on 2026-10-13 and redirects to the root.
+# old /beta/ preview was retired on 2026-10-13 and no longer exists (410 Gone).
 # /tools/ is excluded from the rules below so the server-side admin endpoint
 # there keeps working unchanged.
 Options -Indexes
 DirectoryIndex index.html
 ErrorDocument 404 /404.html
+ErrorDocument 410 /404.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -13,8 +14,8 @@ ErrorDocument 404 /404.html
   RewriteCond %{HTTPS} !=on [OR]
   RewriteCond %{HTTP_HOST} ^www\. [NC]
   RewriteRule ^ https://openvapt.com%{REQUEST_URI} [R=301,L]
-  # The retired /beta/ preview: send old links to the same page at the root.
-  RewriteRule ^beta(?:/(.*))?$ /$1 [R=301,L]
+  # The retired /beta/ preview no longer exists: answer 410 Gone, no redirect.
+  RewriteRule ^beta(?:/.*)?$ - [G,L]
 </IfModule>
 
 <IfModule mod_headers.c>

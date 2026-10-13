@@ -26,9 +26,9 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [NIST SP 800-92, Guide to Computer Security Log Management](https://csrc.nist.gov/pubs/sp/800/92/final) | HOST-LOG-001, HOST-LOG-003 |
 | [NIST Transitioning Away from SHA-1](https://csrc.nist.gov/News/2022/nist-transitioning-away-from-sha-1-for-all-apps) | NET-TLS-006 |
 | [NVD](https://nvd.nist.gov/) | HOST-CVE-001, HOST-CVE-002, HOST-CVE-003, WEB-CVE-001 |
-| [NVD, CVE-2018-7600](https://nvd.nist.gov/vuln/detail/CVE-2018-7600) | WEB-CMS-011 |
-| [NVD, CVE-2020-1938](https://nvd.nist.gov/vuln/detail/CVE-2020-1938) | WEB-TOM-004 |
-| [NVD, CVE-2023-23752](https://nvd.nist.gov/vuln/detail/CVE-2023-23752) | WEB-CMS-010 |
+| [NVD, CVE-2018-7600](https://nvd.nist.gov/vuln/detail/cve-2018-7600) | WEB-CMS-011 |
+| [NVD, CVE-2020-1938](https://nvd.nist.gov/vuln/detail/cve-2020-1938) | WEB-TOM-004 |
+| [NVD, CVE-2023-23752](https://nvd.nist.gov/vuln/detail/cve-2023-23752) | WEB-CMS-010 |
 
 ## The MITRE Corporation (ATT&CK, CWE, CVE)
 
@@ -72,18 +72,18 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [OWASP Node.js Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html) | Academy P13, NET-APP-001, WEB-NODE-002, WEB-NODE-003 |
 | [OWASP PHP Configuration Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/PHP_Configuration_Cheat_Sheet.html) | WEB-PHP-001, WEB-PHP-002, WEB-PHP-003 |
 | [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html) | Academy P6, WEB-DOC-001, WEB-EXP-002 |
-| [OWASP Secure Headers Project](https://owasp.org/www-project-secure-headers/) | Academy P5, WEB-HDR-004, WEB-HDR-005, WEB-HDR-006 |
+| [OWASP Secure Headers Project](https://owasp.org/projects/secure-headers-project) | Academy P5, WEB-HDR-004, WEB-HDR-005, WEB-HDR-006 |
 | [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) | Academy P5, WEB-CK-001 |
-| [OWASP Top 10 2021, A05 Security Misconfiguration](https://owasp.org/Top10/A05_2021-Security_Misconfiguration/) | Academy P6 |
+| [OWASP Top 10 2021, A05 Security Misconfiguration](https://top10.owasp.org/2021/A05_2021-Security_Misconfiguration/) | Academy P6 |
 | [OWASP Transport Layer Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html) | WEB-TLS-001 |
-| [OWASP WSTG-CLNT-07, Testing Cross Origin Resource Sharing](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/11-Client-side_Testing/07-Testing_Cross_Origin_Resource_Sharing) | WEB-COR-001 |
-| [OWASP WSTG-CONF-02, Test Application Platform Configuration](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration) | WEB-TOM-005 |
-| [OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files for Sensitive Information](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information) | WEB-DOC-001, WEB-EXP-001, WEB-EXP-004, WEB-EXP-007, WEB-EXP-008, WEB-EXP-009 |
-| [OWASP WSTG-CONF-05, Enumerate Infrastructure and Application Admin Interfaces](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces) | WEB-EXP-011 |
-| [OWASP WSTG-CONF-09, Test File Permission](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/09-Test_File_Permission) | WEB-DOC-002 |
-| [OWASP WSTG-ERRH-01, Testing for Improper Error Handling](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling) | WEB-EXP-012 |
-| [OWASP WSTG-INFO-02, Fingerprint Web Server](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server) | WEB-EXP-010 |
-| [OWASP Web Security Testing Guide](https://owasp.org/www-project-web-security-testing-guide/) | Academy F2 |
+| [OWASP WSTG-CLNT-07, Testing Cross Origin Resource Sharing](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/11-Client-side_Testing/07-Testing_Cross_Origin_Resource_Sharing/) | WEB-COR-001 |
+| [OWASP WSTG-CONF-02, Test Application Platform Configuration](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration/) | WEB-TOM-005 |
+| [OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files for Sensitive Information](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/) | WEB-DOC-001, WEB-EXP-001, WEB-EXP-004, WEB-EXP-007, WEB-EXP-008, WEB-EXP-009 |
+| [OWASP WSTG-CONF-05, Enumerate Infrastructure and Application Admin Interfaces](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces/) | WEB-EXP-011 |
+| [OWASP WSTG-CONF-09, Test File Permission](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/09-Test_File_Permission/) | WEB-DOC-002 |
+| [OWASP WSTG-ERRH-01, Testing for Improper Error Handling](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling/) | WEB-EXP-012 |
+| [OWASP WSTG-INFO-02, Fingerprint Web Server](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server/) | WEB-EXP-010 |
+| [OWASP Web Security Testing Guide](https://owasp.org/projects/web-security-testing-guide) | Academy F2 |
 
 ## Center for Internet Security (CIS)
 
@@ -100,12 +100,12 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [RFC 6125, Representation and Verification of Domain-Based Application Service Identity](https://www.rfc-editor.org/rfc/rfc6125) | NET-TLS-003 |
-| [RFC 6265, HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265) | WEB-CK-001 |
-| [RFC 6797, HTTP Strict Transport Security](https://www.rfc-editor.org/rfc/rfc6797) | Academy P4, WEB-HDR-001 |
-| [RFC 8996, Deprecating TLS 1.0 and TLS 1.1](https://www.rfc-editor.org/rfc/rfc8996) | Academy P4, NET-TLS-001, NET-TLS-004 |
-| [RFC 9116, A File Format to Aid in Security Vulnerability Disclosure](https://www.rfc-editor.org/rfc/rfc9116) | WEB-SEC-001 |
-| [RFC 9142, Key Exchange Method Updates for SSH](https://www.rfc-editor.org/rfc/rfc9142) | Academy P2, HOST-SSH-004 |
+| [RFC 6125, Representation and Verification of Domain-Based Application Service Identity](https://www.rfc-editor.org/rfc/rfc6125.html) | NET-TLS-003 |
+| [RFC 6265, HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265.html) | WEB-CK-001 |
+| [RFC 6797, HTTP Strict Transport Security](https://www.rfc-editor.org/rfc/rfc6797.html) | Academy P4, WEB-HDR-001 |
+| [RFC 8996, Deprecating TLS 1.0 and TLS 1.1](https://www.rfc-editor.org/rfc/rfc8996.html) | Academy P4, NET-TLS-001, NET-TLS-004 |
+| [RFC 9116, A File Format to Aid in Security Vulnerability Disclosure](https://www.rfc-editor.org/rfc/rfc9116.html) | WEB-SEC-001 |
+| [RFC 9142, Key Exchange Method Updates for SSH](https://www.rfc-editor.org/rfc/rfc9142.html) | Academy P2, HOST-SSH-004 |
 
 ## CISA (U.S. Cybersecurity and Infrastructure Security Agency)
 
@@ -147,7 +147,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [IANA Service Name and Transport Protocol Port Number Registry](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml) | NET-SVC-002 |
+| [IANA Service Name and Transport Protocol Port Number Registry](https://www.iana.org/assignments/service-names-port-numbers) | NET-SVC-002 |
 
 ## PTES (Penetration Testing Execution Standard)
 
@@ -155,7 +155,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [Penetration Testing Execution Standard](http://www.pentest-standard.org/) | Academy F2 |
+| [Penetration Testing Execution Standard](http://www.pentest-standard.org/index.php/Main_Page) | Academy F2 |
 
 ## Linux Kernel Documentation
 
@@ -169,7 +169,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [Linux kernel documentation, Linux Security Module development and LSMs](https://docs.kernel.org/admin-guide/LSM/index.html) | HOST-MAC-001 |
 | [Linux kernel documentation, Yama LSM](https://docs.kernel.org/admin-guide/LSM/Yama.html) | HOST-KRN-010 |
 
-## Linux man-pages Project (man7.org) and Ubuntu Manpages
+## Linux Manual Pages (man7.org, Ubuntu and Debian Manpages)
 
 - Terms: Man pages carry per-page licences. Cited by page name and link only.
 
@@ -179,7 +179,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [auditd(8), Linux man-pages](https://man7.org/linux/man-pages/man8/auditd.8.html) | HOST-LOG-002 |
 | [chmod(1), Linux man-pages (restricted deletion flag)](https://man7.org/linux/man-pages/man1/chmod.1.html) | HOST-FS-002 |
 | [crontab(5), Linux man-pages](https://man7.org/linux/man-pages/man5/crontab.5.html) | HOST-FS-005 |
-| [crypt(5), Linux man-pages (hashing methods)](https://man7.org/linux/man-pages/man5/crypt.5.html) | HOST-PWD-002 |
+| [crypt(5), libxcrypt, Debian trixie manual pages (hashing methods)](https://manpages.debian.org/trixie/libcrypt-dev/crypt.5.en.html) | HOST-PWD-002 |
 | [login.defs(5), Linux man-pages](https://man7.org/linux/man-pages/man5/login.defs.5.html) | HOST-FS-009, HOST-PWD-001, HOST-PWD-005 |
 | [logrotate(8), Linux man-pages](https://man7.org/linux/man-pages/man8/logrotate.8.html) | HOST-LOG-004 |
 | [mount(8), Linux man-pages (nodev, nosuid, noexec)](https://man7.org/linux/man-pages/man8/mount.8.html) | HOST-FS-008 |
@@ -188,7 +188,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [pam_faillock(8), Linux-PAM](https://man7.org/linux/man-pages/man8/pam_faillock.8.html) | HOST-PWD-004 |
 | [passwd(5), Linux man-pages](https://man7.org/linux/man-pages/man5/passwd.5.html) | HOST-USR-001, HOST-USR-004 |
 | [proc_net(5), Linux man-pages](https://man7.org/linux/man-pages/man5/proc_net.5.html) | NET-LSN-001 |
-| [pwquality.conf(5), libpwquality](https://man7.org/linux/man-pages/man5/pwquality.conf.5.html) | HOST-PWD-003 |
+| [pwquality.conf(5), libpwquality, Debian trixie manual pages](https://manpages.debian.org/trixie/libpwquality-common/pwquality.conf.5.en.html) | HOST-PWD-003 |
 | [shadow(5), Linux man-pages](https://man7.org/linux/man-pages/man5/shadow.5.html) | HOST-FS-001, HOST-USR-002 |
 | [ufw(8) manual (Ubuntu)](https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html) | NET-FW-003 |
 | [umask(2), Linux man-pages](https://man7.org/linux/man-pages/man2/umask.2.html) | HOST-FS-009 |
@@ -235,7 +235,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [nftables wiki](https://wiki.nftables.org/) | NET-FW-001 |
+| [nftables wiki](https://wiki.nftables.org/wiki-nftables/index.php/Main_Page) | NET-FW-001 |
 
 ## chrony Project
 
@@ -320,16 +320,16 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [Django documentation, Deployment checklist](https://docs.djangoproject.com/en/stable/howto/deployment/checklist/) | Academy P13, WEB-PY-001, WEB-PY-002, WEB-PY-003 |
-| [Django documentation, django-admin runserver (not for production)](https://docs.djangoproject.com/en/stable/ref/django-admin/#runserver) | WEB-PY-005 |
-| [Django settings reference, ALLOWED_HOSTS](https://docs.djangoproject.com/en/stable/ref/settings/#allowed-hosts) | WEB-PY-002 |
-| [Django settings reference, DEBUG](https://docs.djangoproject.com/en/stable/ref/settings/#debug) | WEB-PY-001 |
-| [Django settings reference, SECRET_KEY](https://docs.djangoproject.com/en/stable/ref/settings/#secret-key) | WEB-PY-003 |
-| [Express documentation, Production best practices: performance and reliability](https://expressjs.com/en/advanced/best-practice-performance.html) | WEB-NODE-003 |
+| [Django documentation, Deployment checklist](https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/) | Academy P13, WEB-PY-001, WEB-PY-002, WEB-PY-003 |
+| [Django documentation, django-admin runserver (not for production)](https://docs.djangoproject.com/en/6.1/ref/django-admin/#runserver) | WEB-PY-005 |
+| [Django settings reference, ALLOWED_HOSTS](https://docs.djangoproject.com/en/6.1/ref/settings/#allowed-hosts) | WEB-PY-002 |
+| [Django settings reference, DEBUG](https://docs.djangoproject.com/en/6.1/ref/settings/#debug) | WEB-PY-001 |
+| [Django settings reference, SECRET_KEY](https://docs.djangoproject.com/en/6.1/ref/settings/#secret-key) | WEB-PY-003 |
+| [Express documentation, Production best practices: performance and reliability](https://expressjs.com/en/advanced/best-practice-performance/) | WEB-NODE-003 |
 | [Flask documentation, Debug mode](https://flask.palletsprojects.com/en/stable/quickstart/#debug-mode) | WEB-PY-004 |
 | [Flask documentation, Deploying to Production](https://flask.palletsprojects.com/en/stable/deploying/) | WEB-PY-005 |
-| [Gunicorn documentation, Deploying Gunicorn (behind a proxy)](https://docs.gunicorn.org/en/stable/deploy.html) | NET-APP-001 |
-| [Node.js documentation, Debugging guide (security implications)](https://nodejs.org/en/learn/getting-started/debugging) | WEB-NODE-002 |
+| [Gunicorn documentation, Deploying Gunicorn (behind a proxy)](https://gunicorn.org/deploy/) | NET-APP-001 |
+| [Node.js documentation, Debugging guide (security implications)](https://nodejs.org/learn/getting-started/debugging) | WEB-NODE-002 |
 | [Werkzeug documentation, Debugging Applications](https://werkzeug.palletsprojects.com/en/stable/debug/) | WEB-PY-004 |
 
 ## Content Management Systems (WordPress, Drupal, Joomla)
@@ -370,7 +370,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [Elastic Security Minimal Setup](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-minimal-setup.html) | NET-DB-007 |
+| [Elastic Security Minimal Setup](https://www.elastic.co/docs/deploy-manage/security/set-up-minimal-security) | NET-DB-007 |
 | [MongoDB Security Checklist](https://www.mongodb.com/docs/manual/administration/security-checklist/) | NET-DB-003 |
 | [MySQL Server Security Guidelines](https://dev.mysql.com/doc/refman/8.4/en/security-guidelines.html) | NET-DB-005 |
 | [PostgreSQL Client Authentication](https://www.postgresql.org/docs/current/client-authentication.html) | NET-DB-004 |

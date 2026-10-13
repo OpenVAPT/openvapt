@@ -128,7 +128,7 @@ func registerExposureChecks() {
 		Detection: "Parses local TCP and UDP socket tables and matches public listeners against vendor and IANA assigned service ports. It sends no packets.",
 		Fix:       "Bind management services to loopback or a dedicated management address, require strong authentication and TLS, and filter access to approved source networks.",
 		Verify:    "Review ss -tulpn and the host firewall from a trusted administrative session.",
-		Refs:      []check.Ref{{Title: "IANA Service Name and Transport Protocol Port Number Registry", URL: "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml"}, {Title: "Docker Protect the Daemon Socket", URL: "https://docs.docker.com/engine/security/protect-access/"}, {Title: "Kubernetes Ports and Protocols", URL: "https://kubernetes.io/docs/reference/networking/ports-and-protocols/"}},
+		Refs:      []check.Ref{{Title: "IANA Service Name and Transport Protocol Port Number Registry", URL: "https://www.iana.org/assignments/service-names-port-numbers"}, {Title: "Docker Protect the Daemon Socket", URL: "https://docs.docker.com/engine/security/protect-access/"}, {Title: "Kubernetes Ports and Protocols", URL: "https://kubernetes.io/docs/reference/networking/ports-and-protocols/"}},
 		Standards: check.Standards{CWE: []string{"CWE-284", "CWE-668"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-17", "CM-7", "SC-7"}},
 		Run: func(_ context.Context, s sys.System) []check.Result {
 			ls, err := collect.Listeners(s)

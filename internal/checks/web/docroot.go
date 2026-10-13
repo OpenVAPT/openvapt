@@ -86,7 +86,7 @@ func init() {
 		Detection: "Walks each document root (metadata only, up to 50000 files, symlinks not followed) and lists regular files with the 'other write' permission bit.",
 		Fix:       "chmod o-w <file> for each listed file (find <docroot> -type f -perm -0002 -exec chmod o-w {} +). Use 644 for files and 755 for folders, owned by the site account, and grant the web server write access only to upload folders.",
 		Verify:    "find <docroot> -type f -perm -0002  should print nothing.",
-		Refs:      []check.Ref{{Title: "OWASP WSTG-CONF-09, Test File Permission", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/09-Test_File_Permission"}},
+		Refs:      []check.Ref{{Title: "OWASP WSTG-CONF-09, Test File Permission", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/09-Test_File_Permission/"}},
 		Standards: check.Standards{CWE: []string{"CWE-732"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-CONF-09"}, NIST: []string{"AC-3", "AC-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			roots := collect.DocRoots(ctx, s)
@@ -133,7 +133,7 @@ func init() {
 		Detection: "Reads Access-Control-Allow-Origin and Access-Control-Allow-Credentials on each site's home page. '*' with credentials true, or 'null', fails. Origin reflection needs crafted requests and is outside this read-only check.",
 		Fix:       "Return Access-Control-Allow-Origin only for an explicit allow-list of trusted origins, never '*' or 'null' together with credentials, and add Vary: Origin.",
 		Verify:    "curl -sI https://<site>/ | grep -i access-control",
-		Refs:      []check.Ref{{Title: "OWASP WSTG-CLNT-07, Testing Cross Origin Resource Sharing", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/11-Client-side_Testing/07-Testing_Cross_Origin_Resource_Sharing"}, refMDN("Access-Control-Allow-Origin")},
+		Refs:      []check.Ref{{Title: "OWASP WSTG-CLNT-07, Testing Cross Origin Resource Sharing", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/11-Client-side_Testing/07-Testing_Cross_Origin_Resource_Sharing/"}, refMDN("Access-Control-Allow-Origin")},
 		Standards: check.Standards{CWE: []string{"CWE-942"}, OWASP: []string{"A05:2021", "A01:2021"}, ASVS: []string{"14.5.3"}, WSTG: []string{"WSTG-CLNT-07"}, NIST: []string{"AC-4", "CM-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {
@@ -156,7 +156,7 @@ func init() {
 		Detection: "Requests /.well-known/security.txt and looks for a Contact: field. This is informational and does not affect the risk summary.",
 		Fix:       "Publish /.well-known/security.txt with at least Contact: and Expires: fields (see securitytxt.org).",
 		Verify:    "curl -s https://<site>/.well-known/security.txt",
-		Refs:      []check.Ref{{Title: "RFC 9116, A File Format to Aid in Security Vulnerability Disclosure", URL: "https://www.rfc-editor.org/rfc/rfc9116"}},
+		Refs:      []check.Ref{{Title: "RFC 9116, A File Format to Aid in Security Vulnerability Disclosure", URL: "https://www.rfc-editor.org/rfc/rfc9116.html"}},
 		Standards: check.Standards{NIST: []string{"RA-5(11)"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {

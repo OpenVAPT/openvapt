@@ -8,7 +8,7 @@ import (
 
 // markdown converts the small Markdown subset used by the legal documents
 // (headings, paragraphs, bullet and numbered lists, bold, inline code, links,
-// blockquotes) into HTML. All text is HTML-escaped first, so a document can
+// blockquotes, tables and fenced code blocks) into HTML. All text is HTML-escaped first, so a document can
 // never inject markup into the website.
 func markdown(src string) string {
 	var out strings.Builder
@@ -48,7 +48,25 @@ func markdown(src string) string {
 		table = nil
 	}
 	sepRe := regexp.MustCompile(`^\|[\s:|-]+\|$`)
+	var code []string // lines of an open ``` fence; nil when outside one
+	inFence := false
 	for _, raw := range strings.Split(src, "\n") {
+		if strings.HasPrefix(strings.TrimSpace(raw), "```") {
+			if inFence {
+				out.WriteString(`<pre class="term">` + html.EscapeString(strings.Join(code, "\n")) + "</pre>\n")
+				code, inFence = nil, false
+			} else {
+				flush()
+				closeList()
+				flushTable()
+				inFence = true
+			}
+			continue
+		}
+		if inFence {
+			code = append(code, raw)
+			continue
+		}
 		if t := strings.TrimSpace(raw); strings.HasPrefix(t, "|") && strings.HasSuffix(t, "|") {
 			flush()
 			closeList()

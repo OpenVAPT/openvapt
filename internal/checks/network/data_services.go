@@ -179,7 +179,7 @@ func init() {
 		cvss:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		severity:  check.Critical,
 		patterns:  []string{"/etc/elasticsearch/elasticsearch.yml"},
-		ref:       check.Ref{Title: "Elastic Security Minimal Setup", URL: "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-minimal-setup.html"},
+		ref:       check.Ref{Title: "Elastic Security Minimal Setup", URL: "https://www.elastic.co/docs/deploy-manage/security/set-up-minimal-security"},
 		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
 			bad := !hasValue(fs, yes, "xpack.security.enabled") || hasValue(fs, func(v string) bool { return v == "0.0.0.0" || v == "_site_" || v == "_global_" }, "network.host")
 			return bad, evidence(fs, "xpack.security.enabled", "network.host")

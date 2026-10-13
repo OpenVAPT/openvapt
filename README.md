@@ -130,6 +130,14 @@ OpenVAPT and openvapt.com collect no data. See [PRIVACY.md](PRIVACY.md).
 
 ## Licence
 
-OpenVAPT Source-Available Licence 1.1 (`LicenseRef-OpenVAPT-SAL-1.1`, file [LICENSE](LICENSE)): Own Use only, no services, no selling. Source-available, not OSI open source. See [LICENSING.md](LICENSING.md).
+OpenVAPT Source-Available Licence 1.2 (`LicenseRef-OpenVAPT-SAL-1.2`, file [LICENSE](LICENSE)): Own Use only, no services, no selling, credit required when you copy, quote, adapt or present OpenVAPT material. Source-available, not OSI open source. See [LICENSING.md](LICENSING.md).
+
+## Citing OpenVAPT
+
+Please cite OpenVAPT in any research paper, thesis, coursework, presentation, poster or academic project it helped, with the version you used. Ready-to-copy APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, BibLaTeX, RIS and CSL-JSON citations are in [CITING.md](CITING.md); GitHub's "Cite this repository" button reads [CITATION.cff](CITATION.cff).
+
+```
+OpenVAPT. (2026). OpenVAPT: An open academic vulnerability assessment tool (Version 0.1.0-alpha.2) [Computer software]. https://github.com/OpenVAPT/openvapt
+```
 
 Names of other projects and products in this repository (for example Lynis, OpenVAS, ZAP, WordPress, Apache Tomcat, Node.js and Django) identify them only. Their owners do not sponsor, endorse or have any connection with OpenVAPT.

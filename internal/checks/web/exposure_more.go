@@ -7,9 +7,9 @@ import (
 	"github.com/openvapt/openvapt/internal/sys"
 )
 
-var refWSTGConf04 = check.Ref{Title: "OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files for Sensitive Information", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information"}
-var refWSTGInfo02 = check.Ref{Title: "OWASP WSTG-INFO-02, Fingerprint Web Server", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server"}
-var refWSTGErrh = check.Ref{Title: "OWASP WSTG-ERRH-01, Testing for Improper Error Handling", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling"}
+var refWSTGConf04 = check.Ref{Title: "OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files for Sensitive Information", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/"}
+var refWSTGInfo02 = check.Ref{Title: "OWASP WSTG-INFO-02, Fingerprint Web Server", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server/"}
+var refWSTGErrh = check.Ref{Title: "OWASP WSTG-ERRH-01, Testing for Improper Error Handling", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling/"}
 
 // statusWith returns a marker that requires HTTP 200 and one of the strings.
 func statusWith(subs ...string) func(sys.HTTPResponse) bool { return bodyHas(subs...) }
@@ -91,7 +91,7 @@ func init() {
 			detection: "Requests /phpmyadmin/, /pma/, /phpMyAdmin/ and /adminer.php; a 200 page containing the tool's name confirms exposure. No login is attempted.",
 			fix:       "Remove the tool, or restrict it to administrators by IP allow-list, VPN or an extra authentication layer, and keep it updated.",
 			verify:    "From outside your network, the paths should return 403 or 404.",
-			refs:      []check.Ref{{Title: "OWASP WSTG-CONF-05, Enumerate Infrastructure and Application Admin Interfaces", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces"}},
+			refs:      []check.Ref{{Title: "OWASP WSTG-CONF-05, Enumerate Infrastructure and Application Admin Interfaces", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces/"}},
 			std:       check.Standards{CWE: []string{"CWE-1188", "CWE-306"}, OWASP: []string{"A05:2021", "A07:2021"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"CM-7", "AC-3"}},
 			probes: []probe{{"/phpmyadmin/", statusWith("phpMyAdmin")}, {"/pma/", statusWith("phpMyAdmin")}, {"/phpMyAdmin/", statusWith("phpMyAdmin")},
 				{"/adminer.php", statusWith("Adminer")}},

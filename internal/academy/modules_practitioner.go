@@ -68,7 +68,7 @@ var practitioner = []Module{
 			{"PermitRootLogin prohibit-password means:", []string{"Root may log in with a password", "Root may log in only with a key", "Root may never log in"}, 1, "It blocks password logins for root while allowing keys."},
 			{"Which algorithm family is considered weak?", []string{"aes256-gcm", "chacha20-poly1305", "aes128-cbc"}, 2, "CBC-mode SSH ciphers have known weaknesses."},
 		},
-		Refs: []Ref{{"OpenBSD, sshd_config(5)", "https://man.openbsd.org/sshd_config"}, {"RFC 9142, Key Exchange Method Updates for SSH", "https://www.rfc-editor.org/rfc/rfc9142"}},
+		Refs: []Ref{{"OpenBSD, sshd_config(5)", "https://man.openbsd.org/sshd_config"}, {"RFC 9142, Key Exchange Method Updates for SSH", "https://www.rfc-editor.org/rfc/rfc9142.html"}},
 	},
 	{
 		ID: "P3", Title: "Network Exposure and Firewalls", Level: Practitioner, Minutes: 20,
@@ -133,7 +133,7 @@ var practitioner = []Module{
 			{"What does HSTS do?", []string{"Encrypts the database", "Tells browsers to always use HTTPS for the site", "Blocks bots"}, 1, "It prevents downgrade to plain HTTP."},
 			{"Why are self-signed certificates a problem on public sites?", []string{"Browsers do not trust them, so users learn to ignore warnings", "They expire faster", "They use weak keys"}, 0, "Trained click-through removes protection against interception."},
 		},
-		Refs: []Ref{{"RFC 8996, Deprecating TLS 1.0 and TLS 1.1", "https://www.rfc-editor.org/rfc/rfc8996"}, {"NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations", "https://csrc.nist.gov/pubs/sp/800/52/r2/final"}, {"RFC 6797, HTTP Strict Transport Security", "https://www.rfc-editor.org/rfc/rfc6797"}},
+		Refs: []Ref{{"RFC 8996, Deprecating TLS 1.0 and TLS 1.1", "https://www.rfc-editor.org/rfc/rfc8996.html"}, {"NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations", "https://csrc.nist.gov/pubs/sp/800/52/r2/final"}, {"RFC 6797, HTTP Strict Transport Security", "https://www.rfc-editor.org/rfc/rfc6797.html"}},
 	},
 	{
 		ID: "P5", Title: "Web Security Headers and Cookies", Level: Practitioner, Minutes: 20,
@@ -161,7 +161,7 @@ var practitioner = []Module{
 			{"The HttpOnly cookie flag:", []string{"Hides the cookie from JavaScript", "Encrypts the cookie", "Makes the cookie permanent"}, 0, "XSS cannot read HttpOnly cookies."},
 			{"Clickjacking is prevented by:", []string{"frame-ancestors or X-Frame-Options", "HSTS", "Compression"}, 0, "They stop other sites embedding your pages."},
 		},
-		Refs: []Ref{{"OWASP Secure Headers Project", "https://owasp.org/www-project-secure-headers/"}, {"OWASP Session Management Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"}},
+		Refs: []Ref{{"OWASP Secure Headers Project", "https://owasp.org/projects/secure-headers-project"}, {"OWASP Session Management Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"}},
 	},
 	{
 		ID: "P6", Title: "Information Exposure and Misconfiguration", Level: Practitioner, Minutes: 25,
@@ -193,7 +193,7 @@ var practitioner = []Module{
 			{"What should you do after finding an exposed .env file?", []string{"Delete it only", "Block it, remove it and rotate every secret in it", "Rename it"}, 1, "Treat every secret in it as leaked."},
 			{"Why does OpenVAPT require content markers, not just HTTP 200?", []string{"To avoid false positives from sites that return 200 for every path", "To save bandwidth", "Because 200 means error"}, 0, "Soft-404 pages would otherwise trigger every check."},
 		},
-		Refs: []Ref{{"OWASP Top 10 2021, A05 Security Misconfiguration", "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/"}, {"OWASP Secrets Management Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"}},
+		Refs: []Ref{{"OWASP Top 10 2021, A05 Security Misconfiguration", "https://top10.owasp.org/2021/A05_2021-Security_Misconfiguration/"}, {"OWASP Secrets Management Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"}},
 	},
 	{
 		ID: "P7", Title: "Identity, Passwords and Privilege", Level: Practitioner, Minutes: 25,

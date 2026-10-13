@@ -22,7 +22,7 @@ Thank you for helping. OpenVAPT is an academic project, so clear explanations ma
 
 - Sign off each commit under the Developer Certificate of Origin: `git commit -s`. See https://developercertificate.org/.
 - Use Conventional Commits: `feat(web): add check for ...`, `fix(scope): ...`, `docs: ...`.
-- Contributions are licensed under the OpenVAPT Source-Available Licence 1.1, and you grant the licensor a licence to relicense them (LICENSE, section 10). No payment or credit is owed.
+- Contributions are licensed under the OpenVAPT Source-Available Licence 1.2, and you grant the licensor a licence to relicense them (LICENSE, section 10). No payment or credit is owed.
 - One topic per pull request. CI must be green.
 
 ## Reporting Bugs

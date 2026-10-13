@@ -77,7 +77,7 @@ var foundation = []Module{
 			{"Which NIST SP 800-115 phase does OpenVAPT deliberately leave out?", []string{"Discovery", "Reporting", "Attack"}, 2, "OpenVAPT is detection only; it never attacks."},
 			{"What must exist before testing a system you do not own?", []string{"A fast internet connection", "Written authorisation with a defined scope", "A paid scanner licence"}, 1, "Authorisation and scope come first, always."},
 		},
-		Refs: []Ref{refNIST115, {"OWASP Web Security Testing Guide", "https://owasp.org/www-project-web-security-testing-guide/"}, {"Penetration Testing Execution Standard", "http://www.pentest-standard.org/"}},
+		Refs: []Ref{refNIST115, {"OWASP Web Security Testing Guide", "https://owasp.org/projects/web-security-testing-guide"}, {"Penetration Testing Execution Standard", "http://www.pentest-standard.org/index.php/Main_Page"}},
 	},
 	{
 		ID: "F3", Title: "Vulnerabilities, CVE, CWE and CVSS", Level: Foundation, Minutes: 20,

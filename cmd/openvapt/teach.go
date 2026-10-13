@@ -33,6 +33,10 @@ Each seed (for example a student number) gives a different simulated server.
 Any student can print the answer key for any seed, so practice labs are
 learning exercises, not secure exams. Free teaching use under TEACHING.md;
 pre-release, used 100% at your own risk.
+
+Citing: credit OpenVAPT in anything you copy or adapt (licence section 5.4),
+and please cite it in handouts, slides and course pages. Copy a citation from
+https://openvapt.com/cite.html, or read CITING.md.
 `)
 		return nil
 	}

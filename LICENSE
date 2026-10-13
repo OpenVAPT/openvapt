@@ -1,6 +1,6 @@
 # OpenVAPT Source-Available Licence
 
-Version 1.1, effective 2026-10-13. Identifier: `LicenseRef-OpenVAPT-SAL-1.1`. Version history is in section 15.
+Version 1.2, effective 2026-10-13. Identifier: `LicenseRef-OpenVAPT-SAL-1.2`. Version history is in section 15.
 
 This licence was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer. No human lawyer drafted or reviewed it. It is not legal advice to anyone.
 
@@ -26,14 +26,18 @@ You may use the Software only under this licence. To get any permission under it
 
 **Output** means anything produced by the Software, including reports, findings, scores and signed reports.
 
+**OpenVAPT Material** means any part of the Software that is protected by copyright, including its source code, documentation, Academy modules, quizzes, worksheets, rubrics, course plans, glossary, check descriptions, report templates, website text, figures, diagrams and screenshots.
+
+**Credit** means a statement, given as set out in section 5.4, that identifies OpenVAPT as the source of OpenVAPT Material. The recommended forms are in CITING.md.
+
 ## 3. What You May Do
 
 The Licensor grants you a non-exclusive, worldwide, royalty-free, non-transferable and non-sublicensable copyright licence, and a licence under any patent rights the Licensor can license, to do the following, and only the following:
 
-1. **Read and study.** Read, study, review and discuss the source code and documentation, and quote reasonable extracts of them, with attribution, in teaching, study, research and academic writing.
+1. **Read and study.** Read, study, review and discuss the source code and documentation, and quote reasonable extracts of them, with Credit (section 5.4), in teaching, study, research and academic writing.
 2. **Own Use.** Download, copy, build, install and run the Software for Own Use only.
 3. **Modify.** Modify the Software for Own Use, or to propose a contribution back to the OpenVAPT project.
-4. **Share copies free of charge.** Give complete copies of the Software, modified or unmodified, to others free of charge, but only if (a) you include this licence, the NOTICE file, the End User Licence Agreement (EULA.md), the Acceptable Use Policy (ACCEPTABLE_USE.md) and TEACHING.md unchanged; (b) you clearly mark any modified version as modified and do not call it OpenVAPT without saying so; and (c) you charge nothing, and receive no other benefit, for the copies or for anything connected with them. Each recipient gets permission only from the Licensor, under this licence, and not from you.
+4. **Share copies free of charge.** Give complete copies of the Software, modified or unmodified, to others free of charge, but only if (a) you include this licence, the NOTICE file, the End User Licence Agreement (EULA.md), the Acceptable Use Policy (ACCEPTABLE_USE.md), TEACHING.md and CITING.md unchanged; (b) you clearly mark any modified version as modified and do not call it OpenVAPT without saying so; and (c) you charge nothing, and receive no other benefit, for the copies or for anything connected with them. Each recipient gets permission only from the Licensor, under this licence, and not from you.
 5. **Teaching.** Use the Software for Teaching, including copying, adapting and translating its course material into your own teaching materials for your own students free of charge, as set out in TEACHING.md. Each student who downloads or runs the Software must accept this licence and the EULA personally, or through a parent or guardian if under 18.
 
 ## 4. What Is Not Licensed
@@ -52,6 +56,13 @@ Everything not expressly allowed in section 3 is not licensed. In particular, no
 1. You must accept and follow the End User Licence Agreement (EULA.md) and the Acceptable Use Policy (ACCEPTABLE_USE.md). Breaking either of them is outside this licence.
 2. You must keep every copyright notice, the NOTICE file and every line beginning with `Required Notice:` in every copy.
 3. You alone are responsible for having the legal right to run the Software on any machine, and for complying with every law that applies to you.
+4. **Credit.** Whenever you copy, quote, share, translate, adapt or present any OpenVAPT Material, in whole or in part, in any medium (including a research paper, thesis, dissertation, coursework, assignment, presentation, poster, academic project, teaching material, book, article, blog post, video or software), you must give Credit, as follows:
+   1. Credit must name "OpenVAPT", give the web address https://openvapt.com or https://github.com/OpenVAPT/openvapt, and, where you know it, the version used. Where you adapted or translated the material, Credit must say so. Any citation in a recognised academic style that contains these items is sufficient Credit. Recommended wording for every common style is in CITING.md.
+   2. Credit may be given in any manner that is reasonable for the medium and context: for example in the reference list of a paper or thesis, on a slide or in the speaker notes of a presentation, in the caption or footer of a poster or figure, in a comment at the top of a source file, or spoken aloud where nothing is written.
+   3. Where it is genuinely impractical to give Credit at the point of use (for example a very short verbal mention), you must give it at the first practical place, such as the reference list, the description or the accompanying materials.
+   4. Credit must not suggest that OpenVAPT or anyone connected with it sponsors, endorses, approves or has reviewed your work.
+   5. You need not give Credit only for running the Software for Own Use, for private notes you keep to yourself, or for using ideas, facts, methods or knowledge you learned from OpenVAPT without copying its expression. The Licensor nevertheless asks you to cite OpenVAPT in those cases too, as CITING.md explains; that request is not a condition of this licence.
+   6. If the Licensor asks you in writing to remove a Credit from a modified version, you must remove it as far as is reasonably practicable.
 
 ## 6. Termination
 
@@ -92,5 +103,6 @@ This licence is governed by the laws of Malaysia, and the courts of Malaysia hav
 
 1. **Version 1.0** (2026-10-13) was the first version. Release v0.1.0-alpha.1 was published under it, and the source archive of that release contains its text, which continues to govern copies obtained from that release (section 12).
 2. **Version 1.1** (2026-10-13) widens the Teaching permission by adding the Teaching With OpenVAPT terms (TEACHING.md): more kinds of teachers, institution virtual machines, and free adaptation of course material. It also adds teaching conditions: TEACHING.md must travel with shared copies, and students under 18 need a parent's or guardian's acceptance. Every other term is unchanged. Anyone holding a version 1.0 copy may instead choose to use that copy under version 1.1 by accepting all of its terms.
+3. **Version 1.2** (2026-10-13) adds the definitions of OpenVAPT Material and Credit and a Credit condition (section 5.4): anyone who copies, quotes, shares, adapts or presents OpenVAPT Material must credit OpenVAPT in a reasonable manner, with recommended citations in CITING.md, and CITING.md must travel with shared copies (section 3.4). Using ideas and facts, and running the Software for Own Use, need no Credit, though citation is requested. Every other term is unchanged. Anyone holding a version 1.0 or 1.1 copy may instead choose to use that copy under version 1.2 by accepting all of its terms.
 
-Required Notice: Copyright (c) 2026 OpenVAPT and contributors. Licensed under the OpenVAPT Source-Available Licence 1.1 (LicenseRef-OpenVAPT-SAL-1.1). Own Use only; no services, no selling.
+Required Notice: Copyright (c) 2026 OpenVAPT and contributors. Licensed under the OpenVAPT Source-Available Licence 1.2 (LicenseRef-OpenVAPT-SAL-1.2). Own Use only; no services, no selling. Credit and cite OpenVAPT when you use its material (CITING.md).

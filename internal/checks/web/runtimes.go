@@ -129,7 +129,7 @@ func matching(fs []djangoFile, re *regexp.Regexp, what string) []string {
 	return out
 }
 
-var refDjangoDeploy = check.Ref{Title: "Django documentation, Deployment checklist", URL: "https://docs.djangoproject.com/en/stable/howto/deployment/checklist/"}
+var refDjangoDeploy = check.Ref{Title: "Django documentation, Deployment checklist", URL: "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"}
 var refNodeSec = check.Ref{Title: "OWASP Node.js Security Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html"}
 
 func init() {
@@ -180,7 +180,7 @@ func init() {
 		Detection: "Reads ExecStart= and Environment= (including NODE_OPTIONS) of long-running services that run node, npm, yarn, pnpm or pm2, and flags --inspect, --inspect-brk and --inspect-wait. A network-reachable listener on port 9229 is also reported by NET-APP-001.",
 		Fix:       "Remove --inspect from the service and from NODE_OPTIONS, run systemctl daemon-reload and restart. Debug on a development machine, or temporarily over an SSH tunnel to 127.0.0.1:9229.",
 		Verify:    "systemctl show -p ExecStart,Environment <unit> | grep -c inspect  prints 0, and nothing listens on 9229.",
-		Refs:      []check.Ref{{Title: "Node.js documentation, Debugging guide (security implications)", URL: "https://nodejs.org/en/learn/getting-started/debugging"}, refNodeSec},
+		Refs:      []check.Ref{{Title: "Node.js documentation, Debugging guide (security implications)", URL: "https://nodejs.org/learn/getting-started/debugging"}, refNodeSec},
 		Standards: check.Standards{CWE: []string{"CWE-489", "CWE-306"}, OWASP: []string{"A05:2021"}, NIST: []string{"CM-7", "CM-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return unitResults(ctx, s, runsNode, func(u collect.Unit) string {
@@ -205,7 +205,7 @@ func init() {
 		Detection: "For long-running services whose ExecStart= runs node, npm, yarn, pnpm or pm2, reads Environment= and fails when NODE_ENV is missing or not production. Variables loaded with EnvironmentFile= are read only for NODE_ENV.",
 		Fix:       "Add Environment=NODE_ENV=production to the [Service] section (systemctl edit <unit>), run systemctl daemon-reload and restart the service.",
 		Verify:    "systemctl show -p Environment <unit>  includes NODE_ENV=production.",
-		Refs:      []check.Ref{{Title: "Express documentation, Production best practices: performance and reliability", URL: "https://expressjs.com/en/advanced/best-practice-performance.html"}, refNodeSec},
+		Refs:      []check.Ref{{Title: "Express documentation, Production best practices: performance and reliability", URL: "https://expressjs.com/en/advanced/best-practice-performance/"}, refNodeSec},
 		Standards: check.Standards{CWE: []string{"CWE-489", "CWE-209"}, OWASP: []string{"A05:2021"}, NIST: []string{"CM-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return unitResults(ctx, s, runsNode, func(u collect.Unit) string {
@@ -234,7 +234,7 @@ func init() {
 		Detection: "Finds settings.py and settings/*.py files that look like Django settings in /srv, /opt, /var/www, home directories and web roots (three folders deep), and fails when a folder sets DEBUG = True and no file in the same folder sets DEBUG = False or reads it from the environment.",
 		Fix:       "Set DEBUG = False in production, preferably from the environment (DEBUG = os.environ.get('DJANGO_DEBUG') == '1'), set ALLOWED_HOSTS, and restart the application. Run python manage.py check --deploy.",
 		Verify:    "python manage.py check --deploy  reports no DEBUG warning.",
-		Refs:      []check.Ref{refDjangoDeploy, {Title: "Django settings reference, DEBUG", URL: "https://docs.djangoproject.com/en/stable/ref/settings/#debug"}},
+		Refs:      []check.Ref{refDjangoDeploy, {Title: "Django settings reference, DEBUG", URL: "https://docs.djangoproject.com/en/6.1/ref/settings/#debug"}},
 		Standards: check.Standards{CWE: []string{"CWE-489", "CWE-215"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.2"}, WSTG: []string{"WSTG-ERRH-01"}, NIST: []string{"CM-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return djangoCheck(ctx, s, func(fs []djangoFile) []string {
@@ -269,7 +269,7 @@ func init() {
 		Detection: "Reads the same Django settings files as WEB-PY-001 and flags an ALLOWED_HOSTS list or tuple that starts with '*'.",
 		Fix:       "List the real domain names: ALLOWED_HOSTS = ['example.com', 'www.example.com'], and restart the application.",
 		Verify:    "python manage.py check --deploy",
-		Refs:      []check.Ref{refDjangoDeploy, {Title: "Django settings reference, ALLOWED_HOSTS", URL: "https://docs.djangoproject.com/en/stable/ref/settings/#allowed-hosts"}},
+		Refs:      []check.Ref{refDjangoDeploy, {Title: "Django settings reference, ALLOWED_HOSTS", URL: "https://docs.djangoproject.com/en/6.1/ref/settings/#allowed-hosts"}},
 		Standards: check.Standards{CWE: []string{"CWE-20"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-INPV-17"}, NIST: []string{"CM-6", "SI-10"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return djangoCheck(ctx, s, func(fs []djangoFile) []string { return matching(fs, djHostsAny, "ALLOWED_HOSTS allows any host") }, "Django accepts any Host header")
@@ -285,7 +285,7 @@ func init() {
 		Detection: "Reads the same Django settings files as WEB-PY-001 and flags SECRET_KEY = 'django-insecure-...'. The key itself is never copied into the report.",
 		Fix:       "Generate a new key (python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'), load it from the environment or a root-readable file (SECRET_KEY = os.environ['DJANGO_SECRET_KEY']), and restart. Changing the key logs all users out.",
 		Verify:    "python manage.py check --deploy  reports no SECRET_KEY warning.",
-		Refs:      []check.Ref{refDjangoDeploy, {Title: "Django settings reference, SECRET_KEY", URL: "https://docs.djangoproject.com/en/stable/ref/settings/#secret-key"}},
+		Refs:      []check.Ref{refDjangoDeploy, {Title: "Django settings reference, SECRET_KEY", URL: "https://docs.djangoproject.com/en/6.1/ref/settings/#secret-key"}},
 		Standards: check.Standards{CWE: []string{"CWE-798", "CWE-321"}, OWASP: []string{"A02:2021", "A05:2021"}, ASVS: []string{"2.10.4"}, NIST: []string{"IA-5", "SC-12"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return djangoCheck(ctx, s, func(fs []djangoFile) []string {
@@ -324,7 +324,7 @@ func init() {
 		Detection: "Reads ExecStart= of long-running services and flags manage.py runserver, flask run, python -m http.server or SimpleHTTPServer, uvicorn --reload and streamlit run.",
 		Fix:       "Serve the application with a production server (Gunicorn or uWSGI for WSGI, Uvicorn without --reload or Hypercorn for ASGI) bound to 127.0.0.1, behind nginx or Apache. Serve static files from the web server.",
 		Verify:    "systemctl show -p ExecStart <unit>  shows a production server.",
-		Refs:      []check.Ref{{Title: "Django documentation, django-admin runserver (not for production)", URL: "https://docs.djangoproject.com/en/stable/ref/django-admin/#runserver"}, {Title: "Flask documentation, Deploying to Production", URL: "https://flask.palletsprojects.com/en/stable/deploying/"}},
+		Refs:      []check.Ref{{Title: "Django documentation, django-admin runserver (not for production)", URL: "https://docs.djangoproject.com/en/6.1/ref/django-admin/#runserver"}, {Title: "Flask documentation, Deploying to Production", URL: "https://flask.palletsprojects.com/en/stable/deploying/"}},
 		Standards: check.Standards{CWE: []string{"CWE-489", "CWE-1188"}, OWASP: []string{"A05:2021"}, NIST: []string{"CM-7"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return unitResults(ctx, s, func(collect.Unit) bool { return true }, func(u collect.Unit) string {

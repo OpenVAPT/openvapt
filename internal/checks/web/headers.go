@@ -23,7 +23,7 @@ func init() {
 		Detection: "Reads the Strict-Transport-Security header from each HTTPS site's home page, including a redirect response, because browsers honour HSTS on any HTTPS response. Plain HTTP responses are not evaluated. Missing, or max-age below 15552000 seconds (180 days), fails.",
 		Fix:       "Apache: Header always set Strict-Transport-Security \"max-age=31536000; includeSubDomains\" . nginx: add_header Strict-Transport-Security \"max-age=31536000; includeSubDomains\" always; . Only add 'preload' once every subdomain supports HTTPS.",
 		Verify:    "curl -sI https://<site>/ | grep -i strict-transport-security",
-		Refs:      []check.Ref{{Title: "RFC 6797, HTTP Strict Transport Security", URL: "https://www.rfc-editor.org/rfc/rfc6797"}, refHTTPHeadersCS, refMDN("Strict-Transport-Security")},
+		Refs:      []check.Ref{{Title: "RFC 6797, HTTP Strict Transport Security", URL: "https://www.rfc-editor.org/rfc/rfc6797.html"}, refHTTPHeadersCS, refMDN("Strict-Transport-Security")},
 		Standards: check.Standards{CWE: []string{"CWE-319", "CWE-523"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.4.5"}, WSTG: []string{"WSTG-CONF-07"}, NIST: []string{"SC-8"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {

@@ -1,12 +1,82 @@
-{{define "content"}}
-<h1>Cite OpenVAPT</h1>
-<p class="lead">If OpenVAPT helps your coursework, thesis or paper, please cite the exact version you used. Each report records the version and commit.</p>
-<p>The repository includes <code>CITATION.cff</code>, which GitHub turns into ready-made APA and BibTeX citations. Archived releases may also receive a DOI.</p>
-<pre class="term">@software{openvapt,
-  title   = {OpenVAPT: An Open Academic Vulnerability Assessment Tool},
-  author  = {{"{{"}}OpenVAPT{{"}}"}},
-  url     = {https://openvapt.com},
-  version = {{"{"}}{{.Version}}{{"}"}},
-  note    = {Source: https://github.com/openvapt/openvapt, commit {{.CommitShort}}}
-}</pre>
+{{define "content"}}{{$d := .Data}}{{$x := $d.CiteExtras}}
+<h1>How to Cite OpenVAPT</h1>
+<p class="lead"><strong>Please cite us.</strong> If OpenVAPT, its Academy, its documentation, its checks or its reports helped your work in any way, in a research paper, thesis, dissertation, coursework, assignment, presentation, poster, academic project, teaching material, book, article, blog post or video, please cite OpenVAPT.</p>
+<p class="muted">This page follows <a href="legal/citing.html">Citing OpenVAPT</a> (CITING.md), the canonical guide. If anything here differs, CITING.md governs.</p>
+
+<div class="mt-8 grid gap-4 md:grid-cols-2">
+  <div class="card">
+    <div class="card-icon">{{icon "scale"}}</div>
+    <h3>Credit Is Required When You Copy</h3>
+    <p class="text-[15px] text-ink-2">Section 5.4 of the <a href="legal/licence-text.html">OpenVAPT Source-Available Licence 1.2</a> requires Credit whenever you copy, quote, share, translate, adapt or present any OpenVAPT Material, in whole or in part, in any medium: code, documentation, Academy modules, quizzes, worksheets, check descriptions, report templates, website text, figures, diagrams and screenshots.</p>
+    <p class="mb-0 text-[15px] text-ink-2">Credit names "OpenVAPT", gives openvapt.com or the GitHub address, gives the version where you know it, says "adapted from" or "translated from" where you changed the material, and never suggests endorsement. Any citation on this page does all of that.</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">{{icon "quote"}}</div>
+    <h3>Citation Is Requested When You Use It</h3>
+    <p class="text-[15px] text-ink-2">We also ask you to cite OpenVAPT when you only ran the tool, used its findings, or used ideas, methods or knowledge you learned from it without copying its words, code or figures. This is a request, not a licence condition, and nothing limits fair dealing or any other right the law gives you.</p>
+    <p class="mb-0 text-[15px] text-ink-2">Academic integrity rules at almost every university and journal require you to acknowledge the tools and sources you used, so citing OpenVAPT is usually expected of you anyway.</p>
+  </div>
+</div>
+
+<h2 id="copy">{{icon "copy"}} Copy a Citation</h2>
+<div class="card">
+  <div class="mb-4 flex flex-wrap items-center gap-2"><span class="tag tag-plain">Version {{$d.CiteVersion}}</span><span class="tag tag-plain">Commit {{.CommitShort}}</span><span class="muted">Filled in from this build. If you used another version, replace it with the one <code>openvapt version</code> shows.</span></div>
+  <div class="seg" role="tablist" aria-label="Citation Style" data-tabs hidden>
+    {{range $i, $s := $d.CiteStyles}}<button type="button" role="tab" id="tab-{{$s.ID}}" aria-controls="panel-{{$s.ID}}" aria-selected="{{if eq $i 0}}true{{else}}false{{end}}" tabindex="{{if eq $i 0}}0{{else}}-1{{end}}">{{$s.Label}}</button>{{end}}
+  </div>
+  {{range $i, $s := $d.CiteStyles}}<div class="cite-panel" role="tabpanel" id="panel-{{$s.ID}}" aria-labelledby="tab-{{$s.ID}}">
+    {{range $s.Boxes}}{{template "copybox" .}}{{end}}
+  </div>{{end}}
+  <p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
+  <p class="muted mb-0 mt-5">The author is the project, "OpenVAPT", a group author: do not add personal names, and do not let a reference manager split it into a first and last name (BibTeX wraps it in double braces for this reason). If your style asks how the work was made, you may add "Built by AI Cybersecurity Engineers". Dates of access show today's date in your browser.</p>
+</div>
+
+<h2 id="download">{{icon "file-down"}} Download Citation Files</h2>
+<p>Import OpenVAPT straight into Zotero, EndNote, Mendeley, JabRef or Pandoc. GitHub also reads <code>CITATION.cff</code> and shows a "Cite this repository" button with APA and BibTeX.</p>
+<div class="flex flex-wrap gap-3">
+  <a class="btn btn-default" href="CITATION.cff" download>{{icon "download"}}CITATION.cff</a>
+  <a class="btn btn-default" href="openvapt.bib" download>{{icon "download"}}BibTeX (.bib)</a>
+  <a class="btn btn-default" href="openvapt.ris" download>{{icon "download"}}RIS (.ris)</a>
+  <a class="btn btn-default" href="openvapt.json" download>{{icon "download"}}CSL-JSON (.json)</a>
+</div>
+
+<h2 id="when">{{icon "list-checks"}} When to Cite</h2>
+<p>Pick the row that matches your work. "Credit required" means the licence requires it; "citation requested" means we ask for it.</p>
+<div class="table-wrap"><table class="table">
+<thead><tr><th>Your Work</th><th>Example Use</th><th>What to Use</th><th>Where It Goes</th></tr></thead>
+<tbody>
+<tr><td>Research Paper</td><td>You ran OpenVAPT and report its findings</td><td>APA 7, IEEE or the journal's style (citation requested)</td><td>Reference list, and the version in your method section</td></tr>
+<tr><td>Thesis</td><td>You quote a check description or adapt a figure</td><td>Your university's style, plus "adapted from" (credit required)</td><td>Reference list and figure caption; optional acknowledgements line</td></tr>
+<tr><td>Dissertation</td><td>You build on OpenVAPT code for your own tool</td><td>Software reference with the commit, plus a code header (credit required)</td><td>Reference list and the top of every file with copied code</td></tr>
+<tr><td>Coursework or Assignment</td><td>You scan your own lab machine and write it up</td><td>The style your course asks for (citation requested)</td><td>Reference list or bibliography</td></tr>
+<tr><td>Presentation</td><td>You show an OpenVAPT screenshot or diagram</td><td>Slide caption line, plus the full reference (credit required)</td><td>Under the image, and on your references slide</td></tr>
+<tr><td>Poster</td><td>You reproduce a chart or table</td><td>Caption line or "adapted from" line (credit required)</td><td>Caption, and the poster's reference box</td></tr>
+<tr><td>Academic Project</td><td>You use OpenVAPT as a tool in a group project</td><td>Software reference with version (citation requested)</td><td>Project report and README</td></tr>
+<tr><td>Teaching Material</td><td>You adapt Academy modules, quizzes or worksheets</td><td>Teaching Credit, exact wording (credit required; see <a href="legal/teaching.html">Teaching With OpenVAPT</a>)</td><td>Handout, slide deck or course page</td></tr>
+<tr><td>Blog Post or Video</td><td>You explain a concept you learned from the Academy</td><td>Plain Text or Spoken line with a link (citation requested)</td><td>Post footer, video description, or aloud</td></tr>
+</tbody></table></div>
+<p class="muted">Running OpenVAPT privately on your own machine needs no credit; a citation is still welcome.</p>
+
+<h2 id="version">{{icon "code-xml"}} Cite a Specific Version and Commit</h2>
+<p>Use the year of the version you used and the version shown by <code>openvapt version</code> or on the release page. Pre-release versions (alpha, beta, rc) are fine to cite; give the full version string. For unreleased code, or to make your work exactly reproducible, add the commit: get it with <code>git rev-parse HEAD</code>, or from the footer of this website ("Built ... from commit"). This build is commit <code>{{.CommitShort}}</code>.</p>
+<div class="grid gap-4">{{range index $x "Commit"}}{{template "copybox" .}}{{end}}</div>
+
+<h2 id="academy">{{icon "graduation-cap"}} Cite the Academy, a Module or a Check</h2>
+<p>The Academy and web pages can change, so give the date you accessed them. Every <a href="academy/">Academy module</a> and every <a href="checks/">check page</a> has a Cite This Page box at the bottom with its exact title, web address and version already filled in.</p>
+<div class="grid gap-4">{{range index $x "Academy"}}{{template "copybox" .}}{{end}}{{range index $x "Check"}}{{template "copybox" .}}{{end}}</div>
+<div class="table-wrap"><table class="table">
+<thead><tr><th>You Used</th><th>Cite</th><th>Add</th></tr></thead>
+<tbody>
+<tr><td>The software (tool, scanner, report signing)</td><td>The software reference</td><td>The exact version</td></tr>
+<tr><td>A specific build or unreleased code</td><td>The software reference</td><td>The Git commit</td></tr>
+<tr><td>The Academy as a whole</td><td>The Academy reference</td><td>The date you accessed it</td></tr>
+<tr><td>One Academy module, worksheet or page</td><td>The page reference</td><td>The module title, web address and date accessed</td></tr>
+<tr><td>One check (for example HOST-SSH-001)</td><td>The software reference</td><td>The check ID in your text</td></tr>
+<tr><td>A report produced by OpenVAPT</td><td>The software reference</td><td>The version that produced the report, shown in the report</td></tr>
+<tr><td>The documentation or website text</td><td>The page reference</td><td>The web address and date accessed</td></tr>
+</tbody></table></div>
+
+<h2 id="endorsement">{{icon "shield-check"}} Use Does Not Imply Endorsement</h2>
+<p>Citing OpenVAPT does not give you any permission the licence does not give, and it does not mean OpenVAPT endorses, approves or has reviewed your work. Do not describe your work as certified, audited or approved by OpenVAPT. OpenVAPT findings are not a professional assessment; describe them as results from an academic tool, used at your own risk.</p>
+<div class="alert alert-info mt-6" role="note">{{icon "book-marked"}}<span>Read the full guide, with every rule and example, in <a href="legal/citing.html">Citing OpenVAPT</a>. The machine-readable version is <a href="CITATION.cff">CITATION.cff</a>. Citing OpenVAPT was drafted by a separate AI system acting as the project's legal reviewer, not a human lawyer, and is not legal advice.</span></div>
 {{end}}

@@ -65,7 +65,7 @@
       <a href="{{.Base}}compare.html">Compare With Other Tools</a>
       <a href="{{.Base}}glossary.html">VAPT Glossary</a>
       <a href="{{.Base}}learn.html">Quick Lessons</a>
-      <a href="{{.Base}}cite.html">Cite OpenVAPT</a>
+      <a href="{{.Base}}cite.html">How to Cite OpenVAPT</a>
       <a href="{{repo}}" rel="noreferrer">Source Code on GitHub</a>
       <a href="{{repo}}/issues" rel="noreferrer">Report a Bug</a>
     </div>
@@ -77,15 +77,17 @@
       <a href="{{.Base}}legal/acceptable-use.html">Acceptable Use</a>
       <a href="{{.Base}}legal/licence.html">Licence</a>
       <a href="{{.Base}}legal/ai-disclosure.html">AI Disclosure</a>
+      <a href="{{.Base}}legal/citing.html">Citing OpenVAPT</a>
       <a href="{{.Base}}legal/credits.html">Credits and Citations</a>
       <a href="{{.Base}}legal/governance.html">Governance and Assurance</a>
     </div>
   </div>
-  <div class="wrap mt-8 border-t border-line pt-5 text-[13px] text-ink-3">Built {{.Built}} from commit <a href="{{repo}}/tree/{{.Commit}}" rel="noreferrer" class="inline"><code>{{.CommitShort}}</code></a>. OpenVAPT Source-Available Licence 1.1: own use only, no services, no selling. Provided as is, at your own risk. Third-party names identify their owners only, with no affiliation or endorsement.</div>
+  <div class="wrap mt-8 border-t border-line pt-5 text-[13px] text-ink-3">Built {{.Built}} from commit <a href="{{repo}}/tree/{{.Commit}}" rel="noreferrer" class="inline"><code>{{.CommitShort}}</code></a>. OpenVAPT Source-Available Licence 1.2: own use only, no services, no selling. Provided as is, at your own risk. Third-party names identify their owners only, with no affiliation or endorsement.</div>
 </footer>
 {{if eq .Path "checks/index.html"}}<script src="{{.Base}}assets/vendor/ag-grid-community.min.js" defer></script><script src="{{.Base}}assets/catalogue.js" defer></script>{{end}}
 {{if eq .Path "download.html"}}<script src="{{.Base}}assets/acknowledge.js" defer></script>{{end}}
 {{if hasPrefix .Path "academy/"}}<script src="{{.Base}}assets/academy.js" defer></script>{{end}}
+{{if or (eq .Path "cite.html") (and (hasPrefix .Path "checks/") (ne .Path "checks/index.html")) (hasPrefix .Path "academy/")}}<script src="{{.Base}}assets/cite.js" defer></script>{{end}}
 {{if or (eq .Path "index.html") (eq .Path "standards.html") (eq .Path "coverage.html")}}<script src="{{.Base}}assets/vendor/echarts.min.js" defer></script><script src="{{.Base}}assets/charts.js" defer></script>{{end}}
 </body>
 </html>{{end}}
@@ -96,3 +98,19 @@
 </figure>{{end}}
 
 {{define "sev"}}<span class="tag tag-{{.}}">{{title (print .)}}</span>{{end}}
+
+{{define "copybox"}}<div class="cite-box">
+<div class="cite-head"><span class="cite-label" id="{{.ID}}-l">{{.Label}}</span><button type="button" class="btn btn-default btn-sm" data-copy="{{.ID}}" aria-label="Copy {{.Label}}">{{icon "copy"}}<span>Copy</span></button></div>
+<pre class="cite-text" id="{{.ID}}" tabindex="0" aria-labelledby="{{.ID}}-l">{{.Text}}</pre>
+{{with .Hint}}<p class="cite-hint">{{.}}</p>{{end}}
+</div>{{end}}
+
+{{define "citepage"}}<details class="cite-page">
+<summary>{{icon "quote"}}<span>Cite This Page</span><span class="chev">{{icon "chevron-right"}}</span></summary>
+<div class="cite-page-body">
+<p class="m-0 text-[15px] text-ink-2">If this page helped your work, please cite it. The version and web address are filled in; the access date is today's date in your browser. Every other style, and when credit is required, is on <a href="../cite.html">How to Cite OpenVAPT</a>.</p>
+{{range .}}{{template "copybox" .}}{{end}}
+<p class="muted m-0">Citing OpenVAPT does not mean OpenVAPT endorses, approves or has reviewed your work.</p>
+<p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
+</div>
+</details>{{end}}

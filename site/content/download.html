@@ -123,6 +123,9 @@ gh attestation verify openvapt_linux_amd64 --repo OpenVAPT/openvapt \
 <pre class="term">sudo ./openvapt scan --out ~/openvapt-report</pre>
   <p>Before every scan the tool shows the acknowledgements again and continues only when you type <code>I ACCEPT</code> (or you pass <code>--accept-terms</code> for automation, which counts as the same acceptance). Running as root lets checks read protected files such as <code>/etc/shadow</code>; without root those checks are skipped or marked Incomplete. The report is written only to the folder you choose, with private permissions. Exit codes: 0 success, 2 invalid arguments, 3 Critical or High findings, 4 incomplete coverage, 5 scan errors, 6 report write failure.</p>
 
+  <h3>Cite OpenVAPT</h3>
+  <p>If OpenVAPT helps your coursework, thesis, paper or project, please cite the version you used (<code>openvapt version</code>). Copy a ready-made reference from <a href="cite.html">How to Cite OpenVAPT</a> or read <a href="legal/citing.html">Citing OpenVAPT</a>.</p>
+
   <h3>Uninstall</h3>
   <p>OpenVAPT installs nothing beyond its own binary. Delete the binary (<code>rm ~/.local/bin/openvapt</code> if you used the installer) and your report folders. If you signed reports, also delete <code>~/.config/openvapt/report-key</code>.</p>
 </section>

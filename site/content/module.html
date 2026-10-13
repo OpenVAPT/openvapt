@@ -32,6 +32,7 @@
 
   <h2>References</h2>
   <ul>{{range $m.Refs}}<li><a href="{{.URL}}" rel="noreferrer">{{.Title}}</a></li>{{end}}</ul>
+  {{template "citepage" .Data.PageCite}}
 
   <div class="mt-10 flex flex-wrap justify-between gap-3 border-t border-line-2 pt-6">
     {{with .Data.Prev}}<a class="btn btn-default min-w-0 max-w-full" href="{{lower .ID}}.html"><span class="truncate">Previous: {{.ID}} {{.Title}}</span></a>{{else}}<span></span>{{end}}

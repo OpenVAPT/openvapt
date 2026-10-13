@@ -14,7 +14,7 @@ var faqs = []FAQ{
 	{"Is OpenVAPT a Free VAPT Tool?",
 		"Yes. OpenVAPT is free to download and use, with no paid tier, no account and no licence key. It covers the vulnerability assessment (VA) part of VAPT. It does not perform penetration testing (PT): it never exploits or attacks anything."},
 	{"Is OpenVAPT Open Source?",
-		"Every line of OpenVAPT's code is public on GitHub at github.com/OpenVAPT/openvapt to read, study and review. It is licensed only under the OpenVAPT Source-Available Licence 1.1, which permits reading and studying the code and using it for your own use, but does not license selling it or providing any service with it, paid or unpaid. It is therefore source-available, not open source under the Open Source Initiative definition."},
+		"Every line of OpenVAPT's code is public on GitHub at github.com/OpenVAPT/openvapt to read, study and review. It is licensed only under the OpenVAPT Source-Available Licence 1.2, which permits reading and studying the code and using it for your own use, but does not license selling it or providing any service with it, paid or unpaid. It is therefore source-available, not open source under the Open Source Initiative definition."},
 	{"Can I Use OpenVAPT for My Company's Servers?",
 		"Yes, for your own use. Individuals and organisations, including companies, may run OpenVAPT free of charge on computers and servers they own or control, to learn and to assess those same machines. OpenVAPT itself is an academic project, not a business, and it may not be used to provide services to anyone else, including on a client's server even with their permission."},
 	{"Can I Use OpenVAPT to Offer VAPT or Security Services to Clients?",

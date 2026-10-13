@@ -34,7 +34,7 @@ To be fully transparent about the infrastructure that delivers the website:
 
 ### One Site for Every Channel
 
-There is no separate preview site. Every release channel (alpha, beta, release candidate and stable) is shown publicly on openvapt.com. Old openvapt.com/beta/ addresses redirect to the same page at the root, and the same no-data rules apply everywhere.
+There is no separate preview site. Every release channel (alpha, beta, release candidate and stable) is shown publicly on openvapt.com. The old openvapt.com/beta/ preview no longer exists, and the same no-data rules apply everywhere.
 
 ## 3. The OpenVAPT Software
 

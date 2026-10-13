@@ -172,7 +172,7 @@ func init() {
 		detection: "Reads the <Connector> elements of conf/server.xml (comments ignored) and, for those with protocol AJP/1.3 or an AJP protocol class, fails when secretRequired=\"false\" or when there is no secret (or requiredSecret) and the address is not a loopback address.",
 		fix:       "If you do not use AJP (most sites proxy over HTTP), delete or comment out the AJP <Connector>. Otherwise set address=\"127.0.0.1\", a long random secret=\"...\" with secretRequired=\"true\", and the same secret in the proxy (mod_proxy_ajp: ProxyPass ... secret=...). Upgrade Tomcat to a supported release.",
 		verify:    "grep -i ajp <conf>/server.xml  and  ss -tlnp | grep 8009  shows nothing or 127.0.0.1 only.",
-		refs:      []check.Ref{refTomcatSec, {Title: "Apache Tomcat 10.1 Configuration Reference, The AJP Connector", URL: "https://tomcat.apache.org/tomcat-10.1-doc/config/ajp.html"}, {Title: "NVD, CVE-2020-1938", URL: "https://nvd.nist.gov/vuln/detail/CVE-2020-1938"}},
+		refs:      []check.Ref{refTomcatSec, {Title: "Apache Tomcat 10.1 Configuration Reference, The AJP Connector", URL: "https://tomcat.apache.org/tomcat-10.1-doc/config/ajp.html"}, {Title: "NVD, CVE-2020-1938", URL: "https://nvd.nist.gov/vuln/detail/cve-2020-1938"}},
 		std:       check.Standards{CWE: []string{"CWE-306", "CWE-284"}, OWASP: []string{"A05:2021", "A06:2021"}, NIST: []string{"SC-7", "AC-3", "CM-7"}},
 		eval: func(ctx context.Context, s sys.System, t collect.TomcatInstance) []string {
 			var bad []string
@@ -200,7 +200,7 @@ func init() {
 		detection: "Looks for examples/ and docs/ application folders (WEB-INF/web.xml or index.html) in each Tomcat installation's webapps folders, including the Debian and Ubuntu tomcatN-examples and tomcatN-docs packages.",
 		fix:       "Delete the examples and docs folders from webapps (or apt remove tomcatN-examples tomcatN-docs) and restart Tomcat.",
 		verify:    "ls <webapps>  lists only your own applications (and ROOT).",
-		refs:      []check.Ref{refTomcatSec, {Title: "OWASP WSTG-CONF-02, Test Application Platform Configuration", URL: "https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration"}},
+		refs:      []check.Ref{refTomcatSec, {Title: "OWASP WSTG-CONF-02, Test Application Platform Configuration", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration/"}},
 		std:       check.Standards{CWE: []string{"CWE-1188", "CWE-200"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-CONF-02"}, NIST: []string{"CM-7"}},
 		eval: func(ctx context.Context, s sys.System, t collect.TomcatInstance) []string {
 			var bad []string

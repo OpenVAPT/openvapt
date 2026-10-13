@@ -14,7 +14,7 @@ import (
 var (
 	refLoginDefs = check.Ref{Title: "login.defs(5), Linux man-pages", URL: "https://man7.org/linux/man-pages/man5/login.defs.5.html"}
 	refNIST63B   = check.Ref{Title: "NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management", URL: "https://pages.nist.gov/800-63-4/sp800-63b.html"}
-	refPwquality = check.Ref{Title: "pwquality.conf(5), libpwquality", URL: "https://man7.org/linux/man-pages/man5/pwquality.conf.5.html"}
+	refPwquality = check.Ref{Title: "pwquality.conf(5), libpwquality, Debian trixie manual pages", URL: "https://manpages.debian.org/trixie/libpwquality-common/pwquality.conf.5.en.html"}
 	refFaillock  = check.Ref{Title: "pam_faillock(8), Linux-PAM", URL: "https://man7.org/linux/man-pages/man8/pam_faillock.8.html"}
 )
 
@@ -66,7 +66,7 @@ func init() {
 		Detection: "Reads /etc/shadow (needs root) and inspects only the hash prefix of each password field: $1$ (MD5) or a 13-character field without a $ prefix (DES) fail. The hash itself is never copied.",
 		Fix:       "Configure a modern algorithm (HOST-PWD-001), then force a password change for each listed account (chage -d 0 <user>) or lock unused accounts (passwd -l <user>).",
 		Verify:    "Re-run this check; no accounts should be listed.",
-		Refs:      []check.Ref{{Title: "crypt(5), Linux man-pages (hashing methods)", URL: "https://man7.org/linux/man-pages/man5/crypt.5.html"}, refNIST63B},
+		Refs:      []check.Ref{{Title: "crypt(5), libxcrypt, Debian trixie manual pages (hashing methods)", URL: "https://manpages.debian.org/trixie/libcrypt-dev/crypt.5.en.html"}, refNIST63B},
 		Standards: check.Standards{CWE: []string{"CWE-916", "CWE-328"}, OWASP: []string{"A02:2021"}, NIST: []string{"IA-5(1)"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			text, complete, ok := readText(ctx, s, "/etc/shadow")

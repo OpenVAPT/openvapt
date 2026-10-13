@@ -108,7 +108,7 @@ var stacks = []Module{
 			{"What does node --inspect=0.0.0.0:9229 give an attacker who can connect?", []string{"Read-only logs", "The ability to run any JavaScript in the application", "Nothing without a password"}, 1, "The inspector has no authentication."},
 			{"What is the safest fix for an unused Tomcat AJP connector?", []string{"Change its port", "Remove or comment out the connector", "Add a firewall rule for port 80"}, 1, "A connector that does not exist cannot be attacked."},
 		},
-		Refs: []Ref{{"Apache Tomcat, Security Considerations", "https://tomcat.apache.org/tomcat-10.1-doc/security-howto.html"}, {"Django, Deployment checklist", "https://docs.djangoproject.com/en/stable/howto/deployment/checklist/"}, {"OWASP Node.js Security Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html"}},
+		Refs: []Ref{{"Apache Tomcat, Security Considerations", "https://tomcat.apache.org/tomcat-10.1-doc/security-howto.html"}, {"Django, Deployment checklist", "https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/"}, {"OWASP Node.js Security Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html"}},
 	},
 	{
 		ID: "P14", Title: "CMS Hardening in Depth: WordPress, Joomla and Drupal", Level: Practitioner, Minutes: 25,

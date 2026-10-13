@@ -69,7 +69,7 @@ Everything else in the repository (all Go code under `cmd/` and `internal/`, tem
 
 | Text | How Used | Source |
 |---|---|---|
-| OpenVAPT Source-Available Licence 1.1 (1.0 before the Teaching terms) | Original text drafted by an AI Cybersecurity Engineer in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
+| OpenVAPT Source-Available Licence 1.2 (1.0 before the Teaching terms, 1.1 before the Credit condition) | Original text drafted by an AI Cybersecurity Engineer in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
 | Go BSD 3-Clause licence | Included word for word in THIRD_PARTY_NOTICES.md | https://go.dev/LICENSE |
 | Contributor Covenant 2.1 | Adopted by reference (linked, not copied) | https://www.contributor-covenant.org/version/2/1/code_of_conduct/ |
 | Developer Certificate of Origin 1.1 | Referenced for commit sign-off | https://developercertificate.org/ |

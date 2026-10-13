@@ -8,6 +8,7 @@
 @source "../static/assets/catalogue.js";
 @source "../static/assets/charts.js";
 @source "../static/assets/academy.js";
+@source "../static/assets/cite.js";
 @source "../../cmd/sitegen";
 
 @font-face{font-family:"IBM Plex Sans";src:url("fonts/IBMPlexSans-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
@@ -46,6 +47,7 @@
   h1{font-size:clamp(2rem,3.4vw,2.625rem);line-height:1.18;letter-spacing:-.01em;margin:0 0 16px}
   h2{font-size:1.75rem;line-height:1.25;margin:56px 0 16px}
   h3{font-size:1.25rem;line-height:1.4;margin:32px 0 8px}
+  h2>svg{@apply mr-1 inline-block size-6 align-[-3px] text-blue-6}
   p,li{max-width:72ch}
   a{@apply text-blue-7 no-underline hover:text-blue-8 hover:underline}
   code{@apply font-mono text-[0.86em] bg-layer rounded px-1.5 py-px}
@@ -135,6 +137,26 @@
   .code-body td{@apply whitespace-pre pr-4 align-top font-mono text-[13px] leading-[1.65];tab-size:4}
   .code-body td.n{@apply min-w-[3.5em] select-none border-r border-line-2 px-3 text-right text-ink-3}
   .code-body td.l{@apply pl-4}
+  /* Citation: style switcher (Ant Segmented look, wraps instead of scrolling), copy boxes, Cite This Page */
+  .btn-sm{@apply h-ctl px-[11px] text-[14px]}
+  .seg{@apply flex flex-wrap gap-1 rounded-ctl bg-layer p-1}
+  .seg [role=tab]{@apply inline-flex h-ctl cursor-pointer items-center rounded-[4px] border-0 bg-transparent px-3 text-[14px] font-medium text-ink-2 transition-colors duration-150 hover:bg-white/70 hover:text-ink}
+  .seg [role=tab][aria-selected=true]{@apply bg-white text-blue-7 shadow-[0_1px_2px_rgba(0,0,0,.08),0_1px_4px_rgba(0,0,0,.04)]}
+  .cite-panel{@apply mt-5 grid gap-4}
+  .cite-panel[hidden]{display:none}
+  .cite-box{@apply min-w-0 overflow-hidden rounded-card border border-line-2 bg-white}
+  .cite-head{@apply flex flex-wrap items-center justify-between gap-2 border-b border-line-2 bg-[#fafafa] px-4 py-2}
+  .cite-label{@apply text-[14px] font-semibold text-ink}
+  .cite-text{@apply m-0 max-w-full px-4 py-3.5 font-mono text-[13.5px] leading-[1.7] text-ink whitespace-pre-wrap [overflow-wrap:anywhere]}
+  .cite-hint{@apply m-0 border-t border-line-2 px-4 py-2 text-[13px] text-ink-3 max-w-none}
+  .btn[data-copied]{@apply border-green-7 text-green-8}
+  .cite-page{@apply mt-12 rounded-card border border-line-2 bg-white}
+  .cite-page summary{@apply flex cursor-pointer list-none items-center gap-2 px-5 py-4 font-semibold text-ink}
+  .cite-page summary::-webkit-details-marker{display:none}
+  .cite-page summary svg{@apply size-4 text-blue-6}
+  .cite-page summary .chev{@apply ml-auto inline-flex transition-transform duration-150}
+  .cite-page[open] summary .chev{@apply rotate-90}
+  .cite-page-body{@apply grid gap-4 border-t border-line-2 px-5 pt-4 pb-5}
   pre.term{@apply my-4 max-w-full overflow-x-auto overflow-y-hidden rounded-card bg-[#161616] p-4 font-mono text-[13px] leading-[1.7] text-[#f4f4f4];tab-size:4}
 
   /* Ant Form items: label above, inputs and selects share the 40px height */
