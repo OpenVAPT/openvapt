@@ -1,73 +1,92 @@
-# PolyForm Noncommercial License 1.0.0
+# OpenVAPT Source-Available Licence
 
-<https://polyformproject.org/licenses/noncommercial/1.0.0>
+Version 1.0, effective 2026-10-13. Identifier: `LicenseRef-OpenVAPT-SAL-1.0`.
 
-## Acceptance
+This licence was drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer. No human lawyer drafted or reviewed it. It is not legal advice to anyone.
 
-In order to get any license under these terms, you must agree to them as both strict obligations and conditions to all your licenses.
+## 1. Acceptance
 
-## Copyright License
+You may use the Software only under this licence. To get any permission under it, you must accept every term below as both a promise and a condition of that permission. If you do not accept, you have no permission at all, apart from any right the law gives you that this licence cannot take away (section 13).
 
-The licensor grants you a copyright license for the software to do everything you might do with the software that would otherwise infringe the licensor's copyright in it for any permitted purpose.  However, you may only distribute the software according to [Distribution License](#distribution-license) and make changes or new works based on the software according to [Changes and New Works License](#changes-and-new-works-license).
+## 2. Definitions
 
-## Distribution License
+**Licensor** means the individual who owns and runs the OpenVAPT project and publishes it under the name "OpenVAPT", and any person to whom that individual transfers the project. "OpenVAPT" is a project name, not a company or other legal entity.
 
-The licensor grants you an additional copyright license to distribute copies of the software.  Your license to distribute covers distributing the software with changes and new works permitted by [Changes and New Works License](#changes-and-new-works-license).
+**Software** means OpenVAPT as made available by the Licensor under this licence, including its source code, compiled programs, tests, documentation, course material and website, and any part or modified version of it.
 
-## Notices
+**You** means the individual who accepts this licence and, where that individual acts for an organisation, that organisation.
 
-You must ensure that anyone who gets a copy of any part of the software from you also gets a copy of these terms or the URL for them above, as well as copies of any plain-text lines beginning with `Required Notice:` that the licensor provided with the software.  For example:
+**Your Organisation** means the company or other organisation you work for or act for, if any.
 
-> Required Notice: Copyright Yoyodyne, Inc. (http://example.com)
+**Own Use** means (a) running the Software on computers and servers that you own or control, to test and learn about those same machines, for your own personal purposes; or (b) running the Software on computers and servers that Your Organisation owns or controls, to test those same machines for Your Organisation's own internal purposes, where Your Organisation has authorised you to do so.
 
-## Changes and New Works License
+**Service** means any activity done for, or made available to, any person other than you or Your Organisation, whether paid or unpaid, including vulnerability assessment, penetration testing, auditing, scanning, consulting, training delivered as a service, and any hosted, managed or outsourced service. Teaching is not a Service.
 
-The licensor grants you an additional copyright license to make changes and new works based on the software for any permitted purpose.
+**Teaching** means, without charge for the Software or for teaching about it (ordinary tuition fees of a school, college or university are not such a charge), explaining and showing the Software's source code and documentation to students, and running the Software only against its built-in simulated lab (`openvapt demo`) or on machines that the teacher, or the educational institution, owns or controls and has authorised. Teaching never includes running the Software on a student's, client's or any other person's machine, or any course, workshop or training offered by a commercial training provider.
 
-## Patent License
+**Output** means anything produced by the Software, including reports, findings, scores and signed reports.
 
-The licensor grants you a patent license for the software that covers patent claims the licensor can license, or becomes able to license, that you would infringe by using the software.
+## 3. What You May Do
 
-## Noncommercial Purposes
+The Licensor grants you a non-exclusive, worldwide, royalty-free, non-transferable and non-sublicensable copyright licence, and a licence under any patent rights the Licensor can license, to do the following, and only the following:
 
-Any noncommercial purpose is a permitted purpose.
+1. **Read and study.** Read, study, review and discuss the source code and documentation, and quote reasonable extracts of them, with attribution, in teaching, study, research and academic writing.
+2. **Own Use.** Download, copy, build, install and run the Software for Own Use only.
+3. **Modify.** Modify the Software for Own Use, or to propose a contribution back to the OpenVAPT project.
+4. **Share copies free of charge.** Give complete copies of the Software, modified or unmodified, to others free of charge, but only if (a) you include this licence, the NOTICE file, the End User Licence Agreement (EULA.md) and the Acceptable Use Policy (ACCEPTABLE_USE.md) unchanged; (b) you clearly mark any modified version as modified and do not call it OpenVAPT without saying so; and (c) you charge nothing, and receive no other benefit, for the copies or for anything connected with them. Each recipient gets permission only from the Licensor, under this licence, and not from you.
+5. **Teaching.** Use the Software for Teaching. Each student who downloads or runs the Software must accept this licence and the EULA personally.
 
-## Personal Uses
+## 4. What Is Not Licensed
 
-Personal use for research, experiment, and testing for the benefit of public knowledge, personal study, private entertainment, hobby projects, amateur pursuits, or religious observance, without any anticipated commercial application, is use for a permitted purpose.
+Everything not expressly allowed in section 3 is not licensed. In particular, nobody, including individuals, charities, educational institutions, research bodies and government bodies, is licensed to:
 
-## Noncommercial Organizations
+1. use the Software, or any Output, to provide any Service to anyone, paid or unpaid, even with that person's permission, including running the Software on a machine belonging to a client, customer or any other third party;
+2. sell, rent, lease or license the Software or copies of it, or charge for it or for access to it;
+3. include the Software, or any part or modified version of it, in any product, platform or service offered to others;
+4. sell, supply or present any Output to others as a service, certification, audit or professional assessment;
+5. use the Software, or any part of it, to examine, access, attack or disrupt any system that you are not authorised to examine, or remove or weaken its scope guard for that purpose; or
+6. use the Software in any other way that earns money, or any other benefit, from the Software itself.
 
-Use by any charitable organization, educational institution, public research organization, public safety or health organization, environmental protection organization, or government institution is use for a permitted purpose regardless of the source of funding or obligations resulting from the funding.
+## 5. Conditions
 
-## Fair Use
+1. You must accept and follow the End User Licence Agreement (EULA.md) and the Acceptable Use Policy (ACCEPTABLE_USE.md). Breaking either of them is outside this licence.
+2. You must keep every copyright notice, the NOTICE file and every line beginning with `Required Notice:` in every copy.
+3. You alone are responsible for having the legal right to run the Software on any machine, and for complying with every law that applies to you.
 
-You may have "fair use" rights for the software under the law. These terms do not limit them.
+## 6. Termination
 
-## No Other Rights
+Your permissions end automatically and immediately if you break any term of this licence, the EULA or the Acceptable Use Policy. The Licensor may, but need not, reinstate them in writing. When your permissions end you must stop using the Software and delete every copy you control. Sections 4 and 7 to 14 continue after termination.
 
-These terms do not allow you to sublicense or transfer any of your licenses to anyone else, or prevent the licensor from granting licenses to anyone else.  These terms do not imply any other licenses.
+## 7. A Free Gift With No Duty
 
-## Patent Defense
+The Software is given free of charge, as a gift, by a person who is not in business, does not trade, sells nothing and accepts no payment or donation. No consideration is paid to the Licensor or any contributor. Giving the Software creates no relationship of supplier and consumer, agency, partnership, employment, advice, professional service or any other relationship, and no duty of care, support, maintenance, update, correction or response.
 
-If you make any written claim that the software infringes or contributes to infringement of any patent, your patent license for the software granted under these terms ends immediately. If your company makes such a claim, your patent license ends immediately for work on behalf of your company.
+## 8. No Warranty
 
-## Violations
+Builds published on the alpha, beta and release candidate (rc) channels are pre-release: unfinished, possibly wrong or unstable, and used 100% at your own risk. To the fullest extent permitted by law, the Software, every build on every channel and every Output are provided "as is", with all faults, and without any warranty, guarantee, condition or representation of any kind, express, implied or statutory, including as to quality, fitness for any purpose, accuracy, completeness, security, availability or non-infringement.
 
-The first time you are notified in writing that you have violated any of these terms, or done anything with the software not covered by your licenses, your licenses can nonetheless continue if you come into full compliance with these terms, and take practical steps to correct past violations, within 32 days of receiving notice.  Otherwise, all your licenses end immediately.
+## 9. No Liability
 
-## No Liability
+To the fullest extent permitted by law, neither the Licensor nor any contributor is liable to you or anyone else for any loss or damage of any kind, however caused and under any legal theory (including contract, tort, negligence and breach of statutory duty), arising from or connected with the Software, any Output or this licence. Where liability cannot lawfully be excluded, it is limited to the smallest amount the law permits.
 
-***As far as the law allows, the software comes as is, without any warranty or condition, and the licensor will not be liable to you for any damages arising out of these terms or the use or nature of the software, under any kind of legal claim.***
+## 10. Contributions
 
-## Definitions
+By submitting a contribution to the OpenVAPT project, you (a) confirm through the Developer Certificate of Origin sign-off that you have the right to submit it; (b) license it to everyone under this licence; and (c) grant the Licensor a perpetual, irrevocable, worldwide, royalty-free licence to use, copy, modify, distribute, sublicense and relicense it under any terms, so that the project can be maintained, relicensed or transferred. You keep your copyright. No payment or credit is owed for any contribution.
 
-The **licensor** is the individual or entity offering these terms, and the **software** is the software the licensor makes available under these terms.
+## 11. Built by AI Agents
 
-**You** refers to the individual or entity agreeing to these terms.
+The Software was researched, developed and built by AI agents under the direction of the Licensor. Copyright may not exist in some parts under the laws of some countries. This licence applies to the extent that rights exist. Your promises in the EULA apply to all of the Software regardless.
 
-**Your company** is any legal entity, sole proprietorship, or other kind of organization that you work for, plus all organizations that have control over, are under the control of, or are under common control with that organization.  **Control** means ownership of substantially all the assets of an entity, or the power to direct its management and policies by vote, contract, or otherwise.  Control can be direct or indirect.
+## 12. Changes to This Licence
 
-**Your licenses** are all the licenses granted to you for the software under these terms.
+The Licensor may publish new versions of this licence. Each copy of the Software is governed by the version provided with it. The Licensor may also offer the Software under other terms.
 
-**Use** means anything you do with the software requiring one of your licenses.
+## 13. Rights the Law Gives You
+
+Nothing in this licence limits any right that the law gives you and that cannot be limited by agreement, including fair dealing under the Copyright Act 1987.
+
+## 14. Governing Law and Severability
+
+This licence is governed by the laws of Malaysia, and the courts of Malaysia have exclusive jurisdiction, subject only to any right the law of your country gives you that cannot be excluded. If any part of this licence is invalid or unenforceable anywhere, it is read down to the minimum extent needed to make it enforceable there, or, if that is not possible, removed there, and the rest stays in full force. A permission that is removed is not replaced by a wider one.
+
+Required Notice: Copyright (c) 2026 OpenVAPT and contributors. Licensed under the OpenVAPT Source-Available Licence 1.0 (LicenseRef-OpenVAPT-SAL-1.0). Own Use only; no services, no selling.

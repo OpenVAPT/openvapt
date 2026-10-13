@@ -47,11 +47,12 @@ const (
 )
 
 var (
-	outDir  = flag.String("out", "dist/site", "output directory")
-	base    = flag.String("base", "/", "URL path the site is served under, e.g. /beta/")
-	noindex = flag.Bool("noindex", false, "add noindex to every page (for the beta site)")
-	commit  string
-	built   = time.Now().UTC()
+	outDir      = flag.String("out", "dist/site", "output directory")
+	base        = flag.String("base", "/", "URL path the site is served under, e.g. /beta/")
+	noindex     = flag.Bool("noindex", false, "add noindex to every page (automatic until a signed-off Stable release exists)")
+	commit      string
+	built       = time.Now().UTC()
+	siteChannel siteChannels
 )
 
 // Page is the data every template receives.
@@ -60,6 +61,8 @@ type Page struct {
 	Base, Commit, CommitShort, Version string
 	Built                              string
 	NoIndex                            bool
+	Channel                            string // most mature released channel, or Pre-Release
+	PreRelease                         bool
 	JSONLD                             template.JS
 	Body                               template.HTML
 	Data                               any
@@ -88,6 +91,9 @@ func main() {
 	must(os.MkdirAll(*outDir, 0o755)) // #nosec G301 -- public website output
 
 	g := &gen{}
+
+	chans := loadChannels()
+	siteChannel = chans
 
 	checks := check.All()
 	// Fill live counts into FAQ answers so they never go stale.
@@ -119,9 +125,10 @@ func main() {
 		"Glossary":    academy.Glossary,
 		"Terms":       academy.Terms(),
 		"ChartData":   chartData(checks),
+		"Channels":    chans,
 	}
 	pages := []struct{ file, path, title, desc, section string }{
-		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "OpenVAPT is an academic, non-commercial project with AI-generated, source-available code. Free to download and use on your own Linux server, for personal or business own use, 100% at your own risk.", "home"},
+		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "OpenVAPT is an academic, non-commercial project with source-available code built by AI agents. Free to download and use on your own Linux server, for personal or business own use, 100% at your own risk.", "home"},
 		{"how-it-works.html", "how-it-works.html", "How OpenVAPT Is Built", "A module by module walkthrough of the OpenVAPT source code, with every function cited to the exact file and line.", "built"},
 		{"standards.html", "standards.html", "Standards and Methodology", "How OpenVAPT maps to NIST SP 800-115, CVSS v3.1, OWASP Top 10, OWASP ASVS, CWE and NIST SP 800-53.", "standards"},
 		{"limits.html", "limits.html", "What OpenVAPT Does Not Do", "The deliberate limits of OpenVAPT: no exploitation, no remote targets, no data collection, not a penetration test.", "limits"},
@@ -130,6 +137,7 @@ func main() {
 		{"contribute.html", "contribute.html", "Review, Report and Contribute", "Report bugs, false positives and new check ideas on GitHub, and how OpenVAPT versions and releases work.", "contribute"},
 		{"cite.html", "cite.html", "Cite OpenVAPT", "How to cite OpenVAPT in academic work.", "cite"},
 		{"coverage.html", "coverage.html", "Coverage Dashboard: What OpenVAPT Assesses", "Interactive coverage of OpenVAPT's checks by control category and severity, mapped to CIS Controls v8, NIST CSF 2.0, OWASP Top 10 and OWASP WSTG.", "coverage"},
+		{"channels.html", "channels.html", "Release Channels: Alpha, Beta, Release Candidate and Stable", "How OpenVAPT moves from Alpha to Beta, Release Candidate and Stable, the evidence each gate requires, and the current build in every channel.", "channels"},
 		{"faq.html", "faq.html", "OpenVAPT FAQ: Free Academic VAPT Tool Questions Answered", "Answers about OpenVAPT, the free academic vulnerability assessment tool for Linux: cost, licence, company use, scope, safety, standards and data.", "faq"},
 		{"compare.html", "compare.html", "OpenVAPT Compared With Lynis, OpenSCAP, OpenVAS, Nuclei and ZAP", "How OpenVAPT, a free academic VAPT learning tool, compares with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy and OWASP ZAP, and when to use each.", "compare"},
 		{"privacy-notice.html", "no-data.html", "We Collect No Data", "OpenVAPT and openvapt.com collect no data: no cookies, no analytics, no logs, no forms, no accounts.", "nodata"},
@@ -169,8 +177,9 @@ func main() {
 		{"DISCLAIMER.md", "legal/disclaimer.html", "Disclaimer", "OpenVAPT is an academic project provided as is, at your own risk."},
 		{"PRIVACY.md", "legal/privacy.html", "Privacy Policy", "OpenVAPT collects no personal data at all."},
 		{"ACCEPTABLE_USE.md", "legal/acceptable-use.html", "Acceptable Use Policy", "How OpenVAPT may and may not be used."},
-		{"LICENSING.md", "legal/licence.html", "Licence", "OpenVAPT is licensed under the PolyForm Noncommercial License 1.0.0 with an additional permission for own use."},
-		{"AI-DISCLOSURE.md", "legal/ai-disclosure.html", "AI Disclosure", "OpenVAPT is entirely AI-generated. Which AI systems produced it, what the human owner did, and what has not been reviewed."},
+		{"LICENSING.md", "legal/licence.html", "Licence", "How OpenVAPT is licensed: the OpenVAPT Source-Available Licence 1.0, for own use only, with no services and no selling."},
+		{"LICENSE", "legal/licence-text.html", "OpenVAPT Source-Available Licence 1.0", "The full text of the OpenVAPT Source-Available Licence 1.0, the only licence under which OpenVAPT is made available."},
+		{"AI-DISCLOSURE.md", "legal/ai-disclosure.html", "AI Disclosure", "OpenVAPT is researched, developed and built entirely by AI agents under human direction. Which AI systems produced it, what the human owner did, and what has not been reviewed."},
 		{"CREDITS.md", "legal/credits.html", "Credits, Sources and Citations", "Every component, tool, standard, source and AI system OpenVAPT uses or refers to, cited precisely."},
 	} {
 		b, err := os.ReadFile(l.md)
@@ -224,7 +233,8 @@ func (g *gen) page(_, path, title, desc, section string, body template.HTML) {
 func pageFor(path, title, desc, section string, body template.HTML, data any) Page {
 	return Page{Title: title, Description: desc, Path: path, Section: section, Base: *base,
 		Commit: commit, CommitShort: commit[:min(12, len(commit))], Version: version.Version,
-		Built: built.Format("2006-01-02"), NoIndex: *noindex, Body: body, Data: data}
+		Built: built.Format("2006-01-02"), NoIndex: *noindex, Body: body, Data: data,
+		Channel: siteChannel.Highest, PreRelease: !siteChannel.Public}
 }
 
 func funcs() template.FuncMap {
@@ -529,21 +539,21 @@ func jsonLD(p Page) template.JS {
 	url := siteURL + "/" + strings.TrimSuffix(p.Path, "index.html")
 	org := map[string]any{"@type": "Organization", "@id": siteURL + "/#org", "name": "OpenVAPT",
 		"url": siteURL, "logo": siteURL + "/assets/icon.svg", "sameAs": []string{"https://github.com/OpenVAPT", repoURL},
-		"description": "An academic, non-commercial project that publishes OpenVAPT, a free, AI-generated vulnerability assessment learning tool with source-available code. Not a business; provides no services."}
+		"description": "An academic, non-commercial project that publishes OpenVAPT, a free vulnerability assessment learning tool with source-available code, researched, developed and built by AI agents under human direction. Not a business; provides no services."}
 	site := map[string]any{"@type": "WebSite", "@id": siteURL + "/#website", "name": "OpenVAPT", "url": siteURL, "publisher": map[string]string{"@id": siteURL + "/#org"}, "inLanguage": "en"}
 	app := map[string]any{"@type": "SoftwareApplication", "@id": siteURL + "/#software", "name": "OpenVAPT",
 		"applicationCategory": "SecurityApplication", "applicationSubCategory": "Vulnerability Assessment Tool",
 		"operatingSystem": "Linux", "url": siteURL, "downloadUrl": siteURL + "/download.html", "softwareVersion": p.Version,
 		"description":         terms.Tagline + " Read-only checks for the Linux machine it runs on: server, network exposure and websites.",
 		"isAccessibleForFree": true, "offers": map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-		"license": "https://polyformproject.org/licenses/noncommercial/1.0.0/", "publisher": map[string]string{"@id": siteURL + "/#org"},
-		"keywords":    "free VAPT tool, VAPT learning, vulnerability assessment, source-available code, AI-generated, Linux security, server hardening, web security headers, academic, education",
+		"license": siteURL + "/legal/licence-text.html", "publisher": map[string]string{"@id": siteURL + "/#org"},
+		"keywords":    "free VAPT tool, VAPT learning, vulnerability assessment, source-available code, built by AI agents, Linux security, server hardening, web security headers, academic, education",
 		"featureList": []string{fmt.Sprintf("%d read-only checks", len(check.All())), "Server, network and web app coverage", "CVSS v3.1 ratings", "OWASP, CWE and NIST mapping", "HTML, JSON, SARIF and Markdown reports", "Loopback-only scope guard", "Simulated lab for learning", "Zero data collection"}}
 	graph := []any{org, site}
 	switch {
 	case p.Path == "index.html":
 		graph = append(graph, app, map[string]any{"@type": "SoftwareSourceCode", "name": "OpenVAPT source code", "codeRepository": repoURL,
-			"programmingLanguage": "Go", "license": "https://polyformproject.org/licenses/noncommercial/1.0.0/", "targetProduct": map[string]string{"@id": siteURL + "/#software"}})
+			"programmingLanguage": "Go", "license": siteURL + "/legal/licence-text.html", "targetProduct": map[string]string{"@id": siteURL + "/#software"}})
 	case p.Path == "faq.html":
 		var qs []any
 		for _, f := range faqs {
@@ -618,9 +628,9 @@ func writeSEO(paths []string, cs []*check.Check) {
 	must(os.WriteFile(filepath.Join(*outDir, "robots.txt"), []byte(robots), 0o644)) // #nosec G306 -- public website file
 
 	var l strings.Builder
-	l.WriteString("# OpenVAPT\n\n> OpenVAPT is a free, academic, non-commercial vulnerability assessment (VA) tool for Linux servers with source-available code, generated entirely by AI under human direction. It runs read-only checks on the machine it is installed on (and only that machine) to identify weaknesses in the server, its network exposure and its websites, rates findings with CVSS v3.1 and proposes cited fixes. It is made for learning how a VAPT tool works. It is not a business, not a penetration testing service and collects no data.\n\n")
-	l.WriteString("Key facts:\n- Price: free. No account, no licence key.\n- Use: anyone, including companies, may use it on machines they own or control, for their own use. It may not be sold or used to provide services.\n- Risk: provided as is; users carry 100% of the risk.\n- Licence: PolyForm Noncommercial 1.0.0 plus an own-use permission (source-available).\n- Platform: Linux. Single static Go binary, standard library only.\n- Scope: loopback-only, enforced in code. Detection only, no exploit code.\n- Standards: NIST SP 800-115, CVSS v3.1, OWASP Top 10 2021, OWASP ASVS 4.0.3, CWE, NIST SP 800-53.\n- Source: " + repoURL + "\n- Built with AI assistance (Claude by Anthropic, via Claude Code) under the owner's direction.\n\n## Docs\n\n")
-	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How it is built, with code citations"}, {"checks/", "Check catalogue"}, {"standards.html", "Standards and methodology"}, {"compare.html", "Comparison with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What it does not do"}, {"learn.html", "Lessons and lab"}, {"download.html", "Download and acknowledgements"}, {"no-data.html", "No data collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}} {
+	l.WriteString("# OpenVAPT\n\n> OpenVAPT is a free, academic, non-commercial vulnerability assessment (VA) tool for Linux servers with source-available code, researched, developed and built entirely by AI agents under human direction. It runs read-only checks on the machine it is installed on (and only that machine) to identify weaknesses in the server, its network exposure and its websites, rates findings with CVSS v3.1 and proposes cited fixes. It is made for learning how a VAPT tool works. It is not a business, not a penetration testing service and collects no data.\n\n")
+	l.WriteString("Key facts:\n- Price: free. No account, no licence key.\n- Use: anyone, including companies, may use it on machines they own or control, for their own use. It may not be sold or used to provide services.\n- Risk: a free gift provided as is, with no warranty; users carry 100% of the risk.\n- Licence: OpenVAPT Source-Available Licence 1.0 (LicenseRef-OpenVAPT-SAL-1.0): own use only, no services, no selling.\n- Platform: Linux. Single static Go binary, standard library only.\n- Scope: designed to be loopback-only, enforced in code. Detection only, no exploit code.\n- Standards: NIST SP 800-115, CVSS v3.1, OWASP Top 10 2021, OWASP ASVS 4.0.3, CWE, NIST SP 800-53.\n- Source: " + repoURL + "\n- Researched, developed and built entirely by AI agents (Claude by Anthropic via Claude Code, with OpenAI Codex) under the owner's direction; not audited by a human security expert or reviewed by a human lawyer.\n- Third-party names identify those projects only; their owners do not sponsor, endorse or have any connection with OpenVAPT.\n\n## Docs\n\n")
+	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How it is built, with code citations"}, {"checks/", "Check catalogue"}, {"standards.html", "Standards and methodology"}, {"compare.html", "Comparison with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What it does not do"}, {"learn.html", "Lessons and lab"}, {"download.html", "Download and acknowledgements"}, {"channels.html", "Release channels and promotion gates"}, {"no-data.html", "No data collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}, {"legal/licence.html", "Licence"}} {
 		l.WriteString("- [" + p[1] + "](" + siteURL + "/" + p[0] + ")\n")
 	}
 	l.WriteString("\n## FAQ\n\n")

@@ -6,7 +6,7 @@ authors:
   - name: "OpenVAPT"
 repository-code: "https://github.com/openvapt/openvapt"
 url: "https://openvapt.com"
-license-url: "https://polyformproject.org/licenses/noncommercial/1.0.0/"
+license-url: "https://github.com/OpenVAPT/openvapt/blob/main/LICENSE"
 version: "0.1.0-dev"
 date-released: "2026-10-13"
 keywords:

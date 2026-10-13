@@ -1,0 +1,8 @@
+{
+  "version": "v0.1.0-alpha.1",
+  "reviewed": "2026-10-13",
+  "reviewer": "AI lawyer (Claude sub-agent)",
+  "open_high_risks": 1,
+  "public_launch_approved": false,
+  "notes": "Licence replaced by the OpenVAPT Source-Available Licence 1.0 (own use and free teaching only, no services). EULA 2.0, Disclaimer 1.5, Acceptable Use Policy 1.4, acknowledgements 1.4, pre-release warnings, non-affiliation notices and AI-agent terminology reviewed and consistent. Open High risk: no legal entity holds the project, so the owner personally bears any claim; this blocks beta until a company limited by guarantee holds the project or the owner accepts the risk in chat and the reviewer records it. No human lawyer review is a High residual risk accepted by the owner. Public launch not approved: needs the entity risk closed and a fresh review of the stable candidate."
+}

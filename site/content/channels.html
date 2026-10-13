@@ -1,0 +1,67 @@
+{{define "content"}}{{$d := .Data}}{{$c := $d.Channels}}
+<h1>Release Channels</h1>
+<p class="lead">OpenVAPT has one codebase and one website. Every build moves through four channels, from Alpha to Stable, and it moves up only when every gate for the next channel passes on that exact build. AI agents run the gates; nobody can skip or override one.</p>
+
+<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+{{range $c.Views}}
+  <div class="card mb-0 flex flex-col">
+    <div class="mb-3 flex flex-wrap items-center gap-2">
+      <h2 class="m-0 text-[20px]">{{.Name}}</h2>
+      {{if .Release}}<span class="tag tag-low">Released</span>{{else}}<span class="tag tag-info">Not Released Yet</span>{{end}}
+    </div>
+    {{if .Release}}
+    <p class="m-0 font-mono text-[15px]">{{.Release.Version}}</p>
+    <p class="muted mt-1">{{.Release.Date}} &middot; commit <a href="{{$d.Repo}}/commit/{{.Release.Commit}}">{{slice .Release.Commit 0 12}}</a></p>
+    {{end}}
+    <p class="text-ink-2">{{.Meaning}}</p>
+    <p class="muted mb-2"><strong>For:</strong> {{.Audience}}</p>
+    <p class="foot-h mb-1 mt-2">Gate</p>
+    <ul class="m-0 pl-5 text-[14px] text-ink-2">{{range .Gates}}<li>{{.}}</li>{{end}}</ul>
+  </div>
+{{end}}
+</div>
+
+<h2>Where OpenVAPT Stands</h2>
+{{if $c.Public}}
+<div class="alert alert-info" role="note">{{icon "info"}}<span>A Stable release exists and its public release was signed off. Stable is the default for the installer and this website.</span></div>
+{{else}}
+<div class="alert alert-warn" role="note">{{icon "triangle-alert"}}<span>There is no Stable release yet, so this website is hidden from search engines and every build is a pre-release: it may be incomplete or wrong, so use it only on test machines, 100% at your own risk.</span></div>
+{{end}}
+<div class="table-wrap mt-4">
+<table>
+<thead><tr><th>Item</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Most Mature Channel</td><td>{{$c.Highest}}</td></tr>
+<tr><td>Next Stable Version</td><td class="font-mono">{{$c.State.Next}}</td></tr>
+<tr><td>Legal Review Record</td><td>{{if $c.Legal.Version}}{{$c.Legal.Version}}, reviewed {{$c.Legal.Reviewed}} by {{$c.Legal.Reviewer}}; open High legal risks: {{$c.Legal.OpenHighRisks}}{{else}}None recorded{{end}}</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>How a Build Is Promoted</h2>
+<div class="steps">
+  <div class="step"><span class="step-dot">1</span><div><b>Plan</b><p>Every day the promote workflow finds the most mature channel whose history, time and legal gates pass, and the exact commit that would move up.</p></div></div>
+  <div class="step"><span class="step-dot">2</span><div><b>Verify</b><p>That exact commit runs the full CI suite, the lab proof and the installer test again. Nothing tested on another commit counts.</p></div></div>
+  <div class="step"><span class="step-dot">3</span><div><b>Release</b><p>The build is published with checksums, Sigstore signatures, build provenance and an SBOM. Alpha, Beta and Release Candidate are marked pre-release.</p></div></div>
+  <div class="step"><span class="step-dot">4</span><div><b>Record</b><p>Every gate is checked once more with the real evidence, and the promotion is appended to the public record. Records are never edited.</p></div></div>
+</div>
+<p class="muted">Gate logic: <a href="{{$d.Repo}}/blob/main/internal/channels/channels.go">internal/channels/channels.go</a>. Workflow: <a href="{{$d.Repo}}/blob/main/.github/workflows/promote.yml">.github/workflows/promote.yml</a>. Record: <a href="{{$d.Repo}}/blob/main/release/channels.json">release/channels.json</a>.</p>
+
+<h2>Promotion History</h2>
+{{if $c.History}}
+<div class="table-wrap">
+<table>
+<thead><tr><th>Date</th><th>Channel</th><th>Version</th><th>Commit</th><th>Evidence</th></tr></thead>
+<tbody>
+{{range $c.History}}<tr><td>{{.Date}}</td><td>{{.Channel}}</td><td class="font-mono">{{.Version}}</td><td class="font-mono"><a href="{{$d.Repo}}/commit/{{.Commit}}">{{slice .Commit 0 12}}</a></td><td class="text-[13px]">{{range .Evidence}}{{.}}<br>{{end}}</td></tr>
+{{end}}
+</tbody>
+</table>
+</div>
+{{else}}
+<p class="text-ink-2">No build has been promoted yet. The first Alpha is published when the promote workflow next finds a build that passes the Alpha gate.</p>
+{{end}}
+
+<h2>Choosing a Channel</h2>
+<p>Use Stable once it exists. Use Release Candidate, Beta or Alpha only on test machines, to help find problems before Stable. The installer picks Stable by default; see <a href="download.html">Download</a> for every channel's install command. <code>openvapt version</code> prints the channel of the build you run, and every report records it.</p>
+{{end}}

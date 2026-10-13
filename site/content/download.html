@@ -81,12 +81,23 @@ make release VERSION=v1.0.0
 sha256sum dist/release/openvapt_linux_amd64   # compare with the published SHA256SUMS</pre>
 
   <h3>Option 2: One-Command Install (Optional)</h3>
-  <div class="alert alert-info" role="note">{{icon "info"}}<span>Available after the first release. Until then the installer stops with a message pointing to Option 1.</span></div>
+  <div class="alert alert-info" role="note">{{icon "info"}}<span>Works once the chosen channel has a release. Until then the installer stops and lists the channels that have one.</span></div>
   <p>Read the script first: <a href="{{$d.Repo}}/blob/main/scripts/install.sh">scripts/install.sh</a>. It checks that the machine is Linux on amd64 or arm64, downloads the release binary and <code>SHA256SUMS</code> from GitHub Releases, refuses to install if the SHA-256 checksum does not match, also verifies the Sigstore signature when <code>cosign</code> is installed, and installs to <code>~/.local/bin</code> (or <code>/usr/local/bin</code> as root). It sends nothing anywhere and scans nothing.</p>
 <pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh</pre>
+  <p>The installer installs Stable by default. To test a pre-release on a test machine, choose a channel with <code>--channel</code>. Current builds per <a href="channels.html">release channel</a>:</p>
+  <div class="table-wrap">
+  <table>
+  <thead><tr><th>Channel</th><th>Current Build</th><th>Install Option</th></tr></thead>
+  <tbody>
+  {{range $d.Channels.Views}}<tr><td>{{.Name}}</td><td class="font-mono">{{if .Release}}{{.Release.Version}}{{else}}Not Released Yet{{end}}</td><td class="font-mono">{{if .Install}}{{.Install}}{{else}}(default){{end}}</td></tr>
+  {{end}}
+  </tbody>
+  </table>
+  </div>
+<pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh -s -- --channel beta</pre>
   <p>To install and then start an interactive scan of this machine in the same command, add <code>--run</code>. The scan still shows the acknowledgements and continues only when you type <code>I ACCEPT</code>; the installer never accepts for you.</p>
 <pre class="term">sh -c "$(curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh)" -- --run</pre>
-  <p>Options: <code>--version vX.Y.Z</code> installs a specific release, <code>--dir DIR</code> chooses the folder. Piping a script into a shell trusts whoever serves it; if you prefer, download it, read it, then run it:</p>
+  <p>Options: <code>--channel</code> picks stable, rc, beta or alpha, <code>--version vX.Y.Z</code> installs a specific release, <code>--dir DIR</code> chooses the folder. Piping a script into a shell trusts whoever serves it; if you prefer, download it, read it, then run it:</p>
 <pre class="term">curl -fsSLo install.sh https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh
 less install.sh
 sh install.sh</pre>

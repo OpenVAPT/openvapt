@@ -50,7 +50,7 @@ a{color:var(--accent)}ul{padding-left:20px}
 <table>
 <tr><th>Scope</th><td>This machine only ({{.Scan.Checks}} checks{{if .Scan.Sites}}, sites: {{join .Scan.Sites ", "}}{{end}})</td></tr>
 <tr><th>Run As Root</th><td>{{if .Scan.AsRoot}}Yes{{else}}No, some checks were skipped{{end}}</td></tr>
-<tr><th>Tool</th><td>{{.Tool.Name}} {{.Tool.Version}} (commit {{short .Tool.Commit}})</td></tr>
+<tr><th>Tool</th><td>{{.Tool.Name}} {{.Tool.Version}} (commit {{short .Tool.Commit}}){{if and .Tool.Channel (ne .Tool.Channel "stable")}} <span class="tag">Pre-Release: {{.Tool.Channel}}</span>{{end}}</td></tr>
 {{with .Integrity}}<tr><th>Integrity</th><td>Signed with key <code>{{.KeyID}}</code>. Check with <code>openvapt verify report.json</code>.</td></tr>{{end}}
 </table>
 

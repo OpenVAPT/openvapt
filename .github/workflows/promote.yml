@@ -1,0 +1,137 @@
+name: promote
+# Moves one build up the release channels (Alpha > Beta > Release Candidate >
+# Stable) when, and only when, every gate in internal/channels passes. There
+# is no manual override: AGENTS.md section 5 forbids bypassing a gate.
+#
+#   plan     picks the most mature channel whose history, time and legal
+#            gates pass, and the exact commit that would be promoted
+#   verify   runs the full CI suite, the lab proof and the installer test on
+#            that exact commit
+#   release  publishes it (release.yml): binaries, checksums, Sigstore
+#            signatures, provenance, SBOM; pre-release for alpha, beta, rc
+#   record   re-checks every gate with the real evidence and appends the
+#            promotion to release/channels.json and release/channels.txt
+on:
+  schedule:
+    - cron: "17 2 * * *" # daily
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: promote
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.plan.outputs.target }}
+      commit: ${{ steps.plan.outputs.commit }}
+      version: ${{ steps.plan.outputs.version }}
+      signed: ${{ steps.signed.outputs.signed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+          cache: false
+      - name: Which current releases carry signatures, provenance and an SBOM
+        id: signed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          signed=""
+          for v in $(awk '!/^#/ && NF { print $2 }' release/channels.txt); do
+            assets=$(gh release view "$v" --json assets -q '.assets[].name' 2>/dev/null || true)
+            echo "$assets" | grep -qx 'openvapt_linux_amd64.sigstore.json' || continue
+            echo "$assets" | grep -qx 'sbom.cdx.json' || continue
+            gh release download "$v" -p openvapt_linux_amd64 -D "$RUNNER_TEMP/$v" || continue
+            gh attestation verify "$RUNNER_TEMP/$v/openvapt_linux_amd64" --repo "$GITHUB_REPOSITORY" >/dev/null || continue
+            signed="$signed,$v"
+          done
+          echo "signed=${signed#,}" >> "$GITHUB_OUTPUT"
+      - name: Plan
+        id: plan
+        run: |
+          # The newest commit that changed anything outside release/, so that
+          # recording a promotion never counts as a new build by itself.
+          head=$(git log -1 --format=%H -- . ':(exclude)release')
+          go run ./cmd/channel plan --head "$head" --signed "${{ steps.signed.outputs.signed }}"
+
+  verify:
+    needs: plan
+    if: needs.plan.outputs.target != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.commit }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+          cache: false
+      - name: Format
+        run: test -z "$(gofmt -l .)"
+      - name: Vet
+        run: go vet ./...
+      - name: Tests and lab proof (every check fails on the vulnerable lab and passes on the hardened lab)
+        run: go test -race ./...
+      - name: Staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
+      - name: Gosec
+        run: go run github.com/securego/gosec/v2/cmd/gosec@v2.22.0 -exclude=G204,G304 ./...
+      - name: Govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+      - name: Build Linux binaries
+        run: make release
+      - name: Installer end to end (verified install, tamper refusal)
+        run: |
+          set -eu
+          rel="$RUNNER_TEMP/rel/download/v0.0.0-ci"; mkdir -p "$rel"
+          cp dist/release/openvapt_linux_* dist/release/SHA256SUMS "$rel/"
+          export OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel"
+          sh scripts/install.sh --version v0.0.0-ci --dir "$RUNNER_TEMP/bin"
+          "$RUNNER_TEMP/bin/openvapt" version
+          printf 'x' >> "$rel/openvapt_linux_amd64"
+          if sh scripts/install.sh --version v0.0.0-ci --dir "$RUNNER_TEMP/bin2"; then echo "tampered binary was installed"; exit 1; fi
+
+  release:
+    needs: [plan, verify]
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.plan.outputs.version }}
+      commit: ${{ needs.plan.outputs.commit }}
+
+  record:
+    needs: [plan, verify, release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+          cache: false
+      - name: Re-check every gate with the verified evidence and record the promotion
+        run: |
+          go run ./cmd/channel promote "${{ needs.plan.outputs.target }}" \
+            --commit "${{ needs.plan.outputs.commit }}" --ci-green --lab-pass --installer-e2e \
+            --signed "${{ needs.plan.outputs.signed }}"
+      - name: Commit the release record
+        run: |
+          git config user.name "OpenVAPT Release Agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add release/channels.json release/channels.txt
+          git commit -m "release: promote ${{ needs.plan.outputs.version }} to ${{ needs.plan.outputs.target }}"
+          git push origin HEAD:main

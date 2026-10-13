@@ -5,24 +5,29 @@
 #
 # What it does, in order (read it before running it):
 #   1. Checks this is Linux on amd64 or arm64.
-#   2. Finds the release (latest, or --version vX.Y.Z).
+#   2. Finds the release of the chosen channel (Stable by default) from the
+#      public channel list, or uses --version vX.Y.Z.
 #   3. Downloads the binary and SHA256SUMS from GitHub Releases.
 #   4. Verifies the SHA-256 checksum (always) and the Sigstore signature
 #      (when cosign is installed). Any mismatch stops the install.
 #   5. Installs the binary to ~/.local/bin (or /usr/local/bin as root).
 #
-# It never scans anything unless you pass --run, and even then the scan asks
+# It is designed never to scan anything unless you pass --run, and even then the scan asks
 # you to read the acknowledgements and type I ACCEPT, as every scan does.
 # It sends nothing anywhere except the downloads from GitHub, stores nothing
 # except the binary, and needs no root unless you choose a system folder.
+# Downloads come from GitHub, a third party. This script is part of OpenVAPT:
+# provided free, as is, with no warranty, and run 100% at your own risk under
+# the EULA and the OpenVAPT Source-Available Licence 1.0 (own use only).
 #
 # Options:
-#   --version vX.Y.Z   install this release instead of the latest
+#   --channel NAME     stable (default), rc, beta or alpha; pre-releases may be wrong
+#   --version vX.Y.Z   install this exact release instead
 #   --dir DIR          install into DIR
 #   --run              after installing, start an interactive scan of THIS machine
 #   --help             show this help
-# Environment: OPENVAPT_VERSION, OPENVAPT_INSTALL_DIR, OPENVAPT_BASE_URL (mirror
-# or test location of the releases, default https://github.com/OpenVAPT/openvapt/releases).
+# Environment: OPENVAPT_CHANNEL, OPENVAPT_VERSION, OPENVAPT_INSTALL_DIR, OPENVAPT_BASE_URL
+# (releases location) and OPENVAPT_CHANNELS_URL (channel list location), for mirrors and tests.
 
 # Everything runs inside main, called on the last line, so a partially
 # downloaded script does nothing at all.
@@ -39,7 +44,7 @@ die() {
 	exit 1
 }
 
-usage() { sed -n '2,26p' "$0" 2>/dev/null | sed 's/^# \{0,1\}//' || true; }
+usage() { sed -n '2,/^$/p' "$0" 2>/dev/null | sed 's/^# \{0,1\}//' || true; }
 
 fetch() { # fetch URL FILE
 	if command -v curl >/dev/null 2>&1; then
@@ -61,25 +66,26 @@ sha256() { # sha256 FILE -> hex digest
 	fi
 }
 
-# latest_version asks GitHub where /releases/latest redirects to, which is
-# the tag of the newest release. Nothing else is requested.
-latest_version() {
-	command -v curl >/dev/null 2>&1 || die "curl is required to find the latest release; pass --version vX.Y.Z with wget"
-	url=$(curl -fsSLI --proto '=https' -o /dev/null -w '%{url_effective}' "$BASE_URL/latest" 2>/dev/null) || url=""
-	case "$url" in
-	*/tag/v*) printf '%s\n' "${url##*/tag/}" ;;
-	*) printf '\n' ;;
-	esac
+# channel_version reads the public channel list (release/channels.txt in
+# the repository: "<channel> <version> <commit> <date>" per line) and prints
+# the version currently published in the requested channel, or nothing.
+channel_version() {
+	list="$TMP/channels.txt"
+	fetch "$CHANNELS_URL" "$list" 2>/dev/null || return 0
+	awk -v c="$1" '$1 == c { print $2; exit }' "$list"
 }
 
 main() {
 	VERSION="${OPENVAPT_VERSION:-}"
+	CHANNEL="${OPENVAPT_CHANNEL:-stable}"
+	CHANNELS_URL="${OPENVAPT_CHANNELS_URL:-https://raw.githubusercontent.com/OpenVAPT/openvapt/main/release/channels.txt}"
 	DIR="${OPENVAPT_INSTALL_DIR:-}"
 	BASE_URL="${OPENVAPT_BASE_URL:-$REPO_URL/releases}"
 	RUN=0
 	while [ $# -gt 0 ]; do
 		case "$1" in
 		--version) [ $# -ge 2 ] || die "--version needs a value"; VERSION="$2"; shift 2 ;;
+		--channel) [ $# -ge 2 ] || die "--channel needs a value"; CHANNEL="$2"; shift 2 ;;
 		--dir) [ $# -ge 2 ] || die "--dir needs a value"; DIR="$2"; shift 2 ;;
 		--run) RUN=1; shift ;;
 		-h | --help) usage; exit 0 ;;
@@ -97,9 +103,21 @@ main() {
 	*) die "unsupported CPU $(uname -m); build from source: $REPO_URL" ;;
 	esac
 
+	case "$CHANNEL" in
+	stable | rc | beta | alpha) ;;
+	*) die "--channel must be stable, rc, beta or alpha, got: $CHANNEL" ;;
+	esac
+
+	TMP=$(mktemp -d 2>/dev/null || mktemp -d -t openvapt)
+	trap 'rm -rf "$TMP"' EXIT INT TERM
+
 	if [ -z "$VERSION" ]; then
-		VERSION=$(latest_version)
-		[ -n "$VERSION" ] || die "no OpenVAPT release has been published yet (or GitHub is unreachable). Build from source instead: $REPO_URL#build-from-source"
+		VERSION=$(channel_version "$CHANNEL")
+		if [ -z "$VERSION" ]; then
+			avail=$(awk '!/^#/ && NF { printf "%s%s", sep, $1; sep=", " }' "$TMP/channels.txt" 2>/dev/null || true)
+			[ -n "$avail" ] || avail="none yet"
+			die "no $CHANNEL release is published (channels with a release: $avail). Choose one with --channel, or build from source: $REPO_URL#build-from-source"
+		fi
 	fi
 	case "$VERSION" in
 	v[0-9]*) ;;
@@ -114,10 +132,12 @@ main() {
 	fi
 
 	BIN="openvapt_linux_$ARCH"
-	TMP=$(mktemp -d 2>/dev/null || mktemp -d -t openvapt)
-	trap 'rm -rf "$TMP"' EXIT INT TERM
 
 	say "OpenVAPT installer: release $VERSION, linux/$ARCH"
+	case "$VERSION" in
+	*-alpha.* | *-beta.* | *-rc.*)
+		say "  WARNING: $VERSION is a pre-release. It may be incomplete or wrong; use it only on test machines, 100% at your own risk." ;;
+	esac
 	say "  downloading $BIN and SHA256SUMS from $BASE_URL/download/$VERSION/"
 	fetch "$BASE_URL/download/$VERSION/$BIN" "$TMP/$BIN" || die "download failed: $BIN"
 	fetch "$BASE_URL/download/$VERSION/SHA256SUMS" "$TMP/SHA256SUMS" || die "download failed: SHA256SUMS"

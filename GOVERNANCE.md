@@ -5,3 +5,4 @@
 - **New maintainers** are invited after a sustained record of reviewed contributions, by agreement of the existing maintainers, recorded in a public issue.
 - **Continuity**: if the project becomes unmaintained, the repository stays public and archived so that the code remains available for study.
 - **Scope changes** that would weaken the core principles (academic purpose, own use only, this machine only, detection only, zero data) require a public decision record and are expected to be refused.
+- **AI agents**: every AI agent working on the project is bound by [AGENTS.md](AGENTS.md), the AI agent governance policy.

@@ -1,16 +1,17 @@
 {{define "content"}}
 <h1>What OpenVAPT Does Not Do</h1>
-<p class="lead">Limits are part of the design. Each one below is enforced in code, not just promised.</p>
+<p class="lead">Limits are part of the design. Each one below is built into the code. Software can contain mistakes, so treat these as design goals, not guarantees, and read the code.</p>
 <div class="table-wrap"><table class="table">
 <thead><tr><th>It Does Not</th><th>Why</th><th>How It Is Enforced</th></tr></thead>
 <tbody>
-<tr><td>Scan any other machine, network or website</td><td>You may only assess what you own. Scanning others without permission can be a crime (for example Malaysia's Computer Crimes Act 1997).</td><td>The scope guard refuses every non-loopback address before connecting. Host names are not resolved. <a href="how-it-works.html#internal/scope">See the code</a>.</td></tr>
+<tr><td>Scan any other machine, network or website</td><td>You may only assess machines you own or control, or that your employer owns or controls and has authorised you to assess. Scanning others without permission can be a crime (for example Malaysia's Computer Crimes Act 1997).</td><td>The scope guard refuses every non-loopback address before connecting. Host names are not resolved. <a href="how-it-works.html#internal/scope">See the code</a>.</td></tr>
 <tr><td>Exploit, attack or brute-force anything</td><td>It is an assessment tool for learning, not an attack tool.</td><td>No exploit code exists in the repository. Only fixed-path GET requests are sent.</td></tr>
-<tr><td>Change your system</td><td>A scan must never break a server.</td><td>The System interface has no write, delete or restart operation. Commands come from a read-only allow-list.</td></tr>
+<tr><td>Change your system</td><td>A scan is designed not to change a server.</td><td>The System interface has no write, delete or restart operation. Commands come from a read-only allow-list.</td></tr>
 <tr><td>Send any data anywhere</td><td>Your weaknesses are your business.</td><td>No telemetry, no update check, no upload code. Proxies are disabled. Reports are written to your disk with mode 0600.</td></tr>
 <tr><td>Look up DNS records of your domains</td><td>DNS lookups would leave the machine.</td><td>Not implemented, on purpose.</td></tr>
 <tr><td>Replace a penetration test or code review</td><td>Logic flaws such as SQL injection, broken access control or business rule errors need a human tester.</td><td>Every report states this limitation.</td></tr>
 <tr><td>Certify or approve anything</td><td>No automated tool can prove a system is secure.</td><td>No seal, badge or score is produced. Signatures prove only that a report was not edited.</td></tr>
+<tr><td>Make pre-release builds reliable</td><td>Alpha, beta and release candidate builds are unfinished and may be wrong or unstable.</td><td>Each build is labelled with its channel. Pre-release builds are used 100% at your own risk.</td></tr>
 <tr><td>Support Windows or macOS scans</td><td>The first version focuses on Linux servers.</td><td><code>openvapt scan</code> exits on other systems. <code>openvapt demo</code> works everywhere.</td></tr>
 </tbody></table></div>
 {{end}}

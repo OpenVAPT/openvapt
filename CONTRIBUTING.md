@@ -4,6 +4,7 @@ Thank you for helping. OpenVAPT is an academic project, so clear explanations ma
 
 ## Ground Rules
 
+- AI agents (Claude, OpenAI Codex and any other) must follow [AGENTS.md](AGENTS.md), the AI agent governance policy.
 - Detection only. No exploit code, payloads, brute force or intrusive techniques will be accepted.
 - This machine only. Never weaken `internal/scope` or the `internal/sys` allow-list.
 - Read-only. Checks may only use the `sys.System` interface.
@@ -21,7 +22,7 @@ Thank you for helping. OpenVAPT is an academic project, so clear explanations ma
 
 - Sign off each commit under the Developer Certificate of Origin: `git commit -s`. See https://developercertificate.org/.
 - Use Conventional Commits: `feat(web): add check for ...`, `fix(scope): ...`, `docs: ...`.
-- Contributions are licensed under the same terms as the project (LICENSE and ADDITIONAL-PERMISSION.md).
+- Contributions are licensed under the OpenVAPT Source-Available Licence 1.0, and you grant the licensor a licence to relicense them (LICENSE, section 10). No payment or credit is owed.
 - One topic per pull request. CI must be green.
 
 ## Reporting Bugs

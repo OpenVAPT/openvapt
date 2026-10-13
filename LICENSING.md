@@ -1,33 +1,39 @@
 # Licence
 
+Version 2.0, effective 2026-10-13. Drafted by an AI agent and reviewed by an AI agent acting as the project's legal reviewer; no human lawyer drafted or reviewed it. This page summarises the licence; the file `LICENSE` is the legal text and prevails.
+
 ## In Short
 
-OpenVAPT is **academic, non-commercial, AI-generated, open, source-available code, free to download and use, for your own personal or business use, 100% at your own risk.**
+OpenVAPT is **academic, non-commercial, open, source-available code built by AI agents, free to download and use, for your own personal or business use, 100% at your own risk.**
 
 - **Free for anyone** to download, read, study, modify and run, including companies.
 - **Own use only**: download it to your own server for personal testing, or use it to test your own company's servers with your company's authorisation.
 - **No services, no selling, no Commercial Exploitation**: you may not sell it, put it in a product, or provide any service to others with anything from or produced by OpenVAPT (no consulting, no scanning for clients, no hosted service, no reselling reports), paid or unpaid.
 - **Not a business**: the project sells nothing and accepts no payments or donations.
-- **Your risk**: it comes as is, with no warranty, and the developers are not liable for anything.
+- **Your risk**: it comes as is, with no warranty, and the developers are not liable for anything, to the fullest extent the law allows.
 
-## The Licence Texts
+## The Licence Text
 
-OpenVAPT is licensed under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/) (file `LICENSE`) together with the **OpenVAPT Additional Permission** (file `ADDITIONAL-PERMISSION.md`).
+OpenVAPT is licensed only under the **OpenVAPT Source-Available Licence 1.0** (file `LICENSE`, identifier `LicenseRef-OpenVAPT-SAL-1.0`). The licence itself grants only these permissions: to read, study and quote the code; to download, build and run it for Own Use; to modify it for Own Use or to contribute back; and to share complete copies free of charge with the licence and terms attached. Everything else is not licensed. In particular, providing any service with OpenVAPT or its output, paid or unpaid, is not licensed for anyone, including charities, schools and government bodies.
 
-The PolyForm Noncommercial licence on its own allows any noncommercial use, including personal use and use by charities, educational institutions, public research bodies and government institutions. The Additional Permission adds one thing: any organisation, including a company, may use OpenVAPT on machines it owns or controls, for its own internal use. Separately, the EULA and Acceptable Use Policy, which every user is asked to accept, add a contractual promise not to sell OpenVAPT and not to use it to provide services to anyone else, paid or unpaid.
+The End User Licence Agreement (EULA) and Acceptable Use Policy are conditions of the licence, so breaking them also ends the licence.
+
+## Earlier Licence
+
+Before its public release, the repository carried the PolyForm Noncommercial License 1.0.0 with an OpenVAPT Additional Permission. No release was published under those terms. They were replaced on 2026-10-13 by the OpenVAPT Source-Available Licence 1.0 so that the ban on services is part of the licence itself.
 
 ## Why We Say Source-Available
 
-The source code is fully public, for everyone to read and review, and you may modify it within the licence. However, the licence restricts commercial use, so OpenVAPT does not meet the Open Source Initiative's formal definition of "open source". The accurate term is **source-available** with a non-commercial licence. We use "open" on this website in its plain sense: nothing about the code is hidden.
+The source code is fully public, for everyone to read and review, and you may modify it within the licence. The licence restricts use to Own Use, so OpenVAPT is not "open source" under the Open Source Initiative's definition. The accurate term is **source-available**. We use "open" on this website only in its plain sense: nothing about the code is hidden.
 
 ## Third-Party Code
 
-The compiled program contains only OpenVAPT's own code and the Go standard library (BSD 3-Clause licence). The website also uses self-hosted copies of AG Grid Community (MIT), Apache ECharts (Apache-2.0), Lucide icons (ISC) and the IBM Plex fonts (SIL Open Font License 1.1). Each component's licence applies to that component and is listed in `THIRD_PARTY_NOTICES.md`. Every source and tool used is credited in `CREDITS.md`.
+The compiled program contains only OpenVAPT's own code and the Go standard library (BSD 3-Clause licence). The website also uses self-hosted copies of AG Grid Community (MIT), Apache ECharts (Apache-2.0), Lucide icons (ISC) and the IBM Plex fonts (SIL Open Font License 1.1). Each component's own licence applies to that component and is listed in `THIRD_PARTY_NOTICES.md`. Every source and tool used is credited in `CREDITS.md`.
 
-## AI-Generated Code and Copyright
+## Built by AI Agents, and Copyright
 
-All of OpenVAPT was generated by AI systems under the direction of the project owner (see `AI-DISCLOSURE.md`). Copyright may not exist in some AI-generated parts under the laws of some countries. The licence applies to the extent that rights exist; the promises in the EULA apply to the whole Software regardless.
+All of OpenVAPT was researched, developed and built by AI agents under the direction of the project owner (see `AI-DISCLOSURE.md`). Copyright may not exist in some parts built by AI agents under the laws of some countries. The licence applies to the extent that rights exist; the promises in the EULA apply to the whole Software regardless.
 
 ## Contributions
 
-By submitting a contribution you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it, and you license it under the PolyForm Noncommercial License 1.0.0 and the OpenVAPT Additional Permission. You keep your copyright. Disclose in your pull request if your contribution was generated by AI. Feedback and ideas shared in Issues or Discussions may be used freely, without payment or obligation.
+By submitting a contribution you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it; you license it to everyone under the OpenVAPT Source-Available Licence 1.0; and you grant the licensor a perpetual licence to relicense it, as set out in section 10 of the licence. You keep your copyright. Disclose in your pull request if an AI agent or other AI system produced any part of your contribution. Feedback and ideas shared in Issues or Discussions may be used freely, without payment or obligation.

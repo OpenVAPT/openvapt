@@ -98,7 +98,7 @@ func Run(ctx context.Context, s sys.System, o Options) *report.Report {
 	osr := collect.OSRelease(s)
 	r := &report.Report{
 		Schema: report.SchemaVersion,
-		Tool:   report.Tool{Name: "OpenVAPT", Version: version.Version, Commit: version.Commit, URL: "https://openvapt.com"},
+		Tool:   report.Tool{Name: "OpenVAPT", Version: version.Version, Channel: string(version.Channel()), Commit: version.Commit, URL: "https://openvapt.com"},
 		Scan: report.Scan{
 			Started:  started,
 			Finished: time.Now().UTC(),
@@ -110,7 +110,7 @@ func Run(ctx context.Context, s sys.System, o Options) *report.Report {
 		},
 		Findings:    findings,
 		Methodology: report.Methodology,
-		Limitations: report.Limitations,
+		Limitations: limitations(),
 		Disclaimer:  report.Disclaimer,
 	}
 	r.Summarise()
@@ -172,4 +172,14 @@ func overall(rs []check.Result) check.Status {
 		}
 	}
 	return check.Skip
+}
+
+// limitations adds a pre-release notice to the standard limitations when
+// the report was produced by an Alpha, Beta, Release Candidate or local build.
+func limitations() []string {
+	out := append([]string{}, report.Limitations...)
+	if version.PreRelease() {
+		out = append(out, "This report was produced by a pre-release build of OpenVAPT ("+version.ChannelName()+", "+version.Version+"). Pre-release builds may be incomplete or wrong; confirm important findings by hand.")
+	}
+	return out
 }

@@ -1,7 +1,18 @@
 name: release
+# Publishes one release. Normally called by promote.yml after a channel gate
+# passes (alpha, beta and rc are published as pre-releases); a manually pushed
+# v* tag also works.
 on:
   push:
     tags: ["v*"]
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      commit:
+        type: string
+        required: true
 permissions:
   contents: write
   id-token: write   # keyless Sigstore signing
@@ -9,8 +20,13 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      COMMIT: ${{ inputs.commit || github.sha }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit || github.ref }}
       - uses: actions/setup-go@v5
         with:
           go-version: "1.26.x"
@@ -23,12 +39,12 @@ jobs:
             -ecosystems "Debian:11,Debian:12,Debian:13,Ubuntu:20.04:LTS,Ubuntu:22.04:LTS,Ubuntu:24.04:LTS,AlmaLinux:8,AlmaLinux:9,Rocky Linux:8,Rocky Linux:9,Packagist,npm" \
             -packages docs/vulndb-packages.txt
           go test ./internal/vulndb/...
-      - run: make release VERSION=${GITHUB_REF_NAME}
+      - run: make release VERSION=${TAG}
       - name: Publish the embedded snapshot alongside the binaries
-        run: cp internal/vulndb/data/snapshot.json.gz "dist/release/openvapt-${GITHUB_REF_NAME}-vulndb-snapshot.json.gz"
+        run: cp internal/vulndb/data/snapshot.json.gz "dist/release/openvapt-${TAG}-vulndb-snapshot.json.gz"
       - name: Source archive (the recommended way to use OpenVAPT is to build from source)
         run: |
-          git archive --format=tar.gz --prefix="openvapt-${GITHUB_REF_NAME}/" -o "dist/release/openvapt-${GITHUB_REF_NAME}-source.tar.gz" "${GITHUB_REF_NAME}"
+          git archive --format=tar.gz --prefix="openvapt-${TAG}/" -o "dist/release/openvapt-${TAG}-source.tar.gz" "${COMMIT}"
           cd dist/release && sha256sum openvapt_linux_* openvapt-*-source.tar.gz openvapt-*-vulndb-snapshot.json.gz > SHA256SUMS
           go version > GO_VERSION.txt
       - uses: sigstore/cosign-installer@v3
@@ -44,4 +60,12 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/release/* --notes-file CHANGELOG.md --verify-tag
+        run: |
+          case "$TAG" in
+          *-alpha.*|*-beta.*|*-rc.*) pre=--prerelease; kind="Pre-release: may be incomplete or wrong, for test machines only, 100% at your own risk." ;;
+          *) pre=""; kind="Stable release." ;;
+          esac
+          { echo "$kind"; echo; echo "Promoted through the OpenVAPT release channels; gate evidence: release/channels.json. Verify before use: SHA256SUMS, Sigstore bundles, provenance and SBOM are attached."; echo; cat CHANGELOG.md; } > notes.md
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then target=""; else target="--target $COMMIT"; fi
+          # shellcheck disable=SC2086
+          gh release create "$TAG" dist/release/* --title "OpenVAPT $TAG" --notes-file notes.md $pre $target

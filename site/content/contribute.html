@@ -10,7 +10,7 @@
 <h2>Pull Requests</h2>
 <ul>
 <li>Every commit is signed off under the Developer Certificate of Origin (<code>git commit -s</code>). No separate agreement is needed.</li>
-<li>Contributions are accepted under the same licence as the project.</li>
+<li>Contributions are licensed under the OpenVAPT Source-Available Licence 1.0, with a licence to the licensor to relicense them (licence section 10). No payment or credit is owed.</li>
 <li>CI must pass: formatting, vet, staticcheck, gosec, govulncheck, unit tests and the lab tests.</li>
 <li>New checks need full documentation, at least one public reference and lab coverage. See <a href="learn.html#write">Write Your Own Check</a>.</li>
 </ul>
@@ -20,7 +20,7 @@
 <li><strong>Semantic Versioning</strong>: MAJOR for breaking changes to the CLI or report schema, MINOR for new checks, PATCH for fixes.</li>
 <li><strong>Conventional Commits</strong> feed the changelog.</li>
 <li>Releases are built only by GitHub Actions from a signed tag, with SHA-256 checksums, Sigstore signatures and a software bill of materials (SBOM).</li>
-<li>Only the latest minor version receives fixes.</li>
+<li>Any fixes are voluntary and, if made, go only into the latest minor version. There is no obligation to fix anything.</li>
 <li>Each report records the tool version and commit it was produced with.</li>
 </ul>
 <p><a href="{{repo}}/blob/main/CHANGELOG.md" rel="noreferrer">Changelog</a> and <a href="{{repo}}/releases" rel="noreferrer">Releases</a></p>

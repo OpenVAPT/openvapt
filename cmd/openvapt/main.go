@@ -93,8 +93,11 @@ func main() {
 	case "terms":
 		fmt.Print(termsText())
 	case "version", "--version", "-v":
-		fmt.Printf("OpenVAPT %s (commit %s, %s/%s)\n%s\nhttps://openvapt.com\n",
-			version.Version, version.Commit, runtime.GOOS, runtime.GOARCH, terms.Tagline)
+		fmt.Printf("OpenVAPT %s (commit %s, %s/%s)\nChannel: %s\n%s\nhttps://openvapt.com\n",
+			version.Version, version.Commit, runtime.GOOS, runtime.GOARCH, version.ChannelName(), terms.Tagline)
+		if version.PreRelease() {
+			fmt.Println("This is a pre-release build: it may be incomplete or wrong and is used 100% at your own risk.")
+		}
 	case "help", "-h", "--help":
 		usage(os.Stdout)
 	default:
