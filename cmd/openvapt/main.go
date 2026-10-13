@@ -219,7 +219,9 @@ func finish(r *report.Report, f scanFlags) error {
 		if err != nil {
 			return err
 		}
-		if err := os.Chmod(dir, 0o700); err != nil { // #nosec G302 -- a private directory needs the execute bit; 0700 is owner-only
+		// A private directory needs the execute bit; 0700 is owner-only.
+		err = os.Chmod(dir, 0o700) // #nosec G302 -- directory, not a file
+		if err != nil {
 			return err
 		}
 		f.out = dir
