@@ -24,20 +24,24 @@ func init() {
 			{Title: "nftables wiki", URL: "https://wiki.nftables.org/"}},
 		Standards: check.Standards{CWE: []string{"CWE-284"}, NIST: []string{"SC-7"}, CISTopic: "Host-based firewall configured"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
-			if out, err := s.Run(ctx, "ufw", "status"); err == nil && strings.Contains(out, "Status: active") {
-				return []check.Result{check.PassR("firewall", "ufw is active")}
+			if out, err := s.Run(ctx, "ufw", "status", "verbose"); err == nil && strings.Contains(strings.ToLower(out), "status: active") {
+				l := strings.ToLower(out)
+				if strings.Contains(l, "default: deny (incoming)") || strings.Contains(l, "default: reject (incoming)") {
+					return []check.Result{check.PassR("firewall", "ufw has a default-deny incoming policy")}
+				}
+				return []check.Result{check.FailR("firewall", "ufw is active but its incoming default policy is not deny or reject")}
 			}
 			if out, err := s.Run(ctx, "firewall-cmd", "--state"); err == nil && strings.TrimSpace(out) == "running" {
-				return []check.Result{check.PassR("firewall", "firewalld is running")}
+				return []check.Result{check.IncompleteR("firewall", "firewalld is running, but its effective active-zone policy could not be determined")}
 			}
 			if out, err := s.Run(ctx, "nft", "list", "ruleset"); err == nil {
 				l := strings.ToLower(out)
-				if strings.Contains(l, "hook input") && (strings.Contains(l, "policy drop") || strings.Contains(l, " drop") || strings.Contains(l, " reject")) {
+				if nftInputDefaultDeny(l) {
 					return []check.Result{check.PassR("firewall", "nftables filters input traffic")}
 				}
 			}
 			if out, err := s.Run(ctx, "iptables", "-S"); err == nil {
-				if strings.Contains(out, "-P INPUT DROP") || strings.Contains(out, "-j DROP") || strings.Contains(out, "-j REJECT") {
+				if strings.Contains(out, "-P INPUT DROP") || strings.Contains(out, "-P INPUT REJECT") {
 					return []check.Result{check.PassR("firewall", "iptables filters input traffic")}
 				}
 				return []check.Result{check.FailR("firewall", "iptables has no drop or reject rules (input policy ACCEPT)")}
@@ -45,4 +49,13 @@ func init() {
 			return []check.Result{check.FailR("firewall", "No active host firewall detected (ufw, firewalld, nftables, iptables)")}
 		},
 	})
+}
+
+func nftInputDefaultDeny(rules string) bool {
+	for _, block := range strings.Split(rules, "}") {
+		if strings.Contains(block, "hook input") && (strings.Contains(block, "policy drop") || strings.Contains(block, "policy reject")) {
+			return true
+		}
+	}
+	return false
 }

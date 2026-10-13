@@ -23,29 +23,91 @@ import (
 // It prefers "sshd -T" (the daemon's own view, including defaults and
 // Include files) and falls back to parsing the config files directly.
 func SSHD(ctx context.Context, s sys.System) (map[string]string, bool) {
-	if out, err := s.Run(ctx, "sshd", "-T"); err == nil && strings.Contains(out, "permitrootlogin") {
+	contexts := []string{"user=root,host=localhost,addr=127.0.0.1", "user=nobody,host=localhost,addr=127.0.0.1", "user=root,host=localhost,addr=192.0.2.1", "user=nobody,host=localhost,addr=192.0.2.1"}
+	merged := map[string]string{}
+	seen := false
+	for _, c := range contexts {
+		if out, err := s.Run(ctx, "sshd", "-T", "-C", c); err == nil && strings.Contains(strings.ToLower(out), "permitrootlogin") {
+			seen = true
+			mergeSSHD(merged, parseKV(out))
+		}
+	}
+	if seen {
+		return merged, true
+	}
+	if out, err := s.Run(ctx, "sshd", "-T"); err == nil && strings.Contains(strings.ToLower(out), "permitrootlogin") {
 		return parseKV(out), true
 	}
 	cfg := map[string]string{}
-	files := []string{"/etc/ssh/sshd_config"}
-	if more, _ := s.Glob("/etc/ssh/sshd_config.d/*.conf"); len(more) > 0 {
-		sort.Strings(more)
-		files = append(more, files...) // drop-ins are read first; first value wins
+	found := parseSSHFile(ctx, s, "/etc/ssh/sshd_config", cfg, map[string]bool{}, 0)
+	return cfg, found
+}
+
+func mergeSSHD(dst, src map[string]string) {
+	for k, v := range src {
+		old, ok := dst[k]
+		if !ok || sshDanger(k, v) > sshDanger(k, old) {
+			dst[k] = v
+		}
 	}
-	found := false
-	for _, f := range files {
-		b, err := s.ReadFile(f)
-		if err != nil {
+}
+
+func sshDanger(k, v string) int {
+	v = strings.ToLower(v)
+	switch k {
+	case "permitrootlogin", "passwordauthentication", "permitemptypasswords", "x11forwarding", "allowtcpforwarding", "allowagentforwarding", "permittunnel", "gatewayports":
+		if v == "yes" || v == "any" {
+			return 10
+		}
+	case "maxauthtries":
+		n, _ := strconv.Atoi(v)
+		return n
+	case "logingracetime":
+		n, _ := strconv.Atoi(strings.TrimSuffix(v, "s"))
+		return n
+	}
+	return 0
+}
+
+func parseSSHFile(ctx context.Context, s sys.System, path string, cfg map[string]string, visiting map[string]bool, depth int) bool {
+	if depth > 16 || visiting[path] {
+		return false
+	}
+	visiting[path] = true
+	defer delete(visiting, path)
+	r, err := s.ReadFile(ctx, path)
+	if err != nil || !r.Complete {
+		return false
+	}
+	found := true
+	complete := true
+	for _, raw := range strings.Split(string(r.Data), "\n") {
+		line := strings.TrimSpace(strings.SplitN(raw, "#", 2)[0])
+		f := strings.Fields(line)
+		if len(f) < 2 {
 			continue
 		}
-		found = true
-		for k, v := range parseKV(string(b)) {
-			if _, set := cfg[k]; !set {
-				cfg[k] = v
+		if strings.EqualFold(f[0], "Match") {
+			break
+		}
+		if strings.EqualFold(f[0], "Include") {
+			for _, pat := range f[1:] {
+				files, _ := s.Glob(pat)
+				sort.Strings(files)
+				for _, inc := range files {
+					if !parseSSHFile(ctx, s, inc, cfg, visiting, depth+1) {
+						complete = false
+					}
+				}
 			}
+			continue
+		}
+		k := strings.ToLower(f[0])
+		if _, ok := cfg[k]; !ok {
+			cfg[k] = strings.ToLower(strings.Join(f[1:], " "))
 		}
 	}
-	return cfg, found
+	return found && complete
 }
 
 func parseKV(text string) map[string]string {
@@ -76,11 +138,14 @@ func parseKV(text string) map[string]string {
 // Sysctl reads a kernel parameter such as "kernel.randomize_va_space"
 // from /proc/sys without running any command.
 func Sysctl(s sys.System, key string) (string, error) {
-	b, err := s.ReadFile("/proc/sys/" + strings.ReplaceAll(key, ".", "/"))
+	r, err := s.ReadFile(context.Background(), "/proc/sys/"+strings.ReplaceAll(key, ".", "/"))
 	if err != nil {
 		return "", err
 	}
-	return strings.TrimSpace(string(b)), nil
+	if !r.Complete {
+		return "", fmt.Errorf("sysctl input was truncated")
+	}
+	return strings.TrimSpace(string(r.Data)), nil
 }
 
 // ---------- Listening sockets ----------
@@ -105,17 +170,22 @@ func Listeners(s sys.System) ([]Listener, error) {
 	var out []Listener
 	var lastErr error
 	ok := false
+	complete := true
 	for _, p := range []struct{ file, proto, state string }{
 		{"/proc/net/tcp", "tcp", "0A"}, {"/proc/net/tcp6", "tcp6", "0A"},
 		{"/proc/net/udp", "udp", "07"}, {"/proc/net/udp6", "udp6", "07"},
 	} {
-		b, err := s.ReadFile(p.file)
+		r, err := s.ReadFile(context.Background(), p.file)
 		if err != nil {
 			lastErr = err
+			complete = false
 			continue
 		}
 		ok = true
-		lines := strings.Split(string(b), "\n")
+		if !r.Complete {
+			return nil, fmt.Errorf("%s was truncated", p.file)
+		}
+		lines := strings.Split(string(r.Data), "\n")
 		for _, line := range lines[1:] {
 			f := strings.Fields(line)
 			if len(f) < 4 || f[3] != p.state {
@@ -128,7 +198,7 @@ func Listeners(s sys.System) ([]Listener, error) {
 			out = append(out, Listener{Proto: p.proto, IP: ip, Port: port})
 		}
 	}
-	if !ok {
+	if !ok || !complete {
 		return nil, lastErr
 	}
 	sort.Slice(out, func(i, j int) bool {
@@ -196,6 +266,8 @@ var (
 	vhostOnce sync.Map // per System, cached for the duration of one scan
 )
 
+type WebTarget struct{ Name, Scheme string }
+
 // VHosts returns the host names configured in Apache, nginx or LiteSpeed on
 // this machine. Only these names are ever requested, and always through
 // 127.0.0.1, so the scan never leaves the machine.
@@ -204,17 +276,8 @@ func VHosts(s sys.System) []string {
 		return v.([]string)
 	}
 	set := map[string]bool{}
-	for _, pat := range vhostPatterns {
-		files, _ := s.Glob(pat)
-		for _, f := range files {
-			b, err := s.ReadFile(f)
-			if err != nil {
-				continue
-			}
-			for _, name := range parseVHostNames(string(b)) {
-				set[name] = true
-			}
-		}
+	for _, target := range WebTargets(s) {
+		set[target.Name] = true
 	}
 	var out []string
 	for n := range set {
@@ -228,11 +291,83 @@ func VHosts(s sys.System) []string {
 	return out
 }
 
+func WebTargets(s sys.System) []WebTarget {
+	var out []WebTarget
+	seen := map[string]bool{}
+	for _, pat := range vhostPatterns {
+		files, _ := s.Glob(pat)
+		for _, f := range files {
+			collectWebTargets(s, f, &out, seen, map[string]bool{}, 0)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Name == out[j].Name {
+			return out[i].Scheme < out[j].Scheme
+		}
+		return out[i].Name < out[j].Name
+	})
+	if len(out) > 50 {
+		out = out[:50]
+	}
+	return out
+}
+
+func collectWebTargets(s sys.System, path string, out *[]WebTarget, seen, visiting map[string]bool, depth int) {
+	if depth > 16 || visiting[path] || len(*out) >= 50 {
+		return
+	}
+	visiting[path] = true
+	defer delete(visiting, path)
+	r, err := s.ReadFile(context.Background(), path)
+	if err != nil || !r.Complete {
+		return
+	}
+	text := string(r.Data)
+	for _, raw := range strings.Split(text, "\n") {
+		line := strings.TrimSpace(strings.SplitN(raw, "#", 2)[0])
+		fields := strings.Fields(strings.TrimSuffix(line, ";"))
+		if len(fields) < 2 {
+			continue
+		}
+		key := strings.ToLower(fields[0])
+		if key == "include" || key == "includeoptional" {
+			for _, p := range fields[1:] {
+				if !safeConfigPattern(p) {
+					continue
+				}
+				files, _ := s.Glob(strings.Trim(p, `"'`))
+				sort.Strings(files)
+				for _, f := range files {
+					collectWebTargets(s, f, out, seen, visiting, depth+1)
+				}
+			}
+			continue
+		}
+	}
+	scheme := "http"
+	lower := strings.ToLower(text)
+	if strings.Contains(lower, "<virtualhost") && strings.Contains(lower, ":443") || strings.Contains(lower, "listen 443") || strings.Contains(lower, "ssl on") || strings.Contains(lower, "ssl_certificate") {
+		scheme = "https"
+	}
+	for _, name := range parseVHostNames(text) {
+		key := scheme + "://" + name
+		if !seen[key] {
+			seen[key] = true
+			*out = append(*out, WebTarget{Name: name, Scheme: scheme})
+		}
+	}
+}
+
+func safeConfigPattern(p string) bool {
+	p = strings.Trim(p, `"'`)
+	return strings.HasPrefix(p, "/etc/apache2/") || strings.HasPrefix(p, "/etc/httpd/") || strings.HasPrefix(p, "/etc/nginx/") || strings.HasPrefix(p, "/usr/local/lsws/conf/")
+}
+
 func parseVHostNames(conf string) []string {
 	var out []string
 	sc := bufio.NewScanner(strings.NewReader(conf))
 	for sc.Scan() {
-		line := strings.TrimSpace(sc.Text())
+		line := strings.TrimSpace(strings.SplitN(sc.Text(), "#", 2)[0])
 		if strings.HasPrefix(line, "#") {
 			continue
 		}
@@ -269,14 +404,14 @@ func validHost(n string) bool {
 // OSRelease parses /etc/os-release into a map (ID, VERSION_ID, PRETTY_NAME...).
 func OSRelease(s sys.System) map[string]string {
 	m := map[string]string{}
-	b, err := s.ReadFile("/etc/os-release")
+	r, err := s.ReadFile(context.Background(), "/etc/os-release")
 	if err != nil {
-		b, err = s.ReadFile("/usr/lib/os-release")
+		r, err = s.ReadFile(context.Background(), "/usr/lib/os-release")
 		if err != nil {
 			return m
 		}
 	}
-	for _, line := range strings.Split(string(b), "\n") {
+	for _, line := range strings.Split(string(r.Data), "\n") {
 		if k, v, ok := strings.Cut(line, "="); ok {
 			m[strings.TrimSpace(k)] = strings.Trim(strings.TrimSpace(v), `"'`)
 		}

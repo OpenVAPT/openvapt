@@ -40,13 +40,9 @@ func Sites(ctx context.Context, s sys.System) []Site {
 		return v.([]Site)
 	}
 	var out []Site
-	for _, name := range collect.VHosts(s) {
-		if r, err := s.HTTP(ctx, "https", name, "/"); err == nil {
-			out = append(out, Site{Name: name, HTTPS: true, Home: r})
-			continue
-		}
-		if r, err := s.HTTP(ctx, "http", name, "/"); err == nil {
-			out = append(out, Site{Name: name, HTTPS: false, Home: r})
+	for _, target := range collect.WebTargets(s) {
+		if r, err := s.HTTP(ctx, target.Scheme, target.Name, "/"); err == nil {
+			out = append(out, Site{Name: target.Name, HTTPS: target.Scheme == "https", Home: r})
 		}
 	}
 	cache.Store(s, out)

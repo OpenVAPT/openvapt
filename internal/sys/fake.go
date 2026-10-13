@@ -11,18 +11,23 @@ import (
 // against a "vulnerable" fake and a "hardened" fake, proving it both fires
 // and stays silent.
 type Fake struct {
-	Files    map[string]string
-	Infos    map[string]FileInfo
-	Commands map[string]string       // "name arg1 arg2" -> output
-	HTTPResp map[string]HTTPResponse // "scheme://vhost/path"
-	TLSResp  map[string]TLSInfo      // "port/sni/maxVersion"
+	Files           map[string]string
+	Infos           map[string]FileInfo
+	Commands        map[string]string       // "name arg1 arg2" -> output
+	HTTPResp        map[string]HTTPResponse // "scheme://vhost/path"
+	TLSResp         map[string]TLSInfo      // "port/sni/maxVersion"
+	IncompleteFiles map[string]bool
+	IncompleteWalks map[string]bool
 }
 
-func (f *Fake) ReadFile(p string) ([]byte, error) {
-	if s, ok := f.Files[p]; ok {
-		return []byte(s), nil
+func (f *Fake) ReadFile(ctx context.Context, p string) (ReadResult, error) {
+	if err := ctx.Err(); err != nil {
+		return ReadResult{}, err
 	}
-	return nil, fs.ErrNotExist
+	if s, ok := f.Files[p]; ok {
+		return ReadResult{Data: []byte(s), Complete: !f.IncompleteFiles[p]}, nil
+	}
+	return ReadResult{}, fs.ErrNotExist
 }
 func (f *Fake) Stat(p string) (FileInfo, error) {
 	if i, ok := f.Infos[p]; ok {
@@ -42,14 +47,22 @@ func (f *Fake) Glob(pattern string) ([]string, error) {
 	}
 	return out, nil
 }
-func (f *Fake) Walk(root string, n int) ([]FileInfo, error) {
+func (f *Fake) Walk(ctx context.Context, root string, n int) (WalkResult, error) {
 	var out []FileInfo
 	for p, i := range f.Infos {
+		if err := ctx.Err(); err != nil {
+			return WalkResult{}, err
+		}
 		if strings.HasPrefix(p, root) && !i.IsDir {
 			out = append(out, i)
 		}
 	}
-	return out, nil
+	complete := !f.IncompleteWalks[root]
+	if len(out) > n {
+		out = out[:n]
+		complete = false
+	}
+	return WalkResult{Files: out, Complete: complete}, nil
 }
 func (f *Fake) Run(_ context.Context, name string, args ...string) (string, error) {
 	if !IsAllowed(name, args) {

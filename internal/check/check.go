@@ -58,10 +58,11 @@ func (s Severity) Rank() int {
 type Status string
 
 const (
-	Pass  Status = "pass"  // the weakness was looked for and not found
-	Fail  Status = "fail"  // the weakness was found
-	Skip  Status = "skip"  // the check does not apply on this machine
-	Error Status = "error" // the check could not complete
+	Pass       Status = "pass"       // the weakness was looked for and not found
+	Fail       Status = "fail"       // the weakness was found
+	Skip       Status = "skip"       // the check does not apply on this machine
+	Incomplete Status = "incomplete" // the check ran, but some required input was partial or unreadable
+	Error      Status = "error"      // the check could not complete
 )
 
 // Ref is a citation to a public source that explains the weakness or the fix.
@@ -186,4 +187,7 @@ func FailR(target, msg string, ev ...string) Result {
 func SkipR(target, msg string) Result { return Result{Status: Skip, Target: target, Message: msg} }
 func ErrR(target string, err error) Result {
 	return Result{Status: Error, Target: target, Message: err.Error()}
+}
+func IncompleteR(target, msg string, ev ...string) Result {
+	return Result{Status: Incomplete, Target: target, Message: msg, Evidence: ev}
 }

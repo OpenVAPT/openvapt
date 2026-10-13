@@ -2,6 +2,7 @@ package report
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/openvapt/openvapt/internal/check"
 )
@@ -41,11 +42,15 @@ func (r *Report) SARIF() ([]byte, error) {
 			Properties: map[string]any{"security-severity": sevScore(f.Severity), "tags": append(append([]string{"security"}, f.Standards.CWE...), f.Standards.OWASP...)},
 		})
 		for _, res := range f.Results {
-			if res.Status != check.Fail {
+			if res.Status != check.Fail && res.Status != check.Incomplete && res.Status != check.Error {
 				continue
 			}
+			level := sevLevel(f.Severity)
+			if res.Status != check.Fail {
+				level = "warning"
+			}
 			results = append(results, result{
-				RuleID: f.ID, Level: sevLevel(f.Severity), Message: msg{res.Message},
+				RuleID: f.ID, Level: level, Message: msg{strings.Title(string(res.Status)) + ": " + res.Message},
 				Locations: []location{{PhysicalLocation: map[string]any{"artifactLocation": map[string]string{"uri": res.Target}}}},
 			})
 		}

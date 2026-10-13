@@ -41,7 +41,7 @@ func init() {
 		Run: func(_ context.Context, s sys.System) []check.Result {
 			ls, err := collect.Listeners(s)
 			if err != nil {
-				return []check.Result{check.SkipR("/proc/net", "Socket tables not readable")}
+				return []check.Result{check.IncompleteR("/proc/net", "One or more socket tables were unreadable or partial")}
 			}
 			var pub, local []string
 			for _, l := range ls {
@@ -75,7 +75,7 @@ func init() {
 		Run: func(_ context.Context, s sys.System) []check.Result {
 			ls, err := collect.Listeners(s)
 			if err != nil {
-				return []check.Result{check.SkipR("/proc/net", "Socket tables not readable")}
+				return []check.Result{check.IncompleteR("/proc/net", "One or more socket tables were unreadable or partial")}
 			}
 			var bad []string
 			for _, l := range ls {
@@ -106,7 +106,7 @@ func init() {
 		Run: func(_ context.Context, s sys.System) []check.Result {
 			ls, err := collect.Listeners(s)
 			if err != nil {
-				return []check.Result{check.SkipR("/proc/net", "Socket tables not readable")}
+				return []check.Result{check.IncompleteR("/proc/net", "One or more socket tables were unreadable or partial")}
 			}
 			var bad []string
 			for _, l := range ls {
