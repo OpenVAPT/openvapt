@@ -27,7 +27,41 @@ func markdown(src string) string {
 		}
 	}
 	olRe := regexp.MustCompile(`^\d+\.\s+`)
+	var table [][]string
+	flushTable := func() {
+		if len(table) == 0 {
+			return
+		}
+		out.WriteString(`<div class="table-wrap"><table class="table"><thead><tr>`)
+		for _, c := range table[0] {
+			out.WriteString("<th>" + inline(c) + "</th>")
+		}
+		out.WriteString("</tr></thead><tbody>")
+		for _, row := range table[1:] {
+			out.WriteString("<tr>")
+			for _, c := range row {
+				out.WriteString("<td>" + inline(c) + "</td>")
+			}
+			out.WriteString("</tr>")
+		}
+		out.WriteString("</tbody></table></div>\n")
+		table = nil
+	}
+	sepRe := regexp.MustCompile(`^\|[\s:|-]+\|$`)
 	for _, raw := range strings.Split(src, "\n") {
+		if t := strings.TrimSpace(raw); strings.HasPrefix(t, "|") && strings.HasSuffix(t, "|") {
+			flush()
+			closeList()
+			if !sepRe.MatchString(t) {
+				cells := strings.Split(strings.Trim(t, "|"), "|")
+				for i := range cells {
+					cells[i] = strings.TrimSpace(cells[i])
+				}
+				table = append(table, cells)
+			}
+			continue
+		}
+		flushTable()
 		line := strings.TrimRight(raw, " ")
 		t := strings.TrimSpace(line)
 		switch {
@@ -76,6 +110,7 @@ func markdown(src string) string {
 	}
 	flush()
 	closeList()
+	flushTable()
 	return out.String()
 }
 

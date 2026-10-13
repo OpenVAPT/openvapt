@@ -35,6 +35,7 @@ import (
 	"github.com/openvapt/openvapt/internal/engine"
 	"github.com/openvapt/openvapt/internal/lab"
 	"github.com/openvapt/openvapt/internal/sys"
+	"github.com/openvapt/openvapt/internal/terms"
 	"github.com/openvapt/openvapt/internal/version"
 )
 
@@ -100,10 +101,13 @@ func main() {
 		"Standards":   standards(checks),
 		"Repo":        repoURL,
 		"Catalogue":   catalogueRows(checks),
+		"Pillars":     terms.Pillars,
+		"Acks":        terms.Acknowledgements,
+		"TermsVer":    terms.Version,
 		"ChartData":   chartData(checks),
 	}
 	pages := []struct{ file, path, title, desc, section string }{
-		{"index.html", "index.html", "OpenVAPT, an Open Academic Vulnerability Assessment Tool", "OpenVAPT is a free, open academic project showing how a vulnerability assessment tool is built. Read every line, run it on your own Linux server, at your own risk.", "home"},
+		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "OpenVAPT is an academic, non-commercial project with open-source code. Free to download and use on your own Linux server, for personal or business own use, 100% at your own risk.", "home"},
 		{"how-it-works.html", "how-it-works.html", "How OpenVAPT Is Built", "A module by module walkthrough of the OpenVAPT source code, with every function cited to the exact file and line.", "built"},
 		{"standards.html", "standards.html", "Standards and Methodology", "How OpenVAPT maps to NIST SP 800-115, CVSS v3.1, OWASP Top 10, OWASP ASVS, CWE and NIST SP 800-53.", "standards"},
 		{"limits.html", "limits.html", "What OpenVAPT Does Not Do", "The deliberate limits of OpenVAPT: no exploitation, no remote targets, no data collection, not a penetration test.", "limits"},
@@ -199,7 +203,9 @@ func funcs() template.FuncMap {
 		"cwe": func(id string) string {
 			return "https://cwe.mitre.org/data/definitions/" + strings.TrimPrefix(id, "CWE-") + ".html"
 		},
-		"icon": icon,
+		"icon":    icon,
+		"tagline": func() string { return terms.Tagline },
+		"add":     func(a, b int) int { return a + b },
 		"json": func(v any) template.JS {
 			b, err := json.Marshal(v) // escapes <, > and & so it is safe inside a script element
 			must(err)

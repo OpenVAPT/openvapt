@@ -1,41 +1,79 @@
 # Privacy Policy
 
-Version 1.0, effective 2026-10-13. Draft pending review by a Malaysian advocate and solicitor.
+Version 1.1, effective 2026-10-13. This policy is a draft pending review by a Malaysian advocate and solicitor.
 
 ## Summary
 
-**We collect no data.** We do not collect, receive, store, use, sell or share any personal data or any other data from the visitors of openvapt.com or the users of the OpenVAPT software.
+**We collect no data.** The OpenVAPT Project does not collect, receive, store, use, analyse, sell, rent, share or transfer any personal data or any other data about the visitors of openvapt.com or the users of the OpenVAPT software. Below we explain, honestly and completely, every place where data could flow, and what happens there.
 
-## This Website
+## 1. Who "We" Are
 
-- **No cookies.** The website sets no cookies of any kind, so no cookie consent is needed.
-- **No tracking or analytics.** There are no analytics, advertising, tracking pixels, social media widgets or third-party scripts.
-- **No third-party requests.** Fonts, styles and scripts are served from openvapt.com itself. Your browser makes no requests to other websites when you read this site.
-- **No server logs.** Web server access and error logging is turned off for openvapt.com.
-- **No forms, accounts or newsletters.** There is nothing to sign up for and nowhere to enter information.
-- **No email contact.** We publish no email address.
+"We" means The OpenVAPT Project, an academic, non-commercial project. The person who runs the project currently chooses not to be named publicly. Because we collect no personal data, there is no data controller holding any of your data. Questions can be raised publicly on GitHub (see section 9).
 
-Our hosting provider operates the network that carries the website. Like any internet service, it handles your IP address in transit to deliver the pages, but we have configured our server to keep no record of your visit.
+## 2. This Website (openvapt.com)
 
-## The OpenVAPT Software
+| Possible data flow | What actually happens |
+|---|---|
+| Cookies | None. The website sets no cookies of any kind, so there is no cookie banner. |
+| Browser storage | None. No localStorage, sessionStorage or IndexedDB is used. |
+| Analytics, advertising, tracking pixels | None. |
+| Third-party scripts, fonts, embeds, CDNs | None. Every file (pages, styles, fonts, icons, charts and the data grid) is served from openvapt.com itself. Your browser makes no requests to any other website while you read this site. |
+| Forms, accounts, logins, newsletters, comments | None exist. |
+| The download acknowledgement checklist | Runs only inside your browser. Your ticks are not stored, sent or remembered; the page asks again every time. |
+| Web server access logs and error logs | Turned off for openvapt.com on 2026-10-13. Older log files that existed before then (which contained IP addresses) were moved out of the logging folder to an access-restricted area on the server and will be permanently deleted after 2026-11-12. |
+| Email | We publish no email address and accept no contact by email. |
 
-- The software runs entirely on your own machine.
-- It never connects to us or to any other machine. It has no telemetry, no crash reporting, no licence check and no automatic update check.
-- Reports are written only to your own disk, with permissions that only your account can read. We never receive them.
-- If you choose to sign a report, the signing key is created and kept on your own machine.
+### Hosting, Network and Certificates
 
-## GitHub
+To be fully transparent about the infrastructure that delivers the website:
 
-The source code, bug reports and discussions are hosted on GitHub. If you choose to use GitHub, for example to report a bug, that interaction is governed by GitHub's own Privacy Statement, and whatever you post there is public. Please never post secrets, full reports or personal data in GitHub issues.
+- The website runs on a virtual private server rented from **The Constant Company, LLC (Vultr)**, administered by the project owner. The same server also hosts other, unrelated websites. None of them receive any data from openvapt.com.
+- The domain's DNS is answered by that same server.
+- The HTTPS certificate is issued by **Let's Encrypt**. Your browser may contact Let's Encrypt's certificate status services as part of normal HTTPS checks; that is between your browser and Let's Encrypt.
+- Like any internet service, the hosting provider's network equipment necessarily handles your IP address while delivering the pages. We have configured our server to keep no record of your visit. We do not control, and cannot see, any network-level records the hosting provider may keep for its own security or legal purposes; those are governed by the provider's own privacy policy.
 
-## Personal Data Protection Act 2010
+### The Beta Site
 
-Because we process no personal data, the obligations of Malaysia's Personal Data Protection Act 2010 (as amended in 2024) relating to collection, notice, access, correction, retention, breach notification and cross-border transfer do not arise in our handling of this website or the software. The same applies under comparable laws such as the EU General Data Protection Regulation.
+openvapt.com/beta/ is an internal preview, excluded from search engines. It follows exactly the same no-data rules.
 
-## Children
+## 3. The OpenVAPT Software
 
-The website collects no data from anyone, including children.
+- The software runs entirely on your own machine and is designed to make **no network connection to any other machine at all**. Every connection is restricted in code to loopback addresses (127.0.0.0/8 and ::1). There is no telemetry, crash reporting, licence check, update check or usage statistics.
+- When you run a scan, the software **reads** information on your machine to assess it, which may include sensitive information: system configuration files, the list of user accounts, `/etc/shadow` (when run as root, to find accounts without passwords), sudo rules, listening network services, installed packages, web server configuration, and the home pages and selected paths of the websites your machine serves (requested through 127.0.0.1).
+- Before anything is written into a report, the software **redacts** recognised secrets such as passwords, keys, tokens and password hashes. Redaction is pattern-based and may not catch every secret; please review a report before sharing it.
+- Reports are written **only to your own disk**, in a folder you choose, readable only by your user account (permissions 0700 for the folder and 0600 for the files). We never receive them.
+- If you choose to sign reports, a signing key is created on your machine (`~/.config/openvapt/report-key`, permission 0600) and never leaves it.
+- What happens to your reports afterwards (who you share them with, where you store them) is entirely your responsibility.
 
-## Changes
+## 4. GitHub
 
-If this policy ever changes, the new version will be dated and published here and in the public Git history before any change takes effect. We do not intend to start collecting data.
+The source code, bug reports, discussions, security reports and the automated build pipeline are hosted on **GitHub, Inc.** (a subsidiary of Microsoft), at github.com/OpenVAPT/openvapt.
+
+- If you visit the repository, download from it, open an issue, start a discussion, submit a pull request or send a private vulnerability report, **GitHub** processes your data under the GitHub Privacy Statement. GitHub may store data on servers outside Malaysia, including in the United States.
+- Anything you post publicly on GitHub (issues, discussions, pull requests, comments) is public to everyone and may be copied or archived by others. **Never post secrets, full reports, hostnames, IP addresses or personal data.**
+- Private vulnerability reports are visible only to the project maintainers and GitHub until a fix is published, after which a public security advisory describes the issue.
+- The maintainers can see what GitHub shows any repository maintainer (for example your GitHub username on issues you open). We do not copy, export or keep that information anywhere else.
+
+## 5. Software Packages and Fonts
+
+The website uses self-hosted copies of AG Grid Community, Apache ECharts, Lucide icons and the IBM Plex fonts. They run inside your browser and make no network requests. The IBM Plex font packages include an install-time telemetry configuration intended for IBM; our build installs packages with scripts disabled, so it never runs, and only the font files are copied.
+
+## 6. Legal Basis and Your Rights
+
+Because we process no personal data, the obligations and rights under Malaysia's Personal Data Protection Act 2010 (as amended in 2024) about notice, consent, access, correction, retention, data breach notification, data protection officers and cross-border transfer do not arise for this website or the software. The same applies under comparable laws such as the EU General Data Protection Regulation. If you believe we hold any data about you, tell us publicly on GitHub (without posting the data) and we will check and answer honestly.
+
+## 7. Children
+
+The website and software collect no data from anyone, including children.
+
+## 8. Security
+
+There is no personal data to protect, so a breach of the website cannot expose your data. The website could, like any website, be tampered with; the full source of the website is public on GitHub, so its contents can be compared with the repository.
+
+## 9. Questions
+
+Ask publicly in GitHub Discussions at github.com/OpenVAPT/openvapt. There is no email contact.
+
+## 10. Changes
+
+Any change to this policy will be dated, published here and kept in the public Git history before it takes effect. We do not intend ever to start collecting data.

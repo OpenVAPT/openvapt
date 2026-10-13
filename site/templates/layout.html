@@ -37,7 +37,7 @@
   </div>
 </header>
 <div class="wrap pt-4">
-  <div class="alert alert-info" role="note">{{icon "info"}}<span>Academic project for learning. Use only on your own machines, at your own risk. This website collects no data. <a href="{{.Base}}no-data.html">How We Know</a></span></div>
+  <div class="alert alert-info" role="note">{{icon "info"}}<span><strong>Academic, non-commercial, open-source code.</strong> Free for your own personal or business use, on your own machines, 100% at your own risk. Not for sale. Not for providing services. This website collects no data. <a href="{{.Base}}download.html#acknowledge">Read the Acknowledgements</a></span></div>
 </div>
 <main id="main" class="wrap pb-16 pt-10">
 {{.Body}}
@@ -46,7 +46,7 @@
   <div class="wrap grid gap-10 md:grid-cols-[2fr_1fr_1fr]">
     <div>
       <p class="foot-h">OpenVAPT</p>
-      <p class="text-ink-2">An open academic project showing how a vulnerability assessment tool is built. Free for anyone to use on their own machines, for their own use, at their own risk. Not a service.</p>
+      <p class="text-ink-2">{{tagline}} You may not sell it or use it to provide services. Not a penetration test, a service or professional advice.</p>
       <p class="text-ink-3">This website collects nothing. No cookies, no tracking, no analytics, no server logs, no forms, no accounts. We do not keep, sell or share any data, because we have none.</p>
     </div>
     <div>
@@ -68,6 +68,7 @@
   <div class="wrap mt-8 border-t border-line pt-5 text-[13px] text-ink-3">Built {{.Built}} from commit <a href="{{repo}}/tree/{{.Commit}}" rel="noreferrer" class="inline"><code>{{.CommitShort}}</code></a>. PolyForm Noncommercial 1.0.0 with own-use permission.</div>
 </footer>
 {{if eq .Path "checks/index.html"}}<script src="{{.Base}}assets/vendor/ag-grid-community.min.js" defer></script><script src="{{.Base}}assets/catalogue.js" defer></script>{{end}}
+{{if eq .Path "download.html"}}<script src="{{.Base}}assets/acknowledge.js" defer></script>{{end}}
 {{if or (eq .Path "index.html") (eq .Path "standards.html")}}<script src="{{.Base}}assets/vendor/echarts.min.js" defer></script><script src="{{.Base}}assets/charts.js" defer></script>{{end}}
 </body>
 </html>{{end}}

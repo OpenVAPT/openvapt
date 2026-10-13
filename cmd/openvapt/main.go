@@ -33,23 +33,25 @@ import (
 	"github.com/openvapt/openvapt/internal/report"
 	"github.com/openvapt/openvapt/internal/sign"
 	"github.com/openvapt/openvapt/internal/sys"
+	"github.com/openvapt/openvapt/internal/terms"
 	"github.com/openvapt/openvapt/internal/version"
 )
 
-const terms = `OpenVAPT - Terms of Use (summary; full text: https://openvapt.com/legal/eula.html)
-
- 1. OpenVAPT is an academic project made for learning. It is free of charge.
- 2. Anyone (individuals and companies) may run it on computers and servers
-    they own or control, for their own use.
- 3. You may NOT use it to provide services to others, sell it, or do
-    business with it.
- 4. It only examines the machine it runs on and never sends data anywhere.
- 5. It is provided "AS IS", without warranty of any kind. You use it
-    entirely at your own risk. The developers accept no responsibility or
-    liability for anything that happens from downloading or using it.
- 6. You are solely responsible for having the right to run it on this
-    machine and for complying with all applicable laws.
-`
+// termsText renders the positioning and acknowledgements from package terms,
+// the same text the website shows before download.
+func termsText() string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "OpenVAPT - Terms of Use and Acknowledgements, version %s\n", terms.Version)
+	fmt.Fprintf(&b, "Full text: https://openvapt.com/legal/eula.html\n\n%s\n\n", terms.Tagline)
+	for _, p := range terms.Pillars {
+		fmt.Fprintf(&b, "  * %s: %s\n", p.Title, p.Text)
+	}
+	b.WriteString("\nBy continuing you confirm each statement below:\n\n")
+	for i, a := range terms.Acknowledgements {
+		fmt.Fprintf(&b, " %d. %s\n", i+1, a)
+	}
+	return b.String()
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -74,10 +76,10 @@ func main() {
 	case "verify":
 		err = cmdVerify(os.Args[2:])
 	case "terms":
-		fmt.Print(terms)
+		fmt.Print(termsText())
 	case "version", "--version", "-v":
-		fmt.Printf("OpenVAPT %s (commit %s, %s/%s)\nAcademic project. Own use only, at your own risk. https://openvapt.com\n",
-			version.Version, version.Commit, runtime.GOOS, runtime.GOARCH)
+		fmt.Printf("OpenVAPT %s (commit %s, %s/%s)\n%s\nhttps://openvapt.com\n",
+			version.Version, version.Commit, runtime.GOOS, runtime.GOARCH, terms.Tagline)
 	case "help", "-h", "--help":
 		usage(os.Stdout)
 	default:
@@ -91,7 +93,8 @@ func main() {
 }
 
 func usage(w io.Writer) {
-	fmt.Fprint(w, `OpenVAPT - academic, read-only vulnerability self-assessment for this machine only.
+	fmt.Fprint(w, `OpenVAPT - academic, non-commercial, read-only vulnerability self-assessment for this machine only.
+Free for your own personal or business use, 100% at your own risk. Not for sale. Not for providing services.
 
 Usage:
   openvapt scan [flags]          Assess this machine and write a local report
@@ -135,7 +138,7 @@ func cmdScan(ctx context.Context, args []string) error {
 	var f scanFlags
 	addScanFlags(fs, &f, "openvapt-report-"+time.Now().Format("20060102-150405"))
 	fs.BoolVar(&f.dryRun, "dry-run", false, "print every file, command and request the scan would use, then exit")
-	fs.BoolVar(&f.accept, "accept-terms", false, "accept the terms of use without the interactive prompt")
+	fs.BoolVar(&f.accept, "accept-terms", false, "confirm you have read and accept every acknowledgement in 'openvapt terms' (for automation)")
 	_ = fs.Parse(args)
 
 	opts := engine.Options{Only: splitList(f.only), Skip: splitList(f.skip), Parallel: f.parallel}
@@ -217,11 +220,13 @@ func finish(r *report.Report, f scanFlags) error {
 	return nil
 }
 
+// confirmTerms asks the user to read and accept every acknowledgement by
+// typing the exact phrase. Nothing about the answer is stored.
 func confirmTerms() bool {
-	fmt.Print(terms)
-	fmt.Print("\nType 'yes' to accept and continue (nothing is stored): ")
+	fmt.Print(termsText())
+	fmt.Printf("\nIf you have read, studied, understood, acknowledged, agreed to and accepted all of the above,\ntype %s to continue (anything else cancels; nothing is stored): ", terms.AcceptPhrase)
 	line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	return strings.TrimSpace(strings.ToLower(line)) == "yes"
+	return strings.EqualFold(strings.TrimSpace(line), terms.AcceptPhrase)
 }
 
 func cmdChecks(args []string) error {

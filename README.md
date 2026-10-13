@@ -4,7 +4,21 @@ An open academic project that shows, in full and in public, how a vulnerability 
 
 OpenVAPT runs read-only checks on the Linux machine it is installed on (and only that machine) to **identify** weaknesses in the server, its network exposure and its websites, **evaluate** them with CVSS v3.1 ratings, **propose fixes** with cited sources, and **verify** them. It writes a report to your own disk and never sends data anywhere.
 
-> **Academic project. Own use only. Your risk, 100%.** Anyone, including companies, may use OpenVAPT free of charge on computers and servers they own or control, for their own use. It may not be used to provide services, sold, or used to do business. It comes as is, with no warranty, and the developers accept no liability. See [EULA.md](EULA.md), [DISCLAIMER.md](DISCLAIMER.md) and [LICENSING.md](LICENSING.md).
+> **Academic. Non-commercial. Open-source code. Free to download and use, for your own personal or business use, 100% at your own risk.**
+> You may download and use OpenVAPT on computers and servers you own or control, for your own use. You may **not** sell it and you may **not** use it to provide services to anyone else, paid or unpaid. It comes as is, with no warranty, and the developers accept no responsibility for anything that happens.
+
+## Read and Accept Before Use
+
+Before downloading or running OpenVAPT, read, study and understand the [EULA](EULA.md), [Disclaimer](DISCLAIMER.md), [Acceptable Use Policy](ACCEPTABLE_USE.md) and [Licence](LICENSING.md). By downloading, building or using it, you acknowledge, agree to and accept every statement below. The tool shows the same statements before every scan and continues only when you type `I ACCEPT`.
+
+1. I have read, studied and understood the End User Licence Agreement, the Disclaimer, the Acceptable Use Policy and the Licence.
+2. I understand that OpenVAPT is an academic, non-commercial project made for learning, and that it is not a penetration test, an audit, a certification, a service or professional advice.
+3. I will download and use OpenVAPT only for my own use, personal or business, and only on computers and servers that I own or control, or for which I have the owner's permission.
+4. I will not sell OpenVAPT, include it in a product, or use it to provide services of any kind to anyone else, paid or unpaid.
+5. I understand that automated results can be wrong or incomplete, and that a report without findings does not prove a system is secure.
+6. I acknowledge, agree to and accept that I use OpenVAPT 100% at my own risk, and that I alone am responsible for every risk and every consequence, including damage, data loss, downtime, security incidents and legal liability.
+7. I agree that the developers and contributors provide OpenVAPT as is, without any warranty, and accept no responsibility or liability of any kind, to the fullest extent the law allows.
+8. I am solely responsible for complying with all laws that apply to me, including the Computer Crimes Act 1997 and the Cyber Security Act 2024 in Malaysia, and the laws of my own country.
 
 Website: https://openvapt.com (generated from this repository; every check page cites its source file and line numbers).
 

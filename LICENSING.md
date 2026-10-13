@@ -2,6 +2,8 @@
 
 ## In Short
 
+OpenVAPT is **academic, non-commercial, open-source code, free to download and use, for your own use, 100% at your own risk.**
+
 - **Free for anyone** to download, read, study, modify and run, including companies.
 - **Own use only**: run it on computers and servers you own or control, for your own purposes.
 - **No services, no selling, no business**: you may not use it to provide services to others, sell it, put it in a product, or earn money from it.
@@ -13,7 +15,7 @@ OpenVAPT is licensed under the [PolyForm Noncommercial License 1.0.0](https://po
 
 The PolyForm Noncommercial licence on its own allows personal use and use by non-profit, educational and government organisations. The Additional Permission extends this so that anyone, including a company, may use OpenVAPT on its own machines for its own use. Neither text allows providing services, selling, or other commercial activity with the software.
 
-## Is OpenVAPT Open Source?
+## What "Open-Source Code" Means Here
 
 The source code is fully public, for everyone to read and review, and you may modify it within the licence. However, the licence restricts commercial use, so OpenVAPT does not meet the Open Source Initiative's formal definition of "open source". The accurate term is **source-available** with a non-commercial licence. We use "open" on this website in its plain sense: nothing about the code is hidden.
 
