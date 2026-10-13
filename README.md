@@ -46,6 +46,16 @@ CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
 sudo ./openvapt scan --out ~/report                   # assess this Linux machine
 ```
 
+**Vulnerability snapshot.** The repository embeds only a tiny test fixture in `internal/vulndb/data/`, so a plain source build has no advisory data: `HOST-CVE-001`, `HOST-CVE-002`, `HOST-CVE-003` and `WEB-CVE-001` then report Incomplete (never Pass), and `openvapt vulndb` prints `Fixture: true`. To match real advisories, generate the snapshot from the public OSV exports and the CISA KEV feed before building:
+
+```bash
+make vulndb                                           # downloads OSV and KEV data, writes internal/vulndb/data/snapshot.json.gz
+make build                                            # embeds it
+./openvapt vulndb                                     # shows the snapshot date and Fixture: false
+```
+
+Release builds run the same generator (see `docs/VULNDB.md`). Every report header shows the snapshot date and age; a snapshot older than 90 days is marked in the header and fails only the Low check `HOST-CVE-003`.
+
 ### One-Command Install
 
 One command downloads the Linux binary of the chosen release channel (Stable by default, or `--channel rc|beta|alpha` on test machines) for your CPU, verifies its SHA-256 checksum (always) and its Sigstore signature (when `cosign` is installed), and installs it to `~/.local/bin` without root. It scans nothing. Read [scripts/install.sh](scripts/install.sh) first; it is short.
@@ -84,7 +94,20 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 | `openvapt verify report.json [--key-id ID]` | Confirm a signed report was not edited |
 | `openvapt terms` / `version` | Terms of use, version |
 
-Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--parallel`. Exit code 3 means Critical or High findings exist.
+Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`).
+
+Exit codes, for scripts and CI:
+
+| Code | Meaning |
+|---|---|
+| 0 | Completed; no finding at or above the `--fail-on` severity, and no coverage gap |
+| 2 | Invalid arguments or usage |
+| 3 | Findings at or above the `--fail-on` severity (default: Critical or High) |
+| 4 | Incomplete coverage: at least one check could not observe enough to decide |
+| 5 | Internal error, a check ended with an error, or the scan was interrupted |
+| 6 | The report could not be written |
+
+Checked in order 5, 4, 3: an error or coverage gap is reported before findings, so a clean exit 0 means every selected check reached a verdict. `--fail-on none` never returns 3.
 
 ## What It Covers
 

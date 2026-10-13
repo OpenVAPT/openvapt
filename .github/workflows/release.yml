@@ -80,7 +80,7 @@ jobs:
         if: steps.existing.outputs.exists == 'false'
         run: |
           go run ./cmd/vulndbgen -out internal/vulndb/data/snapshot.json.gz \
-            -ecosystems "Debian:11,Debian:12,Debian:13,Ubuntu:20.04:LTS,Ubuntu:22.04:LTS,Ubuntu:24.04:LTS,AlmaLinux:8,AlmaLinux:9,Rocky Linux:8,Rocky Linux:9,Packagist,npm" \
+            -ecosystems "Debian:11,Debian:12,Debian:13,Ubuntu:20.04:LTS,Ubuntu:22.04:LTS,Ubuntu:24.04:LTS,AlmaLinux:8,AlmaLinux:9,Rocky Linux:8,Rocky Linux:9,Packagist,npm,WordPress:Core" \
             -packages docs/vulndb-packages.txt
       - name: Test exactly what ships (snapshot included)
         if: steps.existing.outputs.exists == 'false'
