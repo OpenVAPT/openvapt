@@ -6,11 +6,13 @@ If you find a security flaw in OpenVAPT itself (for example a way around the loo
 
 Please do not open a public issue for security flaws, and do not include real secrets or full reports.
 
-There is no email channel. GitHub holds the report. We aim to publish a security advisory, credit the reporter if they wish, and disclose the details once a fix is released, normally within 90 days. This is a voluntary aim, not a promise or an obligation (see the EULA, No Support and No Obligation).
+There is no email channel. GitHub holds the report. We aim to acknowledge a report within 7 days, to publish a security advisory, to credit the reporter if they wish, and to disclose the details once a fix is released, normally within 90 days. These are voluntary aims, not promises or obligations (see the EULA, No Support and No Obligation).
+
+**Reporters without a GitHub account.** GitHub Private Vulnerability Reporting is at present the only channel. Whether a second, non-GitHub path will be offered, or GitHub is confirmed as the only channel, is an open owner decision; this policy will state the outcome. A machine-readable copy of this policy's contact details is published at https://openvapt.com/.well-known/security.txt (RFC 9116).
 
 ## Supported Versions
 
-We intend to fix security flaws only in the latest minor release, on a voluntary basis and without any obligation.
+We intend to fix security flaws only in the latest minor release, on a voluntary basis and without any obligation. While no stable release exists, "latest minor release" means the most recent build on the most mature release channel (see https://openvapt.com/channels.html); a fix lands on main and reaches users through the next promoted build, never by patching an older pre-release.
 
 ## Code Built by AI Cybersecurity Engineers
 

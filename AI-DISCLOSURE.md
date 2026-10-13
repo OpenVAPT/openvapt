@@ -15,7 +15,7 @@ AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude C
 | What did the human owner do? | Set the goals and rules, made every product and policy decision, answered the AI's questions, approved what was built, published and deployed, and owns and runs the project. |
 | Has a human security expert audited the code? | No. |
 | Has a human lawyer drafted or reviewed the legal documents? | No. The legal documents were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer (an AI lawyer). No human lawyer drafted or reviewed them, and they are not lawyer-approved. If you need legal advice, get your own. |
-| How can I see which commits were made by AI Cybersecurity Engineers? | All of them are. Each commit made by an AI system carries a `Co-Authored-By` line naming it. |
+| How can I see which commits were made by AI Cybersecurity Engineers? | All of them are. Each commit made by an AI system carries a `Co-Authored-By` line naming it. Release promotion commits are made by the GitHub Actions bot from `cmd/channel` and carry no model trailer. |
 
 ## AI Systems Used
 
@@ -25,6 +25,7 @@ AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude C
 | Claude (same model, as a separate AI system) | Anthropic | Claude Code sub-agent | Acts as the project's legal reviewer (an AI lawyer focused on Malaysian technology law and source-available licensing): reviewed, audited and rewrote the legal documents; produced findings and replacement clauses that were then applied. This is an AI review, not legal advice. |
 | GPT-5.6 (model id `gpt-5.6-sol`) | OpenAI | Codex CLI 0.162.1 | Performed an independent read-only code review (17 findings, 15 improvement proposals) and implemented the fixes; later built 18 network, data-service and TLS checks and the professional report redesign to Claude's specification. Each piece of work was done on a separate branch and reviewed by Claude before merging. |
 | GPT-6 (model id `gpt-6-sol`) | OpenAI | Codex CLI 0.162.1 | Built the offline vulnerability matching engine (version comparison, inventory, matching, generator, four checks) to Claude's specification, on a separate branch. Claude reviewed it and corrected a factual error in the test data before merging. |
+| Claude Fable 5.1 (model id `claude-fable-5-1`) | Anthropic | Claude Code sub-agent, October 2026 | Acted as the project's AI legal reviewer and governance editor on 2026-10-14: applied the owner-approved legal bundle (EULA 2.4, Licence 1.3, acknowledgements 1.7, AGENTS.md 1.4, GCA 1.1, Disclaimer 1.7), the risk register and decision records, and the self-describing legal review record. An AI review, not legal advice. |
 
 The OpenAI Codex CLI is also configured on the owner's computer for image generation, but no AI-made images are used in OpenVAPT. The logo (`site/static/assets/icon.svg`) is a small SVG written by Claude.
 
