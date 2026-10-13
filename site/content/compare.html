@@ -1,0 +1,25 @@
+{{define "content"}}
+<h1>OpenVAPT Compared With Other Free Security Tools</h1>
+<p class="lead">OpenVAPT is a teaching project. Many mature free tools do more, and for professional work you should use them. This page explains, factually, how they differ and when each fits.</p>
+<div class="table-wrap"><table class="table">
+<thead><tr><th>Tool</th><th>Main Focus</th><th>Targets</th><th>Licence</th><th>Best For</th></tr></thead>
+<tbody>
+<tr><td><strong>OpenVAPT</strong></td><td>Read-only server, network-exposure and local website checks, each documented and cited to its source</td><td>Only the machine it runs on</td><td>PolyForm Noncommercial 1.0.0 with own-use permission (source-available)</td><td>Learning how a VA tool works; checking your own Linux server</td></tr>
+<tr><td>Lynis</td><td>Host security auditing and hardening suggestions</td><td>The local Unix or Linux host</td><td>GPL-3.0</td><td>In-depth host hardening audits</td></tr>
+<tr><td>OpenSCAP</td><td>Compliance scanning against SCAP security policies and benchmarks</td><td>Local or remote hosts</td><td>LGPL-2.1</td><td>Formal compliance baselines</td></tr>
+<tr><td>OpenVAS (Greenbone Community Edition)</td><td>Network vulnerability scanning with a large test feed</td><td>Remote hosts and networks</td><td>GPL family</td><td>Authorised network-wide vulnerability scanning</td></tr>
+<tr><td>Nuclei</td><td>Fast template-based scanning</td><td>Remote hosts, URLs and services</td><td>MIT</td><td>Custom detection templates at scale</td></tr>
+<tr><td>Trivy</td><td>Vulnerabilities and misconfigurations in containers, filesystems and IaC</td><td>Images, repositories, clusters</td><td>Apache-2.0</td><td>Software supply chain and container security</td></tr>
+<tr><td>OWASP ZAP</td><td>Web application security testing, including active scanning</td><td>Web applications</td><td>Apache-2.0</td><td>Authorised web application testing</td></tr>
+</tbody></table></div>
+<h2>Where OpenVAPT Is Different</h2>
+<ul>
+<li><strong>Made to be read.</strong> Every check page shows its full source code with line numbers and a permalink to the exact commit.</li>
+<li><strong>Cannot be aimed at others.</strong> Network access is restricted in code to loopback addresses, so it only assesses its own machine.</li>
+<li><strong>Detection only.</strong> No exploit code, payloads or brute force.</li>
+<li><strong>Zero data.</strong> No telemetry, no accounts, no cookies on the website.</li>
+<li><strong>Built-in lab.</strong> A simulated vulnerable and hardened server for safe practice.</li>
+</ul>
+<h2>Where Other Tools Are Better</h2>
+<p>For broad coverage, compliance evidence, remote or network-wide scanning, container security or active web application testing, the tools above are more complete and widely used. OpenVAPT does not try to replace them, and it may not be used to provide services. Licence details above are summaries; check each project's own licence before use.</p>
+{{end}}

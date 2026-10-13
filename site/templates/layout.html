@@ -11,6 +11,12 @@
 {{if .NoIndex}}<meta name="robots" content="noindex, nofollow, noarchive">{{end}}
 <link rel="canonical" href="https://openvapt.com/{{if ne .Path "index.html"}}{{.Path}}{{end}}">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="OpenVAPT">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{.Title}}">
+<meta name="twitter:description" content="{{.Description}}">
+<link rel="alternate" type="text/plain" href="https://openvapt.com/llms.txt" title="LLM summary">
 <meta property="og:title" content="{{.Title}}">
 <meta property="og:description" content="{{.Description}}">
 <meta property="og:url" content="https://openvapt.com/{{if ne .Path "index.html"}}{{.Path}}{{end}}">
@@ -32,6 +38,7 @@
       <a href="{{.Base}}standards.html" {{if eq .Section "standards"}}aria-current="page"{{end}}>Standards</a>
       <a href="{{.Base}}learn.html" {{if eq .Section "learn"}}aria-current="page"{{end}}>Learn</a>
       <a href="{{.Base}}download.html" {{if eq .Section "download"}}aria-current="page"{{end}}>Download</a>
+      <a href="{{.Base}}faq.html" {{if eq .Section "faq"}}aria-current="page"{{end}}>FAQ</a>
       <a href="{{.Base}}contribute.html" {{if eq .Section "contribute"}}aria-current="page"{{end}}>Contribute</a>
     </nav>
   </div>
@@ -52,6 +59,7 @@
     <div>
       <p class="foot-h">Project</p>
       <a href="{{.Base}}limits.html">What It Does Not Do</a>
+      <a href="{{.Base}}compare.html">Compare With Other Tools</a>
       <a href="{{.Base}}cite.html">Cite OpenVAPT</a>
       <a href="{{repo}}" rel="noreferrer">Source Code on GitHub</a>
       <a href="{{repo}}/issues" rel="noreferrer">Report a Bug</a>

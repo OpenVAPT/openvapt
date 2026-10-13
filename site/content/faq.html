@@ -1,0 +1,11 @@
+{{define "content"}}{{$d := .Data}}
+<h1>Frequently Asked Questions</h1>
+<p class="lead">OpenVAPT is a free, academic, non-commercial vulnerability assessment tool for Linux servers, with open-source code. Here are short, factual answers to the questions people ask most.</p>
+<div class="mt-8 grid gap-4">
+{{range $d.FAQ}}<section class="card">
+  <h2 class="m-0 text-[1.2rem]">{{.Q}}</h2>
+  <p class="mb-0 mt-3 text-ink-2">{{.A}}</p>
+</section>
+{{end}}</div>
+<div class="alert alert-warn mt-8" role="note">{{icon "triangle-alert"}}<span>OpenVAPT is for academic, learning and own use, 100% at your own risk. It may not be sold or used to provide services. <a href="download.html#acknowledge">Read and accept the acknowledgements</a>.</span></div>
+{{end}}

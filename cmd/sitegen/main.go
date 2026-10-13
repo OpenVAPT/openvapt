@@ -104,6 +104,7 @@ func main() {
 		"Pillars":     terms.Pillars,
 		"Acks":        terms.Acknowledgements,
 		"TermsVer":    terms.Version,
+		"FAQ":         faqs,
 		"ChartData":   chartData(checks),
 	}
 	pages := []struct{ file, path, title, desc, section string }{
@@ -115,6 +116,8 @@ func main() {
 		{"download.html", "download.html", "Download and Run OpenVAPT", "Build OpenVAPT from source or download a release, verify it, and run it on your own Linux machine.", "download"},
 		{"contribute.html", "contribute.html", "Review, Report and Contribute", "Report bugs, false positives and new check ideas on GitHub, and how OpenVAPT versions and releases work.", "contribute"},
 		{"cite.html", "cite.html", "Cite OpenVAPT", "How to cite OpenVAPT in academic work.", "cite"},
+		{"faq.html", "faq.html", "OpenVAPT FAQ: Free Academic VAPT Tool Questions Answered", "Answers about OpenVAPT, the free academic vulnerability assessment tool for Linux: cost, licence, company use, scope, safety, standards and data.", "faq"},
+		{"compare.html", "compare.html", "OpenVAPT Compared With Lynis, OpenSCAP, OpenVAS, Nuclei and ZAP", "How OpenVAPT, a free academic VAPT learning tool, compares with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy and OWASP ZAP, and when to use each.", "compare"},
 		{"privacy-notice.html", "no-data.html", "We Collect No Data", "OpenVAPT and openvapt.com collect no data: no cookies, no analytics, no logs, no forms, no accounts.", "nodata"},
 		{"404.html", "404.html", "Page Not Found", "This page does not exist.", ""},
 	}
@@ -419,22 +422,48 @@ func chartData(cs []*check.Check) map[string][]nv {
 
 func jsonLD(p Page) template.JS {
 	url := siteURL + "/" + strings.TrimSuffix(p.Path, "index.html")
-	var doc any
-	if p.Path == "index.html" {
-		doc = map[string]any{
-			"@context": "https://schema.org", "@graph": []any{
-				map[string]any{"@type": "SoftwareApplication", "name": "OpenVAPT", "applicationCategory": "SecurityApplication",
-					"operatingSystem": "Linux", "url": siteURL, "description": p.Description, "softwareVersion": p.Version,
-					"isAccessibleForFree": true, "offers": map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-					"license": "https://polyformproject.org/licenses/noncommercial/1.0.0/"},
-				map[string]any{"@type": "SoftwareSourceCode", "name": "OpenVAPT source code", "codeRepository": repoURL,
-					"programmingLanguage": "Go", "license": "https://polyformproject.org/licenses/noncommercial/1.0.0/"},
-			}}
-	} else {
-		doc = map[string]any{"@context": "https://schema.org", "@type": "WebPage", "name": p.Title, "url": url, "description": p.Description,
-			"isPartOf": map[string]any{"@type": "WebSite", "name": "OpenVAPT", "url": siteURL}}
+	org := map[string]any{"@type": "Organization", "@id": siteURL + "/#org", "name": "The OpenVAPT Project", "alternateName": "OpenVAPT",
+		"url": siteURL, "logo": siteURL + "/assets/icon.svg", "sameAs": []string{"https://github.com/OpenVAPT", repoURL},
+		"description": "An academic, non-commercial project that publishes OpenVAPT, a free vulnerability assessment tool with open-source code. Not a business; provides no services."}
+	site := map[string]any{"@type": "WebSite", "@id": siteURL + "/#website", "name": "OpenVAPT", "url": siteURL, "publisher": map[string]string{"@id": siteURL + "/#org"}, "inLanguage": "en"}
+	app := map[string]any{"@type": "SoftwareApplication", "@id": siteURL + "/#software", "name": "OpenVAPT",
+		"applicationCategory": "SecurityApplication", "applicationSubCategory": "Vulnerability Assessment Tool",
+		"operatingSystem": "Linux", "url": siteURL, "downloadUrl": siteURL + "/download.html", "softwareVersion": p.Version,
+		"description":         terms.Tagline + " Read-only checks for the Linux machine it runs on: server, network exposure and websites.",
+		"isAccessibleForFree": true, "offers": map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+		"license": "https://polyformproject.org/licenses/noncommercial/1.0.0/", "publisher": map[string]string{"@id": siteURL + "/#org"},
+		"keywords":    "free VAPT tool, vulnerability assessment, open-source code, Linux security, server hardening, web security headers, academic, education",
+		"featureList": []string{"56 read-only checks", "Server, network and web app coverage", "CVSS v3.1 ratings", "OWASP, CWE and NIST mapping", "HTML, JSON, SARIF and Markdown reports", "Loopback-only scope guard", "Simulated lab for learning", "Zero data collection"}}
+	graph := []any{org, site}
+	switch {
+	case p.Path == "index.html":
+		graph = append(graph, app, map[string]any{"@type": "SoftwareSourceCode", "name": "OpenVAPT source code", "codeRepository": repoURL,
+			"programmingLanguage": "Go", "license": "https://polyformproject.org/licenses/noncommercial/1.0.0/", "targetProduct": map[string]string{"@id": siteURL + "/#software"}})
+	case p.Path == "faq.html":
+		var qs []any
+		for _, f := range faqs {
+			qs = append(qs, map[string]any{"@type": "Question", "name": f.Q, "acceptedAnswer": map[string]string{"@type": "Answer", "text": f.A}})
+		}
+		graph = append(graph, map[string]any{"@type": "FAQPage", "url": url, "mainEntity": qs})
+	case strings.HasPrefix(p.Path, "checks/") && p.Path != "checks/index.html":
+		graph = append(graph, map[string]any{"@type": "TechArticle", "headline": p.Title, "description": p.Description, "url": url,
+			"about": map[string]string{"@id": siteURL + "/#software"}, "publisher": map[string]string{"@id": siteURL + "/#org"}, "dateModified": p.Built, "inLanguage": "en"})
+	default:
+		graph = append(graph, map[string]any{"@type": "WebPage", "name": p.Title, "url": url, "description": p.Description,
+			"isPartOf": map[string]string{"@id": siteURL + "/#website"}, "about": map[string]string{"@id": siteURL + "/#software"}, "dateModified": p.Built})
 	}
-	b, _ := json.Marshal(doc)
+	if p.Path != "index.html" {
+		items := []any{map[string]any{"@type": "ListItem", "position": 1, "name": "OpenVAPT", "item": siteURL + "/"}}
+		if strings.HasPrefix(p.Path, "checks/") && p.Path != "checks/index.html" {
+			items = append(items, map[string]any{"@type": "ListItem", "position": 2, "name": "Check Catalogue", "item": siteURL + "/checks/"})
+		}
+		if strings.HasPrefix(p.Path, "legal/") {
+			items = append(items, map[string]any{"@type": "ListItem", "position": 2, "name": "Legal", "item": siteURL + "/legal/eula.html"})
+		}
+		items = append(items, map[string]any{"@type": "ListItem", "position": len(items) + 1, "name": p.Title, "item": url})
+		graph = append(graph, map[string]any{"@type": "BreadcrumbList", "itemListElement": items})
+	}
+	b, _ := json.Marshal(map[string]any{"@context": "https://schema.org", "@graph": graph})
 	return template.JS(b) // #nosec G203 -- json.Marshal escapes <, > and &
 }
 
@@ -461,10 +490,14 @@ func writeSEO(paths []string, cs []*check.Check) {
 	must(os.WriteFile(filepath.Join(*outDir, "robots.txt"), []byte(robots), 0o644)) // #nosec G306 -- public website file
 
 	var l strings.Builder
-	l.WriteString("# OpenVAPT\n\n> OpenVAPT is an open, free, academic project that shows how a vulnerability assessment tool is designed, built and tested. It runs read-only checks on the Linux machine it is installed on, and only that machine. It is not a penetration testing service. It collects no data.\n\n")
-	l.WriteString("- Licence: PolyForm Noncommercial 1.0.0 with an additional permission: anyone, including companies, may use it on their own machines for their own use; not for providing services or selling.\n- Source: " + repoURL + "\n- Risk: provided as is; users carry 100% of the risk.\n\n## Pages\n\n")
-	for _, p := range []string{"how-it-works.html", "checks/", "standards.html", "limits.html", "learn.html", "download.html", "no-data.html", "legal/eula.html", "legal/disclaimer.html", "legal/privacy.html"} {
-		l.WriteString("- " + siteURL + "/" + p + "\n")
+	l.WriteString("# OpenVAPT\n\n> OpenVAPT is a free, academic, non-commercial vulnerability assessment (VA) tool for Linux servers with open-source code. It runs read-only checks on the machine it is installed on (and only that machine) to identify weaknesses in the server, its network exposure and its websites, rates findings with CVSS v3.1 and proposes cited fixes. It is made for learning how a VAPT tool works. It is not a business, not a penetration testing service and collects no data.\n\n")
+	l.WriteString("Key facts:\n- Price: free. No account, no licence key.\n- Use: anyone, including companies, may use it on machines they own or control, for their own use. It may not be sold or used to provide services.\n- Risk: provided as is; users carry 100% of the risk.\n- Licence: PolyForm Noncommercial 1.0.0 plus an own-use permission (source-available).\n- Platform: Linux. Single static Go binary, standard library only.\n- Scope: loopback-only, enforced in code. Detection only, no exploit code.\n- Standards: NIST SP 800-115, CVSS v3.1, OWASP Top 10 2021, OWASP ASVS 4.0.3, CWE, NIST SP 800-53.\n- Source: " + repoURL + "\n- Built with AI assistance (Claude by Anthropic, via Claude Code) under the owner's direction.\n\n## Docs\n\n")
+	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How it is built, with code citations"}, {"checks/", "Check catalogue"}, {"standards.html", "Standards and methodology"}, {"compare.html", "Comparison with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What it does not do"}, {"learn.html", "Lessons and lab"}, {"download.html", "Download and acknowledgements"}, {"no-data.html", "No data collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}} {
+		l.WriteString("- [" + p[1] + "](" + siteURL + "/" + p[0] + ")\n")
+	}
+	l.WriteString("\n## FAQ\n\n")
+	for _, f := range faqs {
+		l.WriteString("### " + f.Q + "\n" + f.A + "\n\n")
 	}
 	must(os.WriteFile(filepath.Join(*outDir, "llms.txt"), []byte(l.String()), 0o644)) // #nosec G306 -- public website file
 
