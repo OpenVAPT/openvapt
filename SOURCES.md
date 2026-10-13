@@ -2,7 +2,7 @@
 
 Generated from the code by `internal/sources` (regenerate with `go test ./internal/sources -update`); do not edit by hand. Every reference that any check or Academy module cites is listed here, grouped by publisher, with the publisher's terms and any credit line those terms ask for. OpenVAPT cites sources by title, identifier and link; it does not copy their text. Use of a source does not imply that its publisher endorses OpenVAPT.
 
-Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Academy modules.
+Totals: 208 distinct sources from 34 publishers, cited by 198 checks and 23 Academy modules.
 
 ## NIST (National Institute of Standards and Technology)
 
@@ -16,13 +16,16 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [NIST SP 800-12 Rev. 1, An Introduction to Information Security](https://csrc.nist.gov/pubs/sp/800/12/r1/final) | Academy F1 |
 | [NIST SP 800-123, Guide to General Server Security](https://csrc.nist.gov/pubs/sp/800/123/final) | Academy P1, HOST-FS-001, HOST-FS-003, HOST-SSH-001, HOST-SVC-001, HOST-SYSD-001, NET-SVC-001 |
 | [NIST SP 800-131A Rev. 2, Transitioning Cryptographic Algorithms](https://csrc.nist.gov/pubs/sp/800/131/a/r2/final) | HOST-SSH-004, NET-TLS-005 |
+| [NIST SP 800-177 Rev. 1, Trustworthy Email](https://csrc.nist.gov/pubs/sp/800/177/r1/final) | Academy P16, NET-MAIL-001 |
 | [NIST SP 800-190, Application Container Security Guide](https://csrc.nist.gov/pubs/sp/800/190/final) | Academy P9, HOST-CTR-002, HOST-CTR-003, HOST-CTR-004 |
 | [NIST SP 800-30 Rev. 1, Guide for Conducting Risk Assessments](https://csrc.nist.gov/pubs/sp/800/30/r1/final) | Academy F1 |
 | [NIST SP 800-40 Rev. 4, Guide to Enterprise Patch Management Planning](https://csrc.nist.gov/pubs/sp/800/40/r4/final) | Academy A2, Academy P1, HOST-PKG-001, HOST-UPD-001, HOST-UPD-002 |
 | [NIST SP 800-41 Rev. 1, Guidelines on Firewalls and Firewall Policy](https://csrc.nist.gov/pubs/sp/800/41/r1/final) | Academy P12, Academy P3, NET-FW-001, NET-FW-003, NET-FW-004, NET-FW-005, NET-FW-006 |
-| [NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations](https://csrc.nist.gov/pubs/sp/800/52/r2/final) | Academy P4, NET-TLS-001, NET-TLS-002, NET-TLS-003, NET-TLS-004 |
-| [NIST SP 800-53 Rev. 5, Security and Privacy Controls](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | HOST-IDS-001, HOST-PWD-004, HOST-TIME-001, HOST-USR-001 |
+| [NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations](https://csrc.nist.gov/pubs/sp/800/52/r2/final) | Academy P15, Academy P4, NET-MAIL-002, NET-TLS-001, NET-TLS-002, NET-TLS-003, NET-TLS-004, WEB-APA-005, WEB-NGX-003 |
+| [NIST SP 800-53 Rev. 5, Security and Privacy Controls](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | HOST-IDS-001, HOST-PWD-004, HOST-TIME-001, HOST-USR-001, NET-DB-016, NET-DB-020 |
+| [NIST SP 800-63B, Digital Identity Guidelines: Authentication](https://pages.nist.gov/800-63-3/sp800-63b.html) | NET-DB-019, NET-DB-022 |
 | [NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html) | Academy P7, HOST-PWD-001, HOST-PWD-002, HOST-PWD-003, HOST-PWD-005, HOST-SSH-002 |
+| [NIST SP 800-81 Rev. 2, Secure Domain Name System Deployment Guide](https://csrc.nist.gov/pubs/sp/800/81/r2/final) | Academy P16, NET-DNS-002 |
 | [NIST SP 800-92, Guide to Computer Security Log Management](https://csrc.nist.gov/pubs/sp/800/92/final) | HOST-LOG-001, HOST-LOG-003 |
 | [NIST Transitioning Away from SHA-1](https://csrc.nist.gov/News/2022/nist-transitioning-away-from-sha-1-for-all-apps) | NET-TLS-006 |
 | [NVD](https://nvd.nist.gov/) | HOST-CVE-001, HOST-CVE-002, HOST-CVE-003, WEB-CVE-001 |
@@ -38,6 +41,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | Source | Cited By |
 |---|---|
 | [CVE Program](https://www.cve.org/) | Academy F3 |
+| [CVE-2003-1418, Apache inode disclosure in ETag](https://www.cve.org/CVERecord?id=CVE-2003-1418) | WEB-APA-009 |
 | [MITRE ATT&CK T1053.003, Cron](https://attack.mitre.org/techniques/T1053/003/) | HOST-FS-005 |
 | [MITRE ATT&CK T1543.002, Create or Modify System Process: Systemd Service](https://attack.mitre.org/techniques/T1543/002/) | Academy P11, HOST-SYSD-003 |
 | [MITRE ATT&CK T1548, Abuse Elevation Control Mechanism](https://attack.mitre.org/techniques/T1548/) | Academy P7 |
@@ -78,12 +82,15 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [OWASP Transport Layer Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html) | WEB-TLS-001 |
 | [OWASP WSTG-CLNT-07, Testing Cross Origin Resource Sharing](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/11-Client-side_Testing/07-Testing_Cross_Origin_Resource_Sharing/) | WEB-COR-001 |
 | [OWASP WSTG-CONF-02, Test Application Platform Configuration](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration/) | WEB-TOM-005 |
-| [OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files for Sensitive Information](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/) | WEB-DOC-001, WEB-EXP-001, WEB-EXP-004, WEB-EXP-007, WEB-EXP-008, WEB-EXP-009 |
+| [OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/) | WEB-APA-010, WEB-DOC-001, WEB-EXP-001, WEB-EXP-004, WEB-EXP-007, WEB-EXP-008, WEB-EXP-009, WEB-NGX-007 |
 | [OWASP WSTG-CONF-05, Enumerate Infrastructure and Application Admin Interfaces](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces/) | WEB-EXP-011 |
+| [OWASP WSTG-CONF-06, Test HTTP Methods](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods) | WEB-APA-002 |
 | [OWASP WSTG-CONF-09, Test File Permission](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/09-Test_File_Permission/) | WEB-DOC-002 |
 | [OWASP WSTG-ERRH-01, Testing for Improper Error Handling](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling/) | WEB-EXP-012 |
+| [OWASP WSTG-INFO-02, Fingerprint Web Server](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server) | WEB-APA-001, WEB-NGX-001 |
 | [OWASP WSTG-INFO-02, Fingerprint Web Server](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server/) | WEB-EXP-010 |
 | [OWASP Web Security Testing Guide](https://owasp.org/projects/web-security-testing-guide) | Academy F2 |
+| [OWASP Web Security Testing Guide, Configuration and Deployment Management Testing](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/) | Academy P15 |
 
 ## Center for Internet Security (CIS)
 
@@ -100,10 +107,12 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
+| [RFC 5321, Simple Mail Transfer Protocol, section 7.3](https://www.rfc-editor.org/rfc/rfc5321.html#section-7.3) | NET-MAIL-003 |
 | [RFC 6125, Representation and Verification of Domain-Based Application Service Identity](https://www.rfc-editor.org/rfc/rfc6125.html) | NET-TLS-003 |
 | [RFC 6265, HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265.html) | WEB-CK-001 |
 | [RFC 6797, HTTP Strict Transport Security](https://www.rfc-editor.org/rfc/rfc6797.html) | Academy P4, WEB-HDR-001 |
-| [RFC 8996, Deprecating TLS 1.0 and TLS 1.1](https://www.rfc-editor.org/rfc/rfc8996.html) | Academy P4, NET-TLS-001, NET-TLS-004 |
+| [RFC 7525, Recommendations for Secure Use of TLS and DTLS](https://www.rfc-editor.org/rfc/rfc7525.html) | WEB-APA-006, WEB-NGX-004 |
+| [RFC 8996, Deprecating TLS 1.0 and TLS 1.1](https://www.rfc-editor.org/rfc/rfc8996.html) | Academy P4, NET-MAIL-002, NET-MAIL-004, NET-TLS-001, NET-TLS-004, WEB-NGX-003 |
 | [RFC 9116, A File Format to Aid in Security Vulnerability Disclosure](https://www.rfc-editor.org/rfc/rfc9116.html) | WEB-SEC-001 |
 | [RFC 9142, Key Exchange Method Updates for SSH](https://www.rfc-editor.org/rfc/rfc9142.html) | Academy P2, HOST-SSH-004 |
 
@@ -278,7 +287,8 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [MDN Web Docs, Strict-Transport-Security](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security) | WEB-HDR-001 |
 | [MDN Web Docs, X-Content-Type-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options) | WEB-HDR-004 |
 | [MDN Web Docs, X-Frame-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options) | WEB-HDR-003 |
-| [Mozilla Server Side TLS guidelines](https://wiki.mozilla.org/Security/Server_Side_TLS) | NET-TLS-001, NET-TLS-004 |
+| [Mozilla SSL Configuration Generator](https://ssl-config.mozilla.org/) | Academy P15, WEB-APA-006, WEB-APA-007, WEB-NGX-004, WEB-NGX-005 |
+| [Mozilla Server Side TLS guidelines](https://wiki.mozilla.org/Security/Server_Side_TLS) | Academy P15, NET-TLS-001, NET-TLS-004, WEB-APA-005, WEB-NGX-003, WEB-NGX-004 |
 
 ## Let's Encrypt (ISRG)
 
@@ -294,14 +304,41 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [Apache HTTP Server, Options directive](https://httpd.apache.org/docs/2.4/mod/core.html#options) | WEB-EXP-005 |
-| [Apache HTTP Server, ServerTokens directive](https://httpd.apache.org/docs/2.4/mod/core.html#servertokens) | WEB-HDR-007 |
+| [Apache HTTP Server, AllowOverride directive](https://httpd.apache.org/docs/2.4/mod/core.html#allowoverride) | WEB-APA-004 |
+| [Apache HTTP Server, DirectoryMatch directive](https://httpd.apache.org/docs/2.4/mod/core.html#directorymatch) | WEB-APA-010 |
+| [Apache HTTP Server, FileETag directive](https://httpd.apache.org/docs/2.4/mod/core.html#fileetag) | WEB-APA-009 |
+| [Apache HTTP Server, Options directive](https://httpd.apache.org/docs/2.4/mod/core.html#options) | WEB-APA-003, WEB-EXP-005 |
+| [Apache HTTP Server, SSLCipherSuite directive](https://httpd.apache.org/docs/2.4/mod/mod_ssl.html#sslciphersuite) | WEB-APA-006 |
+| [Apache HTTP Server, SSLProtocol directive](https://httpd.apache.org/docs/2.4/mod/mod_ssl.html#sslprotocol) | WEB-APA-005 |
+| [Apache HTTP Server, SSLUseStapling directive](https://httpd.apache.org/docs/2.4/mod/mod_ssl.html#sslusestapling) | WEB-APA-007 |
+| [Apache HTTP Server, Security Tips](https://httpd.apache.org/docs/2.4/misc/security_tips.html) | Academy P15, WEB-APA-004, WEB-APA-008 |
+| [Apache HTTP Server, ServerTokens directive](https://httpd.apache.org/docs/2.4/mod/core.html#servertokens) | WEB-APA-001, WEB-HDR-007 |
+| [Apache HTTP Server, TraceEnable directive](https://httpd.apache.org/docs/2.4/mod/core.html#traceenable) | WEB-APA-002 |
 | [Apache HTTP Server, mod_status](https://httpd.apache.org/docs/2.4/mod/mod_status.html) | WEB-EXP-006 |
 | [Apache Tomcat 10.1 Configuration Reference, The AJP Connector](https://tomcat.apache.org/tomcat-10.1-doc/config/ajp.html) | WEB-TOM-004 |
 | [Apache Tomcat 10.1 Configuration Reference, The Server Component](https://tomcat.apache.org/tomcat-10.1-doc/config/server.html) | WEB-TOM-003 |
 | [Apache Tomcat 10.1, Manager App How-To](https://tomcat.apache.org/tomcat-10.1-doc/manager-howto.html) | WEB-TOM-001 |
 | [Apache Tomcat 10.1, Realm Configuration How-To (digested passwords)](https://tomcat.apache.org/tomcat-10.1-doc/realm-howto.html) | WEB-TOM-002 |
 | [Apache Tomcat 10.1, Security Considerations](https://tomcat.apache.org/tomcat-10.1-doc/security-howto.html) | Academy P13, WEB-TOM-001, WEB-TOM-002, WEB-TOM-003, WEB-TOM-004, WEB-TOM-005 |
+
+## nginx Documentation (F5, Inc.)
+
+- Terms: nginx documentation is published by the nginx project under its stated BSD-style licence. Cited by title and link only.
+
+| Source | Cited By |
+|---|---|
+| [nginx documentation, ngx_http_autoindex_module](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html) | WEB-NGX-002 |
+| [nginx documentation, ngx_http_core_module](https://nginx.org/en/docs/http/ngx_http_core_module.html) | WEB-NGX-001, WEB-NGX-006, WEB-NGX-007 |
+| [nginx documentation, ngx_http_limit_req_module](https://nginx.org/en/docs/http/ngx_http_limit_req_module.html) | WEB-NGX-006 |
+| [nginx documentation, ngx_http_ssl_module](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) | Academy P15, WEB-NGX-003, WEB-NGX-005 |
+
+## OWASP CRS Project (Core Rule Set)
+
+- Terms: The OWASP CRS documentation is published under the Apache License 2.0. Cited by title and link only.
+
+| Source | Cited By |
+|---|---|
+| [OWASP ModSecurity Core Rule Set](https://coreruleset.org/docs/) | WEB-APA-008 |
 
 ## PHP Documentation
 
@@ -372,9 +409,21 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 |---|---|
 | [Elastic Security Minimal Setup](https://www.elastic.co/docs/deploy-manage/security/set-up-minimal-security) | NET-DB-007 |
 | [MongoDB Security Checklist](https://www.mongodb.com/docs/manual/administration/security-checklist/) | NET-DB-003 |
-| [MySQL Server Security Guidelines](https://dev.mysql.com/doc/refman/8.4/en/security-guidelines.html) | NET-DB-005 |
+| [MySQL 8.4 Reference Manual, Configuring MySQL to Use Encrypted Connections](https://dev.mysql.com/doc/refman/8.4/en/using-encrypted-connections.html) | NET-DB-016 |
+| [MySQL 8.4 Reference Manual, Server System Variables](https://dev.mysql.com/doc/refman/8.4/en/server-system-variables.html) | NET-DB-017 |
+| [MySQL 8.4 Reference Manual, The Error Log](https://dev.mysql.com/doc/refman/8.4/en/error-log.html) | NET-DB-017 |
+| [MySQL 8.4 Reference Manual, Using Symbolic Links](https://dev.mysql.com/doc/refman/8.4/en/symbolic-links.html) | NET-DB-014 |
+| [MySQL 8.4 Reference Manual, secure_file_priv](https://dev.mysql.com/doc/refman/8.4/en/server-system-variables.html#sysvar_secure_file_priv) | NET-DB-015 |
+| [MySQL 8.4 Reference Manual, skip_name_resolve](https://dev.mysql.com/doc/refman/8.4/en/server-system-variables.html#sysvar_skip_name_resolve) | NET-DB-018 |
+| [MySQL Server Security Guidelines](https://dev.mysql.com/doc/refman/8.4/en/security-guidelines.html) | Academy P16, NET-DB-005, NET-DB-014, NET-DB-015, NET-DB-018 |
 | [PostgreSQL Client Authentication](https://www.postgresql.org/docs/current/client-authentication.html) | NET-DB-004 |
-| [Redis security](https://redis.io/docs/latest/operate/oss_and_stack/management/security/) | Academy P8, NET-DB-001, NET-DB-002 |
+| [PostgreSQL, Authentication Methods](https://www.postgresql.org/docs/current/auth-methods.html) | NET-DB-019 |
+| [PostgreSQL, Connections and Authentication](https://www.postgresql.org/docs/current/runtime-config-connection.html) | NET-DB-022 |
+| [PostgreSQL, Error Reporting and Logging](https://www.postgresql.org/docs/current/runtime-config-logging.html) | NET-DB-021 |
+| [PostgreSQL, Password Authentication](https://www.postgresql.org/docs/current/auth-password.html) | Academy P16, NET-DB-019, NET-DB-022 |
+| [PostgreSQL, Secure TCP/IP Connections with SSL](https://www.postgresql.org/docs/current/ssl-tcp.html) | NET-DB-020 |
+| [Redis ACL](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/) | NET-DB-023 |
+| [Redis security](https://redis.io/docs/latest/operate/oss_and_stack/management/security/) | Academy P16, Academy P8, NET-DB-001, NET-DB-002, NET-DB-023 |
 | [memcached Configuration](https://docs.memcached.org/serverguide/configuring/) | NET-DB-006 |
 
 ## Network Services (BIND 9, Samba, Postfix, Dovecot)
@@ -385,8 +434,15 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 |---|---|
 | [BIND 9 Administrator Reference Manual - Access Control](https://bind9.readthedocs.io/en/latest/reference.html#access-control) | NET-DB-010 |
 | [BIND 9 Administrator Reference Manual - allow-transfer](https://bind9.readthedocs.io/en/latest/reference.html#namedconf-statement-allow-transfer) | NET-DB-011 |
+| [BIND 9 Administrator Reference Manual, dnssec-validation](https://bind9.readthedocs.io/en/latest/reference.html#namedconf-statement-dnssec-validation) | NET-DNS-002 |
+| [BIND 9 Administrator Reference Manual, options](https://bind9.readthedocs.io/en/latest/reference.html#options-block-grammar) | NET-DNS-001 |
+| [BIND 9 Administrator Reference Manual, version statement](https://bind9.readthedocs.io/en/latest/reference.html#namedconf-statement-version) | NET-DNS-001 |
 | [Dovecot Authentication Settings](https://doc.dovecot.org/main/core/config/auth/settings.html) | NET-DB-013 |
+| [Dovecot SSL/TLS Configuration](https://doc.dovecot.org/main/core/config/ssl.html) | Academy P16, NET-MAIL-004 |
+| [Postfix Configuration Parameters](https://www.postfix.org/postconf.5.html) | NET-MAIL-001 |
 | [Postfix SMTP Relay and Access Control](https://www.postfix.org/SMTPD_ACCESS_README.html) | NET-DB-012 |
+| [Postfix TLS Support](https://www.postfix.org/TLS_README.html) | Academy P16, NET-MAIL-001, NET-MAIL-002 |
+| [Postfix, disable_vrfy_command](https://www.postfix.org/postconf.5.html#disable_vrfy_command) | NET-MAIL-003 |
 | [Samba smb.conf Manual](https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html) | NET-DB-009 |
 
 ## Projects Hosted on GitHub (Publisher Named in Each Title)
