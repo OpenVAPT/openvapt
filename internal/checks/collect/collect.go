@@ -627,18 +627,99 @@ func collectWebTargets(s sys.System, path string, out *[]WebTarget, seen, visiti
 			continue
 		}
 	}
-	scheme := "http"
-	lower := strings.ToLower(text)
-	if strings.Contains(lower, "<virtualhost") && strings.Contains(lower, ":443") || strings.Contains(lower, "listen 443") || strings.Contains(lower, "ssl on") || strings.Contains(lower, "ssl_certificate") {
-		scheme = "https"
-	}
-	for _, name := range parseVHostNames(text) {
+	add := func(scheme, name string) {
 		key := scheme + "://" + name
 		if !seen[key] {
 			seen[key] = true
 			*out = append(*out, WebTarget{Name: name, Scheme: scheme})
 		}
 	}
+	// Decide the scheme per <VirtualHost> or server {} block, so an http-only
+	// name in a file that also holds an https block is not tagged https (a
+	// fetch that then fails would hide the site). Names outside any block
+	// (LiteSpeed vhdomain, bare includes) use the file-level heuristic.
+	blocks, rest := vhostBlocks(text)
+	for _, b := range blocks {
+		for _, name := range parseVHostNames(b.text) {
+			add(b.scheme, name)
+		}
+	}
+	scheme := "http"
+	lower := strings.ToLower(text)
+	if strings.Contains(lower, "<virtualhost") && strings.Contains(lower, ":443") || strings.Contains(lower, "listen 443") || strings.Contains(lower, "ssl on") || strings.Contains(lower, "ssl_certificate") {
+		scheme = "https"
+	}
+	for _, name := range parseVHostNames(rest) {
+		add(scheme, name)
+	}
+}
+
+type vhostBlock struct {
+	scheme string
+	text   string
+}
+
+// vhostBlocks splits a web server configuration into its Apache
+// <VirtualHost> blocks and nginx server {} blocks, each with the scheme its
+// own directives imply (a :443 or ssl listener, SSLEngine on, ssl on or an
+// ssl_certificate), and returns the text outside every block.
+func vhostBlocks(text string) ([]vhostBlock, string) {
+	var blocks []vhostBlock
+	var rest, cur strings.Builder
+	depth := 0 // nginx brace depth inside a server block
+	inApache, inNginx := false, false
+	https := false
+	flush := func() {
+		scheme := "http"
+		if https {
+			scheme = "https"
+		}
+		blocks = append(blocks, vhostBlock{scheme: scheme, text: cur.String()})
+		cur.Reset()
+		https = false
+	}
+	for _, raw := range strings.Split(text, "\n") {
+		line := strings.TrimSpace(strings.SplitN(raw, "#", 2)[0])
+		lower := strings.ToLower(line)
+		switch {
+		case !inApache && !inNginx && strings.HasPrefix(lower, "<virtualhost"):
+			inApache = true
+			https = strings.Contains(lower, ":443")
+			cur.WriteString(raw + "\n")
+			continue
+		case inApache:
+			cur.WriteString(raw + "\n")
+			if strings.HasPrefix(lower, "sslengine") && strings.Contains(lower, "on") {
+				https = true
+			}
+			if strings.HasPrefix(lower, "</virtualhost") {
+				inApache = false
+				flush()
+			}
+			continue
+		case !inApache && !inNginx && (lower == "server {" || lower == "server{" || strings.HasPrefix(lower, "server ") && strings.HasSuffix(lower, "{")):
+			inNginx = true
+			depth = 1
+			cur.WriteString(raw + "\n")
+			continue
+		case inNginx:
+			cur.WriteString(raw + "\n")
+			if strings.HasPrefix(lower, "listen") && (strings.Contains(lower, "443") || strings.Contains(lower, " ssl")) || strings.HasPrefix(lower, "ssl on") || strings.HasPrefix(lower, "ssl_certificate ") {
+				https = true
+			}
+			depth += strings.Count(line, "{") - strings.Count(line, "}")
+			if depth <= 0 {
+				inNginx = false
+				flush()
+			}
+			continue
+		}
+		rest.WriteString(raw + "\n")
+	}
+	if cur.Len() > 0 { // unterminated block: judge what was seen
+		flush()
+	}
+	return blocks, rest.String()
 }
 
 func safeConfigPattern(p string) bool {

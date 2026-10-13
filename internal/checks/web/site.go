@@ -31,35 +31,68 @@ type Site struct {
 	Home  sys.HTTPResponse
 }
 
-var cache sync.Map // key: System -> []Site
+var cache sync.Map // key: System -> discovered
+
+// discovered is the result of one site discovery: the sites whose home
+// page answered, and the configured targets that did not (reported as
+// Incomplete by every site check, never silently dropped).
+type discovered struct {
+	sites  []Site
+	failed []check.Result
+}
 
 // Sites fetches the home page of every local site once per scan and caches
 // it, so twenty header checks cost one request per site, not twenty.
-func Sites(ctx context.Context, s sys.System) []Site {
+func Sites(ctx context.Context, s sys.System) []Site { return discover(ctx, s).sites }
+
+func discover(ctx context.Context, s sys.System) discovered {
 	if v, ok := cache.Load(s); ok {
-		return v.([]Site)
+		return v.(discovered)
 	}
-	var out []Site
+	var d discovered
+	got := map[string]int{} // name -> index in d.sites
+	var failed []collect.WebTarget
 	for _, target := range collect.WebTargets(s) {
-		if r, err := s.HTTP(ctx, target.Scheme, target.Name, "/"); err == nil {
-			out = append(out, Site{Name: target.Name, HTTPS: target.Scheme == "https", Home: r})
+		r, err := s.HTTP(ctx, target.Scheme, target.Name, "/")
+		if err != nil {
+			failed = append(failed, target)
+			continue
 		}
+		site := Site{Name: target.Name, HTTPS: target.Scheme == "https", Home: r}
+		if i, dup := got[target.Name]; dup {
+			// The same name on :80 and :443: judge the https site, which is
+			// what visitors should reach (WEB-TLS-001 checks the redirect).
+			if site.HTTPS && !d.sites[i].HTTPS {
+				d.sites[i] = site
+			}
+			continue
+		}
+		got[target.Name] = len(d.sites)
+		d.sites = append(d.sites, site)
 	}
-	cache.Store(s, out)
-	return out
+	for _, t := range failed {
+		if i, ok := got[t.Name]; ok && (d.sites[i].HTTPS || t.Scheme == "http") {
+			continue // the name answered on its preferred scheme
+		}
+		d.failed = append(d.failed, check.IncompleteR(t.Name, "Configured site did not answer over "+t.Scheme+" on 127.0.0.1; it was not assessed"))
+	}
+	cache.Store(s, d)
+	return d
 }
 
-// ForEachSite runs fn for every reachable site, or returns a single Skip.
+// ForEachSite runs fn for every reachable site, adds an Incomplete result
+// for every configured site that did not answer, or returns a single Skip
+// when the configuration names no site at all.
 func ForEachSite(ctx context.Context, s sys.System, fn func(Site) check.Result) []check.Result {
-	sites := Sites(ctx, s)
-	if len(sites) == 0 {
+	d := discover(ctx, s)
+	if len(d.sites) == 0 && len(d.failed) == 0 {
 		return []check.Result{check.SkipR("web", "No websites found in the local web server configuration")}
 	}
-	out := make([]check.Result, 0, len(sites))
-	for _, site := range sites {
+	out := make([]check.Result, 0, len(d.sites)+len(d.failed))
+	for _, site := range d.sites {
 		out = append(out, fn(site))
 	}
-	return out
+	return append(out, d.failed...)
 }
 
 // Get fetches a path from a site using the same scheme as its home page.

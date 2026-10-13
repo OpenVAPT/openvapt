@@ -72,7 +72,13 @@ func ParseKV(text string) map[string][]string {
 			line = strings.TrimSpace(line[:i])
 		}
 		var k, v string
-		if i := strings.IndexAny(line, "=:"); i > 0 && !strings.ContainsAny(line[:i], " \t") || (i > 0 && strings.TrimSpace(line[:i]) != "" && !strings.Contains(strings.TrimSpace(line[:i]), " ")) {
+		if strings.HasPrefix(line, "-") {
+			// A command-line option file (memcached.conf): "-l ::1" must not
+			// be split at the IPv6 colons.
+			f := strings.Fields(line)
+			k = f[0]
+			v = strings.TrimSpace(strings.TrimPrefix(line, f[0]))
+		} else if i := strings.IndexAny(line, "=:"); i > 0 && !strings.ContainsAny(line[:i], " \t") || (i > 0 && strings.TrimSpace(line[:i]) != "" && !strings.Contains(strings.TrimSpace(line[:i]), " ")) {
 			k, v = line[:i], line[i+1:]
 		} else if f := strings.Fields(line); len(f) >= 1 {
 			k = f[0]

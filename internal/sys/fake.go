@@ -20,6 +20,7 @@ type Fake struct {
 	TLSCipherResp   map[string]TLSInfo      // "port/sni/cipher"
 	IncompleteFiles map[string]bool
 	IncompleteWalks map[string]bool
+	HTTPErr         map[string]error // "scheme://vhost/path" -> error the request fails with
 }
 
 func (f *Fake) ReadFile(ctx context.Context, p string) (ReadResult, error) {
@@ -76,6 +77,9 @@ func (f *Fake) Run(_ context.Context, name string, args ...string) (string, erro
 	return "", fs.ErrNotExist
 }
 func (f *Fake) HTTP(_ context.Context, scheme, vhost, path string) (HTTPResponse, error) {
+	if err, ok := f.HTTPErr[scheme+"://"+vhost+path]; ok {
+		return HTTPResponse{}, err
+	}
 	if r, ok := f.HTTPResp[scheme+"://"+vhost+path]; ok {
 		return r, nil
 	}

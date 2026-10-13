@@ -2,8 +2,11 @@ package web
 
 import (
 	"context"
+	"errors"
+	"io/fs"
 	"net/http"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/openvapt/openvapt/internal/check"
@@ -19,7 +22,7 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:L/A:N",
 		Summary:   "Checks that every site redirects http:// requests to https://.",
 		Rationale: "Pages served over plain HTTP can be read and changed by anyone on the network path, including injected malware and stolen session cookies.",
-		Detection: "Requests http://<site>/ through 127.0.0.1 without following redirects. A 301/302/307/308 to an https:// URL passes; any other response fails.",
+		Detection: "Requests http://<site>/ through 127.0.0.1 without following redirects. A 301/302/307/308 to an https:// URL passes, as does a refused connection (nothing listens on port 80). Any other response fails. A timeout or other error is Incomplete, because a slow or half-open port 80 proves nothing.",
 		Fix:       "Apache: in the port 80 vhost add  Redirect permanent / https://<site>/ . nginx: return 301 https://$host$request_uri; . Get a free certificate with certbot if HTTPS is not set up yet.",
 		Verify:    "curl -sI http://<site>/  should show a 301 with Location: https://...",
 		Refs:      []check.Ref{{Title: "OWASP Transport Layer Security Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html"}},
@@ -28,7 +31,10 @@ func init() {
 			return ForEachSite(ctx, s, func(st Site) check.Result {
 				r, err := s.HTTP(ctx, "http", st.Name, "/")
 				if err != nil {
-					return check.PassR(st.Name, "Plain HTTP is not served")
+					if notServed(err) {
+						return check.PassR(st.Name, "Plain HTTP is not served (connection refused on port 80)")
+					}
+					return check.IncompleteR(st.Name, "Plain HTTP could not be assessed: the request to port 80 failed without a refusal (timeout or other error), so it is unknown whether the site is served over HTTP", err.Error())
 				}
 				loc := r.Header.Get("Location")
 				if r.Status >= 300 && r.Status < 400 && strings.HasPrefix(strings.ToLower(loc), "https://") {
@@ -85,6 +91,12 @@ func init() {
 			})
 		},
 	})
+}
+
+// notServed reports an error meaning nothing listens on the port: the kernel
+// refused the connection, or a simulated system has no response for it.
+func notServed(err error) bool {
+	return errors.Is(err, syscall.ECONNREFUSED) || errors.Is(err, fs.ErrNotExist)
 }
 
 func itoa(n int) string {

@@ -145,7 +145,7 @@ func baseVulnerable() *sys.Fake {
 			"https://" + site + "/db.sql":        {Status: 200, Header: hdr("Content-Type", "application/sql"), Body: "CREATE TABLE users (id int);"},
 			"https://" + site + "/uploads/":      {Status: 200, Header: hdr("Content-Type", "text/html"), Body: "<html><title>Index of /uploads</title></html>"},
 			"https://" + site + "/server-status": {Status: 200, Header: hdr("Content-Type", "text/html"), Body: "<h1>Apache Server Status for shop</h1>"},
-			"https://" + site + "/readme.html":   {Status: 200, Header: hdr("Content-Type", "text/html"), Body: "<html>WordPress readme</html>"},
+			"https://" + site + "/readme.html":   {Status: 200, Header: hdr("Content-Type", "text/html"), Body: `<html><body><h1 id="logo"><a href="https://wordpress.org/">WordPress</a><br /> Version 5.2.1</h1></body></html>`},
 			"https://" + site + "/xmlrpc.php":    {Status: 405, Header: hdr("Content-Type", "text/plain"), Body: "XML-RPC server accepts POST requests only."},
 		},
 		TLSResp: map[string]sys.TLSInfo{
