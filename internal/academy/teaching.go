@@ -144,7 +144,7 @@ func Worksheet(m *Module, answers bool) string {
 	for _, r := range m.Refs {
 		fmt.Fprintf(&b, "- %s: %s\n", r.Title, r.URL)
 	}
-	b.WriteString("\nAdapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.2. Free teaching use under TEACHING.md. Please cite OpenVAPT: see CITING.md or openvapt.com/cite.html. OpenVAPT is not affiliated with, and is not endorsed by, this institution or any third party named in this material. Pre-release versions may be wrong or unstable. Use at your own risk. If you adapt this material, say where you changed it.\n")
+	b.WriteString("\nAdapted from the OpenVAPT Academy (openvapt.com), built by AI Cybersecurity Engineers, used under the OpenVAPT Source-Available Licence 1.3. Free teaching use under TEACHING.md. Please cite OpenVAPT: see CITING.md or openvapt.com/cite.html. OpenVAPT is not affiliated with, and is not endorsed by, this institution or any third party named in this material. Pre-release versions may be wrong or unstable. Use at your own risk. If you adapt this material, say where you changed it.\n")
 	return b.String()
 }
 

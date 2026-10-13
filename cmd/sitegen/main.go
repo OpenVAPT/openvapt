@@ -197,8 +197,8 @@ func main() {
 		{"DISCLAIMER.md", "legal/disclaimer.html", "Disclaimer", "OpenVAPT is an academic project provided as is, at your own risk."},
 		{"PRIVACY.md", "legal/privacy.html", "Privacy Policy", "OpenVAPT and openvapt.com collect no personal data: no cookies, no analytics, no forms."},
 		{"ACCEPTABLE_USE.md", "legal/acceptable-use.html", "Acceptable Use Policy", "How OpenVAPT may and may not be used: only on machines you own or control."},
-		{"LICENSING.md", "legal/licence.html", "Licence", "How OpenVAPT is licensed: the OpenVAPT Source-Available Licence 1.2, for own use only, with no services and no selling."},
-		{"LICENSE", "legal/licence-text.html", "OpenVAPT Source-Available Licence 1.2", "The full text of the OpenVAPT Source-Available Licence 1.2, the only licence under which OpenVAPT is made available."},
+		{"LICENSING.md", "legal/licence.html", "Licence", "How OpenVAPT is licensed: the OpenVAPT Source-Available Licence 1.3, for own use only, with no services and no selling."},
+		{"LICENSE", "legal/licence-text.html", "OpenVAPT Source-Available Licence 1.3", "The full text of the OpenVAPT Source-Available Licence 1.3, the only licence under which OpenVAPT is made available."},
 		{"AI-DISCLOSURE.md", "legal/ai-disclosure.html", "AI Disclosure", "OpenVAPT is built entirely by AI Cybersecurity Engineers under human direction: which AI systems built it, what the owner did and what is not reviewed."},
 		{"TEACHING.md", "legal/teaching.html", "Teaching With OpenVAPT", "What teachers, schools, colleges and universities may do with OpenVAPT and its Academy, free, and what stays excluded."},
 		{"CITING.md", "legal/citing.html", "Citing OpenVAPT", "The canonical guide to crediting and citing OpenVAPT: when credit is required, when citation is requested, and every citation style."},
@@ -210,11 +210,19 @@ func main() {
 	for _, l := range legal {
 		mdPages[l.md] = filepath.Base(l.path)
 	}
+	// Documents that carry a version and effective date also say which version
+	// governs a given copy (LICENSE sections 12 and 15; EULA section 27).
+	versioned := map[string]bool{"EULA.md": true, "DISCLAIMER.md": true, "PRIVACY.md": true, "ACCEPTABLE_USE.md": true, "LICENSING.md": true, "LICENSE": true, "TEACHING.md": true, "CITING.md": true}
+	const versionNote = `<p class="muted">This is the current published version. The version that travels with your copy of OpenVAPT governs that copy (licence sections 12 and 15; EULA section 27). Earlier versions are in the public Git history.</p>`
 	for _, l := range legal {
 		b, err := os.ReadFile(l.md)
 		must(err)
+		note := ""
+		if versioned[l.md] {
+			note = versionNote
+		}
 		g.page("legal/"+filepath.Base(l.path), l.path, l.title, l.desc, "legal",
-			template.HTML(`<div class="legal"><h1>`+template.HTMLEscapeString(l.title)+`</h1>`+markdown(string(b))+`</div>`)) // #nosec G203 -- markdown() HTML-escapes all text first
+			template.HTML(`<div class="legal"><h1>`+template.HTMLEscapeString(l.title)+`</h1>`+note+markdown(string(b))+`</div>`)) // #nosec G203 -- markdown() HTML-escapes all text first
 	}
 
 	if len(g.problems) > 0 {
@@ -793,7 +801,7 @@ func writeSEO(paths []string, cs []*check.Check) {
 
 	var l strings.Builder
 	l.WriteString("# OpenVAPT\n\n> OpenVAPT is a free, academic, non-commercial vulnerability assessment (VA) tool for Linux servers with source-available code, researched, developed and built entirely by AI Cybersecurity Engineers under human direction. AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude Code, and OpenAI Codex) acting in a cyber security engineering role. They are not people, not registered or professional engineers, and provide no professional engineering or security service. It runs read-only checks on the machine it is installed on (and only that machine) to identify weaknesses in the server, its network exposure and its websites, rates findings with CVSS v3.1 and proposes cited fixes. It is made for learning how a VAPT tool works. It is not a business, not a penetration testing service and collects no data.\n\n")
-	l.WriteString("Key facts:\n- Price: free. No account, no licence key.\n- Use: anyone, including companies, may use it on machines they own or control, for their own use. It may not be sold or used to provide services.\n- Risk: a free gift provided as is, with no warranty; users carry 100% of the risk.\n- Licence: OpenVAPT Source-Available Licence 1.2 (LicenseRef-OpenVAPT-SAL-1.2): own use only, no services, no selling.\n- Platform: Linux. Single static Go binary, standard library only.\n- Scope: designed to be loopback-only, enforced in code. Detection only, no exploit code.\n- Standards: NIST SP 800-115, CVSS v3.1, OWASP Top 10 2021, OWASP ASVS 4.0.3, CWE, NIST SP 800-53.\n- Source: " + repoURL + "\n- Researched, developed and built entirely by AI Cybersecurity Engineers (Claude by Anthropic via Claude Code, with OpenAI Codex) under the owner's direction; not audited by a human security expert or reviewed by a human lawyer.\n- Third-party names identify those projects only; their owners do not sponsor, endorse or have any connection with OpenVAPT.\n\n## Docs\n\n")
+	l.WriteString("Key facts:\n- Price: free. No account, no licence key.\n- Use: anyone, including companies, may use it on machines they own or control, for their own use. It may not be sold or used to provide services.\n- Risk: a free gift provided as is, with no warranty; users carry 100% of the risk.\n- Licence: OpenVAPT Source-Available Licence 1.3 (LicenseRef-OpenVAPT-SAL-1.3): own use only, no services, no selling.\n- Platform: Linux. Single static Go binary, standard library only.\n- Scope: designed to be loopback-only, enforced in code. Detection only, no exploit code.\n- Standards: NIST SP 800-115, CVSS v3.1, OWASP Top 10 2021, OWASP ASVS 4.0.3, CWE, NIST SP 800-53.\n- Source: " + repoURL + "\n- Researched, developed and built entirely by AI Cybersecurity Engineers (Claude by Anthropic via Claude Code, with OpenAI Codex) under the owner's direction; not audited by a human security expert or reviewed by a human lawyer.\n- Third-party names identify those projects only; their owners do not sponsor, endorse or have any connection with OpenVAPT.\n\n## Docs\n\n")
 	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How It Is Built, With Code Citations"}, {"checks/", "Check Catalogue"}, {"standards.html", "Standards and Methodology"}, {"compare.html", "Comparison With Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What It Does Not Do"}, {"learn.html", "Lessons and Lab"}, {"teach.html", "For Teachers: Course Plans, Worksheets, Rubric, Practice Labs"}, {"legal/teaching.html", "Teaching Terms"}, {"download.html", "Download and Acknowledgements"}, {"channels.html", "Release Channels and Promotion Gates"}, {"no-data.html", "No Data Collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}, {"legal/licence.html", "Licence"}, {"cite.html", "How to Cite OpenVAPT (APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, RIS, CSL-JSON)"}, {"legal/citing.html", "Citing OpenVAPT: Credit and Citation Guide"}, {"legal/credits.html", "Credits, Sources and Citations"}, {"legal/sources.html", "Every Source Cited, by Publisher"}, {"legal/governance.html", "Governance, Control and Assurance Framework"}} {
 		l.WriteString("- [" + p[1] + "](" + siteURL + "/" + p[0] + ")\n")
 	}

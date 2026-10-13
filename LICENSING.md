@@ -1,6 +1,6 @@
 # Licence
 
-Version 2.2, effective 2026-10-13. Drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. This page summarises the licence; the file `LICENSE` is the legal text and prevails.
+Version 2.3, effective 2026-10-14. Drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. This page summarises the licence; the file `LICENSE` is the legal text and prevails.
 
 ## In Short
 
@@ -15,7 +15,7 @@ OpenVAPT is **academic, non-commercial, open, source-available code built by AI 
 
 ## The Licence Text
 
-OpenVAPT is licensed only under the **OpenVAPT Source-Available Licence 1.2** (file `LICENSE`, identifier `LicenseRef-OpenVAPT-SAL-1.2`). The licence itself grants only these permissions: to read, study and quote the code; to download, build and run it for Own Use; to modify it for Own Use or to contribute back; to teach with it under the Teaching With OpenVAPT terms (`TEACHING.md`), including adapting its course material free of charge; and to share complete copies free of charge with the licence and terms attached. Everything else is not licensed. In particular, providing any service with OpenVAPT or its output, paid or unpaid, is not licensed for anyone, including charities, schools and government bodies.
+OpenVAPT is licensed only under the **OpenVAPT Source-Available Licence 1.3** (file `LICENSE`, identifier `LicenseRef-OpenVAPT-SAL-1.3`). The licence itself grants only these permissions: to read, study and quote the code; to download, build and run it for Own Use; to modify it for Own Use or to contribute back; to teach with it under the Teaching With OpenVAPT terms (`TEACHING.md`), including adapting its course material free of charge; and to share complete copies free of charge with the licence and terms attached. Everything else is not licensed. In particular, providing any service with OpenVAPT or its output, paid or unpaid, is not licensed for anyone, including charities, schools and government bodies.
 
 The End User Licence Agreement (EULA) and Acceptable Use Policy are conditions of the licence, so breaking them also ends the licence.
 
@@ -42,7 +42,7 @@ The source code is fully public, for everyone to read and review, and you may mo
 
 ## Third-Party Code
 
-The compiled program contains only OpenVAPT's own code and the Go standard library (BSD 3-Clause licence). The website also uses self-hosted copies of AG Grid Community (MIT), Apache ECharts (Apache-2.0), Lucide icons (ISC) and the IBM Plex fonts (SIL Open Font License 1.1). Each component's own licence applies to that component and is listed in `THIRD_PARTY_NOTICES.md`. Every source and tool used is credited in `CREDITS.md`.
+The compiled program contains OpenVAPT's own code, the Go standard library (BSD 3-Clause licence) and, in release builds, an embedded snapshot of public vulnerability advisory data (OSV ecosystem exports and the CISA Known Exploited Vulnerabilities catalogue). The advisory data belongs to its publishers and is used under their terms, listed in `THIRD_PARTY_NOTICES.md`; the snapshot in the source repository is a small test fixture. The website also uses self-hosted copies of AG Grid Community (MIT), Apache ECharts (Apache-2.0), Lucide icons (ISC) and the IBM Plex fonts (SIL Open Font License 1.1). Each component's own licence applies to that component and is listed in `THIRD_PARTY_NOTICES.md`. Every source and tool used is credited in `CREDITS.md`.
 
 ## Built by AI Cybersecurity Engineers, and Copyright
 
@@ -50,4 +50,4 @@ All of OpenVAPT was researched, developed and built by AI Cybersecurity Engineer
 
 ## Contributions
 
-By submitting a contribution you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it; you license it to everyone under the OpenVAPT Source-Available Licence 1.2; and you grant the licensor a perpetual licence to relicense it, as set out in section 10 of the licence. You keep your copyright. Disclose in your pull request if an AI Cybersecurity Engineer or other AI system produced any part of your contribution. Feedback and ideas shared in Issues or Discussions may be used freely, without payment or obligation.
+By submitting a contribution you confirm, through the Developer Certificate of Origin sign-off, that you have the right to submit it; you license it to everyone under the OpenVAPT Source-Available Licence 1.3; you grant the licensor a perpetual licence to relicense it; and you authorise the licensor to accept the EULA's contributor protections on your behalf, as set out in section 10 of the licence. You keep your copyright. Disclose in your pull request if an AI Cybersecurity Engineer or other AI system produced any part of your contribution. Feedback and ideas shared in Issues or Discussions may be used freely, without payment or obligation.

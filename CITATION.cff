@@ -8,7 +8,7 @@ authors:
     website: "https://openvapt.com"
 repository-code: "https://github.com/OpenVAPT/openvapt"
 url: "https://openvapt.com"
-license: LicenseRef-OpenVAPT-SAL-1.2
+license: LicenseRef-OpenVAPT-SAL-1.3
 license-url: "https://github.com/OpenVAPT/openvapt/blob/main/LICENSE"
 version: "0.1.0-alpha.2"
 date-released: "2026-10-13"
