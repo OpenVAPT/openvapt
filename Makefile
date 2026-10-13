@@ -2,7 +2,7 @@ VERSION ?= v0.1.0-dev
 COMMIT  := $(shell git rev-parse HEAD 2>/dev/null || echo unknown)
 LDFLAGS := -s -w -X github.com/openvapt/openvapt/internal/version.Version=$(VERSION) -X github.com/openvapt/openvapt/internal/version.Commit=$(COMMIT)
 
-.PHONY: build check test site site-beta release clean
+.PHONY: build check test site release clean
 
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o openvapt ./cmd/openvapt
@@ -18,9 +18,6 @@ test:
 site:
 	cd site && npm ci --ignore-scripts && npm run build
 	go run ./cmd/sitegen -out dist/site
-
-site-beta:
-	go run ./cmd/sitegen -out dist/beta -base /beta/ -noindex
 
 release:
 	mkdir -p dist/release

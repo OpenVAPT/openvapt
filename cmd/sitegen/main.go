@@ -48,7 +48,7 @@ const (
 
 var (
 	outDir      = flag.String("out", "dist/site", "output directory")
-	base        = flag.String("base", "/", "URL path the site is served under, e.g. /beta/")
+	base        = flag.String("base", "/", "URL path the site is served under (the public site uses /)")
 	noindex     = flag.Bool("noindex", false, "add noindex to every page (automatic until the owner approves the public launch)")
 	unpinned    = flag.Bool("allow-unpinned", false, "build even when no git commit can be resolved (code citations then point at the main branch, not a pinned commit)")
 	commit      string
@@ -286,7 +286,7 @@ func cutWords(s string, n int, end string) string {
 }
 
 // root is the absolute URL the site is served from, without a trailing slash:
-// https://openvapt.com in production, https://openvapt.com/beta for -base /beta/.
+// https://openvapt.com for the public site; a sub-path when -base is set.
 func root() string {
 	return siteURL + strings.TrimSuffix(*base, "/")
 }
@@ -659,7 +659,7 @@ func cisKey(name string) int {
 // ---------- SEO / GEO artefacts ----------
 
 func jsonLD(p Page) template.JS {
-	siteURL := root() // production: https://openvapt.com; -base /beta/: https://openvapt.com/beta
+	siteURL := root() // https://openvapt.com, plus the -base path if one is set
 	url := pageURL(p.Path)
 	org := map[string]any{"@type": "Organization", "@id": siteURL + "/#org", "name": "OpenVAPT",
 		"url": siteURL + "/", "logo": siteURL + "/assets/icon.svg", "sameAs": []string{"https://github.com/OpenVAPT", repoURL},
