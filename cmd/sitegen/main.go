@@ -92,7 +92,7 @@ func main() {
 	checks := check.All()
 	// Fill live counts into FAQ answers so they never go stale.
 	n := counts(checks)
-	rep := strings.NewReplacer("{TOTAL}", fmt.Sprint(n["total"]), "{HOST}", fmt.Sprint(n["host"]), "{NETWORK}", fmt.Sprint(n["network"]), "{WEB}", fmt.Sprint(n["web"]))
+	rep := strings.NewReplacer("{TOTAL}", fmt.Sprint(n["total"]), "{HOST}", fmt.Sprint(n["host"]), "{NETWORK}", fmt.Sprint(n["network"]), "{WEB}", fmt.Sprint(n["web"]), "{MODULES}", fmt.Sprint(len(academy.Modules)))
 	for i := range faqs {
 		faqs[i].A = rep.Replace(faqs[i].A)
 	}
@@ -527,7 +527,7 @@ func cisKey(name string) int {
 
 func jsonLD(p Page) template.JS {
 	url := siteURL + "/" + strings.TrimSuffix(p.Path, "index.html")
-	org := map[string]any{"@type": "Organization", "@id": siteURL + "/#org", "name": "The OpenVAPT Project", "alternateName": "OpenVAPT",
+	org := map[string]any{"@type": "Organization", "@id": siteURL + "/#org", "name": "OpenVAPT",
 		"url": siteURL, "logo": siteURL + "/assets/icon.svg", "sameAs": []string{"https://github.com/OpenVAPT", repoURL},
 		"description": "An academic, non-commercial project that publishes OpenVAPT, a free, AI-generated vulnerability assessment learning tool with source-available code. Not a business; provides no services."}
 	site := map[string]any{"@type": "WebSite", "@id": siteURL + "/#website", "name": "OpenVAPT", "url": siteURL, "publisher": map[string]string{"@id": siteURL + "/#org"}, "inLanguage": "en"}

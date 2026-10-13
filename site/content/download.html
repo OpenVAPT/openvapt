@@ -38,17 +38,22 @@
 <section id="gated">
   <noscript><div class="alert alert-warn mt-6">{{icon "triangle-alert"}}<span>By using any download or command below, you confirm that you have read, studied, understood, acknowledged, agreed to and accepted every statement in the <a href="legal/eula.html">EULA</a>, including that you use OpenVAPT 100% at your own risk.</span></div></noscript>
   <h2 tabindex="-1">Get OpenVAPT</h2>
-  <p>There are two ways. <strong>Building from source is recommended</strong>: you run exactly the code you can read, it needs nothing but Go, and building it is part of learning how it works. Ready-made binaries are an optional convenience, built publicly from the same source.</p>
+  <p>There are three ways. <strong>Building from source is recommended</strong>: you run exactly the code you can read, it needs nothing but Go, and building it is part of learning how it works. The one-command installer and the ready-made binaries are conveniences, built publicly from the same source and verified before use.</p>
 
-  <div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="mt-6 grid gap-6 lg:grid-cols-3">
     <div class="card border-blue-2">
       <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-low">Recommended</span><span class="tag tag-plain">Most Transparent</span></div>
       <h3 class="mt-0">Option 1: Build From Source</h3>
       <p class="text-ink-2">Read the code, then build it yourself. OpenVAPT uses only the Go standard library, so nothing else is downloaded or trusted.</p>
     </div>
     <div class="card">
-      <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-info">Optional</span><span class="tag tag-plain">Convenience</span></div>
-      <h3 class="mt-0">Option 2: Verified Linux Binary</h3>
+      <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-info">Optional</span><span class="tag tag-plain">Fastest</span></div>
+      <h3 class="mt-0">Option 2: One-Command Install</h3>
+      <p class="text-ink-2">One line downloads the binary for your CPU, verifies its checksum and signature, and installs it without root. It scans nothing unless you ask.</p>
+    </div>
+    <div class="card">
+      <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-info">Optional</span><span class="tag tag-plain">Manual Verification</span></div>
+      <h3 class="mt-0">Option 3: Verified Linux Binary</h3>
       <p class="text-ink-2">For machines without Go. Built only by GitHub Actions from a public tagged commit, with checksums, Sigstore signatures, build provenance and a software bill of materials.</p>
     </div>
   </div>
@@ -75,7 +80,18 @@ CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
 make release VERSION=v1.0.0
 sha256sum dist/release/openvapt_linux_amd64   # compare with the published SHA256SUMS</pre>
 
-  <h3>Option 2: Verified Linux Binary (Optional)</h3>
+  <h3>Option 2: One-Command Install (Optional)</h3>
+  <div class="alert alert-info" role="note">{{icon "info"}}<span>Available after the first release. Until then the installer stops with a message pointing to Option 1.</span></div>
+  <p>Read the script first: <a href="{{$d.Repo}}/blob/main/scripts/install.sh">scripts/install.sh</a>. It checks that the machine is Linux on amd64 or arm64, downloads the release binary and <code>SHA256SUMS</code> from GitHub Releases, refuses to install if the SHA-256 checksum does not match, also verifies the Sigstore signature when <code>cosign</code> is installed, and installs to <code>~/.local/bin</code> (or <code>/usr/local/bin</code> as root). It sends nothing anywhere and scans nothing.</p>
+<pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh</pre>
+  <p>To install and then start an interactive scan of this machine in the same command, add <code>--run</code>. The scan still shows the acknowledgements and continues only when you type <code>I ACCEPT</code>; the installer never accepts for you.</p>
+<pre class="term">sh -c "$(curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh)" -- --run</pre>
+  <p>Options: <code>--version vX.Y.Z</code> installs a specific release, <code>--dir DIR</code> chooses the folder. Piping a script into a shell trusts whoever serves it; if you prefer, download it, read it, then run it:</p>
+<pre class="term">curl -fsSLo install.sh https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh
+less install.sh
+sh install.sh</pre>
+
+  <h3>Option 3: Verified Linux Binary (Optional)</h3>
   <div class="alert alert-info" role="note">{{icon "info"}}<span>No binary has been released yet. When releases start, they will appear on the GitHub Releases page with <code>SHA256SUMS</code>, a <code>.sigstore.json</code> signature bundle per binary, a source archive and an SBOM. Always verify before running.</span></div>
 <pre class="term">sha256sum -c SHA256SUMS --ignore-missing
 cosign verify-blob --certificate-identity-regexp 'https://github.com/OpenVAPT/openvapt/' \
@@ -94,6 +110,6 @@ gh attestation verify openvapt_linux_amd64 --repo OpenVAPT/openvapt</pre>
   <p>Before every scan the tool shows the acknowledgements again and continues only when you type <code>I ACCEPT</code> (or you pass <code>--accept-terms</code> for automation, which counts as the same acceptance). Running as root lets checks read protected files such as <code>/etc/shadow</code>; without root those checks are skipped or marked Incomplete. The report is written only to the folder you choose, with private permissions. Exit codes: 0 success, 2 invalid arguments, 3 Critical or High findings, 4 incomplete coverage, 5 scan errors, 6 report write failure.</p>
 
   <h3>Uninstall</h3>
-  <p>OpenVAPT installs nothing. Delete the binary and your report folders. If you signed reports, also delete <code>~/.config/openvapt/report-key</code>.</p>
+  <p>OpenVAPT installs nothing beyond its own binary. Delete the binary (<code>rm ~/.local/bin/openvapt</code> if you used the installer) and your report folders. If you signed reports, also delete <code>~/.config/openvapt/report-key</code>.</p>
 </section>
 {{end}}

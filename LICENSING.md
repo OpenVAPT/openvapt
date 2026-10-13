@@ -5,8 +5,9 @@
 OpenVAPT is **academic, non-commercial, AI-generated, open, source-available code, free to download and use, for your own personal or business use, 100% at your own risk.**
 
 - **Free for anyone** to download, read, study, modify and run, including companies.
-- **Own use only**: run it on computers and servers you own or control, for your own purposes.
-- **No services, no selling, no Commercial Exploitation**: you may not use it to provide services to others, sell it, put it in a product, or otherwise earn money from the software itself.
+- **Own use only**: download it to your own server for personal testing, or use it to test your own company's servers with your company's authorisation.
+- **No services, no selling, no Commercial Exploitation**: you may not sell it, put it in a product, or provide any service to others with anything from or produced by OpenVAPT (no consulting, no scanning for clients, no hosted service, no reselling reports), paid or unpaid.
+- **Not a business**: the project sells nothing and accepts no payments or donations.
 - **Your risk**: it comes as is, with no warranty, and the developers are not liable for anything.
 
 ## The Licence Texts

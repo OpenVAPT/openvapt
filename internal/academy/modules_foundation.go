@@ -4,7 +4,7 @@ var refNIST115 = Ref{"NIST SP 800-115, Technical Guide to Information Security T
 var refCVSS = Ref{"FIRST, CVSS v3.1 Specification Document", "https://www.first.org/cvss/v3.1/specification-document"}
 
 // Modules is the whole course in teaching order.
-var Modules = append(append(foundation, practitioner...), applied...)
+var Modules = append(append(append(foundation, practitioner...), stacks...), applied...)
 
 var foundation = []Module{
 	{

@@ -5,6 +5,13 @@ import "sort"
 // Glossary defines every key term used in the course, in plain words.
 // A test ensures every module's KeyTerms has an entry here.
 var Glossary = map[string]string{
+	"Debug Mode":                    "A development setting that shows internal details such as source code, settings and stack traces, and sometimes allows running code; it must be off in production.",
+	"Default Credentials":           "User names and passwords that ship with a product or appear in its documentation, which attackers try first.",
+	"Fingerprinting":                "Identifying the exact software and version a system runs, for example from banners, headers or version files.",
+	"Reverse Proxy":                 "A web server such as nginx or Apache that receives requests from the internet and forwards them to an application server listening on loopback.",
+	"Sandboxing":                    "Running a program with restricted access to files, devices and privileges, so a compromise of it does less damage.",
+	"Service Unit":                  "A systemd configuration file that describes how to start, stop and run a background service, including its program and user account.",
+	"Stale Rule":                    "A firewall rule that no longer matches a running service and so leaves an unexplained opening.",
 	"ASLR":                          "Address space layout randomisation: the kernel places code and data at unpredictable memory addresses, which makes memory-corruption exploits harder.",
 	"Asset":                         "Anything of value that needs protection, such as data, a service, a system or a reputation.",
 	"Attack Surface":                "All the points where an attacker could try to interact with a system, such as listening ports, web pages and accounts.",

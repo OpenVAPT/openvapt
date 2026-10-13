@@ -29,7 +29,7 @@
 
 <h2>Learn VAPT From Theory to Application</h2>
 <div class="card-layer flex flex-wrap items-center justify-between gap-4">
-  <p class="m-0 max-w-[62ch] text-ink-2">The free OpenVAPT Academy has 15 modules across Foundations, Practitioner and Applied levels. Each one links theory to real checks, with a hands-on lab and a self-check quiz, online or offline with <code>openvapt learn</code>.</p>
+  <p class="m-0 max-w-[62ch] text-ink-2">The free OpenVAPT Academy has {{len $d.Modules}} modules across Foundations, Practitioner and Applied levels. Each one links theory to real checks, with a hands-on lab and a self-check quiz, online or offline with <code>openvapt learn</code>.</p>
   <a class="btn btn-primary" href="academy/">{{icon "graduation-cap"}}Start the Academy</a>
 </div>
 
@@ -38,18 +38,18 @@
   <div class="card">
     <div class="card-icon">{{icon "server"}}</div>
     <h3>Server <span class="muted">({{$d.Counts.host}} checks)</span></h3>
-    <p class="text-ink-2">Operating system support and pending security updates, SSH daemon settings, accounts and sudo rules, permissions on sensitive files and cron, SUID programs, kernel hardening, logging, auditing and time sync.</p>
+    <p class="text-ink-2">Operating system support and pending security updates, SSH daemon settings, accounts and sudo rules, permissions on sensitive files and cron, SUID programs, kernel hardening, systemd service hardening, containers, logging, auditing and time sync.</p>
   </div>
   <div class="grid gap-6">
     <div class="card">
       <div class="card-icon">{{icon "network"}}</div>
       <h3>Network <span class="muted">({{$d.Counts.network}})</span></h3>
-      <p class="m-0 text-ink-2">Listening ports read from the kernel, exposed databases, cleartext services, the host firewall, TLS versions and certificates.</p>
+      <p class="m-0 text-ink-2">Listening ports read from the kernel, exposed databases and application servers, cleartext services, firewall rules compared with what is listening, TLS versions and certificates.</p>
     </div>
     <div class="card">
       <div class="card-icon">{{icon "globe"}}</div>
       <h3>Web Apps <span class="muted">({{$d.Counts.web}})</span></h3>
-      <p class="m-0 text-ink-2">Security headers, cookies, HTTPS redirects, exposed .git, .env and backups, directory listing, PHP settings and WordPress hygiene.</p>
+      <p class="m-0 text-ink-2">Security headers, cookies, HTTPS redirects, exposed .git, .env and backups, directory listing, PHP, Tomcat, Node.js and Python settings, and WordPress, Joomla and Drupal hardening.</p>
     </div>
   </div>
 </div>

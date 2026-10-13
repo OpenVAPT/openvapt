@@ -29,6 +29,19 @@ jobs:
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
       - name: Build Linux binaries
         run: make release
+      - name: Installer lint (shellcheck)
+        run: shellcheck -s sh scripts/install.sh
+      - name: Installer end to end (verified install, tamper refusal)
+        run: |
+          set -eu
+          rel="$RUNNER_TEMP/rel/download/v0.0.0-ci"; mkdir -p "$rel"
+          cp dist/release/openvapt_linux_* dist/release/SHA256SUMS "$rel/"
+          export OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel"
+          sh scripts/install.sh --version v0.0.0-ci --dir "$RUNNER_TEMP/bin"
+          "$RUNNER_TEMP/bin/openvapt" version
+          printf 'x' >> "$rel/openvapt_linux_amd64"
+          if sh scripts/install.sh --version v0.0.0-ci --dir "$RUNNER_TEMP/bin2"; then echo "tampered binary was installed"; exit 1; fi
+          test ! -e "$RUNNER_TEMP/bin2/openvapt"
       - uses: actions/setup-node@v4
         with:
           node-version: "24"

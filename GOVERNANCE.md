@@ -1,6 +1,6 @@
 # Governance
 
-- **Maintainers** review and merge pull requests, cut releases and handle security reports. The current maintainer is The OpenVAPT Project.
+- **Maintainers** review and merge pull requests, cut releases and handle security reports. The current maintainer is OpenVAPT (the project owner).
 - **Decisions** are made in public issues and pull requests. Significant design decisions are recorded as Architecture Decision Records in `docs/adr/`.
 - **New maintainers** are invited after a sustained record of reviewed contributions, by agreement of the existing maintainers, recorded in a public issue.
 - **Continuity**: if the project becomes unmaintained, the repository stays public and archived so that the code remains available for study.

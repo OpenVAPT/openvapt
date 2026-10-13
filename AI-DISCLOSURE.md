@@ -10,7 +10,7 @@
 | Who wrote the documentation, website, course and legal drafts? | AI systems. |
 | What did the human owner do? | Set the goals and rules, made every product and policy decision, answered the AI's questions, approved what was built, published and deployed, and owns and runs the project. |
 | Has a human security expert audited the code? | No. |
-| Has a human lawyer reviewed the legal documents? | No, not yet. An AI system reviewed them in the role of a legal reviewer. A licensed Malaysian advocate and solicitor review is planned before the public launch. |
+| Has a human lawyer drafted or reviewed the legal documents? | No. The legal documents were drafted by AI and reviewed by an AI system acting as the project's legal reviewer (an AI lawyer). No human lawyer drafted or reviewed them, and they are not lawyer-approved. If you need legal advice, get your own. |
 | How can I see which commits were AI-generated? | All of them are. Each commit made by an AI system carries a `Co-Authored-By` line naming it. |
 
 ## AI Systems Used
@@ -18,9 +18,8 @@
 | System | Provider | Interface and version | Role |
 |---|---|---|---|
 | Claude Opus 5.5 (model id `claude-opus-5-5`) | Anthropic | Claude Code (desktop app), October 2026 | Planned, designed and architected the system; wrote and tested most of the code (Codex wrote the parts listed in its row); wrote the website, course (Academy), documentation and legal drafts; built, committed, pushed and deployed; coordinated the other AI systems; verified their output. |
-| Claude (same model, as a separate sub-agent) | Anthropic | Claude Code sub-agent | Reviewed and audited all legal documents in the role of a technology lawyer focused on Malaysian law; produced findings and replacement clauses that were then applied. This is an AI review, not legal advice. |
+| Claude (same model, as a separate sub-agent) | Anthropic | Claude Code sub-agent | Acts as the project's legal reviewer (an AI lawyer focused on Malaysian technology law and source-available licensing): reviewed, audited and rewrote the legal documents; produced findings and replacement clauses that were then applied. This is an AI review, not legal advice. |
 | GPT-5.6 (model id `gpt-5.6-sol`) | OpenAI | Codex CLI 0.162.1 | Performed an independent read-only code review (17 findings, 15 improvement proposals) and implemented the fixes; later built 18 network, data-service and TLS checks and the professional report redesign to Claude's specification. Each piece of work was done on a separate branch and reviewed by Claude before merging. |
-
 | GPT-6 (model id `gpt-6-sol`) | OpenAI | Codex CLI 0.162.1 | Built the offline vulnerability matching engine (version comparison, inventory, matching, generator, four checks) to Claude's specification, on a separate branch. Claude reviewed it and corrected a factual error in the test data before merging. |
 
 The OpenAI Codex CLI is also configured on the owner's computer for image generation, but no AI-generated images are used in OpenVAPT. The logo (`site/static/assets/icon.svg`) is a small SVG written by Claude.

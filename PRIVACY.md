@@ -1,14 +1,14 @@
 # Privacy Policy
 
-Version 1.2, effective 2026-10-13. This policy was drafted by AI and reviewed by an AI legal reviewer; it is awaiting review by a licensed Malaysian advocate and solicitor. It is an information notice, not a contract.
+Version 1.3, effective 2026-10-13. This policy was drafted by AI and reviewed by an AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. It is an information notice, not a contract.
 
 ## Summary
 
-**We collect no data.** The OpenVAPT Project does not collect, use, analyse, sell, rent, share or transfer any personal data or any other data about visitors of openvapt.com or users of the OpenVAPT software. The only exception is the web server log files created before logging was turned off on 2026-10-13. These are held, unused, in an access-restricted area until they are permanently deleted after 2026-11-12, as explained in section 2. Below we explain, honestly and completely, every place where data could flow, and what happens there.
+**We collect no data.** OpenVAPT does not collect, use, analyse, sell, rent, share or transfer any personal data or any other data about visitors of openvapt.com or users of the OpenVAPT software. The only exception is the web server log files created before logging was turned off on 2026-10-13. These are held, unused, in an access-restricted area until they are permanently deleted after 2026-11-12, as explained in section 2. Below we explain, honestly and completely, every place where data could flow, and what happens there.
 
 ## 1. Who "We" Are
 
-"We" means The OpenVAPT Project, an academic, non-commercial project. The person who runs the project currently chooses not to be named publicly. Because we collect no personal data, there is no data controller holding any of your data. Questions can be raised publicly on GitHub (see section 9).
+"We" means OpenVAPT, an academic, non-commercial project run by its project owner. Because we collect no personal data, there is no data controller holding any of your data. Questions can be raised publicly on GitHub (see section 9).
 
 ## 2. This Website (openvapt.com)
 
@@ -39,8 +39,8 @@ openvapt.com/beta/ is an internal preview, excluded from search engines. It foll
 ## 3. The OpenVAPT Software
 
 - The software runs entirely on your own machine and is designed to make **no network connection to any other machine at all**. Every connection is restricted in code to loopback addresses (127.0.0.0/8 and ::1). There is no telemetry, crash reporting, licence check, update check or usage statistics.
-- When you run a scan, the software **reads** information on your machine to assess it, which may include sensitive information: system configuration files, the list of user accounts, `/etc/shadow` (when run as root, to find accounts without passwords), sudo rules, listening network services, installed packages, web server configuration, and the home pages and selected paths of the websites your machine serves (requested through 127.0.0.1).
-- Before anything is written into a report, the software **redacts** recognised secrets such as passwords, keys, tokens and password hashes. Redaction is pattern-based and may not catch every secret; please review a report before sharing it.
+- When you run a scan, the software **reads** information on your machine to assess it, which may include sensitive information: system configuration files, the list of user accounts, `/etc/shadow` (when run as root, to find accounts without passwords), sudo rules, listening network services, installed packages, web server configuration, systemd service unit files, application configuration files (for example for Apache Tomcat, Django, Flask, WordPress, Joomla and Drupal), the output of an allow-list of read-only commands (for example `node --version`), and the home pages and selected paths of the websites your machine serves (requested through 127.0.0.1).
+- Configuration files that can contain secrets are read for pattern matching only, and the checks are designed never to copy secret values into a report. As a second safeguard, before anything is written into a report, the software **redacts** recognised secrets such as passwords, keys, tokens and password hashes. Redaction is pattern-based and may not catch every secret; please review a report before sharing it.
 - Reports are written **only to your own disk**, in a folder you choose, readable only by your user account (permissions 0700 for the folder and 0600 for the files). We never receive them.
 - If you choose to sign reports, a signing key is created on your machine (`~/.config/openvapt/report-key`, permission 0600) and never leaves it.
 - What happens to your reports afterwards (who you share them with, where you store them) is entirely your responsibility.
@@ -60,7 +60,7 @@ The website uses self-hosted copies of AG Grid Community, Apache ECharts, Lucide
 
 ## 6. Legal Basis and Your Rights
 
-The OpenVAPT Project is an academic, non-commercial project. Malaysia's Personal Data Protection Act 2010 (as amended in 2024) applies to personal data processed in respect of commercial transactions, and we carry out none. We also do not collect personal data through the website or the software. For these reasons we believe the Act's obligations about notice, consent, access, correction, retention, breach notification, data protection officers and cross-border transfer do not apply to us. We nevertheless follow its spirit by collecting nothing. We do not target visitors in the European Union and we collect no data, so we believe the EU General Data Protection Regulation does not apply either. If you believe we hold any data about you, tell us publicly on GitHub (without posting the data) and we will check and answer honestly.
+OpenVAPT is an academic, non-commercial project that accepts no payments or donations. Malaysia's Personal Data Protection Act 2010 (as amended in 2024) applies to personal data processed in respect of commercial transactions, and we carry out none. We also do not collect personal data through the website or the software. For these reasons we believe the Act's obligations about notice, consent, access, correction, retention, breach notification, data protection officers and cross-border transfer do not apply to us. We nevertheless follow its spirit by collecting nothing. We do not target visitors in the European Union and we collect no data, so we believe the EU General Data Protection Regulation does not apply either. If you believe we hold any data about you, tell us publicly on GitHub (without posting the data) and we will check and answer honestly.
 
 ## 7. Children
 
@@ -72,7 +72,7 @@ There is no personal data to protect, so a breach of the website cannot expose y
 
 ## 9. Who Wrote This Policy
 
-This policy, like the rest of OpenVAPT, was generated by AI (see `AI-DISCLOSURE.md`) and approved by the project owner. Every factual statement in it was checked against the real server and code configuration on the date above.
+This policy, like the rest of OpenVAPT, was generated by AI (see `AI-DISCLOSURE.md`), reviewed by an AI system acting as the project's legal reviewer, and approved by the project owner. No human lawyer drafted or reviewed it. Every factual statement in it was checked against the real server and code configuration on the date above.
 
 ## 10. Questions
 

@@ -113,6 +113,8 @@ var allowed = [][]string{
 	{"php", "-r"}, // only used with ini_get() expressions
 	{"php", "-v"},
 	{"uname", "-r"},
+	{"node", "--version"}, // print the Node.js version only
+	{"nodejs", "--version"},
 	{"rpm", "-qa", "--qf", "%{NAME}\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n"},
 }
 

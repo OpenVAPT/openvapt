@@ -4,6 +4,11 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Coverage Expansion: Services, Firewall Correlation, Application Stacks and CMS
+- 31 new checks, 165 in total (Claude): systemd service hardening HOST-SYSD-001 to 005 (root services, sandboxing, writable unit files and programs, secrets in Environment=); firewall versus listener correlation NET-FW-003 to 006 (sensitive ports open to anywhere, stale rules, Docker bypassing the host firewall, exposure map) and NET-APP-001 (application server ports exposed directly); Apache Tomcat WEB-TOM-001 to 005 (Manager restriction, default credentials, shutdown port, AJP Ghostcat, sample apps); Node.js WEB-NODE-001 to 003 (end of life, inspector, production mode); Python WEB-PY-001 to 005 (Django DEBUG, ALLOWED_HOSTS, generated SECRET_KEY, Flask/Werkzeug debugger, development servers); CMS WEB-CMS-004 to 011 (configuration permissions, WordPress debug display, file editor and automatic updates, Joomla debug and version manifest, Drupal changelog).
+- New read-only collectors for systemd units with drop-ins, ufw, nftables and iptables allow rules, Tomcat installations, Django settings and CMS configuration; `node --version` added to the read-only command allow-list.
+- Academy modules P11 (systemd), P12 (firewall policy versus listeners), P13 (Tomcat, Node.js, Python) and P14 (CMS hardening), seven new glossary terms; vulnerable and hardened labs extended so every new check is proven both ways.
+
 ### Vulnerability Management and Containers
 - Offline vulnerability matching: HOST-CVE-001 to 003 and WEB-CVE-001, Debian and RPM version comparison, inventory of OS packages and web libraries, release-time snapshot from OSV and CISA KEV (OpenAI Codex, GPT-6; reviewed and corrected by Claude).
 - Docker and Kubernetes host checks HOST-CTR-001 to 004 and HOST-K8S-001 to 003; Academy modules P9 and P10 (Claude).

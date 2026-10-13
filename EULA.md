@@ -1,22 +1,22 @@
 # End User Licence Agreement
 
-Version 1.2, effective 2026-10-13. Acknowledgements version 1.1. This agreement is a draft. It has been reviewed by an AI system acting as a legal reviewer, but **not yet by a human lawyer**; it is awaiting review by a licensed Malaysian advocate and solicitor. Please read it in full. It is written to be plain, honest and complete.
+Version 1.3, effective 2026-10-13. Acknowledgements version 1.2. This Agreement was drafted by AI and reviewed by an AI system acting as the project's legal reviewer; **no human lawyer drafted or reviewed it** (see section 28). Please read it in full. It is written to be plain, honest and complete.
 
 This End User Licence Agreement ("Agreement") applies to everyone who downloads, builds, installs, copies or uses OpenVAPT, including its source code, compiled programs, documentation and website (together, the "Software"). If you do not agree, do not download or use the Software.
 
 ## 1. Who We Are
 
-"We", "us" and "the developers" mean the individual who owns and runs the OpenVAPT project, together with every person who has contributed to it. "You" means the individual, and any organisation on whose behalf that individual acts, who downloads or uses the Software.
+"We", "us" and "the developers" mean OpenVAPT, meaning the individual who owns and runs the project and publishes it under that name, together with every person who has contributed to it. "You" means the individual, and any organisation on whose behalf that individual acts, who downloads or uses the Software.
 
-"The OpenVAPT Project" is the name under which the project is published. It is not a company, partnership, society or any other legal entity. The licensor of the Software is the individual who owns and runs the project, who currently chooses not to be named publicly. References to "we" are made by that individual and for the benefit of every contributor.
+"OpenVAPT" is the name of the project and the name under which its rights are held and the Software is licensed. It is not a company, partnership, society or any other legal entity. The licensor of the Software is the individual who owns and runs the project and publishes it as OpenVAPT. References to "we" are made by that individual and for the benefit of every contributor.
 
 ## 2. Definitions
 
-**Own Use** means use by you, for your own personal purposes or for the internal purposes of your own organisation, on machines that you or your organisation own or control. Business use within your own organisation is Own Use.
+**Own Use** means (a) downloading the Software to computers and servers that you own or control and running it there for your own personal testing and learning, or (b) running it on computers and servers that your company or organisation owns or controls, to test those same machines for the organisation's own internal purposes, where the organisation has authorised you to do so. Business use within your own organisation is Own Use. Own Use never includes selling the Software or providing any service with it.
 
-**Commercial Exploitation** means selling, renting, licensing or distributing the Software for payment, including it in a product or service for others, or using it to provide any service to anyone other than yourself or your own organisation, whether paid or unpaid.
+**Commercial Exploitation** means selling, renting, licensing or distributing the Software for payment or any other benefit; including it in a product or service for others; or using the Software, or anything from or produced by it (including its reports, code and course material), to provide any service to anyone other than yourself or your own organisation, whether paid or unpaid. Examples are security consulting, scanning or assessing machines for clients, a hosted or managed service, and selling or supplying reports to others.
 
-**Not a business.** The OpenVAPT Project is not a business. It does not carry on business, trade or commerce, sells nothing, earns nothing, accepts no payments or donations, and offers no services, support or advice. Your permitted Own Use within your own organisation does not make the project a supplier to you.
+**Not a business.** OpenVAPT is not a business. It does not carry on business, trade or commerce, sells nothing, earns nothing, accepts no payments or donations of any kind, and offers no services, support or advice. Your permitted Own Use within your own organisation does not make the project a supplier to you or to your organisation. Because the Software is given free of charge and not in the course of any business, we believe it is not a supply of goods or services in trade under the Consumer Protection Act 1999; where any law still implies a guarantee that cannot be excluded, section 14.4 applies.
 
 ## 3. Academic Purpose
 
@@ -36,9 +36,9 @@ Before downloading, and again before every scan, you must read, study, understan
 6. I acknowledge, agree to and accept that I use OpenVAPT 100% at my own risk, and that I alone am responsible for every risk and every consequence, including damage, data loss, downtime, security incidents and legal liability.
 7. I agree that the developers and contributors provide OpenVAPT as is, without any warranty, and accept no responsibility or liability of any kind, to the fullest extent the law allows.
 8. I am solely responsible for complying with all laws that apply to me, including the Computer Crimes Act 1997 and the Cyber Security Act 2024 in Malaysia, and the laws of my own country.
-9. I understand that OpenVAPT's code, documentation, website and legal texts were generated by AI systems under the direction of the project owner, may contain mistakes, and have not been independently audited by a human security expert or reviewed by a lawyer.
+9. I understand that OpenVAPT's code, documentation, website and legal texts were generated and reviewed by AI systems under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.
 
-These statements are version 1.1 of the acknowledgements. The version shown by `openvapt terms` is the one you accept for that copy of the tool.
+These statements are version 1.2 of the acknowledgements. The version shown by `openvapt terms` is the one you accept for that copy of the tool.
 
 The website asks you to tick each statement before showing the download instructions. Before every scan, the tool shows the statements and asks you to type `I ACCEPT`, unless you run it with the `--accept-terms` option, which is intended for automated use. Using `--accept-terms` means that you, or the person who set up the automation, have read and accept every statement. Neither the website nor the tool stores or sends your answer anywhere.
 
@@ -72,17 +72,17 @@ The licence texts set out your copyright permissions. This Agreement sets out ad
 
 So that you can decide with full information, this is everything the Software does when you run a scan:
 
-1. It reads configuration and system information on the machine it runs on, which may include sensitive files such as `/etc/passwd`, `/etc/shadow` (when run as root), sudo rules, SSH and web server configuration, kernel parameters and package lists.
-2. It runs a fixed list of read-only commands, including `sshd -T`, `apt-get -s upgrade` (simulation only), `dnf` or `yum updateinfo`, firewall status commands, `systemctl is-active`, `php -v` and `php -r` limited to reading configuration values. The full list is in the source code, and `openvapt scan --dry-run` previews every action.
-3. It sends ordinary HTTP GET requests and TLS handshakes to the websites and services on the same machine, only through loopback addresses (127.0.0.0/8 and ::1), including requests for a short list of fixed paths such as `/.git/HEAD`, `/.env` and `/phpinfo.php` to see whether they are exposed. These requests may appear in your web server logs and may trigger your security tools.
+1. It reads files and system information on the machine it runs on, for pattern matching only. These may include sensitive files such as `/etc/passwd`, `/etc/shadow` (when run as root), sudo rules, SSH, firewall and web server configuration, systemd service unit files, kernel parameters, package lists, and application configuration files for stacks such as Apache Tomcat, Node.js, Django, Flask, WordPress, Joomla and Drupal, which can contain passwords or secret keys. The checks look only for weak settings and are designed never to copy secret values into a report.
+2. It runs only a fixed allow-list of read-only commands, including `sshd -T`, `apt-get -s upgrade` (simulation only), `dnf` or `yum updateinfo`, `rpm -qa`, firewall status commands (`nft`, `iptables`, `ip6tables`, `ufw`, `firewall-cmd`), `systemctl is-active` and `systemctl is-enabled`, `uname -r`, `node --version`, `php -v` and `php -r` limited to reading configuration values. It compares the firewall rules with the services that are actually listening. The full list is in the source code (`internal/sys`), and `openvapt scan --dry-run` previews every action.
+3. It sends ordinary HTTP GET requests and TLS handshakes to the websites and services on the same machine, only through loopback addresses (127.0.0.0/8 and ::1), including requests for a short list of fixed paths such as `/.git/HEAD`, `/.env`, `/phpinfo.php` and common administration pages to see whether they are exposed. These requests may appear in your web server logs and may trigger your security tools.
 4. It does not change, delete, install, restart, exploit, attack or brute-force anything, and in its unmodified form it makes no connection to any other machine.
 5. It uses CPU, memory and disk time while it runs. Each check has a time limit and work is bounded, but on a busy or fragile server even read-only activity can have side effects.
-6. It writes a report, which describes weaknesses of your machine, to a folder you choose, readable only by your user account. Secrets are redacted by pattern matching, which may not catch everything. Protecting and sharing the report is your responsibility.
+6. It writes a report, which describes weaknesses of your machine, to a folder you choose, readable only by your user account. As a second safeguard, the report is also redacted by pattern matching, which may not catch everything. Protecting and sharing the report is your responsibility.
 7. If you enable signing (the default), it creates a private key on your machine in your user configuration folder (for root, under root's home). Keep it private.
 
 ## 9. How OpenVAPT Is Made (AI-Generated)
 
-All of the Software, including its design, code, tests, documentation, website, course material and these legal drafts, was **generated by AI systems**, directed and approved by the human project owner, who decides what is built and published but has not hand-written the code. The AI systems used are listed in `AI-DISCLOSURE.md`: Claude (by Anthropic, through Claude Code) produced the work, and OpenAI Codex reviewed the code and proposed and implemented fixes. A further AI review of these legal documents was carried out by Claude acting as a legal reviewer. **No independent human security expert has audited the code, and no human lawyer has yet reviewed these documents.** AI-generated work can contain mistakes, including security and legal mistakes. The full source code, tests and history are public so that anyone can review them. Commits made with AI assistance carry a `Co-Authored-By` line.
+All of the Software, including its design, code, tests, documentation, website, course material and these legal drafts, was **generated by AI systems**, directed and approved by the human project owner, who decides what is built and published but has not hand-written the code. The AI systems used are listed in `AI-DISCLOSURE.md`: Claude (by Anthropic, through Claude Code) produced the work, and OpenAI Codex reviewed the code and proposed and implemented fixes. These legal documents were reviewed by Claude acting as the project's legal reviewer (an AI lawyer). **No independent human security expert has audited the code, and no human lawyer has drafted or reviewed these documents.** AI-generated work can contain mistakes, including security and legal mistakes. The full source code, tests and history are public so that anyone can review them. Commits made with AI assistance carry a `Co-Authored-By` line.
 
 Because parts of the Software were generated by AI, copyright may not exist in some parts under the laws of some countries. The licence and this Agreement apply to the Software to the extent that copyright and other rights exist in it. Your promises in this Agreement, including the promise not to sell the Software or use it to provide services, apply to all of the Software regardless of whether copyright exists in any particular part.
 
@@ -92,7 +92,7 @@ The compiled program contains only OpenVAPT's own code and the Go standard libra
 
 ## 11. The Operator and Notices
 
-The person who runs the project currently chooses not to be named publicly. The project has no email address and no postal address.
+OpenVAPT is run by its project owner. The project publishes no email address and no postal address; it is contacted through GitHub only.
 
 **Notices.** You agree that we may give you any notice about the Software or this Agreement, including a notice under the "Violations" section of the licence, by (a) posting it in a GitHub Issue, Discussion or security advisory in the repository at github.com/OpenVAPT/openvapt, or (b) commenting on, or replying to, any GitHub issue, pull request, discussion or repository where you are involved. A notice is treated as received when it is posted. You may give notice to us by opening a public GitHub Discussion (never including secrets or personal data) or, for security flaws, through GitHub Private Vulnerability Reporting. We are not obliged to reply.
 
@@ -131,7 +131,7 @@ You are responsible for complying with all export control, sanctions and trade l
 
 ## 19. Name and Endorsement
 
-"OpenVAPT" and the OpenVAPT logo identify this project. They are not registered trademarks, but you may not use them in a way that suggests that a product, service, report, certificate or organisation is provided, approved, certified or endorsed by the OpenVAPT Project or its developers. You may use the name to refer accurately to the Software, for example "assessed with OpenVAPT, an academic tool". A modified version must not be called OpenVAPT without clearly saying it is modified.
+"OpenVAPT" and the OpenVAPT logo identify this project. They are not registered trademarks, but you may not use them in a way that suggests that a product, service, report, certificate or organisation is provided, approved, certified or endorsed by OpenVAPT or its developers. You may use the name to refer accurately to the Software, for example "assessed with OpenVAPT, an academic tool". A modified version must not be called OpenVAPT without clearly saying it is modified.
 
 ## 20. Contributions and Feedback
 
@@ -149,7 +149,7 @@ This Agreement is governed by the laws of Malaysia. The courts of Malaysia have 
 
 ## 23. Assignment
 
-You may not transfer your rights or obligations under this Agreement to anyone else. We may transfer the project, the Software and our rights and obligations under this Agreement to another person or organisation, including a company or non-profit body formed to look after the project. If we do, this Agreement continues to apply between you and the new owner.
+You may not transfer your rights or obligations under this Agreement to anyone else. We may transfer the project, the Software and our rights and obligations under this Agreement to another person or organisation, including a company or other body formed to look after the project. If we do, this Agreement continues to apply between you and the new owner.
 
 ## 24. No Waiver
 
@@ -167,9 +167,9 @@ Headings are for convenience only and do not affect meaning; "including" and sim
 
 We may update this Agreement. Each version is dated and kept in the public Git history. The version in force when you obtain a copy of the Software applies to that copy, and the version shown when you accept in the tool applies to that use.
 
-## 28. Legal Review Status
+## 28. How This Agreement Was Reviewed
 
-This Agreement was drafted by AI in good faith and reviewed by an AI legal reviewer. It is awaiting review by a licensed Malaysian advocate and solicitor before the public launch at openvapt.com. Its wording may change.
+This Agreement was drafted by AI in good faith and reviewed by an AI system acting as the project's legal reviewer (an AI lawyer). No human lawyer drafted or reviewed it, and it is not approved by any human lawyer. Nothing in it is legal advice to you; if you need legal advice, consult your own qualified lawyer. Its wording may change; every version is dated and kept in the public Git history.
 
 ## 29. Whole Agreement and Severability
 

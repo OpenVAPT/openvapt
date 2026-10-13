@@ -109,8 +109,12 @@ func registerMailChecks() {
 	})
 }
 
+// adminPorts are administrative, orchestration, monitoring and remote
+// desktop services (vendor documentation and the IANA registry).
+var adminPorts = map[int]string{2375: "Docker API without TLS", 2376: "Docker API", 6443: "Kubernetes API", 10250: "Kubelet API", 2379: "etcd client API", 8500: "Consul HTTP API", 9100: "Prometheus Node Exporter", 15672: "RabbitMQ Management", 10000: "Webmin", 2083: "cPanel", 2087: "WHM", 5900: "VNC", 3389: "RDP", 161: "SNMP"}
+
 func registerExposureChecks() {
-	ports := map[int]string{2375: "Docker API without TLS", 2376: "Docker API", 6443: "Kubernetes API", 10250: "Kubelet API", 2379: "etcd client API", 8500: "Consul HTTP API", 9100: "Prometheus Node Exporter", 15672: "RabbitMQ Management", 10000: "Webmin", 2083: "cPanel", 2087: "WHM", 5900: "VNC", 3389: "RDP", 161: "SNMP"}
+	ports := adminPorts
 	check.Register(&check.Check{
 		ID:        "NET-SVC-002",
 		Title:     "Administrative Service Ports Network-Reachable",
