@@ -7,7 +7,7 @@ OpenVAPT runs read-only checks on the Linux machine it is installed on (and only
 > **Academic. Non-commercial. Built by AI Cybersecurity Engineers. Open, source-available code. Free to download and use, for your own personal or business use, 100% at your own risk.**
 > You may download and use OpenVAPT on computers and servers you own or control (or that your employer owns or controls and has authorised you to assess), for your own use. You may **not** sell it and you may **not** provide any service to anyone else with anything from or produced by OpenVAPT (no consulting, no scanning for clients, no hosted service, no reselling reports), paid or unpaid, even with their permission. The project itself is not a business and accepts no payments or donations. It comes as is, with no warranty, and the developers accept no responsibility for anything that happens.
 >
-> **All of OpenVAPT was researched, developed and built by AI Cybersecurity Engineers** (Claude by Anthropic through Claude Code, with code review and fixes by OpenAI Codex), directed and approved by the human project owner. It has not been audited by an independent human security expert. The legal documents were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. See [AI-DISCLOSURE.md](AI-DISCLOSURE.md).
+> **All of OpenVAPT was researched, developed and built by AI Cybersecurity Engineers** (Claude by Anthropic through Claude Code, with code review, fixes and some checks and components built by OpenAI Codex), directed and approved by the human project owner. It has not been audited by an independent human security expert. The legal documents were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. See [AI-DISCLOSURE.md](AI-DISCLOSURE.md).
 >
 > AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude Code, and OpenAI Codex) acting in a cyber security engineering role. They are not people, not registered or professional engineers, and provide no professional engineering or security service.
 
@@ -15,9 +15,9 @@ OpenVAPT runs read-only checks on the Linux machine it is installed on (and only
 
 ## Read and Accept Before Use
 
-Before downloading or running OpenVAPT, read, study and understand the [EULA](EULA.md), [Disclaimer](DISCLAIMER.md), [Acceptable Use Policy](ACCEPTABLE_USE.md) and [Licence](LICENSING.md). By downloading, building or using it, you acknowledge, agree to and accept every statement below. The tool shows the same statements before every scan and continues only when you type `I ACCEPT`, or when you pass `--accept-terms` for automation, which counts as the same acceptance.
+Before downloading or running OpenVAPT, read, study and understand the [EULA](EULA.md), [Disclaimer](DISCLAIMER.md), [Acceptable Use Policy](ACCEPTABLE_USE.md), [Licence](LICENSING.md), [Teaching With OpenVAPT](TEACHING.md) and [Citing OpenVAPT](CITING.md). By downloading, building or using it, you acknowledge, agree to and accept every statement below. The tool shows the same statements before every scan and continues only when you type `I ACCEPT`, or when you pass `--accept-terms` for automation, which counts as the same acceptance.
 
-1. I have read, studied and understood the End User Licence Agreement, the Disclaimer, the Acceptable Use Policy and the Licence.
+1. I have read, studied and understood the End User Licence Agreement, the Disclaimer, the Acceptable Use Policy, the Licence, the Teaching With OpenVAPT terms and Citing OpenVAPT.
 2. I understand that OpenVAPT is an academic, non-commercial project made for learning, and that it is not a penetration test, an audit, a certification, a service or professional advice.
 3. I will download and use OpenVAPT only for my own use, personal or business, and only on computers and servers that I own or control, or that my employer owns or controls and has authorised me to assess.
 4. I will not sell OpenVAPT, include it in a product, or use it to provide services of any kind to anyone else, paid or unpaid.
@@ -26,6 +26,7 @@ Before downloading or running OpenVAPT, read, study and understand the [EULA](EU
 7. I agree that OpenVAPT is a free gift from people who are not in business, provided as is, without any warranty, and that, to the fullest extent the law allows, the developers and contributors owe me no duty and accept no responsibility or liability of any kind, and I release them from every claim.
 8. I am solely responsible for complying with all laws that apply to me, including the Computer Crimes Act 1997 and the Cyber Security Act 2024 in Malaysia, and the laws of my own country.
 9. I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI Cybersecurity Engineers (AI systems, not people or registered engineers) under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.
+10. I am at least 18 years old (or the age of majority where I live), or my parent or guardian has read these statements and accepts them for me in their own name; and where I act for an organisation, I am authorised to bind it.
 
 Website: https://openvapt.com (generated from this repository; every check page cites its source file and line numbers). Every component, standard, source and AI tool used is credited in [CREDITS.md](CREDITS.md).
 
@@ -130,7 +131,7 @@ OpenVAPT and openvapt.com collect no data. See [PRIVACY.md](PRIVACY.md).
 
 ## Licence
 
-OpenVAPT Source-Available Licence 1.2 (`LicenseRef-OpenVAPT-SAL-1.2`, file [LICENSE](LICENSE)): Own Use only, no services, no selling, credit required when you copy, quote, adapt or present OpenVAPT material. Source-available, not OSI open source. See [LICENSING.md](LICENSING.md).
+OpenVAPT Source-Available Licence 1.3 (`LicenseRef-OpenVAPT-SAL-1.3`, file [LICENSE](LICENSE)): Own Use only, no services, no selling, credit required when you copy, quote, adapt or present OpenVAPT material. Source-available, not OSI open source. See [LICENSING.md](LICENSING.md).
 
 ## Citing OpenVAPT
 
