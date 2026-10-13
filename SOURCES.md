@@ -2,7 +2,7 @@
 
 Generated from the code by `internal/sources` (regenerate with `go test ./internal/sources -update`); do not edit by hand. Every reference that any check or Academy module cites is listed here, grouped by publisher, with the publisher's terms and any credit line those terms ask for. OpenVAPT cites sources by title, identifier and link; it does not copy their text. Use of a source does not imply that its publisher endorses OpenVAPT.
 
-Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Academy modules.
+Totals: 184 distinct sources from 32 publishers, cited by 201 checks and 23 Academy modules.
 
 ## NIST (National Institute of Standards and Technology)
 
@@ -14,16 +14,17 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [NIST SP 800-115, Technical Guide to Information Security Testing and Assessment](https://csrc.nist.gov/pubs/sp/800/115/final) | Academy A1, Academy A3, Academy F2, NET-FW-006, NET-LSN-001 |
 | [NIST SP 800-119, Guidelines for the Secure Deployment of IPv6](https://csrc.nist.gov/pubs/sp/800/119/final) | NET-FW-002 |
 | [NIST SP 800-12 Rev. 1, An Introduction to Information Security](https://csrc.nist.gov/pubs/sp/800/12/r1/final) | Academy F1 |
-| [NIST SP 800-123, Guide to General Server Security](https://csrc.nist.gov/pubs/sp/800/123/final) | Academy P1, HOST-FS-001, HOST-FS-003, HOST-SSH-001, HOST-SVC-001, HOST-SYSD-001, NET-SVC-001 |
+| [NIST SP 800-123, Guide to General Server Security](https://csrc.nist.gov/pubs/sp/800/123/final) | Academy P1, Academy P22, HOST-FS-001, HOST-FS-003, HOST-SSH-001, HOST-SVC-001, HOST-SVC-002, HOST-SVC-003, HOST-SVC-004, HOST-SVC-005, HOST-SVC-006, HOST-SVC-007, HOST-SVC-008, HOST-SVC-009, HOST-SVC-010, HOST-SVC-011, HOST-SVC-012, HOST-SYSD-001, NET-SVC-001 |
 | [NIST SP 800-131A Rev. 2, Transitioning Cryptographic Algorithms](https://csrc.nist.gov/pubs/sp/800/131/a/r2/final) | HOST-SSH-004, NET-TLS-005 |
+| [NIST SP 800-161 Rev. 1, Cybersecurity Supply Chain Risk Management Practices](https://csrc.nist.gov/pubs/sp/800/161/r1/upd1/final) | HOST-PKG-003 |
 | [NIST SP 800-190, Application Container Security Guide](https://csrc.nist.gov/pubs/sp/800/190/final) | Academy P9, HOST-CTR-002, HOST-CTR-003, HOST-CTR-004 |
 | [NIST SP 800-30 Rev. 1, Guide for Conducting Risk Assessments](https://csrc.nist.gov/pubs/sp/800/30/r1/final) | Academy F1 |
-| [NIST SP 800-40 Rev. 4, Guide to Enterprise Patch Management Planning](https://csrc.nist.gov/pubs/sp/800/40/r4/final) | Academy A2, Academy P1, HOST-PKG-001, HOST-UPD-001, HOST-UPD-002 |
+| [NIST SP 800-40 Rev. 4, Guide to Enterprise Patch Management Planning](https://csrc.nist.gov/pubs/sp/800/40/r4/final) | Academy A2, Academy P1, Academy P22, HOST-PKG-001, HOST-PKG-002, HOST-PKG-003, HOST-PKG-004, HOST-PKG-005, HOST-PKG-006, HOST-UPD-001, HOST-UPD-002 |
 | [NIST SP 800-41 Rev. 1, Guidelines on Firewalls and Firewall Policy](https://csrc.nist.gov/pubs/sp/800/41/r1/final) | Academy P12, Academy P3, NET-FW-001, NET-FW-003, NET-FW-004, NET-FW-005, NET-FW-006 |
 | [NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations](https://csrc.nist.gov/pubs/sp/800/52/r2/final) | Academy P4, NET-TLS-001, NET-TLS-002, NET-TLS-003, NET-TLS-004 |
-| [NIST SP 800-53 Rev. 5, Security and Privacy Controls](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | HOST-IDS-001, HOST-PWD-004, HOST-TIME-001, HOST-USR-001 |
-| [NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html) | Academy P7, HOST-PWD-001, HOST-PWD-002, HOST-PWD-003, HOST-PWD-005, HOST-SSH-002 |
-| [NIST SP 800-92, Guide to Computer Security Log Management](https://csrc.nist.gov/pubs/sp/800/92/final) | HOST-LOG-001, HOST-LOG-003 |
+| [NIST SP 800-53 Rev. 5, Security and Privacy Controls](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) | Academy P21, Academy P22, HOST-AUD-002, HOST-AUD-003, HOST-AUD-004, HOST-AUD-005, HOST-AUD-006, HOST-AUD-007, HOST-IDS-001, HOST-PAM-002, HOST-PAM-003, HOST-PAM-007, HOST-PAM-008, HOST-PAM-009, HOST-PKG-005, HOST-PWD-004, HOST-TIME-001, HOST-USR-001 |
+| [NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html) | Academy P22, Academy P7, HOST-PAM-001, HOST-PAM-004, HOST-PAM-005, HOST-PAM-006, HOST-PWD-001, HOST-PWD-002, HOST-PWD-003, HOST-PWD-005, HOST-SSH-002 |
+| [NIST SP 800-92, Guide to Computer Security Log Management](https://csrc.nist.gov/pubs/sp/800/92/final) | Academy P21, HOST-AUD-001, HOST-AUD-002, HOST-AUD-003, HOST-AUD-004, HOST-AUD-005, HOST-AUD-006, HOST-AUD-007, HOST-AUD-008, HOST-AUD-009, HOST-AUD-010, HOST-AUD-011, HOST-LOG-001, HOST-LOG-003 |
 | [NIST Transitioning Away from SHA-1](https://csrc.nist.gov/News/2022/nist-transitioning-away-from-sha-1-for-all-apps) | NET-TLS-006 |
 | [NVD](https://nvd.nist.gov/) | HOST-CVE-001, HOST-CVE-002, HOST-CVE-003, WEB-CVE-001 |
 | [NVD, CVE-2018-7600](https://nvd.nist.gov/vuln/detail/cve-2018-7600) | WEB-CMS-011 |
@@ -38,11 +39,13 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | Source | Cited By |
 |---|---|
 | [CVE Program](https://www.cve.org/) | Academy F3 |
+| [MITRE ATT&CK T1040, Network Sniffing](https://attack.mitre.org/techniques/T1040/) | HOST-SVC-002, HOST-SVC-003, HOST-SVC-005, HOST-SVC-006 |
 | [MITRE ATT&CK T1053.003, Cron](https://attack.mitre.org/techniques/T1053/003/) | HOST-FS-005 |
 | [MITRE ATT&CK T1543.002, Create or Modify System Process: Systemd Service](https://attack.mitre.org/techniques/T1543/002/) | Academy P11, HOST-SYSD-003 |
 | [MITRE ATT&CK T1548, Abuse Elevation Control Mechanism](https://attack.mitre.org/techniques/T1548/) | Academy P7 |
 | [MITRE ATT&CK T1548.001, Setuid and Setgid](https://attack.mitre.org/techniques/T1548/001/) | HOST-FS-004 |
 | [MITRE ATT&CK T1552.001, Unsecured Credentials: Credentials In Files](https://attack.mitre.org/techniques/T1552/001/) | HOST-USR-007 |
+| [MITRE ATT&CK T1574.007, Hijack Execution Flow: Path Interception by PATH Environment Variable](https://attack.mitre.org/techniques/T1574/007/) | HOST-PAM-008 |
 | [MITRE ATT&CK T1574.010, Hijack Execution Flow: Services File Permissions Weakness](https://attack.mitre.org/techniques/T1574/010/) | HOST-SYSD-004 |
 | [MITRE CWE](https://cwe.mitre.org/) | Academy F3 |
 
@@ -168,6 +171,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | [Linux kernel documentation, IP sysctl](https://docs.kernel.org/networking/ip-sysctl.html) | HOST-KRN-005, HOST-KRN-006, HOST-KRN-007, HOST-KRN-008, HOST-KRN-013, HOST-KRN-014, HOST-KRN-015, HOST-KRN-016, HOST-KRN-017 |
 | [Linux kernel documentation, Linux Security Module development and LSMs](https://docs.kernel.org/admin-guide/LSM/index.html) | HOST-MAC-001 |
 | [Linux kernel documentation, Yama LSM](https://docs.kernel.org/admin-guide/LSM/Yama.html) | HOST-KRN-010 |
+| [NFS security, Linux kernel documentation (exports and rpcbind)](https://docs.kernel.org/filesystems/nfs/index.html) | HOST-SVC-008 |
 
 ## Linux Manual Pages (man7.org, Ubuntu and Debian Manpages)
 
@@ -176,22 +180,34 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 | Source | Cited By |
 |---|---|
 | [Linux exports(5)](https://man7.org/linux/man-pages/man5/exports.5.html) | NET-DB-008 |
-| [auditd(8), Linux man-pages](https://man7.org/linux/man-pages/man8/auditd.8.html) | HOST-LOG-002 |
+| [apt-get(8), Debian trixie manual pages (autoremove)](https://manpages.debian.org/trixie/apt/apt-get.8.en.html) | HOST-PKG-004 |
+| [apt-secure(8), Debian manual pages](https://manpages.debian.org/trixie/apt/apt-secure.8.en.html) | HOST-PKG-002 |
+| [auditctl(8), Linux man-pages](https://man7.org/linux/man-pages/man8/auditctl.8.html) | Academy P21, HOST-AUD-002, HOST-AUD-003, HOST-AUD-004, HOST-AUD-005, HOST-AUD-006, HOST-AUD-007 |
+| [auditd(8), Linux man-pages](https://man7.org/linux/man-pages/man8/auditd.8.html) | HOST-AUD-001, HOST-LOG-002 |
+| [auditd.conf(5), Linux man-pages](https://man7.org/linux/man-pages/man5/auditd.conf.5.html) | HOST-AUD-008, HOST-AUD-009 |
 | [chmod(1), Linux man-pages (restricted deletion flag)](https://man7.org/linux/man-pages/man1/chmod.1.html) | HOST-FS-002 |
 | [crontab(5), Linux man-pages](https://man7.org/linux/man-pages/man5/crontab.5.html) | HOST-FS-005 |
 | [crypt(5), libxcrypt, Debian trixie manual pages (hashing methods)](https://manpages.debian.org/trixie/libcrypt-dev/crypt.5.en.html) | HOST-PWD-002 |
-| [login.defs(5), Linux man-pages](https://man7.org/linux/man-pages/man5/login.defs.5.html) | HOST-FS-009, HOST-PWD-001, HOST-PWD-005 |
+| [dnf.conf(5), Ubuntu noble manual pages (gpgcheck)](https://manpages.ubuntu.com/manpages/noble/en/man5/dnf.conf.5.html) | HOST-PKG-002 |
+| [login.defs(5), Linux man-pages](https://man7.org/linux/man-pages/man5/login.defs.5.html) | HOST-FS-009, HOST-PAM-005, HOST-PAM-006, HOST-PWD-001, HOST-PWD-005 |
 | [logrotate(8), Linux man-pages](https://man7.org/linux/man-pages/man8/logrotate.8.html) | HOST-LOG-004 |
 | [mount(8), Linux man-pages (nodev, nosuid, noexec)](https://man7.org/linux/man-pages/man8/mount.8.html) | HOST-FS-008 |
 | [nologin(8), Linux man-pages](https://man7.org/linux/man-pages/man8/nologin.8.html) | HOST-USR-005 |
 | [nsswitch.conf(5), Linux man-pages (compat mode)](https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html) | HOST-USR-006 |
-| [pam_faillock(8), Linux-PAM](https://man7.org/linux/man-pages/man8/pam_faillock.8.html) | HOST-PWD-004 |
+| [pam.conf(5), Linux man-pages (PAM configuration)](https://man7.org/linux/man-pages/man5/pam.conf.5.html) | Academy P22 |
+| [pam_faillock(8), Linux-PAM](https://man7.org/linux/man-pages/man8/pam_faillock.8.html) | HOST-PAM-002, HOST-PWD-004 |
+| [pam_pwhistory(8), Linux-PAM](https://man7.org/linux/man-pages/man8/pam_pwhistory.8.html) | HOST-PAM-004 |
+| [pam_unix(8), Linux-PAM](https://man7.org/linux/man-pages/man8/pam_unix.8.html) | HOST-PAM-004 |
+| [pam_wheel(8), Linux-PAM](https://man7.org/linux/man-pages/man8/pam_wheel.8.html) | HOST-PAM-003 |
 | [passwd(5), Linux man-pages](https://man7.org/linux/man-pages/man5/passwd.5.html) | HOST-USR-001, HOST-USR-004 |
 | [proc_net(5), Linux man-pages](https://man7.org/linux/man-pages/man5/proc_net.5.html) | NET-LSN-001 |
-| [pwquality.conf(5), libpwquality, Debian trixie manual pages](https://manpages.debian.org/trixie/libpwquality-common/pwquality.conf.5.en.html) | HOST-PWD-003 |
+| [pwquality.conf(5), libpwquality, Debian trixie manual pages](https://manpages.debian.org/trixie/libpwquality-common/pwquality.conf.5.en.html) | HOST-PAM-001, HOST-PWD-003 |
+| [rsyslog.conf(5), Debian trixie manual pages (forwarding actions)](https://manpages.debian.org/trixie/rsyslog/rsyslog.conf.5.en.html) | HOST-AUD-011 |
 | [shadow(5), Linux man-pages](https://man7.org/linux/man-pages/man5/shadow.5.html) | HOST-FS-001, HOST-USR-002 |
+| [sources.list(5), Debian manual pages](https://manpages.debian.org/trixie/apt/sources.list.5.en.html) | HOST-PKG-003 |
 | [ufw(8) manual (Ubuntu)](https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html) | NET-FW-003 |
 | [umask(2), Linux man-pages](https://man7.org/linux/man-pages/man2/umask.2.html) | HOST-FS-009 |
+| [useradd(8), Linux man-pages (default INACTIVE value)](https://man7.org/linux/man-pages/man8/useradd.8.html) | HOST-PAM-007 |
 
 ## OpenBSD (OpenSSH Manual Pages)
 
@@ -207,7 +223,8 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
-| [journald.conf(5)](https://www.freedesktop.org/software/systemd/man/latest/journald.conf.html) | HOST-LOG-001 |
+| [journal-upload.conf(5), systemd](https://www.freedesktop.org/software/systemd/man/latest/journal-upload.conf.html) | HOST-AUD-011 |
+| [journald.conf(5), systemd](https://www.freedesktop.org/software/systemd/man/latest/journald.conf.html) | Academy P21, HOST-AUD-010, HOST-LOG-001 |
 | [systemd, System and Service Credentials](https://systemd.io/CREDENTIALS/) | Academy P11, HOST-SYSD-005 |
 | [systemd-analyze(1), security verb](https://www.freedesktop.org/software/systemd/man/latest/systemd-analyze.html) | HOST-SYSD-002 |
 | [systemd.exec(5), execution environment configuration](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html) | Academy P11, HOST-SYSD-001, HOST-SYSD-002, HOST-SYSD-004, HOST-SYSD-005 |
@@ -219,6 +236,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 
 | Source | Cited By |
 |---|---|
+| [Bash Reference Manual, Bash Variables (TMOUT)](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html) | HOST-PAM-009 |
 | [GNU GRUB Manual, Security](https://www.gnu.org/software/grub/manual/grub/html_node/Security.html) | HOST-FS-006 |
 
 ## sudo Project
@@ -253,7 +271,7 @@ Totals: 166 distinct sources from 32 publishers, cited by 165 checks and 21 Acad
 |---|---|
 | [Debian Policy Manual, Version numbering](https://www.debian.org/doc/debian-policy/ch-controlfields.html#version) | Academy P10 |
 | [Debian releases and LTS](https://wiki.debian.org/LTS) | HOST-OS-001 |
-| [Debian, UnattendedUpgrades](https://wiki.debian.org/UnattendedUpgrades) | HOST-PKG-001, HOST-UPD-001 |
+| [Debian, UnattendedUpgrades](https://wiki.debian.org/UnattendedUpgrades) | HOST-PKG-001, HOST-PKG-006, HOST-UPD-001 |
 | [Red Hat Enterprise Linux life cycle](https://access.redhat.com/support/policy/updates/errata) | HOST-OS-001 |
 | [Ubuntu release cycle](https://ubuntu.com/about/release-cycle) | HOST-OS-001 |
 
