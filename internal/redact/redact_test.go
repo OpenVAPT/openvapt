@@ -75,7 +75,7 @@ func TestRedactKeepsOrdinaryText(t *testing.T) {
 		"https://example.com/docs/page.html",
 		"Listening on 127.0.0.1:443",
 		"price is $5 today",
-		"user@example.invalid wrote the report",
+		"the report was written by the operator on duty",
 		"Server: nginx/1.18.0 (Ubuntu)",
 		"sk-short",
 		"password is required",
