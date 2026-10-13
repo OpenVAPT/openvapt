@@ -142,7 +142,7 @@ jobs:
             git fetch -q origin main && git reset -q --hard origin/main
             go run ./cmd/channel promote "$TARGET" --version "$VERSION" \
               --commit "$COMMIT" --ci-green --lab-pass --installer-e2e --signed "$SIGNED"
-            git add release/channels.json release/channels.txt
+            git add release/channels.json release/channels.txt CITATION.cff
             git commit -q -m "release: promote $VERSION to $TARGET"
             if git push -q origin HEAD:main; then exit 0; fi
             sleep $((attempt * 10))

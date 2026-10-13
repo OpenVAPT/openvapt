@@ -32,6 +32,7 @@ func main() {
 	state := fs.String("state", "release/channels.json", "channel state file")
 	legal := fs.String("legal", "release/legal-review.json", "AI legal review record")
 	text := fs.String("text", "release/channels.txt", "plain channel list for the installer")
+	citation := fs.String("citation", "CITATION.cff", "citation file whose version follows the most advanced release")
 	head := fs.String("head", "", "commit at the tip of main (plan)")
 	commit := fs.String("commit", "", "commit that was verified (promote)")
 	ci := fs.Bool("ci-green", false, "CI passed on the commit")
@@ -126,11 +127,37 @@ func main() {
 		r := s.Promote(c, evidence(c, *commit, *ci, *lab, *inst), checks)
 		must(s.Save(*state))
 		must(os.WriteFile(*text, []byte(s.Text()), 0o644)) // #nosec G306 -- public release list
+		must(updateCitation(*citation, s))
 		fmt.Printf("Promoted %s to %s (%s)\n", r.Commit, channels.InfoFor(c).Name, r.Version)
 	default:
 		usage()
 	}
 }
+
+// updateCitation points CITATION.cff at the most advanced current release
+// (stable, then rc, beta, alpha), so academic citations name a real version.
+// internal/sources tests enforce the same rule.
+func updateCitation(path string, s *channels.State) error {
+	b, err := os.ReadFile(path) // #nosec G304 -- fixed repository file chosen by the operator
+	if err != nil {
+		return err
+	}
+	for _, c := range []channels.Channel{channels.Stable, channels.RC, channels.Beta, channels.Alpha} {
+		r, ok := s.Current[c]
+		if !ok {
+			continue
+		}
+		out := citationVersion.ReplaceAllString(string(b), `version: "`+strings.TrimPrefix(r.Version, "v")+`"`)
+		out = citationDate.ReplaceAllString(out, `date-released: "`+r.Date+`"`)
+		return os.WriteFile(path, []byte(out), 0o644) // #nosec G306 -- public citation file
+	}
+	return nil
+}
+
+var (
+	citationVersion = regexp.MustCompile(`(?m)^version: "[^"]*"`)
+	citationDate    = regexp.MustCompile(`(?m)^date-released: "[^"]*"`)
+)
 
 func summary(cs []channels.Check) string {
 	var failed []string

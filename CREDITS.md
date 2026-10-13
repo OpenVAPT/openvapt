@@ -60,9 +60,9 @@ Everything else in the repository (all Go code under `cmd/` and `internal/`, tem
 | staticcheck | 2025.1.1 | MIT | Static analysis in CI |
 | gosec | v2.22.0 | Apache-2.0 | Security static analysis in CI |
 | govulncheck | v1.1.4 | BSD 3-Clause | Known-vulnerability scanning in CI |
-| cosign (via sigstore/cosign-installer v3) | v3 action | Apache-2.0 | Keyless signing of release binaries |
+| cosign, installed by sigstore/cosign-installer v3.9.1 (pinned to commit 398d4b0) | as installed by that action | Apache-2.0 | Keyless signing of release binaries |
 | cyclonedx-gomod | v1.8.0 | Apache-2.0 | Software bill of materials for releases |
-| GitHub Actions: actions/checkout v4, actions/setup-go v5, actions/setup-node v4, actions/attest-build-provenance v2 | as listed | MIT | CI and release automation |
+| GitHub Actions: actions/checkout v4.4.0 (commit 11d5960), actions/setup-go v5.6.0 (40f1582), actions/setup-node v4.4.0 (49933ea), actions/attest-build-provenance v2.4.0 (e8998f9) | pinned by full commit SHA in `.github/workflows/` | MIT | CI and release automation |
 | Git, GitHub, GitHub CLI | current | various | Version control, hosting, repository settings |
 
 ## 5. Licence and Legal Texts Used
@@ -85,6 +85,10 @@ The licence, EULA, Disclaimer, Privacy Policy and Acceptable Use Policy are orig
 | FIRST CVSS v3.1 Specification | Severity scale and representative base vectors for every check |
 | OWASP Top 10 (2021) | Check mapping |
 | OWASP Application Security Verification Standard (ASVS) 4.0.3 | Check mapping |
+| OWASP Web Security Testing Guide (WSTG) | Check mapping |
+| CIS Critical Security Controls v8 (Center for Internet Security, CC BY-NC-ND 4.0) | Each of the 10 control categories (and so every check, through its category) is mapped to CIS Control numbers, at control level and deliberately not per safeguard; numbers only, no CIS text is reproduced (`internal/check/category.go`) |
+| NIST Cybersecurity Framework (CSF) 2.0 | Each control category is mapped to CSF 2.0 Category identifiers such as PR.AA (`internal/check/category.go`) |
+| MITRE ATT&CK | Technique pages cited as references on persistence, privilege and credential checks (see SOURCES.md) |
 | MITRE Common Weakness Enumeration (CWE) | Check mapping and links |
 | NIST SP 800-53 Rev. 5 | Control mapping |
 | OASIS SARIF 2.1.0 | SARIF report format |
@@ -95,14 +99,18 @@ The licence, EULA, Disclaimer, Privacy Policy and Acceptable Use Policy are orig
 
 ## 7. Sources Cited by Checks and the Academy
 
-Each check cites at least one public source on its own page (`openvapt explain <ID>` or the website check page). Each Academy module lists its references. The sources include:
+The complete list is in [SOURCES.md](SOURCES.md). It is generated from the code by `internal/sources`, so it always names every reference that every check and Academy module cites, grouped by publisher, with which checks cite it. A test fails the build if SOURCES.md is stale, or if a check cites a website whose publisher, terms and credit line are not recorded.
 
-- NIST Special Publications: 800-12 Rev. 1, 800-30 Rev. 1, 800-40 Rev. 4, 800-41 Rev. 1, 800-52 Rev. 2, 800-53 Rev. 5, 800-63B, 800-92, 800-115, 800-123, 800-131A Rev. 2 (https://csrc.nist.gov/).
-- IETF RFCs: 6125, 6265, 6797, 8996, 9142 (https://www.rfc-editor.org/).
-- OWASP: Top 10, ASVS, Web Security Testing Guide, Cheat Sheet Series (Content Security Policy, Clickjacking Defense, Database Security, HTTP Headers, PHP Configuration, Secrets Management, Session Management, Transport Layer Security), Secure Headers Project (https://owasp.org/).
-- MITRE: CWE (https://cwe.mitre.org/), ATT&CK techniques T1053.003 and T1548.001 (https://attack.mitre.org/).
-- The CVE Program (https://www.cve.org/) and the Penetration Testing Execution Standard (http://www.pentest-standard.org/).
-- Linux and software manuals: Linux man-pages (passwd(5), shadow(5), crontab(5), chmod(1), auditd(8), proc_net(5)), Linux kernel documentation (sysctl kernel, fs and IP), OpenBSD sshd_config(5), sudoers(5), systemd journald.conf(5), Apache HTTP Server documentation (ServerTokens, Options, mod_status), PHP manual (ini directives, phpinfo), nftables wiki, Redis security documentation, WordPress hardening and brute force guides, MDN Web Docs (HTTP headers), Let's Encrypt FAQ.
+### 7b. Credit Lines Required by Publishers
+
+OpenVAPT cites these sources by title, identifier and link and does not copy their text. Some publishers ask for, and for others it is good practice to give, the following acknowledgements. Use of a source does not imply that its publisher endorses OpenVAPT.
+
+- **The MITRE Corporation:** © The MITRE Corporation. ATT&CK®, CVE® and CWE™ are trademarks of The MITRE Corporation. ATT&CK technique identifiers, CWE identifiers and CVE identifiers are used under MITRE's published terms of use.
+- **FIRST:** CVSS is owned by FIRST.Org, Inc. (Forum of Incident Response and Security Teams) and is used under the terms FIRST publishes for public use of CVSS, with attribution and a link to https://www.first.org/cvss/. FIRST does not endorse OpenVAPT. OpenVAPT applies the CVSS v3.1 scale and vectors as representative scores; they are not official scores.
+- **Center for Internet Security:** CIS Controls® v8 is © Center for Internet Security, Inc. and published under CC BY-NC-ND 4.0. OpenVAPT refers to CIS Control numbers only and reproduces no CIS text; CIS Benchmarks are named as topics only.
+- **OWASP Foundation:** OWASP Top 10, ASVS, WSTG and the Cheat Sheet Series are © OWASP Foundation and published under CC BY-SA 4.0.
+- **NIST:** NIST publications and CSF 2.0 are works of the U.S. Government, not subject to copyright in the United States; the NVD may include third-party content. Use does not imply endorsement by NIST.
+- **IETF:** RFCs are © IETF Trust and the persons identified as the document authors.
 
 ## 7a. Vulnerability Data
 
