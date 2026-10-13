@@ -36,6 +36,7 @@ import (
 	"github.com/openvapt/openvapt/internal/sys"
 	"github.com/openvapt/openvapt/internal/terms"
 	"github.com/openvapt/openvapt/internal/version"
+	"github.com/openvapt/openvapt/internal/vulndb"
 )
 
 // termsText renders the positioning and acknowledgements from package terms,
@@ -78,6 +79,17 @@ func main() {
 		err = cmdDiff(os.Args[2:])
 	case "verify":
 		err = cmdVerify(os.Args[2:])
+	case "vulndb":
+		db, e := vulndb.Embedded()
+		if e != nil {
+			err = e
+		} else {
+			fmt.Println(db.Notice())
+			fmt.Printf("Fixture: %t\nAdvisories: %d\nAffected: %d\n", db.Header.Fixture, db.Header.Counts.Advisories, db.Header.Counts.Affected)
+			for _, src := range db.Header.Sources {
+				fmt.Printf("%s - %s - licence: %s\n", src.Name, src.URL, src.Licence)
+			}
+		}
 	case "terms":
 		fmt.Print(termsText())
 	case "version", "--version", "-v":
@@ -120,6 +132,7 @@ Usage:
   openvapt learn [MODULE] [--quiz]  OpenVAPT Academy: learn VAPT from theory to application
   openvapt diff <old.json> <new.json>
   openvapt verify <report.json> [--key-id ID]
+  openvapt vulndb             Show offline snapshot details
   openvapt terms | version
 
 Run "openvapt scan -h" for scan flags. Nothing is ever sent off this machine.

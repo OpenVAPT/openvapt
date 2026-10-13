@@ -1,0 +1,12 @@
+sudo
+openssh-server
+policykit-1
+jquery
+components/jquery
+wordpress
+openssl
+apache2
+nginx
+lodash
+express
+symfony/http-foundation

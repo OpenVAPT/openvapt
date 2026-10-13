@@ -113,6 +113,7 @@ var allowed = [][]string{
 	{"php", "-r"}, // only used with ini_get() expressions
 	{"php", "-v"},
 	{"uname", "-r"},
+	{"rpm", "-qa", "--qf", "%{NAME}\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n"},
 }
 
 // IsAllowed reports whether a command line matches the allow-list.
