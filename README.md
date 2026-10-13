@@ -58,7 +58,7 @@ Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, 
 
 ## What It Covers
 
-58 checks in three domains: server (OS support, patches, SSH, accounts, sudo, file permissions, SUID, cron, kernel hardening, logging, audit, time), network (listening services, exposed databases, cleartext services, host firewall, TLS versions and certificates) and web apps (security headers, cookies, HTTPS redirect, exposed `.git`, `.env`, backups, phpinfo, directory listing, status pages, PHP settings, WordPress hygiene). Run `openvapt checks` for the full list.
+123 checks in three domains and ten control categories mapped to CIS Controls v8 and NIST CSF 2.0: server (patching and lifecycle, accounts and password policy, SSH, sudo, file and key permissions, mount options, kernel hardening, mandatory access control, services, logging and auditing), network and data services (listening services, firewalls including IPv6, Redis, MongoDB, PostgreSQL, MySQL, Memcached, Elasticsearch, NFS, Samba, DNS and mail configuration, admin ports, TLS versions, ciphers, keys and certificates) and web apps (security headers, cookies, CORS, HTTPS, exposed files, logs, debug pages and admin tools, secrets and backups inside web roots on disk, PHP and WordPress hygiene). Run `openvapt checks` for the full list.
 
 ## What It Does Not Do
 

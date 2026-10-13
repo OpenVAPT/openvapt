@@ -29,7 +29,7 @@
 
 <h2>Learn VAPT From Theory to Application</h2>
 <div class="card-layer flex flex-wrap items-center justify-between gap-4">
-  <p class="m-0 max-w-[62ch] text-ink-2">The free OpenVAPT Academy has 13 modules across Foundations, Practitioner and Applied levels. Each one links theory to real checks, with a hands-on lab and a self-check quiz, online or offline with <code>openvapt learn</code>.</p>
+  <p class="m-0 max-w-[62ch] text-ink-2">The free OpenVAPT Academy has 15 modules across Foundations, Practitioner and Applied levels. Each one links theory to real checks, with a hands-on lab and a self-check quiz, online or offline with <code>openvapt learn</code>.</p>
   <a class="btn btn-primary" href="academy/">{{icon "graduation-cap"}}Start the Academy</a>
 </div>
 
@@ -54,10 +54,7 @@
   </div>
 </div>
 
-<div class="mt-6 grid gap-6 lg:grid-cols-2">
-  <div class="card"><h3>Checks by Severity</h3><div id="chart-severity" class="chart" role="img" aria-label="Bar chart of checks by severity"></div></div>
-  <div class="card"><h3>Checks by Domain</h3><div id="chart-domain" class="chart" role="img" aria-label="Donut chart of checks by domain"></div></div>
-</div>
+<div class="card mt-6"><div class="flex flex-wrap items-baseline justify-between gap-2"><h3 class="mt-0">Checks by Control Category and Severity</h3><a href="coverage.html">Open the Coverage Dashboard</a></div><div id="chart-catsev" class="h-[400px] w-full" role="img" aria-label="Stacked bar chart of checks per control category by severity"></div></div>
 <script type="application/json" id="chart-data">{{json $d.ChartData}}</script>
 
 <h2>Identify, Evaluate, Fix, Verify</h2>

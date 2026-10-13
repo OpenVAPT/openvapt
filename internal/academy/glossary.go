@@ -48,6 +48,8 @@ var Glossary = map[string]string{
 	"Privilege Escalation":      "Gaining higher privileges than intended, for example turning a normal user account into root.",
 	"Password Hashing":          "Storing a one-way, salted, deliberately slow transformation of a password instead of the password itself.",
 	"Account Lockout":           "Temporarily blocking an account after repeated failed logins to stop password guessing.",
+	"Open Relay":                "A mail server that forwards mail from anyone to anyone, which spammers abuse.",
+	"DNS Recursion":             "A DNS server resolving names on behalf of clients; open to everyone, it can amplify denial-of-service attacks.",
 	"Port":                      "A number that identifies a network service on a machine, such as 22 for SSH or 443 for HTTPS.",
 	"Public-Key Authentication": "Logging in by proving possession of a private key instead of typing a password.",
 	"Remediation":               "Fixing a weakness or reducing its risk to an acceptable level.",

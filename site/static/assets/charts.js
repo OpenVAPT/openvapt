@@ -47,6 +47,43 @@
       data: d.owasp.map(function (s) { return s.value; }), label: { show: true, position: 'right' } }]
   });
 
+  var sevOrder = ['Critical', 'High', 'Medium', 'Low', 'Info'];
+  if (d.matrix && d.categories) {
+    mount('chart-catsev', {
+      grid: { left: 8, right: 24, top: 40, bottom: 8, containLabel: true },
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      legend: { top: 0, icon: 'roundRect' },
+      xAxis: { type: 'value', minInterval: 1, splitLine: { lineStyle: { color: '#f0f0f0' } } },
+      yAxis: { type: 'category', inverse: true, data: d.categories, axisTick: { show: false } },
+      series: sevOrder.map(function (sv, i) {
+        return { name: sv, type: 'bar', stack: 'total', barWidth: 18, itemStyle: { color: sevColors[sv] },
+          emphasis: { focus: 'series' }, data: d.matrix.map(function (row) { return row[i]; }) };
+      })
+    });
+    var cells = [], max = 1;
+    d.matrix.forEach(function (row, y) { row.forEach(function (v, x) { cells.push([x, y, v]); if (v > max) max = v; }); });
+    mount('chart-heat', {
+      grid: { left: 8, right: 16, top: 8, bottom: 60, containLabel: true },
+      tooltip: { formatter: function (p) { return d.categories[p.value[1]] + '<br>' + sevOrder[p.value[0]] + ': ' + p.value[2]; } },
+      xAxis: { type: 'category', data: sevOrder, splitArea: { show: true } },
+      yAxis: { type: 'category', data: d.categories, inverse: true, splitArea: { show: true } },
+      visualMap: { min: 0, max: max, calculable: false, orient: 'horizontal', left: 'center', bottom: 0, inRange: { color: ['#f0f5ff', '#1677ff', '#0958d9'] } },
+      series: [{ type: 'heatmap', data: cells, label: { show: true }, itemStyle: { borderColor: '#fff', borderWidth: 2 } }]
+    });
+  }
+  function hbar(id, items, color) {
+    if (!items) return;
+    mount(id, {
+      grid: { left: 8, right: 32, top: 8, bottom: 8, containLabel: true },
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      xAxis: { type: 'value', minInterval: 1, splitLine: { lineStyle: { color: '#f0f0f0' } } },
+      yAxis: { type: 'category', inverse: true, data: items.map(function (s) { return s.name; }), axisTick: { show: false }, axisLabel: { width: 220, overflow: 'truncate' } },
+      series: [{ type: 'bar', barWidth: 14, itemStyle: { color: color, borderRadius: [0, 4, 4, 0] }, data: items.map(function (s) { return s.value; }), label: { show: true, position: 'right' } }]
+    });
+  }
+  hbar('chart-cis', d.cis, '#1677ff');
+  hbar('chart-csf', d.csf, '#13c2c2');
+
   if (window.ResizeObserver) {
     var ro = new ResizeObserver(function () { charts.forEach(function (c) { c.resize(); }); });
     charts.forEach(function (c) { ro.observe(c.getDom()); });

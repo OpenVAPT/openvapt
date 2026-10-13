@@ -30,20 +30,21 @@ func readAny(ctx context.Context, s sys.System, paths ...string) (string, string
 	return strings.Join(found, ", "), text.String(), complete, true
 }
 func simpleFileCheck(id, title string, sev check.Severity, cat check.Category, summary, rationale, detection, fix, verify, cvss string, paths []string, ref check.Ref, bad func(string) []string) {
-	check.Register(&check.Check{ID: id, Title: title, Domain: check.DomainNetwork, Severity: sev, Category: cat, Effort: check.EffortLow, CVSS: cvss, Summary: summary, Rationale: rationale, Detection: detection, Fix: fix, Verify: verify, Refs: []check.Ref{ref}, Standards: check.Standards{CWE: []string{"CWE-16", "CWE-284"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-3", "CM-6", "SC-7"}}, Run: func(ctx context.Context, s sys.System) []check.Result {
-		p, text, complete, ok := readAny(ctx, s, paths...)
-		if !ok {
-			return []check.Result{check.SkipR(strings.Join(paths, ", "), "Configuration was not found")}
-		}
-		ev := bad(text)
-		if len(ev) > 0 {
-			return []check.Result{check.FailR(p, summary, ev...)}
-		}
-		if !complete {
-			return []check.Result{check.IncompleteR(p, "Configuration input was truncated")}
-		}
-		return []check.Result{check.PassR(p, "No unsafe setting was found")}
-	}})
+	check.Register(&check.Check{
+		ID: id, Title: title, Domain: check.DomainNetwork, Severity: sev, Category: cat, Effort: check.EffortLow, CVSS: cvss, Summary: summary, Rationale: rationale, Detection: detection, Fix: fix, Verify: verify, Refs: []check.Ref{ref}, Standards: check.Standards{CWE: []string{"CWE-16", "CWE-284"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-3", "CM-6", "SC-7"}}, Run: func(ctx context.Context, s sys.System) []check.Result {
+			p, text, complete, ok := readAny(ctx, s, paths...)
+			if !ok {
+				return []check.Result{check.SkipR(strings.Join(paths, ", "), "Configuration was not found")}
+			}
+			ev := bad(text)
+			if len(ev) > 0 {
+				return []check.Result{check.FailR(p, summary, ev...)}
+			}
+			if !complete {
+				return []check.Result{check.IncompleteR(p, "Configuration input was truncated")}
+			}
+			return []check.Result{check.PassR(p, "No unsafe setting was found")}
+		}})
 }
 
 func init() {
@@ -110,22 +111,37 @@ func registerMailChecks() {
 
 func registerExposureChecks() {
 	ports := map[int]string{2375: "Docker API without TLS", 2376: "Docker API", 6443: "Kubernetes API", 10250: "Kubelet API", 2379: "etcd client API", 8500: "Consul HTTP API", 9100: "Prometheus Node Exporter", 15672: "RabbitMQ Management", 10000: "Webmin", 2083: "cPanel", 2087: "WHM", 5900: "VNC", 3389: "RDP", 161: "SNMP"}
-	check.Register(&check.Check{ID: "NET-SVC-002", Title: "Administrative Service Ports Network-Reachable", Domain: check.DomainNetwork, Severity: check.Critical, Category: check.CatNetwork, Effort: check.EffortMedium, CVSS: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", Summary: "Administrative, orchestration, monitoring, or remote desktop ports listen on network-reachable addresses.", Rationale: "These services expose privileged control planes or sensitive telemetry and should not be reachable from untrusted networks.", Detection: "Parses local TCP and UDP socket tables and matches public listeners against vendor and IANA assigned service ports. It sends no packets.", Fix: "Bind management services to loopback or a dedicated management address, require strong authentication and TLS, and filter access to approved source networks.", Verify: "Review ss -tulpn and the host firewall from a trusted administrative session.", Refs: []check.Ref{{Title: "IANA Service Name and Transport Protocol Port Number Registry", URL: "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml"}, {Title: "Docker Protect the Daemon Socket", URL: "https://docs.docker.com/engine/security/protect-access/"}, {Title: "Kubernetes Ports and Protocols", URL: "https://kubernetes.io/docs/reference/networking/ports-and-protocols/"}}, Standards: check.Standards{CWE: []string{"CWE-284", "CWE-668"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-17", "CM-7", "SC-7"}}, Run: func(_ context.Context, s sys.System) []check.Result {
-		ls, err := collect.Listeners(s)
-		if err != nil {
-			return []check.Result{check.IncompleteR("/proc/net", "Socket tables were unreadable or partial")}
-		}
-		var ev []string
-		for _, l := range ls {
-			if n, ok := ports[l.Port]; ok && l.Public() {
-				ev = append(ev, l.String()+" "+n)
+	check.Register(&check.Check{
+		ID:        "NET-SVC-002",
+		Title:     "Administrative Service Ports Network-Reachable",
+		Domain:    check.DomainNetwork,
+		Severity:  check.Critical,
+		Category:  check.CatNetwork,
+		Effort:    check.EffortMedium,
+		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		Summary:   "Administrative, orchestration, monitoring, or remote desktop ports listen on network-reachable addresses.",
+		Rationale: "These services expose privileged control planes or sensitive telemetry and should not be reachable from untrusted networks.",
+		Detection: "Parses local TCP and UDP socket tables and matches public listeners against vendor and IANA assigned service ports. It sends no packets.",
+		Fix:       "Bind management services to loopback or a dedicated management address, require strong authentication and TLS, and filter access to approved source networks.",
+		Verify:    "Review ss -tulpn and the host firewall from a trusted administrative session.",
+		Refs:      []check.Ref{{Title: "IANA Service Name and Transport Protocol Port Number Registry", URL: "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml"}, {Title: "Docker Protect the Daemon Socket", URL: "https://docs.docker.com/engine/security/protect-access/"}, {Title: "Kubernetes Ports and Protocols", URL: "https://kubernetes.io/docs/reference/networking/ports-and-protocols/"}},
+		Standards: check.Standards{CWE: []string{"CWE-284", "CWE-668"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-17", "CM-7", "SC-7"}},
+		Run: func(_ context.Context, s sys.System) []check.Result {
+			ls, err := collect.Listeners(s)
+			if err != nil {
+				return []check.Result{check.IncompleteR("/proc/net", "Socket tables were unreadable or partial")}
 			}
-		}
-		if len(ev) > 0 {
-			return []check.Result{check.FailR("sockets", "Privileged service ports are network-reachable", ev...)}
-		}
-		return []check.Result{check.PassR("sockets", "No listed administrative ports are network-reachable")}
-	}})
+			var ev []string
+			for _, l := range ls {
+				if n, ok := ports[l.Port]; ok && l.Public() {
+					ev = append(ev, l.String()+" "+n)
+				}
+			}
+			if len(ev) > 0 {
+				return []check.Result{check.FailR("sockets", "Privileged service ports are network-reachable", ev...)}
+			}
+			return []check.Result{check.PassR("sockets", "No listed administrative ports are network-reachable")}
+		}})
 }
 
 func matchingLines(t string, needles ...string) []string {

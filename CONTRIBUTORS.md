@@ -5,8 +5,8 @@ OpenVAPT is entirely AI-generated. Everyone and everything that has contributed 
 | Contributor | Type | Contributions |
 |---|---|---|
 | The OpenVAPT project owner | Human (anonymous) | Goals, rules, product, legal and policy decisions; approval of every change; publishing and operating the project. Did not hand-write the code. |
-| Claude (Claude Opus 5.5, Anthropic), through Claude Code | AI system | Planning, design, architecture, all original code, tests, website, OpenVAPT Academy course, documentation and legal drafts; AI legal review (as a separate sub-agent); coordination and review of Codex's work; builds, commits, pushes and deployments. |
-| OpenAI Codex (GPT-5.6, Codex CLI 0.162.1) | AI system | Independent read-only code review (17 findings, 15 improvement proposals, 2026-10-13); implementation of those fixes and improvements on branch `codex/review-fixes`, reviewed by Claude before merging. |
+| Claude (Claude Opus 5.5, Anthropic), through Claude Code | AI system | Planning, design, architecture (including the control-category framework), most original code including 82 of the 123 checks, tests, website, OpenVAPT Academy course, documentation and legal drafts; AI legal review (as a separate sub-agent); coordination and review of Codex's work; builds, commits, pushes and deployments. |
+| OpenAI Codex (GPT-5.6, Codex CLI 0.162.1) | AI system | Independent read-only code review (17 findings, 15 improvement proposals, 2026-10-13); implementation of those fixes and improvements on branch `codex/review-fixes`; 18 network, data-service and TLS checks plus the professional report redesign (executive summary, heat map, CIS Controls and NIST CSF coverage, remediation plan) on branch `codex/coverage-network`. All reviewed by Claude before merging. |
 
 ## How Contributions Are Marked in Git
 

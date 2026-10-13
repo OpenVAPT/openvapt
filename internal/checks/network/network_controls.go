@@ -9,8 +9,38 @@ import (
 )
 
 func init() {
-	check.Register(&check.Check{ID: "NET-FW-002", Title: "IPv6 Listeners Without IPv6 Firewall", Domain: check.DomainNetwork, Severity: check.High, Category: check.CatNetwork, Effort: check.EffortMedium, CVSS: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", Summary: "Network-reachable IPv6 listeners exist without a default-deny IPv6 firewall policy.", Rationale: "An IPv4-only firewall does not protect IPv6 services, creating an alternate path that bypasses intended filtering.", Detection: "Parses /proc/net/tcp6 and udp6, then inspects nft list ruleset and ip6tables -S for an input drop or reject policy.", Fix: "Apply equivalent default-deny filtering for IPv6 with nftables or ip6tables and explicitly allow required services.", Verify: "Run ip6tables -S and nft list ruleset, then confirm the input chain has a default drop or reject policy.", Refs: []check.Ref{{Title: "NIST SP 800-119, Guidelines for the Secure Deployment of IPv6", URL: "https://csrc.nist.gov/pubs/sp/800/119/final"}}, Standards: check.Standards{CWE: []string{"CWE-284"}, NIST: []string{"SC-7"}}, Run: runIPv6Firewall})
-	check.Register(&check.Check{ID: "NET-SVC-003", Title: "Network Time Service Amplification Risk", Domain: check.DomainNetwork, Severity: check.High, Category: check.CatLogging, Effort: check.EffortLow, CVSS: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", Summary: "NTP or chrony serves broad clients or permits legacy monitoring commands that can amplify traffic.", Rationale: "Internet-reachable time services with broad client access or legacy mode 6 or 7 controls can be abused for reflection and amplification.", Detection: "When UDP port 123 is network-reachable, reads ntp.conf or chrony.conf and flags broad allow directives or missing noquery restrictions.", Fix: "Bind the time daemon to required interfaces, restrict clients to explicit networks, disable monitoring, and use noquery or equivalent controls.", Verify: "Confirm UDP port 123 is filtered from untrusted networks and review the daemon's effective access restrictions.", Refs: []check.Ref{{Title: "CISA Alert TA14-013A, NTP Amplification Attacks Using CVE-2013-5211", URL: "https://www.cisa.gov/news-events/alerts/2014/01/13/ntp-amplification-attacks-using-cve-2013-5211"}, {Title: "chrony Documentation - Access Control", URL: "https://chrony-project.org/doc/4.6/chrony.conf.html"}}, Standards: check.Standards{CWE: []string{"CWE-406"}, NIST: []string{"SC-5", "SC-7"}}, Run: runNTP})
+	check.Register(&check.Check{
+		ID:        "NET-FW-002",
+		Title:     "IPv6 Listeners Without IPv6 Firewall",
+		Domain:    check.DomainNetwork,
+		Severity:  check.High,
+		Category:  check.CatNetwork,
+		Effort:    check.EffortMedium,
+		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		Summary:   "Network-reachable IPv6 listeners exist without a default-deny IPv6 firewall policy.",
+		Rationale: "An IPv4-only firewall does not protect IPv6 services, creating an alternate path that bypasses intended filtering.",
+		Detection: "Parses /proc/net/tcp6 and udp6, then inspects nft list ruleset and ip6tables -S for an input drop or reject policy.",
+		Fix:       "Apply equivalent default-deny filtering for IPv6 with nftables or ip6tables and explicitly allow required services.",
+		Verify:    "Run ip6tables -S and nft list ruleset, then confirm the input chain has a default drop or reject policy.",
+		Refs:      []check.Ref{{Title: "NIST SP 800-119, Guidelines for the Secure Deployment of IPv6", URL: "https://csrc.nist.gov/pubs/sp/800/119/final"}},
+		Standards: check.Standards{CWE: []string{"CWE-284"}, NIST: []string{"SC-7"}},
+		Run:       runIPv6Firewall})
+	check.Register(&check.Check{
+		ID:        "NET-SVC-003",
+		Title:     "Network Time Service Amplification Risk",
+		Domain:    check.DomainNetwork,
+		Severity:  check.High,
+		Category:  check.CatLogging,
+		Effort:    check.EffortLow,
+		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+		Summary:   "NTP or chrony serves broad clients or permits legacy monitoring commands that can amplify traffic.",
+		Rationale: "Internet-reachable time services with broad client access or legacy mode 6 or 7 controls can be abused for reflection and amplification.",
+		Detection: "When UDP port 123 is network-reachable, reads ntp.conf or chrony.conf and flags broad allow directives or missing noquery restrictions.",
+		Fix:       "Bind the time daemon to required interfaces, restrict clients to explicit networks, disable monitoring, and use noquery or equivalent controls.",
+		Verify:    "Confirm UDP port 123 is filtered from untrusted networks and review the daemon's effective access restrictions.",
+		Refs:      []check.Ref{{Title: "CISA Alert TA14-013A, NTP Amplification Attacks Using CVE-2013-5211", URL: "https://www.cisa.gov/news-events/alerts/2014/01/13/ntp-amplification-attacks-using-cve-2013-5211"}, {Title: "chrony Documentation - Access Control", URL: "https://chrony-project.org/doc/4.6/chrony.conf.html"}},
+		Standards: check.Standards{CWE: []string{"CWE-406"}, NIST: []string{"SC-5", "SC-7"}},
+		Run:       runNTP})
 }
 
 func runIPv6Firewall(ctx context.Context, s sys.System) []check.Result {

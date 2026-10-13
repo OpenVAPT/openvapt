@@ -89,6 +89,12 @@ func main() {
 	g := &gen{}
 
 	checks := check.All()
+	// Fill live counts into FAQ answers so they never go stale.
+	n := counts(checks)
+	rep := strings.NewReplacer("{TOTAL}", fmt.Sprint(n["total"]), "{HOST}", fmt.Sprint(n["host"]), "{NETWORK}", fmt.Sprint(n["network"]), "{WEB}", fmt.Sprint(n["web"]))
+	for i := range faqs {
+		faqs[i].A = rep.Replace(faqs[i].A)
+	}
 	cites := map[string]Cite{}
 	for _, c := range checks {
 		cites[c.ID] = citeFile(c.SourceFile)
@@ -102,6 +108,7 @@ func main() {
 		"Standards":   standards(checks),
 		"Repo":        repoURL,
 		"Catalogue":   catalogueRows(checks),
+		"Categories":  check.Categories,
 		"Pillars":     terms.Pillars,
 		"Acks":        terms.Acknowledgements,
 		"TermsVer":    terms.Version,
@@ -121,6 +128,7 @@ func main() {
 		{"download.html", "download.html", "Download and Run OpenVAPT", "Build OpenVAPT from source or download a release, verify it, and run it on your own Linux machine.", "download"},
 		{"contribute.html", "contribute.html", "Review, Report and Contribute", "Report bugs, false positives and new check ideas on GitHub, and how OpenVAPT versions and releases work.", "contribute"},
 		{"cite.html", "cite.html", "Cite OpenVAPT", "How to cite OpenVAPT in academic work.", "cite"},
+		{"coverage.html", "coverage.html", "Coverage Dashboard: What OpenVAPT Assesses", "Interactive coverage of OpenVAPT's checks by control category and severity, mapped to CIS Controls v8, NIST CSF 2.0, OWASP Top 10 and OWASP WSTG.", "coverage"},
 		{"faq.html", "faq.html", "OpenVAPT FAQ: Free Academic VAPT Tool Questions Answered", "Answers about OpenVAPT, the free academic vulnerability assessment tool for Linux: cost, licence, company use, scope, safety, standards and data.", "faq"},
 		{"compare.html", "compare.html", "OpenVAPT Compared With Lynis, OpenSCAP, OpenVAS, Nuclei and ZAP", "How OpenVAPT, a free academic VAPT learning tool, compares with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy and OWASP ZAP, and when to use each.", "compare"},
 		{"privacy-notice.html", "no-data.html", "We Collect No Data", "OpenVAPT and openvapt.com collect no data: no cookies, no analytics, no logs, no forms, no accounts.", "nodata"},
@@ -138,7 +146,7 @@ func main() {
 	}
 
 	// OpenVAPT Academy: course index, one page per module, and the glossary.
-	g.render("academy.html", "academy/index.html", "OpenVAPT Academy: Learn VAPT From Theory to Application", "A free 13-module course that teaches vulnerability assessment from security basics to running, fixing, reporting and building checks, using OpenVAPT and a safe simulated lab.", "academy", data)
+	g.render("academy.html", "academy/index.html", "OpenVAPT Academy: Learn VAPT From Theory to Application", "A free 15-module course that teaches vulnerability assessment from security basics to running, fixing, reporting and building checks, using OpenVAPT and a safe simulated lab.", "academy", data)
 	for i := range academy.Modules {
 		m := &academy.Modules[i]
 		var prev, next *academy.Module
@@ -239,6 +247,8 @@ func funcs() template.FuncMap {
 			must(err)
 			return template.JS(b) // #nosec G203 -- json.Marshal escapes <, > and &
 		},
+		"catName": func(c check.Category) string { return check.CategoryByID(c).Name },
+		"catInfo": check.CategoryByID,
 		"pct": func(a, b int) int {
 			if b == 0 {
 				return 0
@@ -411,6 +421,7 @@ func standards(cs []*check.Check) map[string][]StdRow {
 		"CWE":   group(func(c *check.Check) []string { return c.Standards.CWE }, nil),
 		"NIST":  group(func(c *check.Check) []string { return c.Standards.NIST }, nil),
 		"ASVS":  group(func(c *check.Check) []string { return c.Standards.ASVS }, nil),
+		"WSTG":  group(func(c *check.Check) []string { return c.Standards.WSTG }, nil),
 	}
 }
 
@@ -435,6 +446,7 @@ func catalogueRows(cs []*check.Check) []map[string]string {
 		rows = append(rows, map[string]string{
 			"id": c.ID, "title": c.Title, "domain": string(c.Domain), "severity": string(c.Severity),
 			"cwe": strings.Join(c.Standards.CWE, ", "), "owasp": strings.Join(c.Standards.OWASP, ", "),
+			"category": check.CategoryByID(c.Category).Name, "effort": string(c.Effort), "wstg": strings.Join(c.Standards.WSTG, ", "),
 		})
 	}
 	return rows
@@ -445,8 +457,8 @@ type nv struct {
 	Value int    `json:"value"`
 }
 
-// chartData feeds the ECharts charts on the home and standards pages.
-func chartData(cs []*check.Check) map[string][]nv {
+// chartData feeds the ECharts charts on the home, standards and coverage pages.
+func chartData(cs []*check.Check) map[string]any {
 	n := counts(cs)
 	sev := []nv{{"Critical", n["critical"]}, {"High", n["high"]}, {"Medium", n["medium"]}, {"Low", n["low"]}, {"Info", n["info"]}}
 	dom := []nv{{"Server", n["host"]}, {"Network", n["network"]}, {"Web Apps", n["web"]}}
@@ -454,7 +466,53 @@ func chartData(cs []*check.Check) map[string][]nv {
 	for _, r := range standards(cs)["OWASP"] {
 		owasp = append(owasp, nv{r.Key + " " + r.Name, len(r.IDs)})
 	}
-	return map[string][]nv{"severity": sev, "domain": dom, "owasp": owasp}
+	sevs := []check.Severity{check.Critical, check.High, check.Medium, check.Low, check.Info}
+	var cats []string
+	matrix := [][]int{} // [category][severity]
+	cis := map[string]int{}
+	csf := map[string]int{}
+	for _, c := range check.Categories {
+		cats = append(cats, c.Name)
+		row := make([]int, len(sevs))
+		for _, k := range cs {
+			if k.Category != c.ID {
+				continue
+			}
+			for i, sv := range sevs {
+				if k.Severity == sv {
+					row[i]++
+				}
+			}
+			for _, x := range c.CIS {
+				cis[x]++
+			}
+			for _, x := range c.NISTCSF {
+				csf[x]++
+			}
+		}
+		matrix = append(matrix, row)
+	}
+	toNV := func(m map[string]int, label func(string) string) []nv {
+		var out []nv
+		for k, v := range m {
+			out = append(out, nv{label(k), v})
+		}
+		sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+		return out
+	}
+	cisNames := map[string]string{"2": "Software Asset Inventory", "3": "Data Protection", "4": "Secure Configuration", "5": "Account Management", "6": "Access Control Management", "7": "Vulnerability Management", "8": "Audit Log Management", "12": "Network Infrastructure", "13": "Network Monitoring and Defense", "16": "Application Software Security"}
+	csfNames := map[string]string{"PR.AA": "Identity Management, Authentication and Access Control", "PR.DS": "Data Security", "PR.PS": "Platform Security", "PR.IR": "Technology Infrastructure Resilience", "ID.RA": "Risk Assessment", "DE.CM": "Continuous Monitoring"}
+	cisNV := toNV(cis, func(k string) string { return "CIS " + k + " " + cisNames[k] })
+	sort.Slice(cisNV, func(i, j int) bool { return cisKey(cisNV[i].Name) < cisKey(cisNV[j].Name) })
+	return map[string]any{"severity": sev, "domain": dom, "owasp": owasp, "categories": cats,
+		"severities": []string{"Critical", "High", "Medium", "Low", "Info"}, "matrix": matrix,
+		"cis": cisNV, "csf": toNV(csf, func(k string) string { return k + " " + csfNames[k] })}
+}
+
+func cisKey(name string) int {
+	var n int
+	fmt.Sscanf(strings.TrimPrefix(name, "CIS "), "%d", &n)
+	return n
 }
 
 // ---------- SEO / GEO artefacts ----------
@@ -472,7 +530,7 @@ func jsonLD(p Page) template.JS {
 		"isAccessibleForFree": true, "offers": map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD"},
 		"license": "https://polyformproject.org/licenses/noncommercial/1.0.0/", "publisher": map[string]string{"@id": siteURL + "/#org"},
 		"keywords":    "free VAPT tool, VAPT learning, vulnerability assessment, source-available code, AI-generated, Linux security, server hardening, web security headers, academic, education",
-		"featureList": []string{"58 read-only checks", "Server, network and web app coverage", "CVSS v3.1 ratings", "OWASP, CWE and NIST mapping", "HTML, JSON, SARIF and Markdown reports", "Loopback-only scope guard", "Simulated lab for learning", "Zero data collection"}}
+		"featureList": []string{fmt.Sprintf("%d read-only checks", len(check.All())), "Server, network and web app coverage", "CVSS v3.1 ratings", "OWASP, CWE and NIST mapping", "HTML, JSON, SARIF and Markdown reports", "Loopback-only scope guard", "Simulated lab for learning", "Zero data collection"}}
 	graph := []any{org, site}
 	switch {
 	case p.Path == "index.html":

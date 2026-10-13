@@ -230,4 +230,38 @@ var practitioner = []Module{
 		},
 		Refs: []Ref{{"NIST SP 800-63B, Authentication and Lifecycle Management", "https://pages.nist.gov/800-63-3/sp800-63b.html"}, {"MITRE ATT&CK T1548, Abuse Elevation Control Mechanism", "https://attack.mitre.org/techniques/T1548/"}},
 	},
+	{
+		ID: "P8", Title: "Data Services: Databases, File Shares, DNS and Mail", Level: Practitioner, Minutes: 30,
+		Summary: "Why databases, caches, file shares, DNS and mail servers cause so many breaches, and the configuration settings that decide whether they are safe.",
+		Objectives: []string{
+			"Explain why databases and caches must require authentication and bind to loopback.",
+			"Recognise unsafe NFS exports and Samba guest access.",
+			"Explain open DNS recursion, zone transfers and open mail relays.",
+		},
+		Sections: []Section{
+			{"Databases and Caches", []string{
+				"Redis, MongoDB, Elasticsearch and Memcached were designed for trusted networks and have historically shipped without authentication. Exposed instances are found by internet-wide scanners within hours and wiped or ransomed. PostgreSQL 'trust' entries in pg_hba.conf allow login with no password at all, and MySQL's local_infile lets a compromised application read server files.",
+				"The safe pattern is the same everywhere: bind to 127.0.0.1 or a private interface, require authentication, and allow only the application servers that need access through the firewall.",
+			}},
+			{"File Shares", []string{
+				"NFS exports with no_root_squash let a remote root user act as root on the share, and exports to '*' let anyone mount them. Samba shares with guest access, or servers still allowing SMB1, expose files to anonymous users and to old, wormable protocol flaws.",
+			}},
+			{"DNS and Mail", []string{
+				"A DNS server that answers recursive queries for anyone is used to amplify denial-of-service attacks, and one that allows zone transfers to anyone publishes the whole internal name map. A mail server whose relay rules are too broad becomes a spam relay, and allowing passwords over unencrypted connections exposes mail accounts.",
+			}},
+		},
+		KeyTerms:      []string{"Attack Surface", "Default Deny", "Open Relay", "DNS Recursion", "Cleartext"},
+		RelatedChecks: []string{"NET-DB-", "NET-SVC-002", "NET-SVC-003"},
+		Lab: []string{
+			"Run: openvapt demo --only NET-DB- --out p8 and read the evidence for each data service.",
+			"For each finding, name the single configuration line that fixes it.",
+			"On your own server: ss -tlnp and match each database or cache port to its bind setting.",
+		},
+		Quiz: []Question{
+			{"Why are exposed Redis or MongoDB instances so often breached?", []string{"They are slow", "They historically ran without authentication and are found quickly by internet-wide scanners", "They use too much memory"}, 1, "Unauthenticated, internet-reachable data services are found and abused quickly."},
+			{"What does no_root_squash on an NFS export allow?", []string{"A remote root user to act as root on the share", "Faster file copies", "Encrypted transfers"}, 0, "Root on a client keeps root rights on the share."},
+			{"Why is open DNS recursion dangerous?", []string{"It slows name resolution", "It can be abused to amplify denial-of-service attacks", "It deletes zones"}, 1, "Open resolvers amplify traffic toward victims."},
+		},
+		Refs: []Ref{{"OWASP Database Security Cheat Sheet", "https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html"}, {"CISA, DNS Amplification Attacks (Alert TA13-088A)", "https://www.cisa.gov/news-events/alerts/2013/03/29/dns-amplification-attacks"}, {"Redis security", "https://redis.io/docs/latest/operate/oss_and_stack/management/security/"}},
+	},
 }

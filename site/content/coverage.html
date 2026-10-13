@@ -1,0 +1,43 @@
+{{define "content"}}{{$d := .Data}}
+<h1>Coverage Dashboard</h1>
+<p class="lead">What OpenVAPT assesses, organised the way professional assessments report: by control category and severity, and mapped to CIS Controls v8, NIST CSF 2.0, OWASP Top 10 and the OWASP Web Security Testing Guide.</p>
+
+<section class="mt-8 grid grid-cols-2 gap-6 border-y border-line-2 py-6 md:grid-cols-5">
+  <div><div class="stat-title">Checks</div><div class="stat-value">{{$d.Counts.total}}</div></div>
+  <div><div class="stat-title">Control Categories</div><div class="stat-value">{{len $d.Categories}}</div></div>
+  <div><div class="stat-title">CWE Weaknesses</div><div class="stat-value">{{len $d.Standards.CWE}}</div></div>
+  <div><div class="stat-title">OWASP WSTG Tests</div><div class="stat-value">{{len $d.Standards.WSTG}}</div></div>
+  <div><div class="stat-title">NIST 800-53 Controls</div><div class="stat-value">{{len $d.Standards.NIST}}</div></div>
+</section>
+<script type="application/json" id="chart-data">{{json $d.ChartData}}</script>
+
+<h2>Checks by Category and Severity</h2>
+<p class="muted">Severity is the rating a check carries when it fails, on the CVSS v3.1 qualitative scale.</p>
+<div class="card"><div id="chart-catsev" class="h-[420px] w-full" role="img" aria-label="Stacked bar chart of checks per control category by severity"></div></div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="card"><h3>Severity Heat Map</h3><div id="chart-heat" class="h-[420px] w-full" role="img" aria-label="Heat map of checks by category and severity"></div></div>
+  <div class="card"><h3>Checks by Domain</h3><div id="chart-domain" class="chart" role="img" aria-label="Donut chart of checks by domain"></div><h3>Checks by Severity</h3><div id="chart-severity" class="chart" role="img" aria-label="Bar chart of checks by severity"></div></div>
+</div>
+
+<h2>Framework Coverage</h2>
+<div class="grid gap-6 lg:grid-cols-2">
+  <div class="card"><h3>CIS Critical Security Controls v8</h3><p class="muted">Checks per control, through each check's category. Control numbers only; no CIS text is reproduced.</p><div id="chart-cis" class="h-[380px] w-full" role="img" aria-label="Bar chart of checks per CIS Control"></div></div>
+  <div class="card"><h3>NIST Cybersecurity Framework 2.0</h3><p class="muted">Checks per CSF category, through each check's category.</p><div id="chart-csf" class="h-[380px] w-full" role="img" aria-label="Bar chart of checks per NIST CSF category"></div></div>
+</div>
+<div class="card mt-6"><h3>OWASP Top 10 (2021)</h3><div id="chart-owasp" class="h-[380px] w-full" role="img" aria-label="Bar chart of checks per OWASP Top 10 category"></div></div>
+
+<h2>Control Categories</h2>
+<div class="table-wrap"><table class="table">
+<thead><tr><th>Category</th><th>What It Covers</th><th>CIS Controls v8</th><th>NIST CSF 2.0</th></tr></thead>
+<tbody>{{range $d.Categories}}<tr><td><strong>{{.Name}}</strong></td><td>{{.About}}</td><td>{{join .CIS ", "}}</td><td>{{join .NISTCSF ", "}}</td></tr>{{end}}</tbody>
+</table></div>
+
+<h2>OWASP Web Security Testing Guide</h2>
+<p>Web checks that implement, in automated and read-only form, part of these WSTG tests. Full WSTG testing includes manual and active techniques that OpenVAPT deliberately does not perform.</p>
+<div class="table-wrap"><table class="table">
+<thead><tr><th>WSTG Test</th><th>Checks</th></tr></thead>
+<tbody>{{range $d.Standards.WSTG}}<tr><td><code>{{.Key}}</code></td><td>{{range $i, $x := .IDs}}{{if $i}}, {{end}}<a href="checks/{{$x}}.html">{{$x}}</a>{{end}}</td></tr>{{end}}</tbody>
+</table></div>
+<div class="alert alert-warn mt-8" role="note">{{icon "triangle-alert"}}<span>Coverage shows what OpenVAPT checks, not that a system meets any framework. Passing every check is not a certification or a compliance statement. See <a href="limits.html">What It Does Not Do</a>.</span></div>
+{{end}}

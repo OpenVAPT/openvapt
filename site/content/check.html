@@ -1,6 +1,6 @@
 {{define "content"}}{{$c := .Data.C}}
 <nav class="crumbs" aria-label="Breadcrumb"><a href="./">Check Catalogue</a>{{icon "chevron-right"}}<span>{{$c.ID}}</span></nav>
-<div class="flex flex-wrap items-center gap-2 mb-3">{{template "sev" (print $c.Severity)}}<span class="tag tag-plain">{{$c.ID}}</span><span class="tag tag-info">{{if eq $c.Domain "host"}}Server{{else if eq $c.Domain "network"}}Network{{else}}Web Apps{{end}}</span></div>
+<div class="flex flex-wrap items-center gap-2 mb-3">{{template "sev" (print $c.Severity)}}<span class="tag tag-plain">{{$c.ID}}</span><span class="tag tag-info">{{catName $c.Category}}</span><span class="tag tag-info">{{if eq $c.Domain "host"}}Server{{else if eq $c.Domain "network"}}Network{{else}}Web Apps{{end}}</span></div>
 <h1>{{$c.Title}}</h1>
 <p class="lead">{{$c.Summary}}</p>
 <dl class="desc mt-8">
@@ -9,6 +9,9 @@
   <dt>How to Fix</dt><dd>{{$c.Fix}}</dd>
   <dt>How to Verify</dt><dd><code>{{$c.Verify}}</code></dd>
   <dt>CVSS v3.1 Vector</dt><dd><code>{{$c.CVSS}}</code></dd>
+  {{with catInfo $c.Category}}<dt>Control Category</dt><dd>{{.Name}}: CIS Controls v8 {{join .CIS ", "}}; NIST CSF 2.0 {{join .NISTCSF ", "}}</dd>{{end}}
+  <dt>Fix Effort</dt><dd>{{title (print $c.Effort)}}</dd>
+  {{with $c.Standards.WSTG}}<dt>OWASP WSTG</dt><dd>{{join . ", "}}</dd>{{end}}
   {{with $c.Standards.CWE}}<dt>CWE</dt><dd>{{range $i, $x := .}}{{if $i}}, {{end}}<a href="{{cwe $x}}" rel="noreferrer">{{$x}}</a>{{end}}</dd>{{end}}
   {{with $c.Standards.OWASP}}<dt>OWASP Top 10</dt><dd>{{join . ", "}}</dd>{{end}}
   {{with $c.Standards.ASVS}}<dt>OWASP ASVS 4.0.3</dt><dd>{{join . ", "}}</dd>{{end}}

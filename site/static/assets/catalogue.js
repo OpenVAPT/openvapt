@@ -34,27 +34,31 @@
     columnDefs: [
       { field: 'id', headerName: 'ID', width: 140, cellClass: 'font-mono', pinned: 'left' },
       { field: 'title', headerName: 'Check', flex: 2, minWidth: 260, cellRenderer: link },
-      { field: 'domain', headerName: 'Domain', width: 130, valueFormatter: function (p) { return domainName[p.value] || p.value; } },
+      { field: 'category', headerName: 'Category', width: 210 },
+      { field: 'domain', headerName: 'Domain', width: 120, valueFormatter: function (p) { return domainName[p.value] || p.value; } },
       { field: 'severity', headerName: 'Severity', width: 130, cellRenderer: tag,
         comparator: function (a, b) { return sevRank[a] - sevRank[b]; } },
       { field: 'cwe', headerName: 'CWE', flex: 1, minWidth: 140 },
-      { field: 'owasp', headerName: 'OWASP Top 10', flex: 1, minWidth: 150 }
+      { field: 'owasp', headerName: 'OWASP Top 10', flex: 1, minWidth: 140 },
+      { field: 'wstg', headerName: 'OWASP WSTG', flex: 1, minWidth: 140 },
+      { field: 'effort', headerName: 'Fix Effort', width: 120, valueFormatter: function (p) { return p.value ? p.value.charAt(0).toUpperCase() + p.value.slice(1) : ''; } }
     ]
   });
 
   var q = document.getElementById('q'), dom = document.getElementById('domain'),
-      sev = document.getElementById('severity'), shown = document.getElementById('shown');
+      sev = document.getElementById('severity'), cat = document.getElementById('category'), shown = document.getElementById('shown');
   function apply() {
     api.setGridOption('quickFilterText', q.value);
     api.setFilterModel({
       domain: dom.value ? { filterType: 'text', type: 'equals', filter: dom.value } : null,
-      severity: sev.value ? { filterType: 'text', type: 'equals', filter: sev.value } : null
+      severity: sev.value ? { filterType: 'text', type: 'equals', filter: sev.value } : null,
+      category: cat.value ? { filterType: 'text', type: 'equals', filter: cat.value } : null
     });
   }
   api.addEventListener('modelUpdated', function () {
     shown.textContent = api.getDisplayedRowCount() + ' of ' + rows.length + ' checks';
   });
-  [q, dom, sev].forEach(function (el) { el.addEventListener('input', apply); });
+  [q, dom, sev, cat].forEach(function (el) { el.addEventListener('input', apply); });
   document.getElementById('static-table').hidden = true;
   host.hidden = false;
 })();

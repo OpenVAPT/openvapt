@@ -35,6 +35,7 @@
     <nav class="nav" aria-label="Main">
       <a href="{{.Base}}checks/" {{if eq .Section "checks"}}aria-current="page"{{end}}>Checks</a>
       <a href="{{.Base}}how-it-works.html" {{if eq .Section "built"}}aria-current="page"{{end}}>How It's Built</a>
+      <a href="{{.Base}}coverage.html" {{if eq .Section "coverage"}}aria-current="page"{{end}}>Coverage</a>
       <a href="{{.Base}}standards.html" {{if eq .Section "standards"}}aria-current="page"{{end}}>Standards</a>
       <a href="{{.Base}}academy/" {{if or (eq .Section "academy") (eq .Section "learn")}}aria-current="page"{{end}}>Academy</a>
       <a href="{{.Base}}download.html" {{if eq .Section "download"}}aria-current="page"{{end}}>Download</a>
@@ -82,7 +83,7 @@
 {{if eq .Path "checks/index.html"}}<script src="{{.Base}}assets/vendor/ag-grid-community.min.js" defer></script><script src="{{.Base}}assets/catalogue.js" defer></script>{{end}}
 {{if eq .Path "download.html"}}<script src="{{.Base}}assets/acknowledge.js" defer></script>{{end}}
 {{if hasPrefix .Path "academy/"}}<script src="{{.Base}}assets/academy.js" defer></script>{{end}}
-{{if or (eq .Path "index.html") (eq .Path "standards.html")}}<script src="{{.Base}}assets/vendor/echarts.min.js" defer></script><script src="{{.Base}}assets/charts.js" defer></script>{{end}}
+{{if or (eq .Path "index.html") (eq .Path "standards.html") (eq .Path "coverage.html")}}<script src="{{.Base}}assets/vendor/echarts.min.js" defer></script><script src="{{.Base}}assets/charts.js" defer></script>{{end}}
 </body>
 </html>{{end}}
 
