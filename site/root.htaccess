@@ -1,9 +1,9 @@
 # openvapt.com public site. Public launch approved by the owner 2026-10-13.
 # Everything is public here for every channel (Alpha, Beta, RC, Stable); the
 # old /beta/ preview was retired on 2026-10-13 and no longer exists (410 Gone).
-# /tools/ is excluded from the header and PHP rules below so the server-side
-# admin endpoint there keeps working unchanged. Every "/tools/" carve-out in
-# this file is removed in the same change that retires the tools/ folder.
+# The old /tools/ admin endpoint was retired on 2026-10-14 (moved to
+# to-be-deleted); /tools/ now answers 410 Gone and no path is exempt from the
+# header and PHP rules below.
 Options -Indexes
 DirectoryIndex index.html
 ErrorDocument 403 /404.html
@@ -34,10 +34,10 @@ AddType text/markdown .md
   RewriteRule ^ https://openvapt.com%{REQUEST_URI} [R=301,L]
   # The retired /beta/ preview no longer exists: answer 410 Gone, no redirect.
   RewriteRule ^beta(?:/.*)?$ - [G,L]
+  RewriteRule ^tools(?:/.*)?$ - [G,L]
   # One address per page: /index.html redirects to its directory form, which
   # is what every canonical tag names. Only an explicit request is rewritten,
   # never the DirectoryIndex lookup.
-  RewriteCond %{REQUEST_URI} !^/tools/
   RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
   RewriteRule ^(.*/)?index\.html$ https://openvapt.com/$1 [R=301,L]
   # RFC 9116: the well-known location is canonical; the legacy root path
@@ -46,17 +46,15 @@ AddType text/markdown .md
 </IfModule>
 
 <IfModule mod_headers.c>
-  <If "%{REQUEST_URI} !~ m#^/tools/#">
-    Header always set Strict-Transport-Security "max-age=31536000"
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "DENY"
-    Header always set Referrer-Policy "no-referrer"
-    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
-    Header always set Cross-Origin-Opener-Policy "same-origin"
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; object-src 'none'"
-    # The site sets no cookies; make sure nothing upstream does either.
-    Header always unset Set-Cookie
-  </If>
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "no-referrer"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; object-src 'none'"
+  # The site sets no cookies; make sure nothing upstream does either.
+  Header always unset Set-Cookie
   # Caching. Pages, feeds and crawler files are revalidated on every visit so
   # a deploy is seen at once; fonts and the vendored libraries (versioned by
   # package, replaced only with a new file) are kept for a year; the site's
@@ -92,10 +90,7 @@ AddType text/markdown .md
   ForceType text/plain
 </Files>
 
-# The public site is static. Refuse to run server-side code anywhere except
-# the admin endpoint in /tools/.
+# The public site is static. Refuse to run server-side code anywhere.
 <FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh)$">
-  <If "%{REQUEST_URI} !~ m#^/tools/#">
-    Require all denied
-  </If>
+  Require all denied
 </FilesMatch>
