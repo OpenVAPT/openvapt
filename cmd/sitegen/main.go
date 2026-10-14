@@ -70,6 +70,10 @@ type Page struct {
 	PreRelease                         bool
 	JSONLD                             template.JS
 	PageCite                           []CiteBox // set on check and Academy module pages
+	Published                          string    // date the page's inputs first appeared in git (datePublished)
+	Markdown                           string    // URL path of the page's Markdown twin, when it has one
+	Article                            bool      // check and Academy module pages: og:type article
+	AltJSON                            string    // URL path of a JSON dataset that mirrors the page (check catalogue)
 	Body                               template.HTML
 	Data                               any
 }
@@ -143,6 +147,7 @@ func main() {
 		"Install":      installBoxes(chans),
 		"CiteHero":     citeHero(),
 		"Features":     siteFeatures,
+		"IndexNowKey":  indexNowKey(),
 	}
 	pages := []struct{ file, path, title, desc, section string }{
 		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "Academic, non-commercial VAPT tool with source-available code built by AI Cybersecurity Engineers. Free for own use on your Linux server, 100% at your own risk.", "home"},
@@ -158,6 +163,7 @@ func main() {
 		{"channels.html", "channels.html", "Release Channels: Alpha to Stable", "How OpenVAPT moves from Alpha to Beta, Release Candidate and Stable, the evidence each gate requires, and the current build in every channel.", "channels"},
 		{"faq.html", "faq.html", "FAQ: Free Academic VAPT Tool Questions", "Answers about OpenVAPT, the free academic vulnerability assessment tool for Linux: cost, licence, company use, scope, safety, standards and data.", "faq"},
 		{"compare.html", "compare.html", "Compared With Lynis, OpenSCAP, OpenVAS and ZAP", "How OpenVAPT, a free academic VAPT learning tool, compares with Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy and OWASP ZAP, and when to use each.", "compare"},
+		{"machine.html", "machine-readable.html", "For Machines and AI: Every Data File", "Every machine-readable file openvapt.com publishes: sitemap, Atom feed, llms.txt, Markdown twins, JSON catalogue, codemeta.json, security.txt and more.", "machine"},
 		{"privacy-notice.html", "no-data.html", "We Collect No Data", "OpenVAPT and openvapt.com collect no data: no cookies, no analytics, no logs, no forms, no accounts.", "nodata"},
 		{"404.html", "404.html", "Page Not Found", "This page does not exist. Try the OpenVAPT check catalogue or the home page.", ""},
 	}
@@ -254,6 +260,10 @@ func main() {
 	writeCatalogueJSON(checks)
 	writeSecurityTxt()
 	writeSEO(g.paths, g.mods, checks)
+	writeMarkdownTwins(checks, g.mods)
+	writeFeed(chans)
+	writeManifest()
+	writeCodemeta(checks)
 	fmt.Printf("Built %d pages into %s (commit %s)\n", len(g.paths), *outDir, commit[:min(12, len(commit))])
 }
 
@@ -368,6 +378,10 @@ func (g *gen) page(_, path, title, desc, section string, body template.HTML) {
 	p.PageCite, g.pageCite = g.pageCite, nil
 	if len(g.inputs) > 0 {
 		p.LastMod = lastMod(g.inputs...)
+		p.Published = firstMod(g.inputs...)
+	}
+	if p.Published == "" {
+		p.Published = p.LastMod
 	}
 	if g.mods == nil {
 		g.mods = map[string]string{}
@@ -394,6 +408,13 @@ func pageFor(path, title, desc, section string, body template.HTML, data any) Pa
 		NoIndexPage: path == "404.html", Root: root()}
 	if path != "404.html" {
 		p.Canonical = pageURL(path)
+	}
+	if t := mdTwin(path); t != "" {
+		p.Markdown = *base + t
+	}
+	p.Article = (strings.HasPrefix(path, "checks/") || strings.HasPrefix(path, "academy/")) && p.Markdown != ""
+	if path == "checks/index.html" {
+		p.AltJSON = *base + "checks/catalogue.json"
 	}
 	return p
 }
@@ -733,7 +754,7 @@ func jsonLD(p Page) template.JS {
 	siteURL := root() // https://openvapt.com, plus the -base path if one is set
 	url := pageURL(p.Path)
 	org := map[string]any{"@type": "Organization", "@id": siteURL + "/#org", "name": "OpenVAPT",
-		"url": siteURL + "/", "logo": siteURL + "/assets/icon.svg", "sameAs": []string{"https://github.com/OpenVAPT", repoURL},
+		"url": siteURL + "/", "logo": map[string]any{"@type": "ImageObject", "url": siteURL + "/assets/icon-512.png", "width": 512, "height": 512}, "image": siteURL + "/assets/og-image.png", "sameAs": []string{"https://github.com/OpenVAPT", repoURL},
 		"description": "An academic, non-commercial project that publishes OpenVAPT, a free vulnerability assessment learning tool with source-available code, researched, developed and built by AI Cybersecurity Engineers under human direction. Not a business; provides no services."}
 	site := map[string]any{"@type": "WebSite", "@id": siteURL + "/#website", "name": "OpenVAPT", "url": siteURL + "/", "publisher": map[string]string{"@id": siteURL + "/#org"}, "inLanguage": "en"}
 	app := map[string]any{"@type": "SoftwareApplication", "@id": siteURL + "/#software", "name": "OpenVAPT",
@@ -742,13 +763,19 @@ func jsonLD(p Page) template.JS {
 		"description":         terms.Tagline + " Read-only checks for the Linux machine it runs on: server, network exposure and websites.",
 		"isAccessibleForFree": true, "offers": map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD"},
 		"license": siteURL + "/legal/licence-text.html", "publisher": map[string]string{"@id": siteURL + "/#org"},
+		"author": map[string]string{"@id": siteURL + "/#org"}, "image": siteURL + "/assets/og-image.png", "sameAs": []string{repoURL},
+		"releaseNotes": siteURL + "/channels.html", "softwareHelp": map[string]string{"@type": "CreativeWork", "url": siteURL + "/faq.html"},
+		"installUrl": siteURL + "/download.html", "softwareRequirements": "Linux; no runtime dependencies (single static binary)",
 		"keywords":    "free VAPT tool, VAPT learning, vulnerability assessment, source-available code, built by AI Cybersecurity Engineers, Linux security, server hardening, web security headers, academic, education",
 		"featureList": []string{fmt.Sprintf("%d read-only checks", len(check.All())), "Server, network and web app coverage", "CVSS v3.1 ratings", "OWASP, CWE and NIST mapping", "HTML, JSON, SARIF and Markdown reports", "Loopback-only scope guard", "Simulated lab for learning", "Zero data collection"}}
 	graph := []any{org, site}
 	switch {
 	case p.Path == "index.html":
 		graph = append(graph, app, map[string]any{"@type": "SoftwareSourceCode", "name": "OpenVAPT source code", "codeRepository": repoURL,
-			"programmingLanguage": "Go", "license": siteURL + "/legal/licence-text.html", "targetProduct": map[string]string{"@id": siteURL + "/#software"}})
+			"programmingLanguage": "Go", "license": siteURL + "/legal/licence-text.html", "targetProduct": map[string]string{"@id": siteURL + "/#software"}},
+			map[string]any{"@type": "WebPage", "@id": url + "#webpage", "url": url, "name": p.Title, "description": p.Description, "isPartOf": map[string]string{"@id": siteURL + "/#website"},
+				"about": map[string]string{"@id": siteURL + "/#software"}, "datePublished": p.Published, "dateModified": p.LastMod, "inLanguage": "en",
+				"speakable": map[string]any{"@type": "SpeakableSpecification", "cssSelector": []string{".hero h1", ".hero .lead"}}})
 	case p.Path == "cite.html":
 		v := citeVersion()
 		graph = append(graph, map[string]any{"@type": "WebPage", "name": p.Title, "url": url, "description": p.Description,
@@ -771,7 +798,9 @@ func jsonLD(p Page) template.JS {
 		for _, f := range faqs {
 			qs = append(qs, map[string]any{"@type": "Question", "name": f.Q, "acceptedAnswer": map[string]string{"@type": "Answer", "text": f.A}})
 		}
-		graph = append(graph, map[string]any{"@type": "FAQPage", "url": url, "mainEntity": qs})
+		graph = append(graph, map[string]any{"@type": "FAQPage", "@id": url + "#faq", "url": url, "name": p.Title, "description": p.Description, "mainEntity": qs,
+			"isPartOf": map[string]string{"@id": siteURL + "/#website"}, "about": map[string]string{"@id": siteURL + "/#software"}, "datePublished": p.Published, "dateModified": p.LastMod, "inLanguage": "en",
+			"speakable": map[string]any{"@type": "SpeakableSpecification", "cssSelector": []string{"main .lead", "main section.card p"}}})
 	case p.Path == "academy/index.html":
 		var parts []any
 		mins := 0
@@ -785,9 +814,20 @@ func jsonLD(p Page) template.JS {
 			"offers":            map[string]any{"@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free"},
 			"hasCourseInstance": map[string]any{"@type": "CourseInstance", "courseMode": "online", "courseWorkload": isoDuration(mins)}})
 	case strings.HasPrefix(p.Path, "academy/"):
-		graph = append(graph, map[string]any{"@type": "LearningResource", "name": p.Title, "description": p.Description, "url": url,
+		lr := map[string]any{"@type": "LearningResource", "name": p.Title, "description": p.Description, "url": url, "mainEntityOfPage": url,
 			"isPartOf": map[string]string{"@type": "Course", "name": "OpenVAPT Academy", "url": siteURL + "/academy/"}, "isAccessibleForFree": true,
-			"learningResourceType": "Lesson", "inLanguage": "en", "publisher": map[string]string{"@id": siteURL + "/#org"}})
+			"learningResourceType": "Lesson", "inLanguage": "en", "publisher": map[string]string{"@id": siteURL + "/#org"}, "author": map[string]string{"@id": siteURL + "/#org"},
+			"image": siteURL + "/assets/og-image.png", "datePublished": p.Published, "dateModified": p.LastMod, "license": siteURL + "/legal/licence-text.html"}
+		if m := academy.Get(strings.TrimSuffix(strings.TrimPrefix(p.Path, "academy/"), ".html")); m != nil {
+			lr["educationalLevel"] = string(m.Level)
+			lr["timeRequired"] = fmt.Sprintf("PT%dM", m.Minutes)
+			lr["teaches"] = strings.Join(m.Objectives, "; ")
+			lr["keywords"] = strings.Join(m.KeyTerms, ", ")
+		}
+		if p.Markdown != "" {
+			lr["encoding"] = []any{map[string]string{"@type": "MediaObject", "encodingFormat": "text/markdown", "contentUrl": root() + "/" + strings.TrimPrefix(p.Markdown, *base)}}
+		}
+		graph = append(graph, lr)
 	case p.Path == "glossary.html":
 		var ts []any
 		for _, t := range academy.Terms() {
@@ -795,11 +835,24 @@ func jsonLD(p Page) template.JS {
 		}
 		graph = append(graph, map[string]any{"@type": "DefinedTermSet", "name": "VAPT Glossary", "url": url, "hasDefinedTerm": ts})
 	case strings.HasPrefix(p.Path, "checks/") && p.Path != "checks/index.html":
-		graph = append(graph, map[string]any{"@type": "TechArticle", "headline": p.Title, "description": p.Description, "url": url,
-			"about": map[string]string{"@id": siteURL + "/#software"}, "publisher": map[string]string{"@id": siteURL + "/#org"}, "dateModified": p.LastMod, "inLanguage": "en"})
+		ta := map[string]any{"@type": "TechArticle", "headline": p.Title, "description": p.Description, "url": url, "mainEntityOfPage": url,
+			"about": map[string]string{"@id": siteURL + "/#software"}, "publisher": map[string]string{"@id": siteURL + "/#org"}, "author": map[string]string{"@id": siteURL + "/#org"},
+			"image": siteURL + "/assets/og-image.png", "datePublished": p.Published, "dateModified": p.LastMod, "inLanguage": "en",
+			"isAccessibleForFree": true, "license": siteURL + "/legal/licence-text.html", "isPartOf": map[string]string{"@id": siteURL + "/#website"}}
+		if c := check.Get(strings.TrimSuffix(strings.TrimPrefix(p.Path, "checks/"), ".html")); c != nil {
+			kw := append([]string{c.ID, check.CategoryByID(c.Category).Name, string(c.Domain) + " security"}, c.Standards.CWE...)
+			kw = append(kw, c.Standards.OWASP...)
+			ta["keywords"] = strings.Join(kw, ", ")
+			ta["articleSection"] = check.CategoryByID(c.Category).Name
+			ta["proficiencyLevel"] = "Expert"
+		}
+		if p.Markdown != "" {
+			ta["encoding"] = []any{map[string]string{"@type": "MediaObject", "encodingFormat": "text/markdown", "contentUrl": root() + "/" + strings.TrimPrefix(p.Markdown, *base)}}
+		}
+		graph = append(graph, ta)
 	default:
 		graph = append(graph, map[string]any{"@type": "WebPage", "name": p.Title, "url": url, "description": p.Description,
-			"isPartOf": map[string]string{"@id": siteURL + "/#website"}, "about": map[string]string{"@id": siteURL + "/#software"}, "dateModified": p.LastMod})
+			"isPartOf": map[string]string{"@id": siteURL + "/#website"}, "about": map[string]string{"@id": siteURL + "/#software"}, "datePublished": p.Published, "dateModified": p.LastMod, "inLanguage": "en"})
 	}
 	if p.Path != "index.html" {
 		items := []any{map[string]any{"@type": "ListItem", "position": 1, "name": "OpenVAPT", "item": siteURL + "/"}}
@@ -864,9 +917,10 @@ func writeSEO(paths []string, mods map[string]string, cs []*check.Check) {
 	var l strings.Builder
 	l.WriteString("# OpenVAPT\n\n> OpenVAPT is a free, academic, non-commercial vulnerability assessment (VA) tool for Linux servers with source-available code, researched, developed and built entirely by AI Cybersecurity Engineers under human direction. AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude Code, and OpenAI Codex) acting in a cyber security engineering role. They are not people, not registered or professional engineers, and provide no professional engineering or security service. It runs read-only checks on the machine it is installed on (and only that machine) to identify weaknesses in the server, its network exposure and its websites, rates findings with CVSS v3.1 and proposes cited fixes. It is made for learning how a VAPT tool works. It is not a business, not a penetration testing service and collects no data.\n\n")
 	l.WriteString("Key facts:\n- Price: free. No account, no licence key.\n- Use: anyone in any country, including companies, may use it on machines they own or control, for their own use. It may not be sold or used to provide services.\n- Risk: a free gift provided as is, with no warranty; users carry 100% of the risk.\n- Licence: OpenVAPT Source-Available Licence 1.3 (LicenseRef-OpenVAPT-SAL-1.3): own use only, no services, no selling.\n- Platform: Linux. Single static Go binary, standard library only.\n- Scope: designed to be loopback-only, enforced in code. Detection only, no exploit code.\n- Standards: NIST SP 800-115, CVSS v3.1, OWASP Top 10 2021, OWASP ASVS 4.0.3, CWE, NIST SP 800-53.\n- Source: " + repoURL + "\n- Researched, developed and built entirely by AI Cybersecurity Engineers (Claude by Anthropic via Claude Code, with OpenAI Codex) under the owner's direction; not audited by a human security expert or reviewed by a human lawyer.\n- Third-party names identify those projects only; their owners do not sponsor, endorse or have any connection with OpenVAPT.\n\n## Docs\n\n")
-	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How It Is Built, With Code Citations"}, {"checks/", "Check Catalogue"}, {"standards.html", "Standards and Methodology"}, {"compare.html", "Comparison With Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What It Does Not Do"}, {"learn.html", "Lessons and Lab"}, {"teach.html", "For Teachers: Course Plans, Worksheets, Rubric, Practice Labs"}, {"legal/teaching.html", "Teaching Terms"}, {"download.html", "Download and Acknowledgements: Download Only, or Download and Scan in One Command"}, {"channels.html", "Release Channels and Promotion Gates"}, {"no-data.html", "No Data Collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}, {"legal/licence.html", "Licence"}, {"cite.html", "How to Cite OpenVAPT (APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, RIS, CSL-JSON)"}, {"legal/citing.html", "Citing OpenVAPT: Credit and Citation Guide"}, {"legal/credits.html", "Credits, Sources and Citations"}, {"legal/sources.html", "Every Source Cited, by Publisher"}, {"legal/governance.html", "Governance, Control and Assurance Framework"}, {"academy/", "OpenVAPT Academy: Free VAPT Course From Theory to Application"}, {"glossary.html", "VAPT Glossary"}, {"coverage.html", "Coverage Dashboard: Checks by Category, Severity and Framework"}, {"checks/catalogue.json", "Check Catalogue Dataset (JSON)"}, {"legal/ai-disclosure.html", "AI Disclosure"}, {"legal/agents.html", "AI Cybersecurity Engineer Policy"}, {".well-known/security.txt", "Security Contact (RFC 9116 security.txt)"}} {
+	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How It Is Built, With Code Citations"}, {"checks/", "Check Catalogue"}, {"standards.html", "Standards and Methodology"}, {"compare.html", "Comparison With Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What It Does Not Do"}, {"learn.html", "Lessons and Lab"}, {"teach.html", "For Teachers: Course Plans, Worksheets, Rubric, Practice Labs"}, {"legal/teaching.html", "Teaching Terms"}, {"download.html", "Download and Acknowledgements: Download Only, or Download and Scan in One Command"}, {"channels.html", "Release Channels and Promotion Gates"}, {"no-data.html", "No Data Collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}, {"legal/licence.html", "Licence"}, {"cite.html", "How to Cite OpenVAPT (APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, RIS, CSL-JSON)"}, {"legal/citing.html", "Citing OpenVAPT: Credit and Citation Guide"}, {"legal/credits.html", "Credits, Sources and Citations"}, {"legal/sources.html", "Every Source Cited, by Publisher"}, {"legal/governance.html", "Governance, Control and Assurance Framework"}, {"academy/", "OpenVAPT Academy: Free VAPT Course From Theory to Application"}, {"glossary.html", "VAPT Glossary"}, {"coverage.html", "Coverage Dashboard: Checks by Category, Severity and Framework"}, {"checks/catalogue.json", "Check Catalogue Dataset (JSON)"}, {"legal/ai-disclosure.html", "AI Disclosure"}, {"legal/agents.html", "AI Cybersecurity Engineer Policy"}, {".well-known/security.txt", "Security Contact (RFC 9116 security.txt)"}, {"machine-readable.html", "For Machines and AI: Every Data File (sitemap, feed, Markdown twins, datasets)"}, {"feed.xml", "Releases Feed (Atom)"}, {"codemeta.json", "Research Software Metadata (codemeta.json)"}, {"llms-full.txt", "Full Text for Models: every check and FAQ (llms-full.txt)"}} {
 		l.WriteString("- [" + p[1] + "](" + siteURL + "/" + p[0] + ")\n")
 	}
+	l.WriteString("\n## Markdown Versions\n\nEvery check page, every Academy module, the FAQ and the glossary have a Markdown twin at the same address with .md instead of .html, for example " + siteURL + "/checks/HOST-SSH-001.md and " + siteURL + "/academy/f1.md. Each twin starts with front matter naming the canonical HTML page, the licence and the last change date.\n")
 	l.WriteString(llmsCite())
 	l.WriteString("\n## FAQ\n\n")
 	for _, f := range faqs {

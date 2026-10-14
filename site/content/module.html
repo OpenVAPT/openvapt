@@ -17,6 +17,7 @@
   </tbody></table></div>{{end}}
 
   <p class="muted no-print"><a href="worksheet-{{lower $m.ID}}.html">Printable Worksheet</a> &middot; <a href="key-{{lower $m.ID}}.html">Teacher Answer Key</a> &middot; <a href="../teach.html">For Teachers</a> &middot; Print this page with your browser's Print command for a handout.</p>
+  {{template "alt-md" .}}
   <h2>{{icon "flask-conical"}} Lab</h2>
   <ol>{{range $m.Lab}}<li><code>{{.}}</code></li>{{end}}</ol>
 

@@ -227,6 +227,8 @@
 
   .lead{@apply text-[18px] md:text-[20px] leading-[1.55] text-ink-2 max-w-[60ch]}
   .muted{@apply text-[14px] text-ink-3}
+  .alt-md{@apply mt-6 flex items-start gap-2 rounded-card border border-line-2 bg-layer px-4 py-3 text-[14px] text-ink-2}
+  .alt-md svg{@apply mt-0.5 size-4 shrink-0 text-ink-3}
   .section-icon{@apply inline-flex size-5 align-[-3px] text-ink-3 mr-2}
 
   .legal{@apply max-w-[80ch] min-w-0;overflow-wrap:anywhere}
@@ -373,3 +375,14 @@
 /* AG Grid Quartz theme tuned to Ant Design tokens */
 .ag-theme-quartz.ov-grid{--ag-font-family:var(--font-sans);--ag-font-size:14px;--ag-active-color:#0958d9;--ag-header-background-color:#ffffff;
   --ag-border-color:#ececec;--ag-row-hover-color:#f7f7f8;--ag-wrapper-border-radius:16px;--ag-header-foreground-color:#666666;--ag-foreground-color:#0d0d0d}
+
+/* Machine-readable page: on phones each table row becomes a stacked card so
+   the three columns never squeeze into unreadable slivers. */
+@media (max-width: 767px) {
+  .mr thead { display: none; }
+  .mr tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--color-line-2); }
+  .mr tr:last-child { border-bottom: 0; }
+  .mr td { display: block; padding: 2px 0; border: 0; }
+  .mr td:nth-child(2) { font-size: 13px; color: var(--color-ink-3); }
+  .mr td:nth-child(2)::before { content: "Format: "; }
+}

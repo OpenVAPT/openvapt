@@ -1,5 +1,12 @@
 # OpenVAPT
 
+[![CI](https://github.com/OpenVAPT/openvapt/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenVAPT/openvapt/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/OpenVAPT/openvapt/actions/workflows/codeql.yml/badge.svg)](https://github.com/OpenVAPT/openvapt/actions/workflows/codeql.yml)
+[![Latest release](https://img.shields.io/github/v/release/OpenVAPT/openvapt?include_prereleases&label=release)](https://github.com/OpenVAPT/openvapt/releases)
+[![Licence: OpenVAPT SAL 1.3](https://img.shields.io/badge/licence-OpenVAPT%20SAL%201.3-1677ff)](LICENSE)
+[![Cite](https://img.shields.io/badge/cite-CITATION.cff-1677ff)](CITATION.cff)
+[![Website](https://img.shields.io/badge/website-openvapt.com-1677ff)](https://openvapt.com/)
+
 An open academic project that shows, in full and in public, how a vulnerability assessment tool is designed, built, tested and released.
 
 OpenVAPT runs read-only checks on the Linux machine it is installed on (and only that machine) to **identify** weaknesses in the server, its network exposure and its websites, **evaluate** them with CVSS v3.1 ratings, **propose fixes** with cited sources, and **verify** them. It writes a report to your own disk and is designed never to send data anywhere.
@@ -45,6 +52,8 @@ Before downloading or running OpenVAPT, read, study and understand the [EULA](EU
 10. I am at least 18 years old (or the age of majority where I live), or my parent or guardian has read these statements and accepts them for me in their own name; and where I act for an organisation, I am authorised to bind it.
 
 Website: https://openvapt.com (generated from this repository; every check page cites its source file and line numbers). Every component, standard, source and AI tool used is credited in [CREDITS.md](CREDITS.md).
+
+**Quick links:** [Check Catalogue](https://openvapt.com/checks/) (every check with its source) · [Academy](https://openvapt.com/academy/) (free course) · [FAQ](https://openvapt.com/faq.html) · [Download](https://openvapt.com/download.html) · [Releases feed](https://openvapt.com/feed.xml) · [For Machines and AI](https://openvapt.com/machine-readable.html) (llms.txt, Markdown twins, JSON catalogue, codemeta) · [Support](SUPPORT.md)
 
 ## Get OpenVAPT
 

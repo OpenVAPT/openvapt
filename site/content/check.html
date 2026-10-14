@@ -25,5 +25,6 @@
 <h2>{{icon "code-xml"}} Source Code</h2>
 <p>The complete file that defines this check. Run it with <code>openvapt scan --only {{$c.ID}}</code>, or read it offline with <code>openvapt explain {{$c.ID}}</code>.</p>
 {{template "cite" .Data.Cite}}
+{{template "alt-md" .}}
 {{template "citepage" .Data.PageCite}}
 {{end}}

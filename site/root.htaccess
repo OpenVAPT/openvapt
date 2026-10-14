@@ -23,6 +23,9 @@ AddType text/plain .cff
 # Sample reports and Markdown documents.
 AddType application/sarif+json .sarif
 AddType text/markdown .md
+# Web app manifest and the Atom feed.
+AddType application/manifest+json .webmanifest
+AddType application/atom+xml .atom
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -54,13 +57,19 @@ AddType text/markdown .md
   Header always set Cross-Origin-Opener-Policy "same-origin"
   Header always set Cross-Origin-Resource-Policy "same-origin"
   Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; object-src 'none'"
+  # Markdown twins of pages (checks/*.md, academy/*.md, faq.md, glossary.md)
+  # and the sample Markdown reports are for readers, scripts and AI tools; the
+  # HTML page is the one address search engines should index.
+  <FilesMatch "\.md$">
+    Header set X-Robots-Tag "noindex"
+  </FilesMatch>
   # The site sets no cookies; make sure nothing upstream does either.
   Header always unset Set-Cookie
   # Caching. Pages, feeds and crawler files are revalidated on every visit so
   # a deploy is seen at once; fonts and the vendored libraries (versioned by
   # package, replaced only with a new file) are kept for a year; the site's
   # own CSS, scripts and images for a week.
-  <FilesMatch "\.(html|xml|txt|json|md|sarif|bib|ris|cff)$">
+  <FilesMatch "\.(html|xml|txt|json|md|sarif|bib|ris|cff|webmanifest)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
   <FilesMatch "\.(woff2|woff)$">

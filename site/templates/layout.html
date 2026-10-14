@@ -9,8 +9,14 @@
 <title>{{.Title}}{{if ne .Path "index.html"}} - OpenVAPT{{end}}</title>
 <meta name="description" content="{{.Description}}">
 {{if .NoIndex}}<meta name="robots" content="noindex, nofollow, noarchive">{{else if .NoIndexPage}}<meta name="robots" content="noindex">{{end}}
-{{with .Canonical}}<link rel="canonical" href="{{.}}">{{end}}
-<meta property="og:type" content="website">
+{{with .Canonical}}<link rel="canonical" href="{{.}}">
+<link rel="alternate" hreflang="en" href="{{.}}">
+<link rel="alternate" hreflang="x-default" href="{{.}}">{{end}}
+{{if and (not .NoIndex) (not .NoIndexPage)}}<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">{{end}}
+<meta property="og:type" content="{{if .Article}}article{{else}}website{{end}}">
+{{if .Article}}<meta property="article:published_time" content="{{.Published}}">
+<meta property="article:modified_time" content="{{.LastMod}}">
+<meta property="article:author" content="{{.Root}}/">{{end}}
 <meta property="og:site_name" content="OpenVAPT">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
@@ -22,11 +28,19 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="OpenVAPT: see exactly how a vulnerability assessment tool works. Academic, non-commercial, source-available, free.">
 <link rel="alternate" type="text/plain" href="{{.Root}}/llms.txt" title="LLM summary">
+<link rel="alternate" type="application/atom+xml" href="{{.Root}}/feed.xml" title="OpenVAPT Releases">
+{{with .Markdown}}<link rel="alternate" type="text/markdown" href="{{.}}" title="This page as Markdown">{{end}}
+{{with .AltJSON}}<link rel="alternate" type="application/json" href="{{.}}" title="Check catalogue as JSON">{{end}}
 <meta property="og:title" content="{{.Title}}">
 <meta property="og:description" content="{{.Description}}">
 {{with .Canonical}}<meta property="og:url" content="{{.}}">{{end}}
 <meta name="theme-color" content="#ffffff">
+<link rel="icon" href="{{.Base}}favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="{{.Base}}assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{.Base}}assets/apple-touch-icon.png">
+<link rel="manifest" href="{{.Base}}site.webmanifest">
+<meta name="application-name" content="OpenVAPT">
+<meta name="msapplication-TileColor" content="#1677ff">
 <link rel="preload" href="{{.Base}}assets/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{.Base}}{{asset "site.css"}}">
 {{with .JSONLD}}<script type="application/ld+json">{{.}}</script>{{end}}
@@ -83,6 +97,8 @@
       <a href="{{repo}}" rel="noreferrer">Source Code on GitHub</a>
       <a href="{{repo}}/issues" rel="noreferrer">Report a Bug</a>
       <a href="{{.Base}}.well-known/security.txt">Security Contact (security.txt)</a>
+      <a href="{{.Base}}feed.xml" type="application/atom+xml">Releases Feed (Atom)</a>
+      <a href="{{.Base}}machine-readable.html">For Machines and AI</a>
     </div>
     <div>
       <p class="foot-h">Legal</p>
@@ -327,3 +343,5 @@
 </div>
 </details>
 </section>{{end}}
+
+{{define "alt-md"}}{{with .Markdown}}<p class="alt-md no-print">{{icon "file-text"}}<span>Also available as <a href="{{.}}" type="text/markdown">plain Markdown</a> for notes, scripts and AI tools. Same facts, same source, no styling.</span></p>{{end}}{{end}}
