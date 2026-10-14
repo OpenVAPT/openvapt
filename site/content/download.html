@@ -2,7 +2,9 @@
 <h1>Download and Run OpenVAPT</h1>
 <p class="lead">Free to download and use, for your own personal or business use, on your own Linux machines. Before you download, please read, study, understand and accept the statements below.</p>
 
-<section id="acknowledge" class="mt-8">
+{{template "walkthrough" .}}
+
+<section id="acknowledge" class="mt-20">
   <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
     <div class="min-w-0">
       <form id="ack-form" class="card" hidden>
@@ -36,30 +38,137 @@
 </section>
 
 <section id="gated">
-  <noscript><div class="alert alert-warn mt-6">{{icon "triangle-alert"}}<span>By using any download or command below, you confirm that you have read, studied, understood, acknowledged, agreed to and accepted every statement in the <a href="legal/eula.html">EULA</a>, including that you use OpenVAPT 100% at your own risk.</span></div></noscript>
+  <noscript><div class="alert alert-warn mt-6">{{icon "triangle-alert"}}<span>By using any download or command below, you confirm that you have read, studied, understood, acknowledged, agreed to and accepted every statement in the <a href="legal/eula.html">EULA</a>, including that you use OpenVAPT 100% at your own risk. Both ways to start are shown one after the other below.</span></div></noscript>
   <h2 tabindex="-1">Get OpenVAPT</h2>
-  <p>There are three ways. <strong>Building from source is recommended</strong>: you run exactly the code you can read, it needs nothing but Go, and building it is part of learning how it works. The one-command installer and the ready-made binaries are conveniences, built publicly from the same source and verified before use.</p>
+  <p>Choose how to start. <strong>Download Only</strong> installs and verifies OpenVAPT and scans nothing, so you can read the code and scan later. <strong>Download and Scan</strong> does the same, then assesses this machine in the same terminal and writes every report. Both use the same installer, <a href="{{$d.Repo}}/blob/main/scripts/install.sh">scripts/install.sh</a>; read it first. If you prefer to run only code you have built yourself, <a href="#build">build from source</a>, which is the most transparent way.</p>
 
-  <div class="mt-6 grid gap-6 lg:grid-cols-3">
-    <div class="card border-blue-2">
-      <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-low">Recommended</span><span class="tag tag-plain">Most Transparent</span></div>
-      <h3 class="mt-0">Option 1: Build From Source</h3>
-      <p class="text-ink-2">Read the code, then build it yourself. OpenVAPT uses only the Go standard library, so nothing else is downloaded or trusted.</p>
-    </div>
-    <div class="card">
-      <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-info">Optional</span><span class="tag tag-plain">Fastest</span></div>
-      <h3 class="mt-0">Option 2: One-Command Install</h3>
-      <p class="text-ink-2">One line downloads the binary for your CPU, verifies its checksum and signature, and installs it without root. It scans nothing unless you ask.</p>
-    </div>
-    <div class="card">
-      <div class="mb-3 flex flex-wrap items-center gap-2"><span class="tag tag-info">Optional</span><span class="tag tag-plain">Manual Verification</span></div>
-      <h3 class="mt-0">Option 3: Verified Linux Binary</h3>
-      <p class="text-ink-2">For machines without Go. Built only by GitHub Actions from a public tagged commit, with checksums, Sigstore signatures, build provenance and a software bill of materials.</p>
-    </div>
+  <div class="phases mt-6" role="list" aria-label="NIST SP 800-115 Phases">
+    <div class="phase" role="listitem"><p class="phase-k">Planning</p><p class="phase-t">Read the acknowledgements and terms, then preview the scan with <code>--dry-run</code>.</p></div>
+    <div class="phase" role="listitem"><p class="phase-k">Discovery</p><p class="phase-t">The read-only scan of this machine, checked against known weak settings and advisories.</p></div>
+    <div class="phase" role="listitem"><p class="phase-k">Reporting</p><p class="phase-t">HTML, JSON, SARIF and Markdown reports in a private, dated folder.</p></div>
+  </div>
+  <p class="muted mt-3">The phases follow NIST SP 800-115. This is a self-assessment, not a penetration test: there is no Attack phase and no exploit code, and it is designed to look only at the machine it runs on.</p>
+
+  {{$i := $d.Install}}
+  <div class="mt-8">
+  <div class="seg" role="tablist" aria-label="How to Start" data-tabs hidden>
+    <button type="button" role="tab" id="tab-only" aria-controls="panel-only" aria-selected="true" tabindex="0">{{icon "download"}}<span class="ml-1.5">Download Only</span></button>
+    <button type="button" role="tab" id="tab-scan" aria-controls="panel-scan" aria-selected="false" tabindex="-1">{{icon "search"}}<span class="ml-1.5">Download and Scan</span></button>
   </div>
 
-  <h3>Option 1: Build From Source (Recommended)</h3>
-  <p>You need Go 1.26 or newer; <code>go.mod</code> pins the Go 1.26.9 toolchain and Go downloads it automatically if needed. Get the source with git, or download a source archive from the GitHub repository or a release.</p>
+  <div class="cite-panel path-panel" role="tabpanel" id="panel-only" aria-labelledby="tab-only" tabindex="0">
+    <h3 class="mt-0">Download Only</h3>
+    <p class="text-ink-2 m-0">Install and verify now, scan later when you are ready. Nothing is scanned and nothing needs root.</p>
+    {{template "copybox" $i.DownloadOnly}}
+    <div class="path-grid">
+      <div>
+        <p class="path-h">What It Does</p>
+        <ol class="path-steps">
+          <li>Checks the machine is Linux on amd64 or arm64.</li>
+          <li>Reads the public channel list and picks the most stable channel with a release. While there is no Stable release, it says which pre-release channel it uses and warns you.</li>
+          <li>Downloads the binary and <code>SHA256SUMS</code> from GitHub Releases over HTTPS only.</li>
+          <li>Refuses to install unless the SHA-256 checksum matches; also verifies the Sigstore signature when <code>cosign</code> is installed.</li>
+          <li>Installs <code>openvapt</code> to <code>~/.local/bin</code> without root, and prints the next steps.</li>
+        </ol>
+      </div>
+      <div>
+        <p class="path-h">What You See</p>
+<pre class="term">OpenVAPT installer
+  release <span class="ph">vX.Y.Z</span>, linux/amd64
+  checksum verified (sha256 <span class="ph">64 hex digits</span>)
+  installed /home/you/.local/bin/openvapt
+
+Installed (Download Only). Nothing has been scanned.</pre>
+        <p class="path-h">Where Reports Go</p>
+        {{if $d.Features.Released}}<p class="m-0 text-[15px]">Nowhere yet: no scan runs. When you scan later, each scan writes a new folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code> in the home folder of the user who runs it, unless you choose one with <code>--out</code>. With <code>sudo</code> that is the home folder sudo sets, usually root's; when sudo keeps your own home folder, the reports are given back to you.</p>
+        {{else}}<p class="m-0 text-[15px]">Nowhere yet: no scan runs. When you scan later, {{$d.Features.Current}} writes a new folder <code>openvapt-report-&lt;time&gt;</code> in the folder you run the scan from. To choose where, add <code>--out</code>, for example <code>sudo openvapt scan --out ~/openvapt-report</code>.</p>
+        <div class="alert alert-info mt-3">{{icon "info"}}<span><strong>Arrives in the next release.</strong> A new private folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code> becomes the default.</span></div>{{end}}
+        <p class="path-h">Time and Permissions</p>
+        <p class="m-0 text-[15px]">Under a minute. No root, no account, nothing sent anywhere except the downloads from GitHub.</p>
+      </div>
+    </div>
+    <p class="path-h">Scan Later, Yourself</p>
+    {{template "copybox" $i.ScanLater}}
+    <p class="m-0 text-[15px] text-ink-2">The scan shows the acknowledgements again and continues only when you type <code>I ACCEPT</code>. With <code>sudo</code> checks can read protected files such as <code>/etc/shadow</code>; without it those checks are reported as Incomplete. {{if $d.Features.Released}}Add <code>--open</code> to open the HTML report in a desktop session.{{else}}To read the HTML report, open <code>report.html</code> from the report folder in any web browser.{{end}}</p>
+    {{if not $d.Features.Released}}<div class="alert alert-info mt-3">{{icon "info"}}<span><strong>Arrives in the next release.</strong> <code>openvapt scan --open</code> opens the HTML report for you in a desktop session, and scans write to <code>~/openvapt-reports/&lt;UTC time&gt;/</code> by default. Today, add <code>--out ~/openvapt-report</code> to choose the folder.</span></div>{{end}}
+
+    <details class="path-more" id="manual">
+      <summary>{{icon "shield-check"}}<span>Download the Binary Manually and Verify It</span><span class="chev">{{icon "chevron-right"}}</span></summary>
+      <div class="path-more-body">
+      {{if $i.Release}}
+        <p class="m-0">For machines without Go, or when you prefer to check every step yourself. These links are the {{$i.ReleaseName}} release <a class="font-mono" href="{{$i.ReleasePage}}">{{$i.Release.Version}}</a>, the one the installer picks today, built only by GitHub Actions from a public tagged commit.{{if ne $i.ReleaseName "Stable"}} It is a pre-release: it may be incomplete or wrong, so use it only on a test machine.{{end}}</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>File</th><th>What It Is</th></tr></thead>
+          <tbody>{{range $i.Assets}}<tr><td class="font-mono"><a href="{{.URL}}">{{.Name}}</a></td><td>{{.Note}}</td></tr>{{end}}</tbody>
+        </table></div>
+        {{template "copybox" $i.Manual}}
+        <p class="m-0 text-[15px] text-ink-2">Also confirm the build provenance with <code>gh attestation verify openvapt_linux_amd64 --repo OpenVAPT/openvapt --signer-workflow OpenVAPT/openvapt/.github/workflows/release.yml</code>. Each release also carries a source archive and an SBOM.</p>
+      {{else}}
+        <p class="m-0">No release has been published in any channel yet. Build from source instead.</p>
+      {{end}}
+      </div>
+    </details>
+  </div>
+
+  <div class="cite-panel path-panel" role="tabpanel" id="panel-scan" aria-labelledby="tab-scan" tabindex="0">
+    <h3 class="mt-0">Download and Scan</h3>
+    <p class="text-ink-2 m-0">Install, verify and assess this machine in one go, with every report written for you. Run it in a terminal on the machine itself: the scan needs you to type <code>I ACCEPT</code>.</p>
+    {{template "copybox" $i.DownloadScan}}
+    <div class="path-grid">
+      <div>
+        <p class="path-h">What It Does</p>
+        <ol class="path-steps">
+          <li>Everything Download Only does: picks the release, verifies the checksum (and the signature with <code>cosign</code>) and installs without root.</li>
+          <li>Starts a read-only scan of this machine only. Every connection stays on 127.0.0.1.</li>
+          <li>The scan shows the acknowledgements and waits for you to type <code>I ACCEPT</code> on the terminal, even when the installer is piped. The installer never answers for you; with no terminal it refuses to scan.</li>
+          <li>Writes all four reports, signed with your local key: <code>report.html</code>, <code>report.json</code>, <code>report.sarif</code> and <code>report.md</code>.</li>
+          <li>Prints the severity summary, the exit code and what it means, every report path, and how to open the HTML report.</li>
+        </ol>
+      </div>
+      <div>
+        <p class="path-h">What You See</p>
+<pre class="term">type I ACCEPT to continue (anything else cancels; nothing is stored): I ACCEPT
+Scanning this machine with <span class="ph">N</span> checks (read-only, local only)...
+Scan finished.
+Summary: Critical <span class="ph">n</span>, High <span class="ph">n</span>, Medium <span class="ph">n</span>, Low <span class="ph">n</span>, ...
+Exit code 3: findings at or above High severity were found
+Reports (only on this machine, readable only by you):
+  /home/you/openvapt-reports/<span class="ph">20261014T074600Z</span>/report.html</pre>
+        <p class="path-h">Where Reports Go</p>
+        <p class="m-0 text-[15px]">A new folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code>, readable only by you (mode 0700). It is never reused or written over. Choose another new folder with <code>--out DIR</code>.</p>
+        <p class="path-h">Time and Permissions</p>
+        <p class="m-0 text-[15px]">Usually one to five minutes. By default the scan runs as you, so checks that need protected files are reported as Incomplete. For full coverage add <code>--sudo</code>: only the scan runs with sudo (it may ask for your password), the install does not, and the reports are given back to you.</p>
+      </div>
+    </div>
+    <p class="path-h">Full Coverage</p>
+    {{template "copybox" $i.ScanSudo}}
+    <p class="m-0 text-[15px] text-ink-2">More options: <code>--open</code> opens the HTML report with <code>xdg-open</code>, only in a desktop session; <code>--dry-run</code> installs and then previews every file, command and request a scan would use, without scanning. Exit codes: 0 completed with nothing at or above High, 3 findings at or above High, 4 incomplete coverage, 5 error or cancelled, 6 the report could not be written.</p>
+  </div>
+  <p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
+  </div>
+
+  <h3>Release Channels</h3>
+  <p>Without <code>--channel</code> the installer uses the most stable channel that has a release. To test a specific pre-release on a test machine, add <code>--channel</code>; a channel with no release stops with a clear message. Current builds per <a href="channels.html">release channel</a>:</p>
+  <div class="table-wrap">
+  <table>
+  <thead><tr><th>Channel</th><th>Current Build</th><th>Install Option</th></tr></thead>
+  <tbody>
+  {{range $d.Channels.Views}}<tr><td>{{.Name}}</td><td class="font-mono">{{if .Release}}{{.Release.Version}}{{else}}Not Released Yet{{end}}</td><td class="font-mono">{{.Install}}</td></tr>
+  {{end}}
+  </tbody>
+  </table>
+  </div>
+<pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh -s -- --channel beta</pre>
+  <p>The installer downloads only over HTTPS with TLS 1.2 or newer, including redirects. When <code>cosign</code> is missing it continues with the checksum alone; to refuse installation unless the Sigstore signature is verified, set <code>OPENVAPT_REQUIRE_SIGNATURE=1</code>. Piping a script into a shell trusts whoever serves it; if you prefer, download it, read it, then run it:</p>
+<pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | OPENVAPT_REQUIRE_SIGNATURE=1 sh
+
+curl -fsSLo install.sh https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh
+less install.sh
+sh install.sh          # Download Only
+sh install.sh --run    # Download and Scan</pre>
+
+  <h3 id="build">Build From Source (Most Transparent)</h3>
+  <p>You run exactly the code you can read, it needs nothing but Go, and building it is part of learning how it works. You need Go 1.26 or newer; <code>go.mod</code> pins the Go 1.26.9 toolchain and Go downloads it automatically if needed.</p>
 <pre class="term"># 1. Get the source
 git clone https://github.com/OpenVAPT/openvapt.git
 cd openvapt
@@ -80,53 +189,21 @@ CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
 make release VERSION=v{{$d.CiteVersion}}
 sha256sum dist/release/openvapt_linux_amd64   # compare with the published SHA256SUMS</pre>
 
-  <h3>Option 2: One-Command Install (Optional)</h3>
-  <div class="alert alert-info" role="note">{{icon "info"}}<span>Works once the chosen channel has a release. Until then the installer stops and lists the channels that have one.</span></div>
-  <p>Read the script first: <a href="{{$d.Repo}}/blob/main/scripts/install.sh">scripts/install.sh</a>. It checks that the machine is Linux on amd64 or arm64, downloads the release binary and <code>SHA256SUMS</code> from GitHub Releases, refuses to install if the SHA-256 checksum does not match, also verifies the Sigstore signature when <code>cosign</code> is installed, and installs to <code>~/.local/bin</code> (or <code>/usr/local/bin</code> as root). It sends nothing anywhere and scans nothing.</p>
-<pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh</pre>
-  <p>The installer downloads only over HTTPS with TLS 1.2 or newer, including redirects. When <code>cosign</code> is missing it continues with the checksum alone; to refuse installation unless the Sigstore signature is verified, set <code>OPENVAPT_REQUIRE_SIGNATURE=1</code>:</p>
-<pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | OPENVAPT_REQUIRE_SIGNATURE=1 sh</pre>
-  <p>The installer installs Stable by default. To test a pre-release on a test machine, choose a channel with <code>--channel</code>. Current builds per <a href="channels.html">release channel</a>:</p>
-  <div class="table-wrap">
-  <table>
-  <thead><tr><th>Channel</th><th>Current Build</th><th>Install Option</th></tr></thead>
-  <tbody>
-  {{range $d.Channels.Views}}<tr><td>{{.Name}}</td><td class="font-mono">{{if .Release}}{{.Release.Version}}{{else}}Not Released Yet{{end}}</td><td class="font-mono">{{if .Install}}{{.Install}}{{else}}(default){{end}}</td></tr>
-  {{end}}
-  </tbody>
-  </table>
-  </div>
-<pre class="term">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh -s -- --channel beta</pre>
-  <p>To install and then start an interactive scan of this machine in the same command, add <code>--run</code>. The scan still shows the acknowledgements and continues only when you type <code>I ACCEPT</code>; the installer never accepts for you.</p>
-<pre class="term">sh -c "$(curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh)" -- --run</pre>
-  <p>Options: <code>--channel</code> picks stable, rc, beta or alpha, <code>--version vX.Y.Z</code> installs a specific release, <code>--dir DIR</code> chooses the folder. Piping a script into a shell trusts whoever serves it; if you prefer, download it, read it, then run it:</p>
-<pre class="term">curl -fsSLo install.sh https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh
-less install.sh
-sh install.sh</pre>
-
-  <h3>Option 3: Verified Linux Binary (Optional)</h3>
-  <div class="alert alert-info" role="note">{{icon "info"}}<span>Releases appear on the GitHub Releases page, built only through the promotion workflow after every channel gate passed, with <code>SHA256SUMS</code>, a <code>.sigstore.json</code> signature bundle per binary, build provenance, a source archive and an SBOM. Always verify before running.</span></div>
-<pre class="term">sha256sum -c SHA256SUMS --ignore-missing
-cosign verify-blob --certificate-identity-regexp '^https://github\.com/OpenVAPT/openvapt/\.github/workflows/release\.yml@refs/heads/main$' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --bundle openvapt_linux_amd64.sigstore.json openvapt_linux_amd64
-gh attestation verify openvapt_linux_amd64 --repo OpenVAPT/openvapt \
-  --signer-workflow OpenVAPT/openvapt/.github/workflows/release.yml</pre>
-
   <h3>Try It Safely First</h3>
-<pre class="term">./openvapt demo                    # scans a simulated vulnerable server, in memory
-./openvapt scan --dry-run          # lists every file, command and request a real scan would use
-./openvapt learn                   # the OpenVAPT Academy, offline
-./openvapt explain HOST-SSH-001    # documentation for one check</pre>
+<pre class="term">openvapt demo                    # scans a simulated vulnerable server, in memory
+openvapt scan --dry-run          # lists every file, command and request a real scan would use
+openvapt learn                   # the OpenVAPT Academy, offline
+openvapt explain HOST-SSH-001    # documentation for one check</pre>
 
   <h3>Scan Your Own Linux Machine</h3>
-<pre class="term">sudo ./openvapt scan --out ~/openvapt-report</pre>
-  <p>Before every scan the tool shows the acknowledgements again and continues only when you type <code>I ACCEPT</code> (or you pass <code>--accept-terms</code> for automation, which counts as the same acceptance). Running as root lets checks read protected files such as <code>/etc/shadow</code>; without root those checks are skipped or marked Incomplete. The report is written only to the folder you choose, with private permissions. Exit codes: 0 success, 2 invalid arguments, 3 Critical or High findings, 4 incomplete coverage, 5 scan errors, 6 report write failure.</p>
+<pre class="term">sudo openvapt scan</pre>
+  <p>Before every scan the tool shows the acknowledgements again and continues only when you type <code>I ACCEPT</code> (or you pass <code>--accept-terms</code> for automation, which counts as the same acceptance). Running as root lets checks read protected files such as <code>/etc/shadow</code>; without root those checks are skipped or marked Incomplete. {{if $d.Features.Released}}Reports go to a new private folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code> in the home folder of the user running the scan, or to the folder you name with <code>--out</code>. With <code>sudo</code> that is the home folder sudo sets, usually root's; when sudo keeps your own home folder, the reports are given back to you. After the scan OpenVAPT lists every report file and how to open the HTML report.{{else}}With {{$d.Features.Current}}, reports go to a new private folder <code>openvapt-report-&lt;time&gt;</code> in the folder you run the scan from, or to the folder you name with <code>--out</code> (for example <code>sudo openvapt scan --out ~/openvapt-report</code>). After the scan OpenVAPT lists every report file; open <code>report.html</code> in any web browser.{{end}} Exit codes: 0 success, 2 invalid arguments, 3 Critical or High findings, 4 incomplete coverage, 5 scan errors, 6 report write failure.</p>
+  {{if not $d.Features.Released}}<div class="alert alert-info mt-3">{{icon "info"}}<span><strong>Arrives in the next release.</strong> The default report folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code>, <code>--open</code> to open the HTML report, and <code>openvapt cite</code> to print the citation for your exact version.</span></div>{{end}}
 
   <h3>Cite OpenVAPT</h3>
-  <p>If OpenVAPT helps your coursework, thesis, paper or project, please cite the version you used (<code>openvapt version</code>). Copy a ready-made reference from <a href="cite.html">How to Cite OpenVAPT</a> or read <a href="legal/citing.html">Citing OpenVAPT</a>.</p>
+  <p>If OpenVAPT helps your coursework, thesis, paper or project, please cite the version you used (<code>openvapt version</code>). Copy a ready-made reference from <a href="cite.html">How to Cite OpenVAPT</a>{{if not $d.Features.Released}} or the <a href="CITATION.cff">CITATION.cff</a> file{{end}}, or read <a href="legal/citing.html">Citing OpenVAPT</a>.{{if $d.Features.Released}} <code>openvapt cite</code> prints the citation for your exact build.{{end}}</p>
 
   <h3>Uninstall</h3>
-  <p>OpenVAPT installs nothing beyond its own binary. Delete the binary (<code>rm ~/.local/bin/openvapt</code> if you used the installer) and your report folders. If you signed reports, also delete <code>~/.config/openvapt/report-key</code>.</p>
+  <p>OpenVAPT installs nothing beyond its own binary. Delete the binary (<code>rm ~/.local/bin/openvapt</code> if you used the installer) and your report folders ({{if $d.Features.Released}}<code>~/openvapt-reports</code>{{else}}each <code>openvapt-report-&lt;time&gt;</code> folder, or the folders you chose with <code>--out</code>{{end}}). If you signed reports, also delete <code>~/.config/openvapt/report-key</code>.</p>
 </section>
 {{end}}

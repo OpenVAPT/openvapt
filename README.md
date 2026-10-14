@@ -13,6 +13,22 @@ OpenVAPT runs read-only checks on the Linux machine it is installed on (and only
 
 > **Pre-release.** Builds on the alpha, beta and release candidate (rc) channels are pre-release: they may be wrong, incomplete or unstable and are used 100% at your own risk. Only stable builds are full releases, and they too come with no warranty.
 
+## Cite OpenVAPT
+
+Using OpenVAPT in research, teaching or a report? Please cite it, with the version you used. The author is the group author "OpenVAPT"; do not add personal names. OpenVAPT has no DOI yet.
+
+The citation always names the exact version, so take it from one of these (each is generated from the same source and kept current by the release pipeline):
+
+- **Your copy of the tool:** `openvapt cite` (APA) or `openvapt cite --format bibtex` (also ieee, harvard, mla, chicago, ris, csl, cff). Every report also ends with a How to Cite block for the version that produced it.
+- **GitHub:** the **Cite this repository** button on this page, generated from [CITATION.cff](CITATION.cff).
+- **Website:** [openvapt.com/cite.html](https://openvapt.com/cite.html), with one-click copy in 14 styles and .bib, .ris and CSL-JSON downloads.
+
+The general form (APA 7) is:
+
+> OpenVAPT. (Year). OpenVAPT: An open academic vulnerability assessment tool (Version X.Y.Z) [Computer software]. https://github.com/OpenVAPT/openvapt
+
+See [CITING.md](CITING.md) for when credit is required under the licence.
+
 ## Read and Accept Before Use
 
 Before downloading or running OpenVAPT, read, study and understand the [EULA](EULA.md), [Disclaimer](DISCLAIMER.md), [Acceptable Use Policy](ACCEPTABLE_USE.md), [Licence](LICENSING.md), [Teaching With OpenVAPT](TEACHING.md) and [Citing OpenVAPT](CITING.md). By downloading, building or using it, you acknowledge, agree to and accept every statement below. The tool shows the same statements before every scan and continues only when you type `I ACCEPT`, or when you pass `--accept-terms` for automation, which counts as the same acceptance.
@@ -44,7 +60,7 @@ CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
 ./openvapt demo                                       # scan the simulated vulnerable lab (safe, in memory)
 ./openvapt learn                                      # the OpenVAPT Academy, offline
 ./openvapt scan --dry-run                             # preview every file, command and request
-sudo ./openvapt scan --out ~/report                   # assess this Linux machine
+sudo ./openvapt scan                                  # assess this Linux machine; reports go to ~/openvapt-reports/<UTC time>/
 ```
 
 **Vulnerability snapshot.** The repository embeds only a tiny test fixture in `internal/vulndb/data/`, so a plain source build has no advisory data: `HOST-CVE-001`, `HOST-CVE-002`, `HOST-CVE-003` and `WEB-CVE-001` then report Incomplete (never Pass), and `openvapt vulndb` prints `Fixture: true`. To match real advisories, generate the snapshot from the public OSV exports and the CISA KEV feed before building:
@@ -59,19 +75,21 @@ Release builds run the same generator (see `docs/VULNDB.md`). Every report heade
 
 ### One-Command Install
 
-One command downloads the Linux binary of the chosen release channel (Stable by default, or `--channel rc|beta|alpha` on test machines) for your CPU, verifies its SHA-256 checksum (always) and its Sigstore signature (when `cosign` is installed), and installs it to `~/.local/bin` without root. It scans nothing. Read [scripts/install.sh](scripts/install.sh) first; it is short.
+One command downloads the Linux binary for your CPU from the most stable release channel that has a release (Stable, then Release Candidate, then Beta, then Alpha; it warns and names the channel when that is a pre-release, and `--channel NAME` forces one), verifies its SHA-256 checksum (always) and its Sigstore signature (when `cosign` is installed), and installs it to `~/.local/bin` without root. Read [scripts/install.sh](scripts/install.sh) first. There are two ways to run it.
+
+**Download Only** (the default) installs, verifies and prints the next steps. It scans nothing; you scan later with `openvapt scan --dry-run`, then `sudo openvapt scan`.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh
 ```
 
-To install and then start an interactive scan of this machine in the same command (the scan still shows the acknowledgements and waits for you to type `I ACCEPT`):
+**Download and Scan** (`--run`) installs, verifies, then scans this machine in the same terminal. The scan still shows the acknowledgements and waits for you to type `I ACCEPT` (read from the terminal even when the script is piped; the installer never accepts for you, and with no terminal it refuses). It writes every report (HTML, JSON, SARIF, Markdown, signed) to a new folder `~/openvapt-reports/<UTC time>/` (mode 0700), then prints the severity summary, the exit code and what it means, every report path and how to open the HTML report.
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh)" -- --run
+curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh -s -- --run
 ```
 
-Options: `--version vX.Y.Z` pins a release, `--dir DIR` chooses the folder. If the chosen channel has no release yet, the installer says so and lists the channels that have one.
+Options: `--sudo` (with `--run`) runs only the scan with sudo for full coverage, `--out DIR` chooses a new report folder, `--open` opens `report.html` with `xdg-open` only in a desktop session, `--dry-run` previews what a scan would read and run without scanning, `--version vX.Y.Z` pins a release, `--dir DIR` chooses the install folder. A forced channel with no release fails and lists the channels that have one.
 
 The installer downloads only over HTTPS with TLS 1.2 or newer, including redirects. To refuse installation unless the Sigstore signature is verified (instead of continuing with the checksum alone when `cosign` is missing), set `OPENVAPT_REQUIRE_SIGNATURE=1`:
 
@@ -93,11 +111,12 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 | `openvapt explain <ID>` | Full documentation for one check |
 | `openvapt diff old.json new.json` | What was fixed, what is new, what is still open |
 | `openvapt verify report.json [--key-id ID]` | Confirm a signed report was not edited |
+| `openvapt cite [--format apa\|ieee\|harvard\|mla\|chicago\|bibtex\|ris\|csl\|cff] [--check ID] [--module ID]` | Print how to cite this exact version, a check or an Academy module |
 | `openvapt terms` / `version` | Terms of use, version |
 | `openvapt man` | Print the manual page: `openvapt man > openvapt.1`, then `man ./openvapt.1` |
 | `openvapt completion bash\|zsh\|fish` | Print a shell completion script, for example `source <(openvapt completion bash)` |
 
-Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`), `--suppress` (a suppression file, below).
+Scan flags: `--out` (default: a new folder `~/openvapt-reports/<UTC time>/`, mode 0700, in the home folder named by HOME; under sudo that is usually root's, and when sudo keeps your HOME the folder and reports are given back to you), `--open` (opens `report.html` with `/usr/bin/xdg-open` only in a desktop session, never as root), `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`), `--suppress` (a suppression file, below).
 
 ### Suppressing Accepted Findings
 
@@ -166,10 +185,6 @@ OpenVAPT Source-Available Licence 1.3 (`LicenseRef-OpenVAPT-SAL-1.3`, file [LICE
 
 ## Citing OpenVAPT
 
-Please cite OpenVAPT in any research paper, thesis, coursework, presentation, poster or academic project it helped, with the version you used. Ready-to-copy APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, BibLaTeX, RIS and CSL-JSON citations are in [CITING.md](CITING.md); GitHub's "Cite this repository" button reads [CITATION.cff](CITATION.cff).
-
-```
-OpenVAPT. (2026). OpenVAPT: An open academic vulnerability assessment tool (Version 0.1.0-alpha.2) [Computer software]. https://github.com/OpenVAPT/openvapt
-```
+See [Cite OpenVAPT](#cite-openvapt) above. Ready-to-copy APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, BibLaTeX, RIS and CSL-JSON citations are in [CITING.md](CITING.md), on [openvapt.com/cite.html](https://openvapt.com/cite.html) and from `openvapt cite`.
 
 Names of other projects and products in this repository (for example Lynis, OpenVAS, ZAP, WordPress, Apache Tomcat, Node.js and Django) identify them only. Their owners do not sponsor, endorse or have any connection with OpenVAPT.

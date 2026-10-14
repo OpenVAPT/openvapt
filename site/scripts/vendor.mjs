@@ -37,9 +37,9 @@ copy('@ibm/plex-sans/LICENSE.txt', 'static/assets/vendor/LICENSES/ibm-plex.txt')
 
 // Lucide icons (ISC): only the icons the templates use are copied, and the
 // site generator inlines them as SVG at build time.
-const icons = ['shield-check', 'calendar', 'code-xml', 'book-open', 'download', 'git-pull-request', 'list-checks', 'scale',
+const icons = ['shield-check', 'play', 'pause', 'rotate-ccw', 'mouse-pointer-2', 'calendar', 'code-xml', 'book-open', 'download', 'git-pull-request', 'list-checks', 'scale',
   'server', 'network', 'globe', 'search', 'wrench', 'circle-check', 'triangle-alert', 'info', 'external-link',
-  'file-text', 'lock', 'eye-off', 'ban', 'graduation-cap', 'chevron-right', 'flask-conical', 'quote', 'gauge', 'copy', 'check', 'file-down', 'book-marked'];
+  'file-text', 'lock', 'eye-off', 'ban', 'graduation-cap', 'chevron-right', 'flask-conical', 'quote', 'gauge', 'copy', 'check', 'file-down', 'book-marked', 'chevron-down'];
 for (const i of icons) {
   try { copy(`lucide-static/icons/${i}.svg`, `icons/${i}.svg`); }
   catch { console.warn('missing icon', i); }
