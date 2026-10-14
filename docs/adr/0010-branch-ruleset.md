@@ -108,3 +108,8 @@ Update an existing ruleset with `--method PUT repos/OpenVAPT/openvapt/rulesets/<
 GitHub rejected the repository-level ruleset with the GitHub Actions integration as a bypass actor ("Actor GitHub Actions integration must be part of the ruleset source or owner organization", HTTP 422). Applying the pull-request and required-check rules without that bypass would break the promotion workflow's record commits. Applied instead: a ruleset on the default branch with `deletion` and `non_fast_forward` only (no force-push, no branch deletion). Also enabled: secret scanning, push protection, Dependabot security updates, web commit sign-off, and required SHA pinning for actions.
 
 Open follow-up (owner decision): either create the ruleset at the organisation level, where the Actions integration can be a bypass actor, or change `promote.yml` so the record step opens a pull request that the workflow merges after `ci`, and then add the `pull_request` and `required_status_checks` rules here.
+
+## Applied 2026-10-14 (deploy key bypass)
+
+Organisation rulesets need a paid plan, so the free route is used: the owner enabled deploy keys for the organisation, added a write deploy key ("promote record job") and stored its private half as the Actions secret RECORD_DEPLOY_KEY. The promote record job checks out with that key and pushes over SSH; its workflow token is read-only. The repository ruleset on main requires a pull request and the `ci` check and blocks force-push and deletion, with the deploy key as the only bypass actor. Rotate by deleting the deploy key, generating a new pair, and replacing the secret.
+
