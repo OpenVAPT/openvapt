@@ -272,6 +272,12 @@ jobs:
           sha256sum -c --strict SHA256SUMS
           for f in *; do grep -q "  $f\$" SHA256SUMS || [ "$f" = SHA256SUMS ] || { echo "unexpected file $f"; exit 1; }; done
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        # Pin the cosign binary, not only the installer: a future installer
+        # bump must not silently change the signer or bundle format. v3.0.6
+        # writes Sigstore bundle v0.3, verified by cosign v2.4.3, v2.5.2 and v3
+        # in the release path test before this upgrade.
+        with:
+          cosign-release: v3.0.6
       - name: Sign the binaries, SHA256SUMS, the vulnerability snapshot and the SBOM
         run: |
           set -eu
