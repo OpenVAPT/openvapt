@@ -1,10 +1,12 @@
 package network
 
 import (
+	"context"
 	"strings"
 
 	"github.com/openvapt/openvapt/internal/check"
 	"github.com/openvapt/openvapt/internal/checks/collect"
+	"github.com/openvapt/openvapt/internal/sys"
 )
 
 // NET-MAIL and NET-DNS: Postfix, Dovecot and BIND hardening read from their
@@ -90,16 +92,16 @@ func init() {
 		id: "NET-MAIL-002", title: "Postfix Allows TLS 1.0 or 1.1", sev: check.Medium, cat: check.CatCrypto,
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
 		summary:   "smtpd_tls_protocols or smtpd_tls_mandatory_protocols is unset or still allows TLSv1 or TLSv1.1.",
-		rationale: "The Postfix default for opportunistic TLS still admits TLS 1.0 and 1.1, which RFC 8996 deprecates. Setting a floor of TLS 1.2 is compatible with every current mail server and client. Severity is Medium rather than High because SMTP opportunistic TLS already tolerates fallback to plaintext.",
-		detection: "When smtpd_tls_security_level is not none, reads smtpd_tls_protocols and smtpd_tls_mandatory_protocols. Fails when either is unset or, in list form, does not exclude both TLSv1 and TLSv1.1, or, in >= form, names a version below TLSv1.2.",
+		rationale: "The Postfix default for opportunistic TLS still admits TLS 1.0 and 1.1, which RFC 8996 deprecates. Setting a floor of TLS 1.2 is compatible with every current mail server and client. Severity is Medium rather than High because SMTP opportunistic TLS already tolerates fallback to plaintext. Postfix uses the system OpenSSL, so when its configuration already sets a floor of TLS 1.2 (MinProtocol in openssl.cnf on Debian 12 and Ubuntu 22.04 and later, or a crypto policy of DEFAULT, FUTURE or FIPS on the RHEL family) the old versions cannot be negotiated whatever main.cf says; the check then reports Pass and names the floor, and the directives remain worth setting so the configuration says what it does.",
+		detection: "When smtpd_tls_security_level is not none, reads smtpd_tls_protocols and smtpd_tls_mandatory_protocols. Fails when either is unset or, in list form, does not exclude both TLSv1 and TLSv1.1, or, in >= form, names a version below TLSv1.2, unless /etc/crypto-policies/config or openssl.cnf (with its .include files) shows the system library already refuses TLS 1.0 and 1.1, in which case the result is Pass with the floor as evidence.",
 		fix:       "Add  smtpd_tls_protocols = >=TLSv1.2  and  smtpd_tls_mandatory_protocols = >=TLSv1.2  (Postfix 3.6 and newer; on older releases use  !SSLv2, !SSLv3, !TLSv1, !TLSv1.1 ), then postfix reload.",
 		verify:    "postconf smtpd_tls_protocols smtpd_tls_mandatory_protocols",
 		patterns:  postfixFiles, markers: postfixMarkers,
 		refs: []check.Ref{refPostfixTLS, refRFC8996, refNISTTLSMail},
 		std:  check.Standards{CWE: []string{"CWE-326", "CWE-327"}, OWASP: []string{"A02:2021"}, ASVS: []string{"9.1.3"}, NIST: []string{"SC-8", "SC-13"}, CISTopic: "TLS protocol versions"},
-		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
+		evaluateSys: func(ctx context.Context, s sys.System, fs []collect.ConfigFile) (bool, []string, string) {
 			if postfixTLSLevel(fs) == "none" {
-				return false, []string{"smtpd_tls_security_level is none; see NET-MAIL-001"}
+				return false, []string{"smtpd_tls_security_level is none; see NET-MAIL-001"}, ""
 			}
 			var ev []string
 			bad := false
@@ -118,7 +120,12 @@ func init() {
 					ev = append(ev, k+" = "+last)
 				}
 			}
-			return bad, ev
+			if bad {
+				if floor := collect.SystemTLSFloor(ctx, s); floor.Known && floor.Forbids {
+					return false, append(ev, floor.Evidence), "main.cf still allows TLS 1.0 or 1.1, but the system crypto library floor refuses them, so they cannot be negotiated; set the Postfix directives so the configuration says what it does"
+				}
+			}
+			return bad, ev, ""
 		},
 		passMsg: "Postfix requires TLS 1.2 or newer",
 	})

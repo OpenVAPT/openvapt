@@ -77,6 +77,7 @@ func TestMySQLDepthTable(t *testing.T) {
 		{"NET-DB-014", "symbolic-links=0\n", check.Pass}, {"NET-DB-014", "skip-symbolic-links\n", check.Pass}, {"NET-DB-014", "symbolic-links=1\n", check.Fail}, {"NET-DB-014", "", check.Fail},
 		{"NET-DB-015", "secure_file_priv=NULL\n", check.Pass}, {"NET-DB-015", "secure-file-priv=/var/lib/mysql-files\n", check.Pass}, {"NET-DB-015", "secure_file_priv=\n", check.Fail}, {"NET-DB-015", "secure_file_priv=\"\"\n", check.Fail}, {"NET-DB-015", "", check.Fail},
 		{"NET-DB-016", "require_secure_transport=ON\n", check.Pass}, {"NET-DB-016", "require-secure-transport=1\n", check.Pass}, {"NET-DB-016", "require_secure_transport=OFF\n", check.Fail}, {"NET-DB-016", "skip-networking\n", check.Pass}, {"NET-DB-016", "skip_networking=ON\n", check.Pass}, {"NET-DB-016", "skip-networking=OFF\n", check.Fail},
+		{"NET-DB-016", "bind-address=127.0.0.1\n", check.Pass}, {"NET-DB-016", "bind_address=::1\n", check.Pass}, {"NET-DB-016", "bind-address=0.0.0.0\n", check.Fail}, {"NET-DB-016", "bind-address=127.0.0.1,10.0.0.5\n", check.Fail},
 		{"NET-DB-017", "log_error=/var/log/mysql/error.log\n", check.Pass}, {"NET-DB-017", "log-error=/var/log/mysqld.log\n", check.Pass}, {"NET-DB-017", "", check.Fail},
 		{"NET-DB-018", "skip-name-resolve\n", check.Pass}, {"NET-DB-018", "skip_name_resolve=ON\n", check.Pass}, {"NET-DB-018", "skip-name-resolve=OFF\n", check.Fail}, {"NET-DB-018", "", check.Fail},
 	} {
@@ -103,8 +104,10 @@ func TestPostgreSQLDepthTable(t *testing.T) {
 		{"NET-DB-019", "", "# host all all 0.0.0.0/0 md5\nhostssl all all 10.0.0.0/8 scram-sha-256 clientcert=verify-full\n", check.Pass},
 		{"NET-DB-019", "", "host all all 10.0.0.0/8 md5\n", check.Fail},
 		{"NET-DB-019", "", "hostssl all all 10.0.0.0/8 password\n", check.Fail},
-		{"NET-DB-020", "ssl = on\n", "", check.Pass}, {"NET-DB-020", "ssl = off\n", "", check.Fail}, {"NET-DB-020", "listen_addresses = '*'\n", "", check.Fail}, {"NET-DB-020", "listen_addresses = ''\n", "", check.Pass},
-		{"NET-DB-020", "ssl = off\nssl = on\n", "", check.Pass}, // last value wins
+		{"NET-DB-020", "listen_addresses = '*'\nssl = on\n", "", check.Pass}, {"NET-DB-020", "listen_addresses = '*'\nssl = off\n", "", check.Fail}, {"NET-DB-020", "listen_addresses = '*'\n", "", check.Fail}, {"NET-DB-020", "listen_addresses = ''\n", "", check.Pass},
+		{"NET-DB-020", "listen_addresses = '0.0.0.0'\nssl = off\nssl = on\n", "", check.Pass}, // last value wins
+		{"NET-DB-020", "ssl = off\n", "", check.Pass},                                         // default listen_addresses is localhost
+		{"NET-DB-020", "listen_addresses = 'localhost'\nssl = off\n", "", check.Pass}, {"NET-DB-020", "listen_addresses = '127.0.0.1, ::1'\n", "", check.Pass}, {"NET-DB-020", "listen_addresses = 'localhost,10.0.0.5'\n", "", check.Fail},
 		{"NET-DB-021", "log_connections = on\n", "", check.Pass}, {"NET-DB-021", "log_connections = off\n", "", check.Fail}, {"NET-DB-021", "", "", check.Fail}, {"NET-DB-021", "log_connections = 'receipt,authentication'\n", "", check.Pass},
 		{"NET-DB-022", "password_encryption = scram-sha-256\n", "", check.Pass}, {"NET-DB-022", "password_encryption = md5\n", "", check.Fail}, {"NET-DB-022", "password_encryption = on\n", "", check.Fail}, {"NET-DB-022", "", "", check.Pass},
 	} {

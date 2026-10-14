@@ -1,16 +1,19 @@
 package web
 
 import (
+	"context"
+	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/openvapt/openvapt/internal/check"
+	"github.com/openvapt/openvapt/internal/checks/collect"
+	"github.com/openvapt/openvapt/internal/sys"
 )
 
 // WEB-APA: Apache HTTP Server hardening read from apache2.conf or httpd.conf
 // and every Include under /etc/apache2 or /etc/httpd. Detection only.
 
-var refApacheCore = check.Ref{Title: "Apache HTTP Server, core directives", URL: "https://httpd.apache.org/docs/2.4/mod/core.html"}
-var refApacheSSL = check.Ref{Title: "Apache HTTP Server, mod_ssl", URL: "https://httpd.apache.org/docs/2.4/mod/mod_ssl.html"}
 var refApacheSecTips = check.Ref{Title: "Apache HTTP Server, Security Tips", URL: "https://httpd.apache.org/docs/2.4/misc/security_tips.html"}
 
 func apacheTLSConfigured(c serverConf) bool {
@@ -65,7 +68,7 @@ func init() {
 		fix:       "Add  TraceEnable Off  to the server configuration and reload.",
 		verify:    "curl -s -o /dev/null -w '%{http_code}' -X TRACE https://<site>/  should print 405.",
 		refs:      []check.Ref{{Title: "Apache HTTP Server, TraceEnable directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#traceenable"}, {Title: "OWASP WSTG-CONF-06, Test HTTP Methods", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods"}},
-		std:       check.Standards{CWE: []string{"CWE-16", "CWE-693"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.5.1"}, WSTG: []string{"WSTG-CONF-06"}, NIST: []string{"CM-7"}, CISTopic: "HTTP methods allowed by the web server"},
+		std:       check.Standards{CWE: []string{"CWE-693", "CWE-1188"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.5.1"}, WSTG: []string{"WSTG-CONF-06"}, NIST: []string{"CM-7"}, CISTopic: "HTTP methods allowed by the web server"},
 		kind:      apacheKind,
 		evaluate: func(c serverConf) (bool, []string) {
 			off := c.has("traceenable", func(v string) bool { return v == "off" })
@@ -109,7 +112,7 @@ func init() {
 		fix:       "Set  AllowOverride None  and move needed rules into the vhost, or allow only what the application needs, for example  AllowOverride FileInfo Indexes Limit  for WordPress permalinks.",
 		verify:    "grep -rn AllowOverride /etc/apache2 /etc/httpd 2>/dev/null  should show no All.",
 		refs:      []check.Ref{{Title: "Apache HTTP Server, AllowOverride directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#allowoverride"}, refApacheSecTips},
-		std:       check.Standards{CWE: []string{"CWE-284", "CWE-16"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.1.1"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"CM-6", "CM-7"}, CISTopic: "Web server per-directory override scope"},
+		std:       check.Standards{CWE: []string{"CWE-284", "CWE-1188"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.1.1"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"CM-6", "CM-7"}, CISTopic: "Web server per-directory override scope"},
 		kind:      apacheKind,
 		evaluate: func(c serverConf) (bool, []string) {
 			var ev []string
@@ -127,32 +130,38 @@ func init() {
 		id: "WEB-APA-005", title: "Apache Allows TLS 1.0 or 1.1", sev: check.High, cat: check.CatCrypto,
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
 		summary:   "SSLProtocol permits SSLv3, TLSv1 or TLSv1.1, or is not set on a TLS-enabled server (the default  all -SSLv3  allows TLS 1.0 and 1.1).",
-		rationale: "TLS 1.0 and 1.1 are deprecated by RFC 8996 and lack the protections of TLS 1.2 and 1.3. Apache's default still allows them, so an explicit SSLProtocol is required.",
-		detection: "Reads every SSLProtocol directive and expands  all , + and - tokens. Any resulting version below TLSv1.2 fails. When SSLEngine on or SSLCertificateFile is present and SSLProtocol is absent, the default is applied and the check fails.",
+		rationale: "TLS 1.0 and 1.1 are deprecated by RFC 8996 and lack the protections of TLS 1.2 and 1.3. Apache's default still allows them, so an explicit SSLProtocol is required. The directive is not the last word: mod_ssl uses the system OpenSSL, and when its configuration already sets a floor of TLS 1.2 (MinProtocol in openssl.cnf on Debian 12 and Ubuntu 22.04 and later, or a crypto policy of DEFAULT, FUTURE or FIPS on the RHEL family) the old versions cannot be negotiated whatever the directive lists. In that case the check reports Pass and names the floor, because rating a server High for a line that has no effect would contradict the live handshake checks (WEB-TLS). The directive is still worth tidying so the configuration says what it does.",
+		detection: "Reads every SSLProtocol directive and expands  all , + and - tokens. Any resulting version below TLSv1.2 fails, as does an absent SSLProtocol when SSLEngine on or SSLCertificateFile is present, unless /etc/crypto-policies/config or openssl.cnf (with its .include files) shows the system library already refuses TLS 1.0 and 1.1, in which case the result is Pass with the floor as evidence.",
 		fix:       "Set  SSLProtocol -all +TLSv1.2 +TLSv1.3  (Mozilla intermediate) in mods-enabled/ssl.conf or ssl.conf, then apachectl configtest and reload.",
 		verify:    "openssl s_client -connect 127.0.0.1:443 -servername <site> -tls1_1  should fail to connect.",
-		refs:      []check.Ref{{Title: "Apache HTTP Server, SSLProtocol directive", URL: "https://httpd.apache.org/docs/2.4/mod/mod_ssl.html#sslprotocol"}, refMozillaTLS, refNISTTLS},
+		refs:      []check.Ref{{Title: "Apache HTTP Server, SSLProtocol directive", URL: "https://httpd.apache.org/docs/2.4/mod/mod_ssl.html#sslprotocol"}, refMozillaTLS, refNISTTLS, refOpenSSLConfig},
 		std:       check.Standards{CWE: []string{"CWE-326", "CWE-327"}, OWASP: []string{"A02:2021"}, ASVS: []string{"9.1.3"}, WSTG: []string{"WSTG-CRYP-01"}, NIST: []string{"SC-8", "SC-13"}, CISTopic: "TLS protocol versions"},
 		kind:      apacheKind,
+		wantFloor: true,
 		evaluate: func(c serverConf) (bool, []string) {
-			var ev []string
-			bad := false
-			for _, l := range c.directive("sslprotocol") {
-				if w := weakTLSProtocols(l.Value); len(w) > 0 {
-					bad = true
-					ev = append(ev, l.File+": "+l.Raw+" (allows "+strings.Join(w, ", ")+")")
-				}
-			}
+			ev := weakProtocolLines(c, "sslprotocol")
 			if !c.anyValue("sslprotocol") && apacheTLSConfigured(c) {
-				bad = true
 				ev = append(ev, "SSLProtocol is not set; the default  all -SSLv3  allows TLS 1.0 and 1.1")
 			}
-			if !bad && len(ev) == 0 {
-				ev = c.evidenceFor("sslprotocol")
+			if len(ev) > 0 {
+				if floorOverrides(c) {
+					return false, append(ev, c.tlsFloor.Evidence)
+				}
+				return true, ev
 			}
-			return bad, ev
+			ev = c.evidenceFor("sslprotocol")
+			if c.tlsFloor.Known {
+				ev = append(ev, c.tlsFloor.Evidence)
+			}
+			return false, ev
 		},
 		passMsg: "SSLProtocol allows only TLS 1.2 or newer",
+		pass: func(c serverConf) string {
+			if len(weakProtocolLines(c, "sslprotocol")) > 0 || (!c.anyValue("sslprotocol") && apacheTLSConfigured(c)) {
+				return floorPassMsg
+			}
+			return "SSLProtocol allows only TLS 1.2 or newer"
+		},
 	})
 
 	registerServerRule(serverRule{
@@ -265,24 +274,43 @@ func init() {
 	})
 
 	registerServerRule(serverRule{
-		id: "WEB-APA-010", title: "Apache Serves Repository and Environment Files", sev: check.Medium, cat: check.CatExposure,
-		cvss:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+		id: "WEB-APA-010", title: "Apache Serves Repository and Environment Files", sev: check.Low, cat: check.CatExposure,
+		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		summary:   "No DirectoryMatch, FilesMatch or RedirectMatch rule denies .git, .svn, .hg or .env paths, so they are served if present under a document root.",
-		rationale: "Repository folders rebuild the source code and its history; .env files hold database passwords and application keys. Debian's default only protects .ht* files. One rule for every dot path removes the whole class, including files deployed by mistake later.",
-		detection: "Looks for a block or rule whose pattern covers dot-prefixed names: DirectoryMatch or LocationMatch with a dot pattern, FilesMatch starting with ^\\. , or RedirectMatch for .git or .env. Fails when none exists.",
+		rationale: "Repository folders rebuild the source code and its history; .env files hold database passwords and application keys. Debian's default only protects .ht* files. One rule for every dot path removes the whole class, including files deployed by mistake later. The rating is Low because this is a missing safety net, not an exposure: when such a file is actually present under a document root, WEB-APP-009 and WEB-DOC-001 report it at their own higher severity, and when none is present the check passes and only notes the missing rule.",
+		detection: "Looks for a block or rule whose pattern covers dot-prefixed names: DirectoryMatch or LocationMatch with a dot pattern, FilesMatch starting with ^\\. , or RedirectMatch for .git or .env. When none exists, checks each configured document root (metadata only, symlinks not followed) for a .git, .svn, .hg, .env or .env.* entry; Fails at Low when one is found and the rule is missing, Passes with a note when none is found.",
 		fix:       "Add to the server configuration:  <DirectoryMatch \"/\\.(git|svn|hg)\"> Require all denied </DirectoryMatch>  and  <FilesMatch \"^\\.(env|git|svn)\"> Require all denied </FilesMatch> , then reload.",
 		verify:    "curl -s -o /dev/null -w '%{http_code}' https://<site>/.git/HEAD  should print 403 or 404.",
 		refs:      []check.Ref{{Title: "Apache HTTP Server, DirectoryMatch directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#directorymatch"}, {Title: "OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/"}},
 		std:       check.Standards{CWE: []string{"CWE-538", "CWE-200"}, OWASP: []string{"A05:2021"}, ASVS: []string{"12.5.1", "14.3.3"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"CM-7", "SC-28"}, CISTopic: "Web server access to hidden files"},
 		kind:      apacheKind,
-		evaluate: func(c serverConf) (bool, []string) {
+		evaluateSys: func(ctx context.Context, s sys.System, c serverConf) (bool, []string) {
 			for _, l := range c.Lines {
 				if dotRuleCovers(l.Raw) {
 					return false, []string{l.File + ": " + l.Raw}
 				}
 			}
-			return true, []string{"no DirectoryMatch, FilesMatch or RedirectMatch rule covers .git, .svn or .env"}
+			roots := collect.DocRoots(ctx, s)
+			var present []string
+			for _, root := range roots {
+				for _, name := range []string{".git", ".svn", ".hg", ".env"} {
+					if collect.Exists(s, root+"/"+name) {
+						present = append(present, root+"/"+name)
+					} else if m, _ := s.Glob(root + "/" + name + "/*"); len(m) > 0 {
+						present = append(present, root+"/"+name)
+					}
+				}
+				if m, _ := s.Glob(root + "/.env.*"); len(m) > 0 {
+					sort.Strings(m)
+					present = append(present, m...)
+				}
+			}
+			if len(present) > 0 {
+				return true, append([]string{"no DirectoryMatch, FilesMatch or RedirectMatch rule covers .git, .svn or .env, and these exist under a document root:"}, present...)
+			}
+			return false, []string{fmt.Sprintf("no deny rule for dot paths, but none of .git, .svn, .hg or .env exists under the %d configured document root(s); add the rule as a safety net", len(roots))}
 		},
+		passMsg: "Repository and environment paths are either denied by a rule or absent from every document root",
 	})
 }
 

@@ -30,7 +30,11 @@ type depthRule struct {
 	refs                                     []check.Ref
 	std                                      check.Standards
 	evaluate                                 func(fs []collect.ConfigFile) (bad bool, ev []string)
-	passMsg                                  string
+	// evaluateSys, when set, replaces evaluate for rules that must also read
+	// the system (for example the crypto library floor). A non-empty pass
+	// string replaces passMsg so the Pass can say why.
+	evaluateSys func(ctx context.Context, s sys.System, fs []collect.ConfigFile) (bad bool, ev []string, pass string)
+	passMsg     string
 }
 
 func installed(s sys.System, markers []string) bool {
@@ -55,7 +59,14 @@ func registerDepth(r depthRule) {
 				}
 				return []check.Result{check.SkipR(target, "Service configuration was not found")}
 			}
-			bad, ev := r.evaluate(fs)
+			var bad bool
+			var ev []string
+			var pass string
+			if r.evaluateSys != nil {
+				bad, ev, pass = r.evaluateSys(ctx, s, fs)
+			} else {
+				bad, ev = r.evaluate(fs)
+			}
 			if bad {
 				return []check.Result{check.FailR(fs[0].Path, r.summary, ev...)}
 			}
@@ -63,6 +74,9 @@ func registerDepth(r depthRule) {
 				return []check.Result{check.IncompleteR(fs[0].Path, "Configuration input was truncated; the setting could not be confirmed")}
 			}
 			msg := r.passMsg
+			if pass != "" {
+				msg = pass
+			}
 			if msg == "" {
 				msg = "The hardening setting is present"
 			}
@@ -201,8 +215,8 @@ func init() {
 		id: "NET-DB-016", title: "MySQL Does Not Require Encrypted Client Connections", sev: check.Medium, cat: check.CatCrypto,
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
 		summary:   "require_secure_transport is not ON, so clients may log in and query over plaintext TCP.",
-		rationale: "Without the requirement, a client that is misconfigured or downgraded sends credentials and data in the clear across the network. The setting is harmless for Unix socket connections and makes TLS a server-side rule rather than a client choice.",
-		detection: "Parses the option files for require_secure_transport under [mysqld]. Fails unless it is ON. Skipped when skip-networking is on, since no TCP connections exist.",
+		rationale: "Without the requirement, a client that is misconfigured or downgraded sends credentials and data in the clear across the network. The setting is harmless for Unix socket connections and makes TLS a server-side rule rather than a client choice. When bind-address keeps the server on loopback (127.0.0.1, ::1 or localhost) the plaintext path never leaves the machine and only a local root user could read it, so the check reports Pass with a note instead of a Medium finding; the Medium applies to servers reachable from the network.",
+		detection: "Parses the option files for require_secure_transport under [mysqld]. Fails unless it is ON. Passes with a note when skip-networking is on (no TCP) or every bind-address value is a loopback address, since no network path exists to protect.",
 		fix:       "Provision a server certificate (MySQL creates one by default), then add  require_secure_transport = ON  under [mysqld] and restart in a maintenance window. Test every application connection string first.",
 		verify:    "SHOW VARIABLES LIKE 'require_secure_transport';  should print ON, and  a client that disables TLS (ssl-mode DISABLED) connecting to 127.0.0.1 should be refused.",
 		patterns:  mysqlFiles, markers: mysqlMarkers,
@@ -211,6 +225,13 @@ func init() {
 		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
 			if skipNetworking(fs) {
 				return false, []string{"skip-networking is on; no TCP connections are accepted"}
+			}
+			var binds []string
+			for _, v := range mysqlValues(fs, "bind-address") {
+				binds = append(binds, strings.Split(v, ",")...) // MySQL 8 accepts a comma-separated list
+			}
+			if len(binds) > 0 && allLoopback(binds) {
+				return false, append([]string{"bind-address is loopback only, so plaintext connections never leave this machine; TLS is still recommended before exposing the port"}, mysqlEvidence(fs, "bind_address", "require_secure_transport")...)
 			}
 			ok := false
 			for _, v := range mysqlValues(fs, "require_secure_transport") {
@@ -317,16 +338,23 @@ func init() {
 		id: "NET-DB-020", title: "PostgreSQL SSL Not Enabled", sev: check.Medium, cat: check.CatCrypto,
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
 		summary:   "postgresql.conf does not set ssl = on, so TCP clients cannot encrypt their sessions and hostssl rules cannot apply.",
-		rationale: "Without SSL every query and result crosses the network in the clear. Enabling it costs one certificate and lets pg_hba.conf require hostssl for remote clients. Loopback-only servers gain less, but still protect credentials from local sniffing of the TCP path.",
-		detection: "Reads postgresql.conf and flags ssl absent or off. Skipped when listen_addresses is empty (no TCP at all).",
+		rationale: "Without SSL every query and result crosses the network in the clear. Enabling it costs one certificate and lets pg_hba.conf require hostssl for remote clients. When listen_addresses keeps the server on loopback (the PostgreSQL default, localhost) the plaintext path never leaves the machine and only a local root user could read it, so the check reports Pass with a note instead of a Medium finding; the Medium applies to servers reachable from the network.",
+		detection: "Reads postgresql.conf and flags ssl absent or off. Passes with a note when listen_addresses is empty (no TCP at all) or names only loopback addresses (localhost, 127.0.0.1, ::1), or when it is unset, since the PostgreSQL default is localhost.",
 		fix:       "Install a certificate and key readable only by the postgres user, set  ssl = on , ssl_cert_file and ssl_key_file, reload, then change remote pg_hba.conf rules from host to hostssl.",
 		verify:    "SHOW ssl;  should print on, and  psql \"sslmode=require host=127.0.0.1\"  should connect.",
 		patterns:  pgConf, markers: pgMarkers,
 		refs: []check.Ref{refPGSSL, refNISTSC8},
 		std:  check.Standards{CWE: []string{"CWE-319"}, OWASP: []string{"A02:2021"}, ASVS: []string{"9.2.2"}, NIST: []string{"SC-8", "SC-13"}, CISTopic: "Database transport encryption"},
 		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
-			if la, ok := pgValue(fs, "listen_addresses"); ok && la == "" {
+			la, ok := pgValue(fs, "listen_addresses")
+			if ok && la == "" {
 				return false, []string{"listen_addresses is empty; no TCP connections are accepted"}
+			}
+			if !ok {
+				return false, []string{"listen_addresses is not set; the PostgreSQL default is localhost, so plaintext connections never leave this machine; enable ssl before exposing the port"}
+			}
+			if allLoopback(strings.Split(la, ",")) {
+				return false, []string{"listen_addresses = " + la + " is loopback only, so plaintext connections never leave this machine; enable ssl before exposing the port"}
 			}
 			v, ok := pgValue(fs, "ssl")
 			if !ok {
@@ -428,4 +456,21 @@ func skipNetworking(fs []collect.ConfigFile) bool {
 		}
 	}
 	return false
+}
+
+// allLoopback reports whether every address in the list is a loopback
+// address (127.0.0.1, any 127.x, ::1 or localhost). An empty list is not
+// loopback: it means the server default, which differs per service.
+func allLoopback(addrs []string) bool {
+	if len(addrs) == 0 {
+		return false
+	}
+	for _, a := range addrs {
+		a = strings.ToLower(strings.Trim(strings.TrimSpace(a), `'"`))
+		if a == "localhost" || a == "::1" || strings.HasPrefix(a, "127.") || a == "::ffff:127.0.0.1" {
+			continue
+		}
+		return false
+	}
+	return true
 }

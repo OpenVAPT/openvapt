@@ -1,8 +1,6 @@
 package lab
 
 import (
-	"io/fs"
-
 	"github.com/openvapt/openvapt/internal/sys"
 )
 
@@ -14,10 +12,6 @@ import (
 // unsigned personal package archive and a dozen legacy services installed.
 // The hardened server has each fix applied. PASS_MIN_DAYS and PASS_WARN_AGE
 // live in fixtures_host.go with the rest of login.defs.
-
-func auditDir(f *sys.Fake, path string, mode fs.FileMode) {
-	f.Infos[path] = sys.FileInfo{Path: path, Mode: fs.ModeDir | mode, IsDir: true}
-}
 
 // dpkgInfo marks packages as installed through their dpkg info list files.
 func dpkgInfo(f *sys.Fake, names ...string) {

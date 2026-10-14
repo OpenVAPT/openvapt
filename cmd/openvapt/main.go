@@ -350,7 +350,27 @@ func cmdDemo(ctx context.Context, args []string) error {
 	fs.StringVar(&which, "lab", "vulnerable", "which simulated server to scan: vulnerable, hardened or practice")
 	seed := fs.String("seed", "", "practice lab seed, for example a student number (with --lab practice)")
 	addScanFlags(fs, &f, "")
+	// The help text invites  demo hardened ; accept one positional lab name
+	// (before or after the flags) as a synonym for --lab and refuse anything
+	// else, so a typo never scans the vulnerable lab in silence.
+	var pos []string
+	if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
+		pos, args = append(pos, args[0]), args[1:]
+	}
 	_ = fs.Parse(args)
+	pos = append(pos, fs.Args()...)
+	labFlag := false
+	fs.Visit(func(fl *flag.Flag) { labFlag = labFlag || fl.Name == "lab" })
+	switch len(pos) {
+	case 0:
+	case 1:
+		if labFlag && which != pos[0] {
+			return usageErr("lab given twice: --lab %s and %q", which, pos[0])
+		}
+		which = pos[0]
+	default:
+		return usageErr("demo takes at most one lab name (vulnerable, hardened or practice), got %q", strings.Join(pos, " "))
+	}
 	if err := f.prepare(); err != nil {
 		return err
 	}

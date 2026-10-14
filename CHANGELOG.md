@@ -13,6 +13,17 @@ All notable changes are documented here. This project follows Semantic Versionin
 - For Teachers: the four overview cards are "Jump to" links to their sections instead of repeated headings.
 - Site .htaccess: 403 responses show the 404 page; the /tools/ carve-outs are marked for removal with the tools/ folder.
 
+### Stream: software verification fixes (2026-10-14 review, 11-verify-software)
+- CI: six unused symbols removed (staticcheck U1000) and the `secretKey` redaction pattern annotated for gosec G101, so the Staticcheck and Gosec steps pass again under the pinned toolchain.
+- WEB-NGX-003, WEB-APA-005 and NET-MAIL-002 now read the system crypto library floor (`/etc/crypto-policies/config`, `openssl.cnf` MinProtocol with its `.include` files) and report Pass naming the floor when it already refuses TLS 1.0 and 1.1, instead of a High from a directive that cannot take effect; WEB-NGX-003 skips when no server block is served over TLS.
+- HOST-FS-016: the SUID baseline gains the sssd helpers (krb5_child, ldap_child, proxy_child, selinux_child) and other RHEL 9 / Alma 9 defaults, with the package sources cited in the code; a RHEL-shaped unit test added.
+- Redaction: secret key words must end the key, so `password_encryption = md5`, `server_tokens off`, `authorization = disabled`, "password directive" and cipher names stay readable while DB_PASSWORD, requirepass, secret_key_base and Authorization headers are still masked; tests added for every case.
+- HOST-SEC-001: the credential assignment pattern no longer crosses a newline.
+- WEB-APA-010 is Low and fails only when a document root actually holds .git, .svn, .hg or .env; NET-DB-016 and NET-DB-020 pass with a note when MySQL or PostgreSQL binds loopback only; WEB-APA-002 and WEB-APA-004 cite CWE-1188 instead of the category entry CWE-16.
+- `openvapt demo hardened` (positional lab name) now works, and extra positionals are a usage error instead of silently scanning the vulnerable lab.
+- EULA section 8.1 and PRIVACY section 3 (now 1.6) list the files and folders the new check families read; release/legal-review.json hashes refreshed.
+- SOURCES.md: OpenSSL Project added as a publisher.
+
 ### Stream: software (2026-10-14 review, Wave 1 "honest results")
 - CVE checks are honest about their data: when the binary embeds only the test fixture snapshot (a plain source build), HOST-CVE-001, HOST-CVE-002, HOST-CVE-003 and WEB-CVE-001 report Incomplete with evidence naming the fixture, never Pass. New `make vulndb` target generates the real snapshot into the embed path; README and docs/VULNDB.md explain it.
 - WordPress core is matched: `wp-includes/version.php` is inventoried as OSV ecosystem `WordPress:Core`, a WordPress version comparator was added, and cmd/vulndbgen and the release workflow fetch the WordPress:Core export. WEB-CVE-001 reports Incomplete, not Pass, for an inventoried ecosystem the snapshot has no advisories for.

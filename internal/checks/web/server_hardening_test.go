@@ -149,7 +149,7 @@ func TestApacheRulesTable(t *testing.T) {
 		{"WEB-APA-007", "SSLEngine on\nSSLUseStapling On\n", check.Pass}, {"WEB-APA-007", "SSLEngine on\n", check.Fail}, {"WEB-APA-007", "", check.Pass},
 		{"WEB-APA-008", "LoadModule security2_module mod_security2.so\n", check.Pass}, {"WEB-APA-008", "LoadModule php_module mod_php.so\n", check.Fail},
 		{"WEB-APA-009", "FileETag MTime Size\n", check.Pass}, {"WEB-APA-009", "FileETag INode MTime Size\n", check.Fail}, {"WEB-APA-009", "FileETag All\n", check.Fail}, {"WEB-APA-009", "", check.Pass},
-		{"WEB-APA-010", "<FilesMatch \"^\\.ht\">\nRequire all denied\n</FilesMatch>\n", check.Fail},
+		{"WEB-APA-010", "<FilesMatch \"^\\.ht\">\nRequire all denied\n</FilesMatch>\n", check.Pass}, // no document root holds a dot file: the missing rule is only a note
 		{"WEB-APA-010", "<FilesMatch \"^\\.\">\nRequire all denied\n</FilesMatch>\n", check.Pass},
 		{"WEB-APA-010", "<DirectoryMatch \"/\\.git\">\nRequire all denied\n</DirectoryMatch>\n", check.Pass},
 		{"WEB-APA-010", "RedirectMatch 404 /\\.env\n", check.Pass},

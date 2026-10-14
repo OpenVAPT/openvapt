@@ -16,8 +16,8 @@ var refNginxSSL = check.Ref{Title: "nginx documentation, ngx_http_ssl_module", U
 var refMozillaTLS = check.Ref{Title: "Mozilla, Server Side TLS guidelines", URL: "https://wiki.mozilla.org/Security/Server_Side_TLS"}
 var refMozillaGen = check.Ref{Title: "Mozilla SSL Configuration Generator", URL: "https://ssl-config.mozilla.org/"}
 var refNISTTLS = check.Ref{Title: "NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations", URL: "https://csrc.nist.gov/pubs/sp/800/52/r2/final"}
+var refOpenSSLConfig = check.Ref{Title: "OpenSSL, config(5): system default TLS settings (MinProtocol)", URL: "https://docs.openssl.org/3.0/man5/config/"}
 var refWSTGFinger = check.Ref{Title: "OWASP WSTG-INFO-02, Fingerprint Web Server", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server"}
-var refWSTGConf = check.Ref{Title: "OWASP WSTG-CONF-05, Enumerate Infrastructure and Application Admin Interfaces", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces"}
 
 func nginxTLSConfigured(c serverConf) bool {
 	return c.anyValue("ssl_certificate") || c.has("listen", func(v string) bool { return strings.Contains(v, " ssl") || strings.HasSuffix(v, "ssl") })
@@ -69,30 +69,43 @@ func init() {
 		id: "WEB-NGX-003", title: "nginx Allows TLS 1.0 or 1.1", sev: check.High, cat: check.CatCrypto,
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
 		summary:   "ssl_protocols lists SSLv3, TLSv1 or TLSv1.1, or is not set on a TLS-enabled server, so the allowed version depends on the nginx build.",
-		rationale: "TLS 1.0 and 1.1 are deprecated by RFC 8996 and lack the protections of TLS 1.2 and 1.3. Clients that negotiate them are exposed to downgrade and known cipher weaknesses.",
-		detection: "Reads every ssl_protocols directive in the nginx configuration tree. Any listed version below TLSv1.2 fails. When TLS is configured (ssl_certificate or listen ... ssl) and no ssl_protocols is set, the result is Incomplete because the default changed between nginx releases.",
+		rationale: "TLS 1.0 and 1.1 are deprecated by RFC 8996 and lack the protections of TLS 1.2 and 1.3. Clients that negotiate them are exposed to downgrade and known cipher weaknesses. The directive is not the last word: nginx uses the system OpenSSL, and when its configuration already sets a floor of TLS 1.2 (MinProtocol in openssl.cnf on Debian 12 and Ubuntu 22.04 and later, or a crypto policy of DEFAULT, FUTURE or FIPS on the RHEL family) the old versions cannot be negotiated whatever the directive lists. In that case the check reports Pass and names the floor, because rating a server High for a line that has no effect would contradict the live handshake checks (WEB-TLS). The directive is still worth tidying so the configuration says what it does.",
+		detection: "Skipped when no server block is served over TLS (no ssl_certificate and no listen ... ssl). Otherwise reads every ssl_protocols directive in the nginx configuration tree. Any listed version below TLSv1.2 fails, unless /etc/crypto-policies/config or openssl.cnf (with its .include files) shows the system library already refuses TLS 1.0 and 1.1, in which case the result is Pass with the floor as evidence. When no ssl_protocols is set and the floor is unknown, the result is Incomplete because the default changed between nginx releases.",
 		fix:       "Set  ssl_protocols TLSv1.2 TLSv1.3;  in the http block (the Mozilla intermediate profile), run nginx -t and reload.",
 		verify:    "openssl s_client -connect 127.0.0.1:443 -servername <site> -tls1_1  should fail to connect.",
-		refs:      []check.Ref{refNginxSSL, refMozillaTLS, refNISTTLS, {Title: "RFC 8996, Deprecating TLS 1.0 and TLS 1.1", URL: "https://www.rfc-editor.org/rfc/rfc8996.html"}},
+		refs:      []check.Ref{refNginxSSL, refMozillaTLS, refNISTTLS, {Title: "RFC 8996, Deprecating TLS 1.0 and TLS 1.1", URL: "https://www.rfc-editor.org/rfc/rfc8996.html"}, refOpenSSLConfig},
 		std:       check.Standards{CWE: []string{"CWE-326", "CWE-327"}, OWASP: []string{"A02:2021"}, ASVS: []string{"9.1.3"}, WSTG: []string{"WSTG-CRYP-01"}, NIST: []string{"SC-8", "SC-13"}, CISTopic: "TLS protocol versions"},
 		kind:      nginxKind,
+		wantFloor: true,
+		skip: func(c serverConf) (bool, string) {
+			return !nginxTLSConfigured(c), "No server block is served over TLS (no ssl_certificate or listen ... ssl), so the protocol list has nothing to protect"
+		},
 		evaluate: func(c serverConf) (bool, []string) {
-			var ev []string
-			bad := false
-			for _, l := range c.directive("ssl_protocols") {
-				if w := weakTLSProtocols(l.Value); len(w) > 0 {
-					bad = true
-					ev = append(ev, l.File+": "+l.Raw+" (allows "+strings.Join(w, ", ")+")")
+			ev := weakProtocolLines(c, "ssl_protocols")
+			if len(ev) > 0 {
+				if floorOverrides(c) {
+					return false, append(ev, c.tlsFloor.Evidence)
 				}
+				return true, ev
 			}
-			if !bad && len(ev) == 0 {
-				ev = c.evidenceFor("ssl_protocols")
+			ev = c.evidenceFor("ssl_protocols")
+			if c.tlsFloor.Known {
+				ev = append(ev, c.tlsFloor.Evidence)
 			}
-			return bad, ev
+			return false, ev
 		},
 		passMsg: "ssl_protocols allows only TLS 1.2 or newer",
+		pass: func(c serverConf) string {
+			if len(weakProtocolLines(c, "ssl_protocols")) > 0 {
+				return floorPassMsg
+			}
+			if !c.anyValue("ssl_protocols") {
+				return "ssl_protocols is not set, but the system crypto library floor refuses TLS 1.0 and 1.1"
+			}
+			return "ssl_protocols allows only TLS 1.2 or newer"
+		},
 		incomplete: func(c serverConf) (bool, string) {
-			return nginxTLSConfigured(c) && !c.anyValue("ssl_protocols"), "TLS is configured but ssl_protocols is not set; the default depends on the nginx version, so set it explicitly"
+			return !c.anyValue("ssl_protocols") && !floorOverrides(c), "TLS is configured but ssl_protocols is not set; the default depends on the nginx version, so set it explicitly"
 		},
 	})
 

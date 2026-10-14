@@ -2,7 +2,7 @@
 
 Generated from the code by `internal/sources` (regenerate with `go test ./internal/sources -update`); do not edit by hand. Every reference that any check or Academy module cites is listed here, grouped by publisher, with the publisher's terms and any credit line those terms ask for. OpenVAPT cites sources by title, identifier and link; it does not copy their text. Use of a source does not imply that its publisher endorses OpenVAPT.
 
-Totals: 282 distinct sources from 40 publishers, cited by 307 checks and 31 Academy modules.
+Totals: 283 distinct sources from 41 publishers, cited by 307 checks and 31 Academy modules.
 
 ## NIST (National Institute of Standards and Technology)
 
@@ -396,6 +396,14 @@ Totals: 282 distinct sources from 40 publishers, cited by 307 checks and 31 Acad
 | [nginx documentation, ngx_http_core_module](https://nginx.org/en/docs/http/ngx_http_core_module.html) | WEB-NGX-001, WEB-NGX-006, WEB-NGX-007 |
 | [nginx documentation, ngx_http_limit_req_module](https://nginx.org/en/docs/http/ngx_http_limit_req_module.html) | WEB-NGX-006 |
 | [nginx documentation, ngx_http_ssl_module](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) | Academy P18, WEB-NGX-003, WEB-NGX-005 |
+
+## OpenSSL Project (documentation)
+
+- Terms: OpenSSL documentation is published by the OpenSSL Project under the Apache License 2.0. Cited by title and link only.
+
+| Source | Cited By |
+|---|---|
+| [OpenSSL, config(5): system default TLS settings (MinProtocol)](https://docs.openssl.org/3.0/man5/config/) | WEB-APA-005, WEB-NGX-003 |
 
 ## OWASP CRS Project (Core Rule Set)
 

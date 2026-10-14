@@ -249,13 +249,6 @@ func flatten(m map[string][]string) []string {
 	}
 	return out
 }
-func flattenValues(fs []collect.ConfigFile) []string {
-	var out []string
-	for _, f := range fs {
-		out = append(out, flatten(f.Values)...)
-	}
-	return out
-}
 
 // dataCWE gives each data service check the weakness it actually detects:
 // missing authentication on an insecure default, unsafe sharing permissions,

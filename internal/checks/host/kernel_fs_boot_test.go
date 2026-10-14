@@ -176,6 +176,24 @@ func TestWalkChecksIncompleteOnPartialWalk(t *testing.T) {
 	if r := run(t, "HOST-FS-015", g); r.Status != check.Incomplete {
 		t.Errorf("no passwd: want Incomplete, got %s", r.Status)
 	}
+	// A stock RHEL 9 / Alma 9 server: sssd helpers and the other RHEL
+	// family defaults are on the baseline (V-04), an extra helper is not.
+	rhel := empty()
+	rhel.Files["/etc/passwd"] = "root:x:0:0:root:/root:/bin/bash\n"
+	rhel.Files["/etc/group"] = "root:x:0:\n"
+	for _, p := range []string{"/usr/libexec/sssd/krb5_child", "/usr/libexec/sssd/ldap_child", "/usr/libexec/sssd/proxy_child", "/usr/libexec/sssd/selinux_child",
+		"/usr/libexec/abrt-action-install-debuginfo-to-abrt-cache", "/usr/libexec/qemu-bridge-helper", "/usr/bin/staprun", "/usr/sbin/netreport",
+		"/usr/libexec/openssh/ssh-keysign", "/usr/libexec/dbus-1/dbus-daemon-launch-helper", "/usr/libexec/utempter/utempter", "/usr/libexec/cockpit-session",
+		"/usr/sbin/grub2-set-bootflag", "/usr/sbin/pam_timestamp_check", "/usr/sbin/unix_chkpwd", "/usr/sbin/userhelper", "/usr/bin/sudo", "/usr/bin/fusermount3"} {
+		rhel.Infos[p] = sys.FileInfo{Path: p, Mode: fs.ModeSetuid | 0o755}
+	}
+	if r := run(t, "HOST-FS-016", rhel); r.Status != check.Pass {
+		t.Errorf("RHEL 9 default SUID set: want Pass, got %s %v", r.Status, r.Evidence)
+	}
+	rhel.Infos["/usr/libexec/sssd/custom_child"] = sys.FileInfo{Path: "/usr/libexec/sssd/custom_child", Mode: fs.ModeSetuid | 0o755}
+	if r := run(t, "HOST-FS-016", rhel); r.Status != check.Fail {
+		t.Errorf("unknown helper beside the sssd ones: want Fail, got %s", r.Status)
+	}
 	// Empty SUID inventory is incomplete, never a pass.
 	if r := run(t, "HOST-FS-016", empty()); r.Status != check.Incomplete {
 		t.Errorf("no SUID programs seen: want Incomplete, got %s", r.Status)

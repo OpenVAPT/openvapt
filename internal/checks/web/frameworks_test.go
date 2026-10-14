@@ -26,15 +26,6 @@ func appFake(files map[string]string) *sys.Fake {
 	return f
 }
 
-func oneResult(t *testing.T, id string, f sys.System) check.Result {
-	t.Helper()
-	r := runOn(t, id, f)
-	if len(r) != 1 {
-		t.Fatalf("%s: want one result, got %+v", id, r)
-	}
-	return r[0]
-}
-
 func TestParseDotenv(t *testing.T) {
 	v := parseDotenv("# comment\nexport APP_ENV=prod\nAPP_DEBUG=\"true\" # trailing\nAPP_KEY='base64:abc'\nBAD LINE\n")
 	for k, want := range map[string]string{"APP_ENV": "prod", "APP_DEBUG": "true", "APP_KEY": "base64:abc"} {

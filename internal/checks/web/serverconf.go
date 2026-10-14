@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/openvapt/openvapt/internal/check"
+	"github.com/openvapt/openvapt/internal/checks/collect"
 	"github.com/openvapt/openvapt/internal/sys"
 )
 
@@ -23,6 +24,10 @@ type serverConf struct {
 	kind       serverKind   // nginx or apache
 	skip       check.Result // ready-made Skip or Incomplete result when !Found
 	serverRoot string       // Apache ServerRoot when set and under the prefixes
+	// tlsFloor is the system crypto library floor, read only for rules that
+	// set wantFloor. A directive that lists TLS 1.0 or 1.1 cannot take
+	// effect when the library already refuses those versions.
+	tlsFloor collect.TLSFloor
 }
 
 type confLine struct {
@@ -287,6 +292,18 @@ type serverRule struct {
 	std                                      check.Standards
 	kind                                     serverKind
 	evaluate                                 func(c serverConf) (bad bool, ev []string)
+	// evaluateSys, when set, replaces evaluate for rules that must also look
+	// at the file system (for example whether a document root holds the
+	// files a missing deny rule would expose).
+	evaluateSys func(ctx context.Context, s sys.System, c serverConf) (bad bool, ev []string)
+	// skip, when set and true, reports Skip with the message before anything
+	// is evaluated (for example a TLS rule when no site is served over TLS).
+	skip func(c serverConf) (bool, string)
+	// wantFloor asks for the system TLS floor to be read into c.tlsFloor.
+	wantFloor bool
+	// pass, when set, replaces passMsg so a Pass can say why (for example
+	// that the library floor, not the directive, forbids TLS 1.0).
+	pass func(c serverConf) string
 	// incomplete, when set, turns a would-be Pass into Incomplete when the
 	// configuration leaves the setting undecidable (for example a default
 	// that depends on the software version). It never changes a Fail.
@@ -305,7 +322,21 @@ func registerServerRule(r serverRule) {
 				return []check.Result{c.skip}
 			}
 			target := c.Paths[0]
-			bad, ev := r.evaluate(c)
+			if r.skip != nil {
+				if hit, msg := r.skip(c); hit {
+					return []check.Result{check.SkipR(target, msg)}
+				}
+			}
+			if r.wantFloor {
+				c.tlsFloor = collect.SystemTLSFloor(ctx, s)
+			}
+			var bad bool
+			var ev []string
+			if r.evaluateSys != nil {
+				bad, ev = r.evaluateSys(ctx, s, c)
+			} else {
+				bad, ev = r.evaluate(c)
+			}
 			if bad {
 				return []check.Result{check.FailR(target, r.summary, ev...)}
 			}
@@ -318,6 +349,9 @@ func registerServerRule(r serverRule) {
 				}
 			}
 			msg := r.passMsg
+			if r.pass != nil {
+				msg = r.pass(c)
+			}
 			if msg == "" {
 				msg = "The hardening setting is present"
 			}
@@ -388,3 +422,22 @@ func weakCiphers(list string) []string {
 	}
 	return out
 }
+
+// weakProtocolLines returns the directive lines (ssl_protocols or
+// SSLProtocol) that still allow a version below TLS 1.2, rendered as
+// evidence.
+func weakProtocolLines(c serverConf, key string) []string {
+	var ev []string
+	for _, l := range c.directive(key) {
+		if w := weakTLSProtocols(l.Value); len(w) > 0 {
+			ev = append(ev, l.File+": "+l.Raw+" (allows "+strings.Join(w, ", ")+")")
+		}
+	}
+	return ev
+}
+
+// floorOverrides reports whether the system crypto library floor already
+// refuses TLS 1.0 and 1.1, so a permissive directive has no effect.
+func floorOverrides(c serverConf) bool { return c.tlsFloor.Known && c.tlsFloor.Forbids }
+
+const floorPassMsg = "The directive still lists TLS 1.0 or 1.1, but the system crypto library floor refuses them, so they cannot be negotiated; tidy the directive so the configuration says what it does"

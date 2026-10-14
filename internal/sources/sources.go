@@ -75,6 +75,7 @@ var Publishers = []Publisher{
 	{"Let's Encrypt (ISRG)", []string{"letsencrypt.org"}, linkOnly, ""},
 	{"Apache Software Foundation (HTTP Server, Tomcat)", []string{"httpd.apache.org", "tomcat.apache.org"}, "Apache documentation is published under the Apache License 2.0. Cited by title and link only.", ""},
 	{"nginx Documentation (F5, Inc.)", []string{"nginx.org"}, "nginx documentation is published by the nginx project under its stated BSD-style licence. Cited by title and link only.", ""},
+	{"OpenSSL Project (documentation)", []string{"docs.openssl.org"}, "OpenSSL documentation is published by the OpenSSL Project under the Apache License 2.0. Cited by title and link only.", ""},
 	{"OWASP CRS Project (Core Rule Set)", []string{"coreruleset.org"}, "The OWASP CRS documentation is published under the Apache License 2.0. Cited by title and link only.", ""},
 	{"PHP Documentation", []string{"www.php.net"}, "The PHP manual is published under CC BY 3.0. Cited by title and link only.", ""},
 	{"Web Frameworks and Runtimes (Django, Flask, Werkzeug, Node.js, Express, Gunicorn)", []string{"docs.djangoproject.com", "flask.palletsprojects.com", "werkzeug.palletsprojects.com", "nodejs.org", "expressjs.com", "docs.gunicorn.org", "gunicorn.org"}, linkOnly, ""},

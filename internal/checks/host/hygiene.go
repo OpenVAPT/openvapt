@@ -43,7 +43,7 @@ var secretPatterns = []struct {
 }{
 	{"private key", regexp.MustCompile(`-----BEGIN (RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY( BLOCK)?-----`)},
 	{"AWS access key id", regexp.MustCompile(`\b(AKIA|ASIA)[0-9A-Z]{16}\b`)},
-	{"credential assignment", regexp.MustCompile(`(?im)^\s*(export\s+)?[A-Za-z0-9_.-]*(password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token)[A-Za-z0-9_.-]*\s*[=:]\s*["']?[^\s"'#$%<{(]{6,}`)},
+	{"credential assignment", regexp.MustCompile(`(?im)^\s*(export\s+)?[A-Za-z0-9_.-]*(password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token)[A-Za-z0-9_.-]*[ \t]*[=:][ \t]*["']?[^\s"'#$%<{(]{6,}`)},
 }
 
 // secretCandidate reports whether a file name is worth reading for secrets.

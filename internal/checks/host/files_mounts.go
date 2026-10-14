@@ -635,7 +635,23 @@ func mountOptsText(opts []string) string {
 // suidBaseline lists program names that mainstream distributions ship with
 // the SUID or SGID bit. Anything else with the bit in a system binary
 // directory deserves a look. Names only; paths vary between distributions.
+//
+// Sources, checked 2026-10-14 against the distributions' own package file
+// lists: Debian 12 and Ubuntu 24.04 (packages.debian.org and
+// packages.ubuntu.com "list of files" pages for passwd, util-linux,
+// openssh-client, dbus, libutempter0, snapd, polkitd, fuse3, cifs-utils,
+// xserver-xorg-legacy, uidmap, lxc, evolution-data-server, sssd-common) and
+// RHEL 9 / AlmaLinux 9 (rpm -ql file lists for shadow-utils, util-linux,
+// openssh-clients, dbus-daemon, libutempter, polkit, fuse3, cockpit-ws,
+// grub2-tools-minimal, initscripts, sssd-common and sssd-krb5-common). The
+// sssd helpers krb5_child, ldap_child, proxy_child and selinux_child live in
+// /usr/libexec/sssd and are installed setuid root on both families.
+// abrt-action-install-debuginfo-to-abrt-cache (abrt), qemu-bridge-helper
+// (qemu-kvm-common) and staprun (systemtap-runtime) are setuid root in
+// their packages on the RHEL family and are common on server installs.
 var suidBaseline = map[string]bool{
+	"krb5_child": true, "ldap_child": true, "proxy_child": true, "selinux_child": true,
+	"abrt-action-install-debuginfo-to-abrt-cache": true, "qemu-bridge-helper": true, "staprun": true, "netreport": true,
 	"passwd": true, "chage": true, "chfn": true, "chsh": true, "gpasswd": true, "newgrp": true, "expiry": true, "sg": true,
 	"su": true, "sudo": true, "sudoedit": true, "pkexec": true, "polkit-agent-helper-1": true, "doas": true,
 	"mount": true, "umount": true, "fusermount": true, "fusermount3": true, "mount.nfs": true, "mount.cifs": true, "ntfs-3g": true,
