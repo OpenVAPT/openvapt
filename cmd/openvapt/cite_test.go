@@ -44,12 +44,18 @@ func TestCitationSameEverywhere(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(readme), "> "+apa+"\n") {
-		t.Errorf("README Cite OpenVAPT section lacks the APA citation for %s:\n%s", v[1], apa)
+	// The README never hard-codes a version (the release record step moves
+	// CITATION.cff, which would leave a pinned README citation stale). It must
+	// point to the three generated sources and keep the group author rule.
+	for _, want := range []string{"## Cite OpenVAPT", "`openvapt cite`", "CITATION.cff", "https://openvapt.com/cite.html", `group author "OpenVAPT"`, "OpenVAPT. (Year). OpenVAPT: An open academic vulnerability assessment tool (Version X.Y.Z)"} {
+		if !strings.Contains(string(readme), want) {
+			t.Errorf("README Cite OpenVAPT section lacks %q", want)
+		}
 	}
-	if !strings.Contains(string(readme), "```bibtex\n"+bib+"\n```") {
-		t.Errorf("README Cite OpenVAPT section lacks the BibTeX for %s:\n%s", v[1], bib)
+	if regexp.MustCompile(`\(Version \d+\.\d+\.\d+`).Match(readme) {
+		t.Error("README pins a citation version; it must point to openvapt cite, CITATION.cff and cite.html instead")
 	}
+	_ = bib
 
 	old := version.Version
 	version.Version = "v" + string(v[1])
