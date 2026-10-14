@@ -92,7 +92,7 @@ func manPage() string {
 		fmt.Fprintf(&b, ".TP\n.B %d\n%s\n", e.Code, roff(e.Meaning))
 	}
 	b.WriteString(".SH FILES\n")
-	b.WriteString(".TP\n.I ~/openvapt\\-reports/YYYYMMDDTHHMMSSZ/\nDefault report folder of openvapt scan without \\-\\-out: a new folder named after the UTC time under the home folder of the user running the scan (root's home folder under sudo), mode 0700, never reused; report.html, report.json, report.sarif and report.md inside it are mode 0600.\n")
+	b.WriteString(".TP\n.I ~/openvapt\\-reports/YYYYMMDDTHHMMSSZ/\nDefault report folder of openvapt scan without \\-\\-out: a new folder named after the UTC time under the home folder named by HOME (under sudo usually root's; when sudo keeps the invoking user's HOME and it is that user's home folder in the user database, the folder and reports are given to that user), mode 0700, never reused; report.html, report.json, report.sarif and report.md inside it are mode 0600.\n")
 	b.WriteString(".TP\n.I openvapt\\-demo\\-report\\-YYYYMMDD\\-HHMMSS\\-*/\nDefault report folder of openvapt demo without \\-\\-out, in the current directory (mode 0700).\n")
 	b.WriteString(".TP\n.I /usr/bin/xdg\\-open\nStarted only with \\-\\-open, only in a desktop session (DISPLAY or WAYLAND_DISPLAY set), never as root, and only with the report.html the same run wrote. It is the one program OpenVAPT may start outside its read\\-only command allow\\-list.\n")
 	b.WriteString(".TP\n.I ~/.config/openvapt/report\\-key\nLocal Ed25519 report signing key (under the user configuration folder), created on first signed report (see openvapt verify).\n")

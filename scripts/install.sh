@@ -115,6 +115,18 @@ fetch() { # fetch URL FILE
 	fi
 }
 
+# check_url NAME URL refuses, with a clear reason, any download location that
+# is not https:// (file:// only with OPENVAPT_ALLOW_FILE=1, for tests). It runs
+# before any download, so the reason is never hidden by a quiet fetch.
+check_url() {
+	case "$2" in
+	https://*) return 0 ;;
+	file://*) [ "${OPENVAPT_ALLOW_FILE:-0}" = 1 ] && return 0 ;;
+	esac
+	safe=$(printf '%s' "$2" | cut -d: -f1 | tr -cd 'A-Za-z0-9+.-' | cut -c1-20)
+	die "$1 must be an https:// URL (got a ${safe:-scheme-less} URL). Refusing to download over anything but HTTPS."
+}
+
 sha256() { # sha256 FILE -> hex digest
 	if command -v sha256sum >/dev/null 2>&1; then
 		sha256sum "$1" | cut -d' ' -f1
@@ -244,6 +256,8 @@ main() {
 	trap 'exit 130' INT TERM
 
 	say "OpenVAPT installer"
+	check_url OPENVAPT_CHANNELS_URL "$CHANNELS_URL"
+	check_url OPENVAPT_BASE_URL "$BASE_URL"
 	if [ -z "$VERSION" ]; then
 		choose_release
 	fi
@@ -334,9 +348,18 @@ next_steps() {
 	say "  $CMD scan --dry-run     preview every file, command and request a scan would use"
 	say "  sudo $CMD scan          scan this machine (only one you own or control) with full coverage"
 	say "  $CMD scan               or scan without root (some checks are Incomplete)"
-	say "Reports: a new folder ~/openvapt-reports/<UTC time>/ in the home folder of the user who runs"
-	say "the scan (with sudo that is root's home folder; add --out DIR to choose), holding report.html,"
-	say "report.json, report.sarif and report.md, readable only by that user."
+	case "$VERSION" in
+	v0.1.0-alpha.[123])
+		# Releases before v0.1.0-alpha.4 have no default reports folder.
+		say "Reports: $VERSION writes a new folder openvapt-report-<time> in the folder you run the scan"
+		say "from; choose one with --out DIR, for example: sudo $CMD scan --out ~/openvapt-report"
+		say "(openvapt-reports/<UTC time>/ in your home folder is the default from the next release)." ;;
+	*)
+		say "Reports: a new folder ~/openvapt-reports/<UTC time>/ in the home folder of the user who runs"
+		say "the scan, holding report.html, report.json, report.sarif and report.md, readable only by that"
+		say "user. With sudo it is the home folder sudo sets (usually root's); when sudo keeps your HOME,"
+		say "the folder is given back to you. Add --out DIR to choose another folder." ;;
+	esac
 	say "Uninstall: rm $DIR/openvapt"
 }
 

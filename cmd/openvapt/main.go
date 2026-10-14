@@ -308,7 +308,7 @@ func defaultOutDir(prefix string) (string, error) {
 }
 
 func addScanFlags(fs *flag.FlagSet, f *scanFlags, defOut string) {
-	fs.StringVar(&f.out, "out", defOut, "directory to write the report into (scan default: a new folder ~/openvapt-reports/<UTC time>; demo default: a new folder in the current directory)")
+	fs.StringVar(&f.out, "out", defOut, "directory to write the report into (scan default: a new folder ~/openvapt-reports/<UTC time>, given back to the sudo user when sudo keeps HOME; demo default: a new folder in the current directory)")
 	fs.BoolVar(&f.open, "open", false, "after writing, open report.html with /usr/bin/xdg-open, only in a desktop session (DISPLAY or WAYLAND_DISPLAY set) and never as root")
 	fs.StringVar(&f.formats, "format", "html,json,sarif,md", "comma-separated report formats: html,json,sarif,md")
 	fs.StringVar(&f.only, "only", "", "run only these check ids or prefixes (e.g. WEB-,HOST-SSH-001)")
@@ -442,6 +442,7 @@ func finish(r *report.Report, f scanFlags) error {
 			fmt.Fprintln(os.Stderr, "warning: report not signed:", err)
 		}
 	}
+	var rd *reportsDir
 	if f.out == "" {
 		var dir string
 		var err error
@@ -449,7 +450,10 @@ func finish(r *report.Report, f scanFlags) error {
 			dir, err = defaultOutDir("openvapt-demo-report-")
 		} else {
 			home, _ := os.UserHomeDir()
-			dir, err = scanReportsDir(home, time.Now())
+			rd, err = scanReportsDir(home, time.Now(), sudoOwner(os.Geteuid(), os.Getenv, home))
+			if rd != nil {
+				dir = rd.Path
+			}
 		}
 		if err != nil {
 			return &exitError{code: 6, err: err}
@@ -457,6 +461,11 @@ func finish(r *report.Report, f scanFlags) error {
 		f.out = dir
 	}
 	files, err := r.WriteAll(f.out, f.formatList)
+	if rd != nil {
+		if herr := rd.finish(files); err == nil && herr != nil {
+			err = fmt.Errorf("could not give the report folder back to the sudo user: %w", herr)
+		}
+	}
 	if err != nil {
 		return &exitError{code: 6, err: err}
 	}

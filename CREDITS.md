@@ -81,7 +81,7 @@ The licence, EULA, Disclaimer, Privacy Policy and Acceptable Use Policy are orig
 
 | Standard | Applied To |
 |---|---|
-| NIST SP 800-115, Technical Guide to Information Security Testing and Assessment | Scan phases (planning, discovery, analysis, reporting) and report structure |
+| NIST SP 800-115, Technical Guide to Information Security Testing and Assessment | Scan phases (Planning, Discovery and Reporting of its four phases; the Attack phase is omitted) and report structure |
 | FIRST CVSS v3.1 Specification | Severity scale and representative base vectors for every check |
 | OWASP Top 10 (2021) | Check mapping |
 | OWASP Application Security Verification Standard (ASVS) 4.0.3 | Check mapping |

@@ -76,6 +76,14 @@ fi
 pass "file:// refused without OPENVAPT_ALLOW_FILE=1"
 export OPENVAPT_ALLOW_FILE=1
 
+# 1b. A non-HTTPS channel list or release location is refused with a reason.
+for var in OPENVAPT_CHANNELS_URL OPENVAPT_BASE_URL; do
+	if env "$var=http://example.invalid/x" sh "$W/install.sh" --dir "$W/b0b" >"$W/o" 2>&1; then fail "$var over http accepted"; fi
+	grep -q "$var must be an https:// URL" "$W/o" || { cat "$W/o"; fail "$var: no clear reason"; }
+	[ ! -e "$W/b0b/openvapt" ] || fail "$var: something was installed"
+done
+pass "non-HTTPS OPENVAPT_CHANNELS_URL and OPENVAPT_BASE_URL are refused with a clear reason"
+
 # 2. Channel fallback and Download Only.
 sh "$W/install.sh" --dir "$W/b1" >"$W/o" 2>&1 || { cat "$W/o"; fail "default install"; }
 grep -q "there is no Stable release yet" "$W/o" || fail "no pre-release warning"
