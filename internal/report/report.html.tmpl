@@ -128,5 +128,11 @@ a{color:var(--accent)}ul{padding-left:20px}
 <ul>{{range .Methodology}}<li>{{.}}</li>{{end}}</ul>
 <h2>Limitations</h2>
 <ul>{{range .Limitations}}<li>{{.}}</li>{{end}}</ul>
+{{with .HowToCite}}<h2>How to Cite</h2>
+<p>{{.Reference}} Using these results in research, teaching or a report? Please cite OpenVAPT.</p>
+<p><strong>APA 7:</strong> {{.APA}}</p>
+<p><strong>BibTeX:</strong></p>
+<pre>{{.BibTeX}}</pre>
+<p><strong>Credit when you share this report:</strong> {{.Credit}}</p>{{end}}
 <p class="muted">Generated locally by OpenVAPT. Nothing in this report was sent anywhere.</p>
 </main></body></html>

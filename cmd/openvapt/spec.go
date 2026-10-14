@@ -85,6 +85,7 @@ func init() {
 			}
 			return cmdVulndb()
 		}},
+		{Name: "cite", Args: "[--format F] [--check ID] [--module ID]", Summary: "Print how to cite this exact version (APA, BibTeX and more)", Flags: func() *flag.FlagSet { var a, b, c string; return citeFlagSet(&a, &b, &c) }, Run: cmdCite},
 		{Name: "terms", Summary: "Print the terms of use and acknowledgements", Run: noArgs("terms", func() { fmt.Print(termsText()) })},
 		{Name: "version", Aliases: []string{"--version", "-v"}, Summary: "Print version information", Run: noArgs("version", cmdVersion)},
 		{Name: "man", Summary: "Print the manual page (roff), for example openvapt man > openvapt.1", Run: noArgs("man", func() { fmt.Print(manPage()) })},
