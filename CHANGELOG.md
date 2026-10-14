@@ -4,6 +4,10 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+_No changes recorded yet._
+
+## [v0.1.0-alpha.3] - 2026-10-14
+
 ### Fix: vulnerability data sources (2026-10-14)
 - The release snapshot no longer requests a WordPress export: OSV publishes none, and the request failed the release build. WordPress core is still inventoried and WEB-CVE-001 reports it Incomplete, never Pass; README, CREDITS, THIRD_PARTY_NOTICES and docs/VULNDB.md now say so. A test checks every configured ecosystem against OSV's published list.
 
