@@ -4,6 +4,12 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Website redesign and walkthrough
+
+- Website: a calmer, near-monochrome visual language. White canvas, near-black ink and soft greys with one restrained blue accent, very large headings with tight tracking, hairline borders, pill buttons and navigation, 16px cards and 24px media frames, a lighter footer, and recoloured ECharts and AG Grid themes. IBM Plex stays the only typeface. Light theme only, no sticky or fixed elements, every page, URL, notice, structured data block and zero-data rule unchanged.
+- Website: new animated walkthrough, "See It Run on Your Machine", on the home page (loops), How It's Built and Download (above the acknowledgement gate). It is labelled as a simulated walkthrough using the built-in demo lab and is built only from real output: the installer messages, the `openvapt scan` acknowledgement prompt, `openvapt demo --format html,md --no-sign` on the vulnerable lab (307 checks, Critical 14, High 71, Medium 88, Low 123, exit code 3), its HTML report (HOST-SSH-001 finding card), `openvapt explain HOST-SSH-001` and `openvapt learn`; trimmed lines are marked. Seven chapters with Play, Pause, Replay and chapter buttons, polite live captions, a text transcript, pausing when off-screen or when the tab is hidden, and static stills under reduced motion. Self-hosted `walkthrough.js`, no storage, no network, CSP unchanged.
+- Website: four more Lucide icons vendored by the existing script (play, pause, rotate-ccw, mouse-pointer-2).
+
 ### Stream: r2-cvss
 
 - CVSS v3.1 vectors of 18 host checks for detective gaps and local-only weaknesses (audit, journal, logging, time sync, SSH log level, martian logging, file integrity monitoring, rootless Docker, running kernel behind installed kernel) now use a local attack vector; severities are unchanged, and the report Methodology explains the rule (A2-09).
