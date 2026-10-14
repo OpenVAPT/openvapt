@@ -14,11 +14,12 @@
 <table class="table">
 <thead><tr><th>ID</th><th>Check</th><th class="max-sm:hidden">Category</th><th>Severity</th><th class="max-sm:hidden">CWE</th></tr></thead>
 <tbody>
-{{range $d.Checks}}<tr>
+{{range $d.Checks}}<tr data-domain="{{.Domain}}" data-severity="{{.Severity}}" data-category="{{catName .Category}}">
 <td class="whitespace-nowrap"><code class="[overflow-wrap:normal]">{{.ID}}</code></td><td><a href="{{.ID}}.html">{{.Title}}</a><br><span class="muted">{{.Summary}}</span></td>
 <td class="max-sm:hidden">{{catName .Category}}</td>
 <td>{{template "sev" .Severity}}</td><td class="max-sm:hidden">{{join .Standards.CWE ", "}}</td></tr>
-{{end}}</tbody></table></div>
+{{end}}<tr id="no-match" hidden><td colspan="5" class="muted">No checks match. Clear a filter or change the search.</td></tr>
+</tbody></table></div>
 <h2 id="dataset">{{icon "file-down"}} Dataset</h2>
 <p>The whole catalogue is published as one JSON file, generated from the code at every build: id, title, domain, severity, CVSS v3.1 vector, control category with its CIS Controls v8 and NIST CSF 2.0 mapping, CWE, OWASP Top 10, ASVS, WSTG and NIST SP 800-53 identifiers, the Academy modules that teach each check, and a permalink to the source file at this commit.</p>
 <div class="flex flex-wrap gap-3">

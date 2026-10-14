@@ -5,10 +5,10 @@
 <div class="alert alert-info" role="note">{{icon "scale"}}<span>What teaching allows, and what stays excluded, is set by <a href="legal/teaching.html">Teaching With OpenVAPT</a>. Please read it before your first class. It covers who may teach, school lab machines, online classes, assessment, students under 18 and how students accept the terms.</span></div>
 
 <div class="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-  <div class="card mb-0"><div class="card-icon">{{icon "calendar"}}</div><h2 class="mt-0 text-base">Course Plans</h2><p class="m-0 text-ink-2">Four-week, eight-week and fourteen-week plans mapped to the {{len $d.Modules}} Academy modules.</p></div>
-  <div class="card mb-0"><div class="card-icon">{{icon "file-text"}}</div><h2 class="mt-0 text-base">Worksheets and Keys</h2><p class="m-0 text-ink-2">A printable worksheet and a teacher answer key for every module.</p></div>
-  <div class="card mb-0"><div class="card-icon">{{icon "flask-conical"}}</div><h2 class="mt-0 text-base">Practice Labs</h2><p class="m-0 text-ink-2">Each student's seed gives a different simulated server, with an answer key for you.</p></div>
-  <div class="card mb-0"><div class="card-icon">{{icon "circle-check"}}</div><h2 class="mt-0 text-base">Marking Rubric</h2><p class="m-0 text-ink-2">Six weighted criteria for a student's assessment report, structured after NIST SP 800-115.</p></div>
+  <div class="card mb-0"><div class="card-icon">{{icon "calendar"}}</div><p class="mt-0 mb-2 text-base font-semibold"><a href="#course-plans">Jump to Course Plans</a></p><p class="m-0 text-ink-2">Four-week, eight-week and fourteen-week plans mapped to the {{len $d.Modules}} Academy modules.</p></div>
+  <div class="card mb-0"><div class="card-icon">{{icon "file-text"}}</div><p class="mt-0 mb-2 text-base font-semibold"><a href="#worksheets">Jump to Worksheets and Keys</a></p><p class="m-0 text-ink-2">A printable worksheet and a teacher answer key for every module.</p></div>
+  <div class="card mb-0"><div class="card-icon">{{icon "flask-conical"}}</div><p class="mt-0 mb-2 text-base font-semibold"><a href="#practice-labs">Jump to Practice Labs</a></p><p class="m-0 text-ink-2">Each student's seed gives a different simulated server, with an answer key for you.</p></div>
+  <div class="card mb-0"><div class="card-icon">{{icon "circle-check"}}</div><p class="mt-0 mb-2 text-base font-semibold"><a href="#rubric">Jump to Marking Rubric</a></p><p class="m-0 text-ink-2">Six weighted criteria for a student's assessment report, structured after NIST SP 800-115.</p></div>
 </div>
 
 <h2>Before Your First Class</h2>
@@ -20,7 +20,7 @@
   <li>OpenVAPT is pre-release software (see <a href="channels.html">Release Channels</a>). It may be wrong or unstable. Use it only on isolated lab machines, 100% at your own risk, and remember that a clean report does not prove a system is secure.</li>
 </ol>
 
-<h2>Course Plans</h2>
+<h2 id="course-plans">Course Plans</h2>
 {{range $d.Courses}}
 <details class="card mb-4">
   <summary class="cursor-pointer"><strong>{{.Title}}</strong> <span class="muted">&middot; {{.Hours}}</span></summary>
@@ -38,7 +38,7 @@
 </details>
 {{end}}
 
-<h2>Printable Handouts, Worksheets and Answer Keys</h2>
+<h2 id="worksheets">Printable Handouts, Worksheets and Answer Keys</h2>
 <p>Every module page prints as a handout: the browser's Print command drops the navigation, notices, quiz feedback and buttons and keeps the theory, key terms, lab steps, questions, references and the credit line. Each module also has a student worksheet and a teacher answer key. Generate Markdown files offline with <code>openvapt teach worksheet P2 --out p2.md</code> (add <code>--answers</code> for the key).</p>
 <div class="table-wrap">
 <table>
@@ -70,7 +70,7 @@
   <li><strong>Pre-release, as is.</strong> The material was built by AI Cybersecurity Engineers, may contain mistakes, and is used 100% at your own risk. Check it before you teach it.</li>
 </ul>
 
-<h2>Practice Labs: A Different Server for Every Student</h2>
+<h2 id="practice-labs">Practice Labs: A Different Server for Every Student</h2>
 <p>A practice server is the simulated vulnerable lab with some weaknesses fixed. The seed decides which ones, check by check, so every student is likely to assess a different server, which makes copying a neighbour's report much harder. The same seed gives the same server in the same version of OpenVAPT. The practice lab is simulated in memory and is not run against a real machine.</p>
 <div class="grid gap-6 lg:grid-cols-2">
   <div class="min-w-0">
@@ -86,7 +86,7 @@
 </div>
 <div class="alert alert-warn" role="note">{{icon "triangle-alert"}}<span><strong>Limitation:</strong> the answer key is computed by the same public code every student has, so any student can print the answer key for their own seed or anyone else's. Treat practice labs as learning exercises, not secure exams. For graded work, combine them with written questions, the student's own evidence and a short oral explanation of findings. The key lists what the lab planted; it is not proof that a report is complete or correct.</span></div>
 
-<h2>Marking Rubric</h2>
+<h2 id="rubric">Marking Rubric</h2>
 <p>For a student's assessment report of a practice server or an authorised lab machine. Structured after the reporting guidance of NIST SP 800-115: scope and method, findings with evidence, risk, remediation and verification, limitations. Offline copy: <code>openvapt teach rubric</code></p>
 <div class="table-wrap">
 <table>

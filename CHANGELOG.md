@@ -4,6 +4,15 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Stream: website verification fixes (2026-10-14 review, 14-verify-website)
+- Check catalogue: the search box and the Domain, Category and Severity selects now filter the plain table on every screen width (and before the grid loads), keep the "N of 307 checks" counter current and show a "No checks match" row; on wide screens AG Grid takes over the same controls as before.
+- Academy: modules are listed in teaching order (F1 to F3, P1 to P22, A1 to A6) on the website, in `openvapt learn` and in the worksheets, whatever file defines them; a test enforces the order.
+- Academy: P17 to P22, A5 and A6 name the modules to read first; a test requires every Practitioner and Applied module to have prerequisites.
+- Phone notice: Read More becomes Read Less while open and the one-line summary is hidden so no sentence is shown twice.
+- Coverage page: the chart library loads at once instead of waiting for the charts to scroll into view.
+- For Teachers: the four overview cards are "Jump to" links to their sections instead of repeated headings.
+- Site .htaccess: 403 responses show the 404 page; the /tools/ carve-outs are marked for removal with the tools/ folder.
+
 ### Stream: software (2026-10-14 review, Wave 1 "honest results")
 - CVE checks are honest about their data: when the binary embeds only the test fixture snapshot (a plain source build), HOST-CVE-001, HOST-CVE-002, HOST-CVE-003 and WEB-CVE-001 report Incomplete with evidence naming the fixture, never Pass. New `make vulndb` target generates the real snapshot into the embed path; README and docs/VULNDB.md explain it.
 - WordPress core is matched: `wp-includes/version.php` is inventoried as OSV ecosystem `WordPress:Core`, a WordPress version comparator was added, and cmd/vulndbgen and the release workflow fetch the WordPress:Core export. WEB-CVE-001 reports Incomplete, not Pass, for an inventoried ecosystem the snapshot has no advisories for.

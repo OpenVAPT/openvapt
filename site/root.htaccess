@@ -2,9 +2,11 @@
 # Everything is public here for every channel (Alpha, Beta, RC, Stable); the
 # old /beta/ preview was retired on 2026-10-13 and no longer exists (410 Gone).
 # /tools/ is excluded from the header and PHP rules below so the server-side
-# admin endpoint there keeps working unchanged.
+# admin endpoint there keeps working unchanged. Every "/tools/" carve-out in
+# this file is removed in the same change that retires the tools/ folder.
 Options -Indexes
 DirectoryIndex index.html
+ErrorDocument 403 /404.html
 ErrorDocument 404 /404.html
 ErrorDocument 410 /404.html
 

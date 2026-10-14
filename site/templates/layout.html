@@ -52,7 +52,7 @@
 <div class="wrap pt-4">
   {{/* Phones: one compact strip with both leads; Read More opens the full notices below it. Wider screens: the full notices. The text is the same; only one copy is shown. */}}
   <details class="notice-compact md:hidden">
-    <summary>{{icon "info"}}<span>{{if .PreRelease}}<strong>Pre-release.</strong> {{end}}<strong>Academic, non-commercial, source-available code built by AI Cybersecurity Engineers.</strong> Free for your own use, 100% at your own risk. This website collects no data. <span class="notice-more">Read More</span></span></summary>
+    <summary>{{icon "info"}}<span><span class="notice-lead">{{if .PreRelease}}<strong>Pre-release.</strong> {{end}}<strong>Academic, non-commercial, source-available code built by AI Cybersecurity Engineers.</strong> Free for your own use, 100% at your own risk. This website collects no data. </span><span class="notice-more">Read More</span><span class="notice-less">Read Less</span></span></summary>
     <div class="notice-body">{{template "notices" .}}</div>
   </details>
   <div class="max-md:hidden">{{template "notices" .}}</div>
@@ -97,7 +97,7 @@
 {{if eq .Path "download.html"}}<script src="{{.Base}}assets/acknowledge.js" defer></script>{{end}}
 {{if hasPrefix .Path "academy/"}}<script src="{{.Base}}assets/academy.js" defer></script>{{end}}
 {{if or (eq .Path "cite.html") (and (hasPrefix .Path "checks/") (ne .Path "checks/index.html")) (hasPrefix .Path "academy/")}}<script src="{{.Base}}assets/cite.js" defer></script>{{end}}
-{{if or (eq .Path "index.html") (eq .Path "standards.html") (eq .Path "coverage.html")}}<script src="{{.Base}}assets/charts.js" data-vendor="{{.Base}}assets/vendor/" defer></script>{{end}}
+{{if or (eq .Path "index.html") (eq .Path "standards.html") (eq .Path "coverage.html")}}<script src="{{.Base}}assets/charts.js" data-vendor="{{.Base}}assets/vendor/"{{if eq .Path "coverage.html"}} data-eager="1"{{end}} defer></script>{{end}}
 </body>
 </html>{{end}}
 

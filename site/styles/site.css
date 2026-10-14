@@ -185,8 +185,9 @@
   .notice-compact summary{@apply flex cursor-pointer list-none items-start gap-2 px-3 py-2}
   .notice-compact summary::-webkit-details-marker{display:none}
   .notice-compact summary svg{@apply mt-0.5 size-4 shrink-0 text-gold-7}
-  .notice-more{@apply ml-1 whitespace-nowrap font-medium text-blue-7 underline}
-  .notice-compact[open] .notice-more{display:none}
+  .notice-more,.notice-less{@apply ml-1 whitespace-nowrap font-medium text-blue-7 underline}
+  .notice-less,.notice-compact[open] .notice-more,.notice-compact[open] .notice-lead{display:none}
+  .notice-compact[open] .notice-less{display:inline}
   .notice-body{@apply grid gap-3 border-t border-gold-3 px-3 py-3}
   .notice-body .alert{@apply mb-0}
 

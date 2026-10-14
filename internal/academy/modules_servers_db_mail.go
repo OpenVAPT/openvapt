@@ -23,6 +23,7 @@ var serversGlossary = map[string]string{
 var serversDBMail = []Module{
 	{
 		ID: "P18", Title: "Web Server Hardening: nginx and Apache", Level: Practitioner, Minutes: 30,
+		Prereqs: []string{"P4", "P5"},
 		Summary: "Reading nginx.conf and apache2.conf the way an assessor does: the dozen directives that decide what a server reveals, which TLS it speaks, and which files it will hand out.",
 		Objectives: []string{
 			"Find the effective value of a directive across nginx.conf, conf.d, sites-enabled and Apache's Include tree.",
@@ -69,6 +70,7 @@ var serversDBMail = []Module{
 	},
 	{
 		ID: "P19", Title: "Database, Mail and DNS Hardening", Level: Practitioner, Minutes: 30,
+		Prereqs: []string{"P8"},
 		Summary: "Beyond binding and authentication: the option-file settings that limit what a compromised database credential can do, make mail and database traffic encrypted by rule, and keep DNS honest.",
 		Objectives: []string{
 			"Read MySQL, PostgreSQL and Redis option files and name the setting behind each finding.",

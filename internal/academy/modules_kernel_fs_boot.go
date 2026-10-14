@@ -8,6 +8,7 @@ package academy
 var kernelFSBoot = []Module{
 	{
 		ID: "P17", Title: "Kernel, Filesystem and Boot Hardening", Level: Practitioner, Minutes: 35,
+		Prereqs: []string{"P1"},
 		Summary: "Why the kernel's own switches, the layout and permissions of the filesystem, and what happens before login decide how far an attacker with a foothold can get.",
 		Objectives: []string{
 			"Explain what the main kernel hardening parameters protect against and where their values live.",

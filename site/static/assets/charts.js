@@ -1,7 +1,8 @@
 // Charts (Apache ECharts, self-hosted). Data is embedded in the page as JSON,
 // generated from the check registry at build time. Nothing is fetched or stored.
-// The 369 KB library is loaded only when the first chart scrolls near the
-// viewport (a script element from this site, allowed by the CSP); the data
+// The 369 KB library is loaded when the first chart scrolls near the viewport,
+// or at once on the coverage page, whose purpose is the charts (a script
+// element from this site, allowed by the CSP); the data
 // tables under each chart are in the page already, so nothing is lost if it
 // never loads.
 (function () {
@@ -22,13 +23,16 @@
     s.onload = render;
     document.head.appendChild(s);
   }
-  if (window.IntersectionObserver) {
+  // Pages that are about the charts (data-eager on the script tag) load the
+  // library at once; elsewhere it waits until a chart scrolls near the viewport.
+  var eager = !!(document.currentScript && document.currentScript.getAttribute('data-eager'));
+  if (eager || !window.IntersectionObserver) {
+    load();
+  } else {
     var io = new IntersectionObserver(function (entries) {
       if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
     }, { rootMargin: '400px 0px' });
     containers.forEach(function (el) { io.observe(el); });
-  } else {
-    load();
   }
   function render() {
   if (!window.echarts) return;

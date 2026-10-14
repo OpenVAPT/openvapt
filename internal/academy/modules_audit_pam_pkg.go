@@ -9,6 +9,7 @@ package academy
 var auditPamPkg = []Module{
 	{
 		ID: "P21", Title: "Audit Logging and Monitoring Depth", Level: Practitioner, Minutes: 30,
+		Prereqs: []string{"P16"},
 		Summary: "What the Linux audit daemon should record, how its rules and log files are protected, and why a copy of every log must leave the machine.",
 		Objectives: []string{
 			"Explain the difference between a running audit daemon and a useful audit trail.",
@@ -59,6 +60,7 @@ var auditPamPkg = []Module{
 	},
 	{
 		ID: "P22", Title: "Authentication Policy and Package Hygiene", Level: Practitioner, Minutes: 35,
+		Prereqs: []string{"P7", "P15"},
 		Summary: "The PAM and login.defs settings that decide how passwords are checked, reused and locked, how root's environment can be hijacked, and how packages arrive on the machine and which services came with them.",
 		Objectives: []string{
 			"Explain what pam_pwquality, pam_faillock, pam_pwhistory and pam_wheel each decide, and read their options from a PAM stack.",

@@ -9,6 +9,7 @@ package academy
 var containersApps = []Module{
 	{
 		ID: "A5", Title: "Container Runtime Hardening Depth", Level: Applied, Minutes: 35,
+		Prereqs: []string{"P9", "P20"},
 		Summary: "Beyond \"is the daemon on TCP\": the daemon defaults, socket ownership, confinement profiles, resource limits and image trust that decide what a compromised container can do to its host.",
 		Objectives: []string{
 			"Read /etc/docker/daemon.json and a container's hostconfig.json and name each setting that limits blast radius.",
@@ -52,6 +53,7 @@ var containersApps = []Module{
 	},
 	{
 		ID: "A6", Title: "Application Framework and CMS Configuration", Level: Applied, Minutes: 35,
+		Prereqs: []string{"P13", "P14"},
 		Summary: "How Laravel, Symfony, Rails, Spring Boot, Flask, Drupal, Joomla, Magento, Ghost and WordPress each express the same five production mistakes, and how to find them from the files on disk.",
 		Objectives: []string{
 			"Map a framework's configuration file and setting names to the five mistakes: debug on, secret exposed, wrong environment, lifecycle expired, writable code.",
@@ -94,6 +96,7 @@ var containersApps = []Module{
 	},
 	{
 		ID: "P20", Title: "Secrets, Cron and Account Hygiene", Level: Practitioner, Minutes: 20,
+		Prereqs: []string{"P7", "P15"},
 		Summary: "The small cross-cutting habits that stop a low-privilege foothold becoming root: no secrets in readable files, restricted SSH keys, cron that runs only root-owned code, a clean PATH and consistent account files.",
 		Objectives: []string{
 			"Find secrets that any local user can read and explain why that is a lateral movement path.",
