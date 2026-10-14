@@ -124,6 +124,9 @@ check_url() {
 	file://*) [ "${OPENVAPT_ALLOW_FILE:-0}" = 1 ] && return 0 ;;
 	esac
 	safe=$(printf '%s' "$2" | cut -d: -f1 | tr -cd 'A-Za-z0-9+.-' | cut -c1-20)
+	case "$2" in
+	file://*) die "$1 must be an https:// URL (got a file URL). file:// is accepted only for offline tests with OPENVAPT_ALLOW_FILE=1." ;;
+	esac
 	die "$1 must be an https:// URL (got a ${safe:-scheme-less} URL). Refusing to download over anything but HTTPS."
 }
 
