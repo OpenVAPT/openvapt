@@ -15,7 +15,10 @@
 # held in memory (openvapt demo), writing every report format.
 set -eu
 
-[ $# -eq 1 ] && [ -x "$1" ] || { echo "usage: sh scripts/test-install.sh PATH/TO/openvapt" >&2; exit 2; }
+if [ $# -ne 1 ] || [ ! -x "$1" ]; then
+	echo "usage: sh scripts/test-install.sh PATH/TO/openvapt" >&2
+	exit 2
+fi
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 W=$(mktemp -d 2>/dev/null || mktemp -d -t ovtest)
 trap 'rm -rf "$W"' EXIT
