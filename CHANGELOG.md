@@ -4,6 +4,9 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Fix: asset cache busting (2026-10-14)
+- The site's own CSS and JavaScript links carry a content hash (`?v=`), and the chart and catalogue loaders add a hash of the vendored libraries, so the new cache headers can never serve a stale stylesheet or script after a deploy. Found by browser-testing the live site at phone width.
+
 ### Stream: worldwide audience (owner instruction 2026-10-14)
 - OpenVAPT is stated to be open to anyone, in any country: EULA 2.5 (section 22, acknowledgements 1.8 statement 8 names computer misuse laws from several regions as examples, liability cap USD 1 or its equivalent instead of RM1), Disclaimer 1.8, Privacy 1.7 (section 6 written for worldwide data protection laws), Teaching 1.4, SECURITY.md accepts reports in any language, security.txt lists English only.
 - Academy F2, the teaching plan, the teach and limits pages, ADR 0001 and AGENTS.md name laws from several regions instead of Malaysian law only; Malaysian law still governs the Agreement because that is where the licensor is.
