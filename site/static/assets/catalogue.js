@@ -54,11 +54,13 @@
 
   if (!window.matchMedia || !window.matchMedia('(min-width: 640px)').matches) return;
   var vendor = (document.currentScript && document.currentScript.getAttribute('data-vendor')) || 'assets/vendor/';
+  var vv = document.currentScript && document.currentScript.getAttribute('data-vendor-v');
+  var vq = vv ? '?v=' + vv : '';
   var loaded = false;
   function css(name) {
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = vendor + name;
+    l.href = vendor + name + vq;
     document.head.appendChild(l);
   }
   function load() {
@@ -68,7 +70,7 @@
     css('ag-theme-quartz.min.css');
     if (window.agGrid) { mount(); return; }
     var s = document.createElement('script');
-    s.src = vendor + 'ag-grid-community.min.js';
+    s.src = vendor + 'ag-grid-community.min.js' + vq;
     s.defer = true;
     s.onload = mount;
     document.head.appendChild(s);
