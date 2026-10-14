@@ -1,23 +1,26 @@
 {{define "content"}}{{$d := .Data}}
-<section class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-  <div class="min-w-0">
-    <span class="tag tag-plain mb-4 whitespace-normal">Academic &middot; Non-Commercial &middot; Built by AI Cybersecurity Engineers &middot; Source-Available &middot; Free</span>
-    <h1>See Exactly How a Vulnerability Assessment Tool Works</h1>
-    <p class="lead mb-8">Read every line, then run it on your own Linux server to find, rate and fix weaknesses. Free for your own use, 100% at your own risk.</p>
-    <div class="flex flex-wrap gap-3">
-      <a class="btn btn-primary" href="how-it-works.html">{{icon "code-xml"}}Read the Code</a>
-      <a class="btn btn-default" href="download.html">{{icon "download"}}Download</a>
-    </div>
+<section class="hero">
+  <span class="tag tag-plain mb-6 whitespace-normal">Academic &middot; Non-Commercial &middot; Built by AI Cybersecurity Engineers &middot; Source-Available &middot; Free</span>
+  <h1>See Exactly How a Vulnerability Assessment Tool Works</h1>
+  <p class="lead mb-8">Read every line, then run it on your own Linux server to find, rate and fix weaknesses. Free for your own use, 100% at your own risk.</p>
+  <div class="flex flex-wrap gap-3">
+    <a class="btn btn-primary" href="how-it-works.html">{{icon "code-xml"}}Read the Code</a>
+    <a class="btn btn-default" href="download.html">{{icon "download"}}Download</a>
   </div>
-  <div class="min-w-0">{{template "cite" (index (index $d.Walkthrough 0).Cites 1)}}</div>
 </section>
 
-<section class="mt-14 grid grid-cols-2 gap-6 border-y border-line-2 py-8 md:grid-cols-4">
+{{template "walkthrough" .}}
+
+<section class="mt-20 grid grid-cols-2 gap-8 border-y border-line-2 py-10 md:grid-cols-4">
   <div><div class="stat-title">Checks, Each Cited</div><div class="stat-value">{{$d.Counts.total}}</div></div>
   <div><div class="stat-title">Bytes Sent Off the Machine</div><div class="stat-value">0</div></div>
   <div><div class="stat-title">Third-Party Go Modules</div><div class="stat-value">0</div></div>
   <div><div class="stat-title">Machines in Scope</div><div class="stat-value">1</div></div>
 </section>
+
+<h2>Every Line Is Public</h2>
+<p class="lead">This excerpt is read from the repository when the site is built, so it always matches the commit in the footer.</p>
+<div class="min-w-0">{{template "cite" (index (index $d.Walkthrough 0).Cites 1)}}</div>
 
 <h2>What OpenVAPT Is, and Is Not</h2>
 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

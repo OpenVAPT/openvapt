@@ -1,6 +1,8 @@
 {{define "content"}}{{$d := .Data}}
 <h1>How OpenVAPT Is Built</h1>
 <p class="lead">A walk through the source, module by module. Every excerpt is read from the repository when this site is built, so line numbers and links always match the commit in the footer.</p>
+{{template "walkthrough" .}}
+<h2>The Source, Module by Module</h2>
 <div class="grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)]">
   <nav aria-label="Modules" class="min-w-0">
     <p class="foot-h">Modules</p>

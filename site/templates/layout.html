@@ -57,7 +57,7 @@
   </details>
   <div class="max-md:hidden">{{template "notices" .}}</div>
 </div>
-<main id="main" class="wrap pb-16 pt-10">
+<main id="main" class="wrap pb-16 pt-12 md:pt-16">
 {{.Body}}
 </main>
 <footer class="foot">
@@ -95,6 +95,7 @@
 </footer>
 {{if eq .Path "checks/index.html"}}<script src="{{.Base}}{{asset "catalogue.js"}}" data-vendor="{{.Base}}assets/vendor/" data-vendor-v="{{vendorv}}" defer></script>{{end}}
 {{if eq .Path "download.html"}}<script src="{{.Base}}{{asset "acknowledge.js"}}" defer></script>{{end}}
+{{if or (eq .Path "index.html") (eq .Path "how-it-works.html") (eq .Path "download.html")}}<script src="{{.Base}}{{asset "walkthrough.js"}}" defer></script>{{end}}
 {{if hasPrefix .Path "academy/"}}<script src="{{.Base}}{{asset "academy.js"}}" defer></script>{{end}}
 {{if or (eq .Path "cite.html") (and (hasPrefix .Path "checks/") (ne .Path "checks/index.html")) (hasPrefix .Path "academy/")}}<script src="{{.Base}}{{asset "cite.js"}}" defer></script>{{end}}
 {{if or (eq .Path "index.html") (eq .Path "standards.html") (eq .Path "coverage.html")}}<script src="{{.Base}}{{asset "charts.js"}}" data-vendor="{{.Base}}assets/vendor/" data-vendor-v="{{vendorv}}"{{if eq .Path "coverage.html"}} data-eager="1"{{end}} defer></script>{{end}}
@@ -126,3 +127,176 @@
 <p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
 </div>
 </details>{{end}}
+
+{{/* Walkthrough: a simulation built only from real OpenVAPT output (install.sh messages, openvapt scan's acknowledgement prompt,
+     openvapt demo on the built-in vulnerable lab, its HTML report, openvapt explain and openvapt learn). Long output is trimmed and
+     marked as trimmed; values are kept as printed. Without JavaScript, or with reduced motion, every scene is a static, readable still.
+     Content pages include it with the page data as the argument; on the home page it loops. */}}
+{{define "walkthrough"}}<section class="wt" data-wt{{if eq .Path "index.html"}} data-loop{{end}} aria-labelledby="wt-title">
+<div class="wt-head">
+  <h2 id="wt-title">See It Run on Your Machine</h2>
+  <p class="wt-label">Simulated Walkthrough Using the Built-In Demo Lab. Every line below is real OpenVAPT output, trimmed for length where marked.</p>
+</div>
+<div class="wt-stage" data-wt-stage>
+<div class="wt-scene" data-caption="Scene 1 of 7, Install. The one-line installer downloads the Linux binary, verifies its SHA-256 checksum and installs it without root. It scans nothing.">
+  <div class="win win-term"><div class="win-bar"><span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="win-title">you@server: ~</span></div>
+  <div class="term" tabindex="0" role="log" aria-label="Terminal, scene 1">
+<div class="ln" data-k="cmd"><span class="ps">$ </span><span class="tx">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh</span></div>
+<div class="ln">OpenVAPT installer: release <span class="ph">vX.Y.Z</span>, linux/amd64</div>
+<div class="ln">  downloading openvapt_linux_amd64 and SHA256SUMS from https://github.com/OpenVAPT/openvapt/releases/download/<span class="ph">vX.Y.Z</span>/</div>
+<div class="ln ok">  checksum verified (sha256 <span class="ph">64 hex digits</span>)</div>
+<div class="ln">  note: cosign is not installed, so the Sigstore signature was not checked.</div>
+<div class="ln">  installed /home/you/.local/bin/openvapt</div>
+<div class="ln">&nbsp;</div>
+<div class="ln">Installed. Nothing has been scanned. OpenVAPT checks only this machine, read-only,</div>
+<div class="ln">and before every scan it shows the acknowledgements and waits for you to type I ACCEPT.</div>
+  </div></div>
+</div>
+<div class="wt-scene" data-gap="220" data-caption="Scene 2 of 7, Accept. Before every scan OpenVAPT prints the terms and the numbered acknowledgements, and continues only when you type I ACCEPT. Nothing about the answer is stored.">
+  <div class="win win-term"><div class="win-bar"><span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="win-title">you@server: ~</span></div>
+  <div class="term" tabindex="0" role="log" aria-label="Terminal, scene 2">
+<div class="ln" data-k="cmd"><span class="ps">$ </span><span class="tx">sudo openvapt scan --out ~/openvapt-report</span></div>
+<div class="ln">OpenVAPT - Terms of Use and Acknowledgements, version 1.8 (2026-10-14)</div>
+<div class="ln">Full text: https://openvapt.com/legal/eula.html</div>
+<div class="ln dim">[the eight statements of what OpenVAPT is are trimmed here]</div>
+<div class="ln">By continuing you confirm each statement below:</div>
+<div class="ln"> 1. I have read, studied and understood the End User Licence Agreement, the Disclaimer, the Acceptable Use Policy, the Licence, the Teaching With OpenVAPT terms and Citing OpenVAPT.</div>
+<div class="ln dim">[statements 2 to 9 are trimmed here; openvapt terms prints all of them]</div>
+<div class="ln"> 10. I am at least 18 years old (or the age of majority where I live), or my parent or guardian has read these statements and accepts them for me in their own name; and where I act for an organisation, I am authorised to bind it.</div>
+<div class="ln">&nbsp;</div>
+<div class="ln">If you have read, studied, understood, acknowledged, agreed to and accepted all of the above,</div>
+<div class="ln" data-k="cmd" data-prefix="type I ACCEPT to continue (anything else cancels; nothing is stored): "><span class="ps">type I ACCEPT to continue (anything else cancels; nothing is stored): </span><span class="tx">I ACCEPT</span></div>
+<div class="ln">Scanning this machine with 307 checks (read-only, local only)...</div>
+  </div></div>
+</div>
+<div class="wt-scene" data-gap="420" data-hold="3200" data-caption="Scene 3 of 7, Checks. An illustration of the read-only checks working through the server, network and web domains, with real check IDs. The terminal itself prints only the start line and the summary.">
+  <div class="win win-viz"><div class="win-bar"><span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="win-title">Illustration: Checks by Domain</span></div>
+  <div class="viz" tabindex="0">
+    <div class="viz-col"><p class="viz-h">{{icon "server"}}Server</p>
+      <p class="ln chk"><code>HOST-SSH-001</code><span>SSH Allows Direct Root Login</span><span class="tag tag-high">High</span></p>
+      <p class="ln chk"><code>HOST-SSH-003</code><span>SSH Permits Empty Passwords</span><span class="tag tag-critical">Critical</span></p>
+      <p class="ln chk"><code>HOST-USR-003</code><span>Sudo Rules Without Password (NOPASSWD)</span><span class="tag tag-high">High</span></p>
+      <p class="ln chk"><code>HOST-KRN-001</code><span>Address Space Layout Randomisation Not Fully Enabled</span><span class="tag tag-medium">Medium</span></p>
+      <p class="ln chk"><code>HOST-AUD-001</code><span>Audit Daemon Not Enabled at Boot</span><span class="tag tag-low">Low</span></p>
+    </div>
+    <div class="viz-col"><p class="viz-h">{{icon "network"}}Network</p>
+      <p class="ln chk"><code>NET-DB-002</code><span>Redis Authentication and Network Binding</span><span class="tag tag-critical">Critical</span></p>
+      <p class="ln chk"><code>NET-SVC-001</code><span>Cleartext Legacy Services Listening</span><span class="tag tag-high">High</span></p>
+      <p class="ln chk"><code>NET-FW-001</code><span>No Active Host Firewall</span><span class="tag tag-medium">Medium</span></p>
+      <p class="ln chk"><code>NET-TLS-001</code><span>Deprecated TLS 1.0 or 1.1 Accepted</span><span class="tag tag-medium">Medium</span></p>
+    </div>
+    <div class="viz-col"><p class="viz-h">{{icon "globe"}}Web</p>
+      <p class="ln chk"><code>WEB-EXP-002</code><span>Environment or Secrets File Exposed</span><span class="tag tag-critical">Critical</span></p>
+      <p class="ln chk"><code>WEB-EXP-001</code><span>Git Repository Exposed on the Website</span><span class="tag tag-high">High</span></p>
+      <p class="ln chk"><code>WEB-HDR-002</code><span>Missing Content Security Policy</span><span class="tag tag-medium">Medium</span></p>
+      <p class="ln chk"><code>WEB-HDR-004</code><span>Missing X-Content-Type-Options</span><span class="tag tag-low">Low</span></p>
+    </div>
+  </div></div>
+</div>
+<div class="wt-scene" data-hold="4200" data-caption="Scene 4 of 7, Summary. The built-in demo lab, a simulated vulnerable server held in memory, gives this summary: 307 checks, 14 Critical, 71 High, 88 Medium and 123 Low, then exit code 3 because findings at or above High were found.">
+  <div class="win win-term"><div class="win-bar"><span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="win-title">you@server: ~</span></div>
+  <div class="term" tabindex="0" role="log" aria-label="Terminal, scene 4">
+<div class="ln" data-k="cmd"><span class="ps">$ </span><span class="tx">openvapt demo --format html,md --no-sign</span></div>
+<div class="ln">Demo: scanning the simulated "vulnerable" lab server (in memory, your machine is not touched).</div>
+<div class="ln">&nbsp;</div>
+<div class="ln strong">  Checks run:  307   Passed: 2   Failed: 305   Incomplete: 0 (plus 3 targets)   Skipped: 0   Errors: 0</div>
+<div class="ln strong">  Failed by severity:  <span class="c-crit">Critical 14</span>   <span class="c-high">High 71</span>   <span class="c-med">Medium 88</span>   <span class="c-low">Low 123</span></div>
+<div class="ln">&nbsp;</div>
+<div class="ln"><span class="c-crit">  CRITICAL</span>  HOST-CTR-001  Docker API Exposed Over TCP Without TLS</div>
+<div class="ln"><span class="c-crit">  CRITICAL</span>  HOST-SSH-003  SSH Permits Empty Passwords</div>
+<div class="ln"><span class="c-crit">  CRITICAL</span>  NET-DB-002    Redis Authentication and Network Binding</div>
+<div class="ln"><span class="c-high">  HIGH    </span>  HOST-SSH-001  SSH Allows Direct Root Login</div>
+<div class="ln dim">  [the other 301 failed checks are listed here, trimmed]</div>
+<div class="ln">Report written (only on this machine):</div>
+<div class="ln">  /home/you/openvapt-demo-report-20261014-074600-3873905855/report.html</div>
+<div class="ln">  /home/you/openvapt-demo-report-20261014-074600-3873905855/report.md</div>
+<div class="ln">openvapt: 85 finding(s) at or above high severity</div>
+<div class="ln" data-k="cmd"><span class="ps">$ </span><span class="tx">echo $?</span></div>
+<div class="ln strong">3</div>
+  </div></div>
+</div>
+<div class="wt-scene" data-gap="900" data-hold="6500" data-caption="Scene 5 of 7, Report. The HTML report opens from your own disk: an executive summary, severity counts, and a finding card with evidence, the fix, how to verify it, and a link to the matching Academy module. Secrets in evidence are redacted before the report is written.">
+  <div class="win win-browser"><div class="win-bar"><span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="win-url">file:///home/you/openvapt-demo-report-20261014-074600-3873905855/report.html</span></div>
+  <div class="rp" tabindex="0">
+    <div class="ln"><p class="rp-h1">OpenVAPT Self-Assessment Report</p><p class="rp-sub">lab-vulnerable (simulated) - Ubuntu 18.04.6 LTS - 2026-10-14 02:57 UTC</p></div>
+    <div class="ln"><p class="rp-h2">Executive Summary</p><p class="rp-p">Result: 305 checks failed (14 Critical, 71 High, 88 Medium, 123 Low, 9 Info) and 2 passed. Critical weaknesses require immediate attention.</p></div>
+    <div class="ln rp-tiles"><span class="t-crit"><b>14</b>Critical</span><span class="t-high"><b>71</b>High</span><span class="t-med"><b>88</b>Medium</span><span class="t-low"><b>123</b>Low</span><span><b>2</b>Passed</span></div>
+    <div class="ln rp-card" data-point>
+      <span class="wt-pointer" aria-hidden="true">{{icon "mouse-pointer-2"}}</span>
+      <p class="rp-card-h"><span class="tag tag-high">High</span><b>SSH Allows Direct Root Login</b><code>HOST-SSH-001</code></p>
+      <p class="rp-p"><b>Why it matters:</b> Root is the one account name every attacker knows. Allowing it over SSH turns any password guess into full control of the server, and removes the audit trail of which person used root.</p>
+      <p class="rp-p"><b>Evidence, sshd:</b> Root may log in over SSH with a password</p>
+      <pre class="rp-pre">permitrootlogin yes</pre>
+      <p class="rp-p"><b>Fix:</b> In /etc/ssh/sshd_config set: PermitRootLogin no (or prohibit-password if key-based root login is truly required). Log in as a named user and use sudo. Then run: sshd -t &amp;&amp; systemctl reload sshd</p>
+      <p class="rp-p"><b>Verify:</b> <code>sshd -T | grep -i permitrootlogin</code> should print 'permitrootlogin no'.</p>
+      <p class="rp-p"><b>Learn:</b> <span class="rp-link">P2: SSH Security, https://openvapt.com/academy/p2.html</span></p>
+    </div>
+    <div class="ln"><p class="rp-note">Evidence: secrets (passwords, keys, tokens, hashes) were redacted before writing this report.</p></div>
+  </div></div>
+</div>
+<div class="wt-scene" data-hold="4000" data-caption="Scene 6 of 7, Explain and Learn. openvapt explain shows what a check does, why, and how to fix and verify it. openvapt learn lists the free, offline Academy modules.">
+  <div class="win win-term"><div class="win-bar"><span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="win-title">you@server: ~</span></div>
+  <div class="term" tabindex="0" role="log" aria-label="Terminal, scene 6">
+<div class="ln" data-k="cmd"><span class="ps">$ </span><span class="tx">openvapt explain HOST-SSH-001</span></div>
+<div class="ln strong">HOST-SSH-001  SSH Allows Direct Root Login</div>
+<div class="ln">Domain: host   Severity: high   CVSS: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H</div>
+<div class="ln">What it checks:</div>
+<div class="ln">  Checks whether the SSH daemon accepts logins as root with a password.</div>
+<div class="ln dim">[why it matters, how it detects, how to fix and references are trimmed here]</div>
+<div class="ln">How to verify:</div>
+<div class="ln">  sshd -T | grep -i permitrootlogin  should print 'permitrootlogin no'.</div>
+<div class="ln">  - P2: SSH Security (Practitioner, about 15 minutes)</div>
+<div class="ln">    offline: openvapt learn P2</div>
+<div class="ln" data-k="cmd"><span class="ps">$ </span><span class="tx">openvapt learn</span></div>
+<div class="ln strong">OpenVAPT Academy: learn vulnerability assessment from theory to application.</div>
+<div class="ln">Free, offline, nothing stored. Also online at https://openvapt.com/academy/</div>
+<div class="ln">Foundations</div>
+<div class="ln">  F1  Security Basics                               15 min</div>
+<div class="ln">  F2  What VAPT Is, and Doing It Legally            20 min</div>
+<div class="ln">  F3  Vulnerabilities, CVE, CWE and CVSS            20 min</div>
+<div class="ln dim">[22 Practitioner and 6 Applied modules are listed here, trimmed]</div>
+<div class="ln">Read a module:  openvapt learn F1</div>
+<div class="ln">Take its quiz:  openvapt learn F1 --quiz</div>
+  </div></div>
+</div>
+<div class="wt-scene" data-gap="500" data-hold="5000" data-caption="Scene 7 of 7, Next. Read the code, then download OpenVAPT or start the free Academy.">
+  <div class="win win-end"><div class="end">
+    <p class="ln end-h">Read It. Run It on Your Own Machine.</p>
+    <p class="ln end-p">Free for your own use, on machines you own or control, 100% at your own risk.</p>
+    <p class="ln end-cta"><a class="btn btn-primary" href="{{.Base}}download.html">{{icon "download"}}Download</a> <a class="btn btn-default" href="{{.Base}}academy/">{{icon "graduation-cap"}}Start the Academy</a></p>
+  </div></div>
+</div>
+</div>
+<p class="wt-caption" data-wt-caption aria-hidden="true"></p>
+<p class="sr-only" aria-live="polite" data-wt-live></p>
+<div class="wt-controls" data-wt-controls hidden>
+  <div class="wt-buttons">
+    <button type="button" class="btn btn-primary btn-sm" data-wt-play>{{icon "play"}}{{icon "pause"}}<span>Pause</span></button>
+    <button type="button" class="btn btn-default btn-sm" data-wt-replay>{{icon "rotate-ccw"}}<span>Replay</span></button>
+  </div>
+  <ol class="wt-rail" aria-label="Walkthrough Chapters">
+    <li><button type="button" data-wt-ch="0"><span class="wt-fill"></span>Install</button></li>
+    <li><button type="button" data-wt-ch="1"><span class="wt-fill"></span>Accept</button></li>
+    <li><button type="button" data-wt-ch="2"><span class="wt-fill"></span>Checks</button></li>
+    <li><button type="button" data-wt-ch="3"><span class="wt-fill"></span>Summary</button></li>
+    <li><button type="button" data-wt-ch="4"><span class="wt-fill"></span>Report</button></li>
+    <li><button type="button" data-wt-ch="5"><span class="wt-fill"></span>Explain</button></li>
+    <li><button type="button" data-wt-ch="6"><span class="wt-fill"></span>Next</button></li>
+  </ol>
+</div>
+<details class="wt-transcript">
+<summary>{{icon "file-text"}}<span>Read the Walkthrough Transcript</span><span class="chev">{{icon "chevron-right"}}</span></summary>
+<div class="wt-transcript-body">
+<p>This is a simulated walkthrough using the built-in demo lab. It is built only from real OpenVAPT output; long output is trimmed where marked and every value is kept as printed.</p>
+<ol>
+<li><strong>Install.</strong> Run <code>curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh</code>. The installer downloads the Linux binary and SHA256SUMS, verifies the checksum, checks the Sigstore signature when cosign is installed, and installs to <code>~/.local/bin</code> without root. It prints: "Installed. Nothing has been scanned."</li>
+<li><strong>Accept.</strong> Run <code>sudo openvapt scan --out ~/openvapt-report</code>. OpenVAPT prints the terms and ten numbered acknowledgements, then asks you to type <code>I ACCEPT</code>; anything else cancels and nothing is stored. It then prints "Scanning this machine with 307 checks (read-only, local only)...".</li>
+<li><strong>Checks.</strong> The read-only checks cover three domains: Server (for example HOST-SSH-001, HOST-USR-003, HOST-KRN-001), Network (NET-DB-002, NET-FW-001, NET-TLS-001) and Web (WEB-EXP-002, WEB-HDR-002). The terminal prints only the start line and the summary; the scene illustrates the work in between.</li>
+<li><strong>Summary.</strong> <code>openvapt demo</code> scans a simulated vulnerable lab server in memory: 307 checks run, 2 passed, 305 failed, 0 incomplete; failed by severity Critical 14, High 71, Medium 88, Low 123. It writes report.html and report.md only on this machine and exits with code 3, meaning findings at or above High severity were found.</li>
+<li><strong>Report.</strong> The HTML report has an executive summary, severity counts and a card for each finding. The HOST-SSH-001 card shows the evidence <code>permitrootlogin yes</code>, the fix (set <code>PermitRootLogin no</code>, then <code>sshd -t &amp;&amp; systemctl reload sshd</code>), how to verify it, and the Academy module P2: SSH Security. Secrets in evidence are redacted before the report is written.</li>
+<li><strong>Explain and Learn.</strong> <code>openvapt explain HOST-SSH-001</code> prints what the check does, why it matters, how it detects, how to fix and verify it, and its references. <code>openvapt learn</code> lists the offline Academy: 3 Foundations, 22 Practitioner and 6 Applied modules, each with a quiz.</li>
+<li><strong>Next.</strong> <a href="{{.Base}}download.html">Download OpenVAPT</a> or <a href="{{.Base}}academy/">start the Academy</a>.</li>
+</ol>
+</div>
+</details>
+</section>{{end}}
