@@ -13,6 +13,30 @@ OpenVAPT runs read-only checks on the Linux machine it is installed on (and only
 
 > **Pre-release.** Builds on the alpha, beta and release candidate (rc) channels are pre-release: they may be wrong, incomplete or unstable and are used 100% at your own risk. Only stable builds are full releases, and they too come with no warranty.
 
+## Cite OpenVAPT
+
+Using OpenVAPT in research, teaching or a report? Please cite it, with the version you used. Run `openvapt cite` (or `openvapt cite --format bibtex`) to print the citation for your exact build; every report also ends with a How to Cite block. The author is the group author "OpenVAPT"; do not add personal names. OpenVAPT has no DOI yet.
+
+APA 7:
+
+> OpenVAPT. (2026). OpenVAPT: An open academic vulnerability assessment tool (Version 0.1.0-alpha.2) [Computer software]. https://github.com/OpenVAPT/openvapt
+
+BibTeX:
+
+```bibtex
+@software{openvapt_2026,
+  author       = {{OpenVAPT}},
+  title        = {{OpenVAPT: An Open Academic Vulnerability Assessment Tool}},
+  year         = {2026},
+  version      = {0.1.0-alpha.2},
+  url          = {https://github.com/OpenVAPT/openvapt},
+  note         = {Built by AI Cybersecurity Engineers. https://openvapt.com},
+  license      = {LicenseRef-OpenVAPT-SAL-1.3}
+}
+```
+
+Every other style (IEEE, Harvard, MLA, Chicago, Vancouver, RIS, CSL-JSON) is on https://openvapt.com/cite.html and in [CITING.md](CITING.md); GitHub's "Cite this repository" button reads [CITATION.cff](CITATION.cff). A test keeps these lines identical to what the website, the CLI and the reports print.
+
 ## Read and Accept Before Use
 
 Before downloading or running OpenVAPT, read, study and understand the [EULA](EULA.md), [Disclaimer](DISCLAIMER.md), [Acceptable Use Policy](ACCEPTABLE_USE.md), [Licence](LICENSING.md), [Teaching With OpenVAPT](TEACHING.md) and [Citing OpenVAPT](CITING.md). By downloading, building or using it, you acknowledge, agree to and accept every statement below. The tool shows the same statements before every scan and continues only when you type `I ACCEPT`, or when you pass `--accept-terms` for automation, which counts as the same acceptance.
@@ -93,6 +117,7 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 | `openvapt explain <ID>` | Full documentation for one check |
 | `openvapt diff old.json new.json` | What was fixed, what is new, what is still open |
 | `openvapt verify report.json [--key-id ID]` | Confirm a signed report was not edited |
+| `openvapt cite [--format apa\|ieee\|harvard\|mla\|chicago\|bibtex\|ris\|csl\|cff] [--check ID] [--module ID]` | Print how to cite this exact version, a check or an Academy module |
 | `openvapt terms` / `version` | Terms of use, version |
 | `openvapt man` | Print the manual page: `openvapt man > openvapt.1`, then `man ./openvapt.1` |
 | `openvapt completion bash\|zsh\|fish` | Print a shell completion script, for example `source <(openvapt completion bash)` |
