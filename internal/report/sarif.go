@@ -91,6 +91,7 @@ func (r *Report) SARIF() ([]byte, error) {
 			"tool":        map[string]any{"driver": map[string]any{"name": "OpenVAPT", "version": r.Tool.Version, "informationUri": r.Tool.URL, "rules": rules}},
 			"results":     results,
 			"invocations": []any{r.invocation()},
+			"properties":  map[string]any{"citation": r.HowToCite()},
 		}},
 	}
 	return json.MarshalIndent(doc, "", "  ")
