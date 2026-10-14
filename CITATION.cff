@@ -10,7 +10,7 @@ repository-code: "https://github.com/OpenVAPT/openvapt"
 url: "https://openvapt.com"
 # The licence is not on the SPDX list, so CFF 1.2.0 allows only license-url here (schema: license is an SPDX enum).
 license-url: "https://github.com/OpenVAPT/openvapt/blob/main/LICENSE"
-version: "0.1.0-alpha.3"
+version: "0.1.0-alpha.4"
 date-released: "2026-10-14"
 keywords:
   - vulnerability assessment

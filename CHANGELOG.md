@@ -4,6 +4,10 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+_No changes recorded yet._
+
+## [v0.1.0-alpha.4] - 2026-10-14
+
 ### Stream: round3 fixes
 
 - Website: until the default release includes them, pages that mention `openvapt cite`, `--open` or the default `~/openvapt-reports` folder say they arrive in the next release and show what the current release does.
