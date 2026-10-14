@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/openvapt/openvapt/internal/cite"
 	"io"
 	"os"
 	"path/filepath"
@@ -105,7 +106,7 @@ func (r *Report) WriteAll(dir string, formats []string) ([]string, error) {
 			return written, err
 		}
 		p := filepath.Join(clean, name)
-		file, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+		file, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_EXCL|noFollow, 0o600)
 		if err != nil {
 			return written, err
 		}
@@ -224,6 +225,8 @@ func (r *Report) Markdown() string {
 	for _, m := range r.Limitations {
 		fmt.Fprintf(&b, "- %s\n", m)
 	}
+	c := r.HowToCite()
+	fmt.Fprintf(&b, "\n## How to Cite\n\n%s\n\n%s\n\n**APA 7:**\n\n%s\n\n**BibTeX:**\n\n%s\n\n**Credit when you share this report:**\n\n%s\n", mdFence(c.Reference, "text"), mdText(cite.Request), mdFence(c.APA, "text"), mdFence(c.BibTeX, "bibtex"), mdFence(c.Credit, "text"))
 	return b.String()
 }
 
@@ -330,4 +333,21 @@ func (r *Report) PrintSummary(w io.Writer) {
 			fmt.Fprintf(w, "  %-9s %-13s %s\n", strings.ToUpper(f.Status), f.ID, f.Title)
 		}
 	}
+	fmt.Fprintf(w, "\n  %s\n", cite.CLILine)
+}
+
+// mdFence renders s as a fenced code block whose fence is longer than any
+// backtick run in s, so text read back from a report file cannot close it.
+func mdFence(s, lang string) string {
+	longest, run := 0, 0
+	for _, r := range s {
+		if r == '`' {
+			run++
+			longest = max(longest, run)
+		} else {
+			run = 0
+		}
+	}
+	fence := strings.Repeat("`", max(3, longest+1))
+	return fence + lang + "\n" + s + "\n" + fence
 }

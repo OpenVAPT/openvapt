@@ -22,7 +22,6 @@ import (
 	"io"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -158,6 +157,7 @@ type scanFlags struct {
 	suppress                            string
 	failOn                              string
 	dryRun, accept, noSign, quiet, demo bool
+	open                                bool
 	parallel                            int
 	timeout                             time.Duration
 
@@ -308,7 +308,8 @@ func defaultOutDir(prefix string) (string, error) {
 }
 
 func addScanFlags(fs *flag.FlagSet, f *scanFlags, defOut string) {
-	fs.StringVar(&f.out, "out", defOut, "directory to write the report into")
+	fs.StringVar(&f.out, "out", defOut, "directory to write the report into (scan default: a new folder ~/openvapt-reports/<UTC time>, given back to the sudo user when sudo keeps HOME; demo default: a new folder in the current directory)")
+	fs.BoolVar(&f.open, "open", false, "after writing, open report.html with /usr/bin/xdg-open, only in a desktop session (DISPLAY or WAYLAND_DISPLAY set) and never as root")
 	fs.StringVar(&f.formats, "format", "html,json,sarif,md", "comma-separated report formats: html,json,sarif,md")
 	fs.StringVar(&f.only, "only", "", "run only these check ids or prefixes (e.g. WEB-,HOST-SSH-001)")
 	fs.StringVar(&f.skip, "skip", "", "skip these check ids or prefixes")
@@ -441,18 +442,30 @@ func finish(r *report.Report, f scanFlags) error {
 			fmt.Fprintln(os.Stderr, "warning: report not signed:", err)
 		}
 	}
+	var rd *reportsDir
 	if f.out == "" {
-		prefix := "openvapt-report-"
+		var dir string
+		var err error
 		if f.demo {
-			prefix = "openvapt-demo-report-"
+			dir, err = defaultOutDir("openvapt-demo-report-")
+		} else {
+			home, _ := os.UserHomeDir()
+			rd, err = scanReportsDir(home, time.Now(), sudoOwner(os.Geteuid(), os.Getenv, home))
+			if rd != nil {
+				dir = rd.Path
+			}
 		}
-		dir, err := defaultOutDir(prefix)
 		if err != nil {
 			return &exitError{code: 6, err: err}
 		}
 		f.out = dir
 	}
 	files, err := r.WriteAll(f.out, f.formatList)
+	if rd != nil {
+		if herr := rd.finish(files); err == nil && herr != nil {
+			err = fmt.Errorf("could not give the report folder back to the sudo user: %w", herr)
+		}
+	}
 	if err != nil {
 		return &exitError{code: 6, err: err}
 	}
@@ -460,13 +473,12 @@ func finish(r *report.Report, f scanFlags) error {
 	if f.old != nil {
 		report.PrintDiff(os.Stdout, f.old, r)
 	}
-	fmt.Println("Report written (only on this machine):")
-	for _, p := range files {
-		abs, _ := filepath.Abs(p)
-		fmt.Println("  " + abs)
-	}
+	printReports(os.Stdout, files)
 	if r.Integrity != nil && !f.quiet {
 		fmt.Printf("Signed with your local key %s. Anyone can check it with: openvapt verify report.json --key-id %s\n", r.Integrity.KeyID, r.Integrity.KeyID)
+	}
+	if f.open {
+		openReport(os.Stdout, files, os.Getenv, os.Geteuid())
 	}
 	if code, why := exitCode(r, f.failAt); code != 0 {
 		return &exitError{code: code, err: errors.New(why)}

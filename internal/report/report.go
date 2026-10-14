@@ -31,6 +31,8 @@ type Report struct {
 	Integrity   *Integrity `json:"integrity,omitempty"`
 	// Suppression is set when --suppress was used; see suppress.go.
 	Suppression *SuppressionInfo `json:"suppression,omitempty"`
+	// Citation is the How to Cite block; see citation.go.
+	Citation *Citation `json:"citation,omitempty"`
 }
 
 type Tool struct {
@@ -386,7 +388,7 @@ func (r *Report) Summarise() {
 // Methodology is printed in every report so readers know exactly what was done.
 var Methodology = []string{
 	"Scope: this machine only. Every network connection is restricted in code to loopback addresses (127.0.0.0/8, ::1). No other host was contacted.",
-	"Approach: automated, non-intrusive vulnerability assessment following the planning, discovery, analysis and reporting phases of NIST SP 800-115. No exploitation was attempted.",
+	"Approach: automated, non-intrusive vulnerability assessment following the Planning, Discovery and Reporting phases of NIST SP 800-115 (its four phases are Planning, Discovery, Attack and Reporting); the Attack phase is omitted and no exploitation was attempted.",
 	"Discovery: configuration files, /proc and /sys were read; a short allow-list of read-only commands was run (for example sshd -T and apt-get -s upgrade, which only simulates).",
 	"Web: websites were discovered from the local web server configuration and requested through 127.0.0.1 with GET requests for fixed paths only. No forms were submitted and no attack payloads were sent.",
 	"Rating: each check carries a qualitative severity on the CVSS v3.1 scale with a representative base vector. Environmental factors on your network may raise or lower the real risk. Detective gaps such as missing logging, auditing or integrity monitoring carry a local attack vector: a missing record opens no network path, it makes a separate intrusion harder to trace.",

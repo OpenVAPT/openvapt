@@ -1,7 +1,22 @@
 {{define "content"}}{{$d := .Data}}{{$x := $d.CiteExtras}}
 <h1>How to Cite OpenVAPT</h1>
 <p class="lead"><strong>Please cite us.</strong> If OpenVAPT, its Academy, its documentation, its checks or its reports helped your work in any way, in a research paper, thesis, dissertation, coursework, assignment, presentation, poster, academic project, teaching material, book, article, blog post or video, please cite OpenVAPT.</p>
-<p class="muted">This page follows <a href="legal/citing.html">Citing OpenVAPT</a> (CITING.md), the canonical guide. If anything here differs, CITING.md governs.</p>
+<section class="card mt-8" aria-labelledby="hero-apa-l" data-copy-scope>
+  <p class="m-0 text-[13px] font-medium uppercase tracking-[.06em] text-ink-3" id="hero-apa-l">Recommended Citation (APA 7)</p>
+  <pre class="cite-text mt-3 rounded-card border border-line-2 bg-layer text-[15px]" id="hero-apa" tabindex="0" aria-labelledby="hero-apa-l">{{$d.CiteHero.APA}}</pre>
+  <div class="cite-hero mt-4">
+    <button type="button" class="btn btn-primary" data-copy="hero-apa">{{icon "copy"}}<span>Copy APA</span></button>
+    <a class="btn btn-default" href="openvapt.bib" download>{{icon "download"}}BibTeX (.bib)</a>
+    <a class="btn btn-default" href="#copy">Every Other Style</a>
+  </div>
+  <ul class="mb-0 mt-5 grid gap-1.5 text-[14px] text-ink-2">
+    <li><strong>Version.</strong> Give the version you used: <code>openvapt version</code> prints it{{if $d.Features.Released}}, and <code>openvapt cite</code> prints this citation for that exact build{{else}}; copy the citation below, or use <a href="CITATION.cff">CITATION.cff</a> (<code>openvapt cite</code>, which prints it for your exact build, arrives in the next release){{end}}. A build made from source that is not a release says "{{$d.CiteHero.Unreleased}}"; add the commit instead.</li>
+    <li><strong>Access Date.</strong> Styles that ask for one (Harvard, Vancouver, web pages) show today's date in your browser. Use the date you actually used OpenVAPT.</li>
+    <li><strong>DOI.</strong> {{$d.CiteHero.DOINote}}</li>
+  </ul>
+  <p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
+</section>
+<p class="muted mt-6">This page follows <a href="legal/citing.html">Citing OpenVAPT</a> (CITING.md), the canonical guide. If anything here differs, CITING.md governs.</p>
 
 <div class="mt-8 grid gap-4 md:grid-cols-2">
   <div class="card">
@@ -19,7 +34,7 @@
 </div>
 
 <h2 id="copy">{{icon "copy"}} Copy a Citation</h2>
-<div class="card">
+<div class="card" data-copy-scope>
   <div class="mb-4 flex flex-wrap items-center gap-2"><span class="tag tag-plain">Version {{$d.CiteVersion}}</span><span class="tag tag-plain">Commit {{.CommitShort}}</span><span class="muted">Filled in from this build. If you used another version, replace it with the one <code>openvapt version</code> shows.</span></div>
   <div class="seg" role="tablist" aria-label="Citation Style" data-tabs hidden>
     {{range $i, $s := $d.CiteStyles}}<button type="button" role="tab" id="tab-{{$s.ID}}" aria-controls="panel-{{$s.ID}}" aria-selected="{{if eq $i 0}}true{{else}}false{{end}}" tabindex="{{if eq $i 0}}0{{else}}-1{{end}}">{{$s.Label}}</button>{{end}}

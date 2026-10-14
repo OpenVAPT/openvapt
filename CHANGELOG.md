@@ -4,10 +4,37 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
-_No changes recorded yet._
+### Stream: round3 fixes
+
+- Website: until the default release includes them, pages that mention `openvapt cite`, `--open` or the default `~/openvapt-reports` folder say they arrive in the next release and show what the current release does.
+- Under sudo with HOME kept, the default reports folder and its files are given back to the sudo user (checked against the user database); the base folder is checked to be a real folder owned by the expected user, and report files refuse links.
+- Installer: a non-HTTPS OPENVAPT_CHANNELS_URL or OPENVAPT_BASE_URL now stops with a clear reason; its next steps describe where reports go for the installed version.
+- report.md keeps URLs in the How to Cite block literal (fenced text); builds without a version are called "unreleased build" everywhere.
+- NIST SP 800-115 phases worded consistently (Planning, Discovery and Reporting; no Attack phase); walkthrough marks the trimmed pre-release warnings and names its last chapter Get Started; page citations label the access date.
 
 ## [v0.1.0-alpha.3] - 2026-10-14
+### Stream: install paths
 
+- Installer: fixed the default install failing for everyone while no Stable release exists. Without `--channel` it now picks the most stable channel that has a release (Stable, then Release Candidate, Beta, Alpha) and warns, naming the channel, when that is a pre-release; a forced `--channel` without a release fails and lists the channels that have one.
+- Installer: two ways to start. Download Only (the default) installs, verifies and prints the next steps. Download and Scan (`--run`) then scans this machine interactively (acknowledgements and `I ACCEPT` read from the terminal, refused without one), writes all four signed reports to `~/openvapt-reports/<UTC time>/` (0700) or `--out DIR`, and prints the severity summary, the exit code and its meaning, every report path and how to open the HTML report. New `--sudo` (scan only), `--open` (desktop sessions only) and `--dry-run`.
+- CLI: `openvapt scan` without `--out` now writes to a new folder `~/openvapt-reports/<UTC time>/` (0700, never reused) instead of the current directory; `--out` is unchanged and `demo` keeps its current-directory default. Every scan and demo ends with a Reports block listing each file and how to open the HTML report. New `--open` opens report.html with `/usr/bin/xdg-open`, only in a desktop session and never as root.
+- Website: the download page offers Download Only and Download and Scan as accessible tabs, each with a copy-ready command, the steps, sample output, where reports go and time and permission notes, mapped to the NIST SP 800-115 phases; manual binary links and verification steps follow the channel record. Two new FAQ entries; the walkthrough matches the new commands and output.
+- Tests: scripts/test-install.sh covers channel fallback, Download Only, `--run` without a terminal, Download and Scan in a scripted terminal (accept and cancel), `--out`, `--dry-run` and checksum refusal, using a test double that scans only the simulated lab; CI runs it.
+- EULA section 8.6 and Privacy Policy section 3: factual additions describing the default report folder and `--open`.
+### Stream: cite
+
+- Citation: new internal/cite package is the single source of every citation; the website, `openvapt cite`, every report and the README render from it, and tests keep them identical and free of personal names.
+- Website: a Cite pill in the header (in-flow disclosure panel, never an overlay) and a Cite OpenVAPT disclosure in the footer of every page, with APA, IEEE, Harvard, MLA, Chicago and BibTeX, Copy buttons with a spoken Copied confirmation, .bib, .ris, CITATION.cff and CSL-JSON downloads, and Cite This Check or Cite This Module on check and Academy pages. Printed pages end with the APA citation.
+- Website: How to Cite page gains a recommended APA citation with a Copy APA button, and notes on version, access date and the absence of a DOI. llms.txt gains a How to Cite section; FAQ gains How Do I Cite OpenVAPT?
+- CLI: `openvapt cite [--format apa|ieee|harvard|mla|chicago|bibtex|ris|csl|cff] [--check ID] [--module ID]` prints the citation for the exact build ("unreleased build" for builds from source); every scan and demo ends with a one-line request to cite.
+- Reports: every HTML and Markdown report ends with a How to Cite block (report reference line, APA, BibTeX, licence credit line); JSON gains a `citation` field and SARIF run properties carry the same block.
+- README: Cite OpenVAPT section near the top with APA and BibTeX, test-checked against CITATION.cff.
+
+### Website redesign and walkthrough
+
+- Website: a calmer, near-monochrome visual language. White canvas, near-black ink and soft greys with one restrained blue accent, very large headings with tight tracking, hairline borders, pill buttons and navigation, 16px cards and 24px media frames, a lighter footer, and recoloured ECharts and AG Grid themes. IBM Plex stays the only typeface. Light theme only, no sticky or fixed elements, every page, URL, notice, structured data block and zero-data rule unchanged.
+- Website: new animated walkthrough, "See It Run on Your Machine", on the home page (loops), How It's Built and Download (above the acknowledgement gate). It is labelled as a simulated walkthrough using the built-in demo lab and is built only from real output: the installer messages, the `openvapt scan` acknowledgement prompt, `openvapt demo --format html,md --no-sign` on the vulnerable lab (307 checks, Critical 14, High 71, Medium 88, Low 123, exit code 3), its HTML report (HOST-SSH-001 finding card), `openvapt explain HOST-SSH-001` and `openvapt learn`; trimmed lines are marked. Seven chapters with Play, Pause, Replay and chapter buttons, polite live captions, a text transcript, pausing when off-screen or when the tab is hidden, and static stills under reduced motion. Self-hosted `walkthrough.js`, no storage, no network, CSP unchanged.
+- Website: four more Lucide icons vendored by the existing script (play, pause, rotate-ccw, mouse-pointer-2).
 ### Fix: vulnerability data sources (2026-10-14)
 - The release snapshot no longer requests a WordPress export: OSV publishes none, and the request failed the release build. WordPress core is still inventoried and WEB-CVE-001 reports it Incomplete, never Pass; README, CREDITS, THIRD_PARTY_NOTICES and docs/VULNDB.md now say so. A test checks every configured ecosystem against OSV's published list.
 
