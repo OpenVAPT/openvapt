@@ -394,6 +394,10 @@ func funcs() template.FuncMap {
 		"join":  strings.Join,
 		"title": func(s string) string { return strings.ToUpper(s[:1]) + s[1:] },
 		"repo":  func() string { return repoURL },
+		// asset adds a content hash to a file under site/static/assets so a
+		// deploy invalidates browser caches (the server caches assets for days).
+		"asset":   assetVersioned,
+		"vendorv": vendorVersion,
 		"blob": func(file string) string {
 			// GitHub serves folders under /tree/ and files under /blob/;
 			// using the right one keeps every link exact (no redirect).
