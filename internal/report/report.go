@@ -31,6 +31,8 @@ type Report struct {
 	Integrity   *Integrity `json:"integrity,omitempty"`
 	// Suppression is set when --suppress was used; see suppress.go.
 	Suppression *SuppressionInfo `json:"suppression,omitempty"`
+	// Citation is the How to Cite block; see citation.go.
+	Citation *Citation `json:"citation,omitempty"`
 }
 
 type Tool struct {

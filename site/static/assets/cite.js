@@ -1,4 +1,5 @@
-// Citation helpers: copy buttons, the style switcher and today's access date.
+// Citation helpers: the header Cite panel, copy buttons, the style switcher
+// and today's access date.
 // Runs only in the browser. Nothing is stored, sent or remembered.
 (function () {
   // Show today's date as the access date, in each style's own format.
@@ -19,17 +20,18 @@
 
   // Copy buttons.
   function announce(btn, msg) {
-    var scope = btn.closest('.cite-page-body') || document;
+    var scope = btn.closest('[data-copy-scope]') || document;
     var live = scope.querySelector('[data-copy-status]');
     if (live) { live.textContent = ''; setTimeout(function () { live.textContent = msg; }, 30); }
   }
   function done(btn, label) {
     var span = btn.querySelector('span');
+    if (!btn._label) btn._label = span.textContent;
     btn.setAttribute('data-copied', '');
     span.textContent = 'Copied';
     announce(btn, label + ' copied to the clipboard.');
     clearTimeout(btn._t);
-    btn._t = setTimeout(function () { span.textContent = 'Copy'; btn.removeAttribute('data-copied'); }, 2000);
+    btn._t = setTimeout(function () { span.textContent = btn._label; btn.removeAttribute('data-copied'); }, 2000);
   }
   function selectText(el) {
     var r = document.createRange();
@@ -59,6 +61,27 @@
       fallback(btn, el, label);
     }
   });
+
+  // Header Cite control: without scripts it is a link to the cite page; with
+  // scripts it is a disclosure button that opens a panel in the page flow.
+  var toggle = document.querySelector('[data-cite-toggle]');
+  var link = document.querySelector('[data-cite-link]');
+  var panel = toggle && document.getElementById(toggle.getAttribute('aria-controls'));
+  if (toggle && link && panel) {
+    toggle.hidden = false;
+    link.hidden = true;
+    var setOpen = function (open) {
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      panel.hidden = !open;
+    };
+    toggle.addEventListener('click', function () { setOpen(panel.hidden); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !panel.hidden) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+  }
 
   // Style switcher: WAI-ARIA tabs with arrow keys, Home and End.
   Array.prototype.forEach.call(document.querySelectorAll('[data-tabs]'), function (list) {
