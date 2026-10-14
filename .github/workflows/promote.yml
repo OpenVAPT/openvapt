@@ -84,10 +84,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # Check out the default branch, then move to the planned commit only
+      # after proving it is on main, so no job-supplied ref is checked out
+      # directly (same pattern as release.yml).
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ needs.plan.outputs.commit }}
+          fetch-depth: 0
           persist-credentials: false
+      - name: Move to the planned commit
+        env:
+          COMMIT: ${{ needs.plan.outputs.commit }}
+        run: |
+          echo "$COMMIT" | grep -Eq '^[0-9a-f]{40}$' || { echo "bad commit $COMMIT"; exit 1; }
+          git merge-base --is-ancestor "$COMMIT" origin/main || { echo "commit $COMMIT is not on main"; exit 1; }
+          git checkout --quiet --detach "$COMMIT"
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
