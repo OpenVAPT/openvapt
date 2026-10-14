@@ -10,6 +10,8 @@
   if (!dataEl) return;
   var d = JSON.parse(dataEl.textContent);
   var vendor = (document.currentScript && document.currentScript.getAttribute('data-vendor')) || 'assets/vendor/';
+  var vv = document.currentScript && document.currentScript.getAttribute('data-vendor-v');
+  var vq = vv ? '?v=' + vv : '';
   var containers = Array.prototype.slice.call(document.querySelectorAll('[id^="chart-"]')).filter(function (el) { return el.id !== 'chart-data'; });
   if (!containers.length) return;
   var loaded = false;
@@ -18,7 +20,7 @@
     loaded = true;
     if (window.echarts) { render(); return; }
     var s = document.createElement('script');
-    s.src = vendor + 'echarts.min.js';
+    s.src = vendor + 'echarts.min.js' + vq;
     s.defer = true;
     s.onload = render;
     document.head.appendChild(s);
