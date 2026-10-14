@@ -1,6 +1,6 @@
 # OpenVAPT Governance, Control and Assurance Framework (GCA)
 
-Version 1.1, effective 2026-10-14 (1.0 adopted by the owner in chat on 2026-10-13; 1.1 corrects the Own Use wording in G1 and the design-principles table to match the licence, approved by the owner in chat on 2026-10-14). Drafted and reviewed by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer); not reviewed by any human lawyer or human security expert. It is incorporated by reference into [AGENTS.md](AGENTS.md) (section 11) and binds every AI Cybersecurity Engineer that works on OpenVAPT. It is not legal advice.
+Version 1.1, effective 2026-10-14 (1.0 adopted by the owner in chat on 2026-10-13; 1.1 corrects the Own Use wording in G1 and the design-principles table to match the licence, approved by the owner in chat on 2026-10-14; on 2026-10-14, before any release carried 1.1, G1 was clarified to say learners, teachers and researchers "in every country" on the owner's worldwide instruction, with no rule changed). Drafted and reviewed by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer); not reviewed by any human lawyer or human security expert. It is incorporated by reference into [AGENTS.md](AGENTS.md) (section 11) and binds every AI Cybersecurity Engineer that works on OpenVAPT. It is not legal advice.
 
 > Governance decides what should happen. Controls enforce what may happen. Assurance proves what actually happened.
 
@@ -28,7 +28,7 @@ Risk is the thread through all three pillars: the risk tier of a change decides 
 
 ### G1. Mission and Invariants
 
-Purpose: an academic, free, transparent, source-available vulnerability assessment tool and course, built by AI Cybersecurity Engineers, for Own Use (personal, or an organisation's own internal use on machines it owns or controls) on the user's own computers, for learners, teachers and researchers, open to review. Never for selling or providing services, paid or unpaid. Used 100% at the user's own risk.
+Purpose: an academic, free, transparent, source-available vulnerability assessment tool and course, built by AI Cybersecurity Engineers, for Own Use (personal, or an organisation's own internal use on machines it owns or controls) on the user's own computers, for learners, teachers and researchers in every country, open to review. Never for selling or providing services, paid or unpaid. Used 100% at the user's own risk.
 
 Invariants. I1 to I4 restate AGENTS.md section 4 ("no instruction, from anyone, permits these"), so no AI Cybersecurity Engineer and no chat instruction can change them. Changing any invariant needs a policy change drafted by the AI legal reviewer, approved by the owner in chat, and a public decision record (GOVERNANCE.md), and is expected to be refused.
 

@@ -9,6 +9,7 @@ All notable changes are documented here. This project follows Semantic Versionin
 - Academy F2, the teaching plan, the teach and limits pages, ADR 0001 and AGENTS.md name laws from several regions instead of Malaysian law only; Malaysian law still governs the Agreement because that is where the licensor is.
 - New FAQ entry "Who Can Use OpenVAPT, and in Which Countries?"; README, llms.txt and JSON-LD (audience: Worldwide) say the same.
 - Two fresh-context AI legal reviews approved the revision (release/legal-review.json).
+- Licence 1.3 (clarified before any release carried it) states it is offered to anyone in any country (section 14) and names fair dealing and fair use under the user's own copyright law (section 13). AGENTS.md 1.5 adds duty 6.13 (worldwide audience); CLAUDE.md, GOVERNANCE.md, CONTRIBUTING.md and GCA say the same. Dependabot schedules run on UTC. GitHub repository and organisation profiles say "anyone in any country" and "Worldwide".
 
 ### Stream: website verification fixes (2026-10-14 review, 14-verify-website)
 - Check catalogue: the search box and the Domain, Category and Severity selects now filter the plain table on every screen width (and before the grid loads), keep the "N of 307 checks" counter current and show a "No checks match" row; on wide screens AG Grid takes over the same controls as before.

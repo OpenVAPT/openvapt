@@ -1,6 +1,6 @@
 # AI Cybersecurity Engineer Governance Policy
 
-Version 1.4, effective 2026-10-14. Issued by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer) under the owner's mandate. It binds every AI Cybersecurity Engineer that works on OpenVAPT: Claude, OpenAI Codex, any sub-agent, and any other model or tool. It is not legal advice.
+Version 1.5, effective 2026-10-14. Issued by the OpenVAPT AI legal reviewer and governor (an AI system, not a human lawyer) under the owner's mandate. It binds every AI Cybersecurity Engineer that works on OpenVAPT: Claude, OpenAI Codex, any sub-agent, and any other model or tool. It is not legal advice.
 
 OpenVAPT is academic, non-commercial, source-available code built by AI Cybersecurity Engineers, free for Own Use only, used 100% at the user's own risk. Every AI Cybersecurity Engineer action must keep that true.
 
@@ -95,6 +95,7 @@ OpenVAPT has one codebase and one website, with four channels in this order: alp
 10. **Third-party vulnerabilities.** If, while building or testing a check, an AI Cybersecurity Engineer finds what appears to be an undisclosed flaw in third-party software (for example a CMS, web server or library), it does not publish the details in a check description, test, commit, issue or website text. It records the facts in the internal findings register, tells the owner in chat with options, and the owner decides whether to report it to that project through its own disclosure channel (section 3.9). Checks may describe only weaknesses that are already public and cited.
 11. **Real scan output is confidential.** Findings, package lists, paths, hostnames, versions and any other output from an owner-approved scan of a real machine (3.5) are never copied into a Task Card, commit, test fixture, issue, website text or any other record. Records may say only that a scan ran, its date and whether the tool behaved as designed. Test data comes from the simulated lab.
 12. **Personal data in issues and discussions.** Users sometimes post usernames, hostnames, IP addresses or report excerpts. AI Cybersecurity Engineers never quote, copy or summarise such data into commits, tests, records or other issues; they refer to the issue by number, and they ask the poster (with the owner's approval under 3.9) to remove it. Nothing from an issue is used as a test fixture without being reduced to a synthetic example.
+13. **Worldwide audience.** OpenVAPT is for the whole world: it is offered to anyone, in any country, and everything about it is written for a worldwide audience. Every change to site copy, the Academy, documents, legal text, FAQ, llms text or structured data is written for readers in any country: laws from several regions as examples, never one country alone; neutral currency; no country-specific assumptions. Source: the owner's instruction in chat on 2026-10-14.
 
 ## 7. Model and Tool Rules
 
@@ -128,6 +129,7 @@ Version history:
 
 | Version | Effective | Change |
 |---|---|---|
+| 1.5 | 2026-10-14 | Section 1.3 names the laws of the countries where OpenVAPT is used as well as Malaysian law; new duty 6.13 requires a worldwide audience in everything written, on the owner's instruction of 2026-10-14. Drafted by an AI Cybersecurity Engineer on the owner's instruction; reviewed by a fresh-context AI legal reviewer. |
 | 1.4 | 2026-10-14 | Publishing versus pushing clarified (2.7, 3.9); sync duty for EULA section 8 and PRIVACY section 3 on collector, path or command changes (3.11, 6.2); reviewer never approves its own drafting in the same run (6.2); self-describing legal review record with document hashes and accepted High risks (5.8); third-party vulnerability handling (6.10); confidentiality of real scan output (6.11); personal data in issues (6.12); model deprecation (7.1, 6.7); click-through terms (3.12); acknowledgement sync rule covers the tagline and pillars (3.6); GCA 1.1 incorporated (section 11). Drafted by the AI legal reviewer; approved by the owner in chat on 2026-10-14. |
 | 1.3 | 2026-10-13 | Clarified the stable gate in section 5.4: release/legal-review.json must cover the exact stable candidate version, as internal/channels already enforces; a launch approval recorded for an earlier pre-release does not count. No rule changed. Drafted by the AI legal reviewer. |
 | 1.2 | 2026-10-13 | Adopted the Governance, Control and Assurance Framework 1.0 and incorporated it by reference (section 11). Drafted by the AI legal reviewer; approved by the owner in chat. Precedence in section 1.3 unchanged. |

@@ -4,6 +4,7 @@ Thank you for helping. OpenVAPT is an academic project, so clear explanations ma
 
 ## Ground Rules
 
+- Contributors are welcome from anywhere in the world. Write for a worldwide reader: plain English, no assumption of one country's law, currency or customs, and laws named only as examples from several regions.
 - AI Cybersecurity Engineers (Claude, OpenAI Codex and any other) must follow [AGENTS.md](AGENTS.md), the AI Cybersecurity Engineer governance policy.
 - Detection only. No exploit code, payloads, brute force or intrusive techniques will be accepted.
 - This machine only. Never weaken `internal/scope` or the `internal/sys` allow-list.

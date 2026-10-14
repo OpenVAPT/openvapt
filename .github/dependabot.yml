@@ -10,7 +10,7 @@ updates:
       interval: weekly
       day: monday
       time: "03:00"
-      timezone: Asia/Kuala_Lumpur
+      timezone: Etc/UTC
     groups:
       github-actions:
         patterns: ["*"]
@@ -24,7 +24,7 @@ updates:
       interval: weekly
       day: monday
       time: "03:00"
-      timezone: Asia/Kuala_Lumpur
+      timezone: Etc/UTC
     groups:
       site-npm:
         patterns: ["*"]
