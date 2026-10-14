@@ -59,7 +59,9 @@ var rules = []struct {
 	// user:password@host without a scheme.
 	{regexp.MustCompile(`(^|[\s'"=(])([A-Za-z0-9._-]+):[^\s:@/'"]+@([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+|localhost)\b`), `$1$2:[REDACTED]@$3`},
 	// Slack incoming webhook URLs: the path is the credential.
-	{regexp.MustCompile(`hooks\.slack\.com/(services|workflows|triggers)/[A-Za-z0-9/_-]+`), `hooks.slack.com/$1/[REDACTED]`},
+	// Anchored at a token boundary (start of text, whitespace, quote, = or
+	// a URL scheme), so only the real Slack host matches, never a longer name.
+	{regexp.MustCompile(`(^|[\s'"=(<]|https?://)hooks\.slack\.com/(services|workflows|triggers)/[A-Za-z0-9/_-]+`), `${1}hooks.slack.com/$2/[REDACTED]`},
 	// Well-known token shapes.
 	{regexp.MustCompile(`\b(?:AKIA|ASIA)[0-9A-Z]{16}\b`), `[REDACTED AWS KEY]`},
 	// A 40 character AWS secret access key next to its access key id.
