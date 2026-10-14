@@ -23,8 +23,8 @@ fi
 N=$(printf '%s\n' "$URLS" | grep -c . || true)
 [ "$N" -gt 0 ] || { echo "indexnow: no URLs" >&2; exit 1; }
 [ "$N" -le 10000 ] || { echo "indexnow: $N URLs is over the 10,000 limit" >&2; exit 1; }
-LIST=$(printf '%s\n' "$URLS" | grep . | sed 's/["\\]//g; s/.*/    "&"/' | paste -sd, - | sed 's/,/,\n/g')
-BODY=$(printf '{\n  "host": "openvapt.com",\n  "key": "%s",\n  "keyLocation": "https://openvapt.com/%s.txt",\n  "urlList": [\n%s\n  ]\n}\n' "$KEY" "$KEY" "$LIST")
+BODY=$(printf '%s\n' "$URLS" | grep . | awk -v key="$KEY" 'BEGIN{printf "{\"host\":\"openvapt.com\",\"key\":\"%s\",\"keyLocation\":\"https://openvapt.com/%s.txt\",\"urlList\":[", key, key}
+  {gsub(/["\\]/, ""); printf "%s\"%s\"", (NR>1?",":""), $0} END{print "]}"}')
 CODE=$(printf '%s' "$BODY" | curl -sS --proto '=https' --tlsv1.2 -o /dev/null -w '%{http_code}' \
   -H 'Content-Type: application/json; charset=utf-8' --data-binary @- https://api.indexnow.org/indexnow)
 echo "indexnow: submitted $N URLs, HTTP $CODE (200 or 202 = accepted)"
