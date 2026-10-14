@@ -55,9 +55,10 @@ https://openvapt.com/cite.html, or read CITING.md.
 		if len(rest) == 0 || academy.Get(rest[0]) == nil {
 			return usageErr("usage: openvapt teach worksheet <MODULE> [--answers] [--out FILE]; modules: openvapt learn")
 		}
-		fs := flag.NewFlagSet("worksheet", flag.ExitOnError)
-		answers := fs.Bool("answers", false, "print the teacher answer key")
-		out := fs.String("out", "", "write to this file instead of the terminal")
+		var answersV bool
+		var outV string
+		answers, out := &answersV, &outV
+		fs := worksheetFlagSet(answers, out)
 		_ = fs.Parse(rest[1:])
 		text := academy.Worksheet(academy.Get(rest[0]), *answers)
 		if *out == "" {
@@ -77,10 +78,9 @@ https://openvapt.com/cite.html, or read CITING.md.
 	case "rubric":
 		fmt.Print(rubricMarkdown())
 	case "answers":
-		fs := flag.NewFlagSet("answers", flag.ExitOnError)
-		seed := fs.String("seed", "", "the seed the student used (for example their student number)")
-		only := fs.String("only", "", "the same --only the student used, if any")
-		skip := fs.String("skip", "", "the same --skip the student used, if any")
+		var seedV, onlyV, skipV string
+		seed, only, skip := &seedV, &onlyV, &skipV
+		fs := answersFlagSet(seed, only, skip)
 		_ = fs.Parse(rest)
 		if strings.TrimSpace(*seed) == "" {
 			return usageErr("usage: openvapt teach answers --seed <SEED>")
@@ -120,6 +120,21 @@ func rubricMarkdown() string {
 }
 
 // usageErr reports invalid arguments with exit code 2.
+func worksheetFlagSet(answers *bool, out *string) *flag.FlagSet {
+	fs := flag.NewFlagSet("worksheet", flag.ExitOnError)
+	fs.BoolVar(answers, "answers", false, "print the teacher answer key")
+	fs.StringVar(out, "out", "", "write to this file instead of the terminal")
+	return fs
+}
+
+func answersFlagSet(seed, only, skip *string) *flag.FlagSet {
+	fs := flag.NewFlagSet("answers", flag.ExitOnError)
+	fs.StringVar(seed, "seed", "", "the seed the student used (for example their student number)")
+	fs.StringVar(only, "only", "", "the same --only the student used, if any")
+	fs.StringVar(skip, "skip", "", "the same --skip the student used, if any")
+	return fs
+}
+
 func usageErr(f string, a ...any) error {
 	return &exitError{code: 2, err: fmt.Errorf(f, a...)}
 }

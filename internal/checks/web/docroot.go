@@ -245,7 +245,7 @@ func init() {
 		Fix:       "Publish /.well-known/security.txt with at least Contact: and Expires: fields (see securitytxt.org).",
 		Verify:    "curl -s https://<site>/.well-known/security.txt",
 		Refs:      []check.Ref{{Title: "RFC 9116, A File Format to Aid in Security Vulnerability Disclosure", URL: "https://www.rfc-editor.org/rfc/rfc9116.html"}},
-		Standards: check.Standards{NIST: []string{"RA-5(11)"}},
+		Standards: check.Standards{CWE: []string{"CWE-1188"}, NIST: []string{"RA-5(11)"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {
 				r, err := st.Get(ctx, s, "/.well-known/security.txt")

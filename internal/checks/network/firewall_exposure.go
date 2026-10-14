@@ -71,7 +71,7 @@ func init() {
 		Fix:       "Delete the rule or restrict it to the addresses that need it, for example: ufw delete allow 3306 && ufw allow from 203.0.113.10 to any port 3306 proto tcp . Better, bind the service to 127.0.0.1 and reach it through an SSH tunnel or VPN.",
 		Verify:    "ufw status numbered  or  nft list ruleset  shows no rule opening that port to Anywhere.",
 		Refs:      []check.Ref{refNIST41, {Title: "ufw(8) manual (Ubuntu)", URL: "https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html"}},
-		Standards: check.Standards{CWE: []string{"CWE-284", "CWE-668"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "AC-4", "CM-7"}, CISTopic: "Restrict firewall rules to required sources"},
+		Standards: check.Standards{CWE: []string{"CWE-923", "CWE-1327"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "AC-4", "CM-7"}, CISTopic: "Restrict firewall rules to required sources"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			fw := collect.ReadFirewall(ctx, s)
 			if len(fw.Rules) == 0 {
@@ -154,10 +154,10 @@ func init() {
 		Summary:   "Checks whether Docker publishes container ports through its own iptables chains with no DOCKER-USER filtering.",
 		Rationale: "Docker inserts its NAT and FORWARD rules ahead of ufw and of the INPUT chain, so a port published with -p 8080:80 is reachable from the internet even when ufw says the port is denied. Administrators routinely believe the firewall protects these containers when it does not.",
 		Detection: "Reads iptables -S and looks for ACCEPT rules with a destination port in the DOCKER chain (published container ports). Fails when there are such rules and the DOCKER-USER chain contains no DROP or REJECT rule.",
-		Fix:       "Publish container ports on loopback only (-p 127.0.0.1:8080:80) and put a reverse proxy in front, or add filtering to DOCKER-USER, for example: iptables -I DOCKER-USER -i eth0 ! -s 203.0.113.0/24 -j DROP (persist it with your firewall tooling).",
+		Fix:       "Publish container ports on loopback only (-p 127.0.0.1:8080:80) and put a reverse proxy in front, or add filtering to DOCKER-USER, for example: iptables -I DOCKER-USER -i eth0 ! -s 203.0.113.0/24 -j DROP (persist it with your firewall tooling). Caution: test from an allowed address first; a wrong interface name or source range cuts access to every published container.",
 		Verify:    "docker ps --format '{{.Ports}}'  shows 127.0.0.1 bindings, or iptables -S DOCKER-USER shows DROP rules.",
 		Refs:      []check.Ref{{Title: "Docker documentation, Packet filtering and firewalls", URL: "https://docs.docker.com/engine/network/packet-filtering-firewalls/"}, refNIST41},
-		Standards: check.Standards{CWE: []string{"CWE-284", "CWE-668"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Filter container traffic"},
+		Standards: check.Standards{CWE: []string{"CWE-923", "CWE-1327"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Filter container traffic"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			fw := collect.ReadFirewall(ctx, s)
 			if len(fw.Docker) == 0 {
@@ -180,7 +180,7 @@ func init() {
 		Fix:       "For each socket labelled allowed from anywhere or reachable, decide whether it must be public. If not, bind it to 127.0.0.1 or restrict the firewall rule.",
 		Verify:    "Re-run this check after changes and compare the map.",
 		Refs:      []check.Ref{refNIST41, {Title: "NIST SP 800-115, Technical Guide to Information Security Testing and Assessment", URL: "https://csrc.nist.gov/pubs/sp/800/115/final"}},
-		Standards: check.Standards{NIST: []string{"CM-7", "CM-8", "SC-7"}, CISTopic: "Network services inventory"},
+		Standards: check.Standards{CWE: []string{"CWE-923"}, NIST: []string{"CM-7", "CM-8", "SC-7"}, CISTopic: "Network services inventory"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			pub, inc := publicListeners(s)
 			if inc != nil {
@@ -228,7 +228,7 @@ func init() {
 		Verify:    "ss -tlnp  shows these ports on 127.0.0.1 or ::1 only.",
 		Refs: []check.Ref{{Title: "Node.js, Inspector security implications", URL: "https://nodejs.org/en/learn/getting-started/debugging#security-implications"},
 			{Title: "Apache Tomcat 9, AJP Connector", URL: "https://tomcat.apache.org/tomcat-9.0-doc/config/ajp.html"}},
-		Standards: check.Standards{CWE: []string{"CWE-668", "CWE-1188"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Expose applications only through a hardened front end"},
+		Standards: check.Standards{CWE: []string{"CWE-489", "CWE-1327"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Expose applications only through a hardened front end"},
 		Run:       appPortRun(codePorts, "Debugger or application control ports are network-reachable", "No debugger or application control port is network-reachable"),
 	})
 
@@ -243,7 +243,7 @@ func init() {
 		Verify:    "ss -tlnp  shows these ports on 127.0.0.1 or ::1 only.",
 		Refs: []check.Ref{{Title: "OWASP Node.js Security Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html"},
 			{Title: "Gunicorn documentation, Deploying Gunicorn (behind a proxy)", URL: "https://gunicorn.org/deploy/"}},
-		Standards: check.Standards{CWE: []string{"CWE-668", "CWE-1188"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Expose applications only through a hardened front end"},
+		Standards: check.Standards{CWE: []string{"CWE-1188", "CWE-1327"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Expose applications only through a hardened front end"},
 		Run:       appPortRun(appPorts, "Application server ports are network-reachable", "No application server port is network-reachable"),
 	})
 }

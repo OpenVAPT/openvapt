@@ -29,15 +29,15 @@ var sysctlRules = []sysctlRule{
 	{"HOST-KRN-001", "Address Space Layout Randomisation Not Fully Enabled", "kernel.randomize_va_space", "2",
 		"Checks that the kernel randomises memory layout for stack, libraries, heap and VDSO.",
 		"ASLR makes memory-corruption exploits much harder because attackers cannot predict where code lives.",
-		check.Medium, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N", refKernelDocs, "CWE-693", nil},
+		check.Medium, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N", refKernelDocs, "CWE-344", nil},
 	{"HOST-KRN-002", "Kernel Pointers Exposed to Unprivileged Users", "kernel.kptr_restrict", "1",
 		"Checks that kernel memory addresses are hidden from normal users.",
 		"Leaked kernel addresses defeat kernel ASLR and are the first step of most local kernel exploits.",
-		check.Low, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N", refKernelDocs, "CWE-200", []string{"2"}},
+		check.Low, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N", refKernelDocs, "CWE-497", []string{"2"}},
 	{"HOST-KRN-003", "Kernel Log Readable by Unprivileged Users", "kernel.dmesg_restrict", "1",
 		"Checks that only privileged users can read the kernel log (dmesg).",
 		"The kernel log can reveal addresses, hardware and driver details useful for local exploitation.",
-		check.Low, "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N", refKernelDocs, "CWE-200", nil},
+		check.Low, "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N", refKernelDocs, "CWE-497", nil},
 	{"HOST-KRN-004", "Setuid Programs May Dump Core", "fs.suid_dumpable", "0",
 		"Checks that privileged programs do not write core dumps.",
 		"A core dump of a setuid program can contain password hashes or keys and may be readable by the user who crashed it.",
@@ -57,15 +57,15 @@ var sysctlRules = []sysctlRule{
 	{"HOST-KRN-008", "TCP SYN Cookies Disabled", "net.ipv4.tcp_syncookies", "1",
 		"Checks that SYN cookies protect the server from SYN flood attacks.",
 		"Without SYN cookies a simple flood of half-open connections can make every service unreachable.",
-		check.Low, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L", refKernelNet, "CWE-400", nil},
+		check.Low, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L", refKernelNet, "CWE-770", nil},
 	{"HOST-KRN-009", "Unprivileged eBPF Allowed", "kernel.unprivileged_bpf_disabled", "1",
 		"Checks that normal users cannot load eBPF programs into the kernel.",
 		"Unprivileged eBPF has been the entry point for many local privilege-escalation bugs.",
-		check.Medium, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:L", refKernelDocs, "CWE-269", []string{"2"}},
+		check.Medium, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:L", refKernelDocs, "CWE-749", []string{"2"}},
 	{"HOST-KRN-010", "Process Tracing Not Restricted", "kernel.yama.ptrace_scope", "1",
 		"Checks that processes cannot attach a debugger to other processes of the same user.",
 		"Unrestricted ptrace lets any compromised process read the memory of others, for example to steal SSH agent keys or browser sessions.",
-		check.Low, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N", check.Ref{Title: "Linux kernel documentation, Yama LSM", URL: "https://docs.kernel.org/admin-guide/LSM/Yama.html"}, "CWE-269", []string{"2", "3"}},
+		check.Low, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N", check.Ref{Title: "Linux kernel documentation, Yama LSM", URL: "https://docs.kernel.org/admin-guide/LSM/Yama.html"}, "CWE-749", []string{"2", "3"}},
 	{"HOST-KRN-011", "Symlink Protection Disabled", "fs.protected_symlinks", "1",
 		"Checks that the kernel blocks following symlinks owned by other users in world-writable sticky directories.",
 		"Without it, classic /tmp symlink races let local users trick root-run programs into overwriting files.",
@@ -81,7 +81,7 @@ var sysctlRules = []sysctlRule{
 	{"HOST-KRN-014", "Martian Packets Not Logged", "net.ipv4.conf.all.log_martians", "1",
 		"Checks that packets with impossible source addresses are logged.",
 		"Logging martian packets helps detect spoofing and misrouting attempts.",
-		check.Low, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N", refKernelNet, "CWE-778", nil},
+		check.Low, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:N", refKernelNet, "CWE-778", nil},
 	{"HOST-KRN-015", "Server Sends ICMP Redirects", "net.ipv4.conf.all.send_redirects", "0",
 		"Checks that the server does not send ICMP redirects, which only routers should do.",
 		"A non-router sending redirects can be abused to influence other hosts' routing on the local network.",
@@ -97,7 +97,7 @@ var sysctlRules = []sysctlRule{
 	{"HOST-KRN-018", "Performance Events Open to Unprivileged Users", "kernel.perf_event_paranoid", "2",
 		"Checks that unprivileged users cannot use kernel performance events to observe the system.",
 		"Unrestricted perf events expose kernel and other processes' activity and have been used in local exploits.",
-		check.Low, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N", refKernelDocs, "CWE-200", []string{"3", "4"}},
+		check.Low, "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N", refKernelDocs, "CWE-749", []string{"3", "4"}},
 }
 
 func init() {
@@ -116,33 +116,44 @@ func registerSysctl(r sysctlRule) {
 			Summary:   r.summary,
 			Rationale: r.rationale,
 			Detection: sysctlDetection(r),
-			Fix:       "Create /etc/sysctl.d/60-openvapt-hardening.conf containing:  " + r.key + " = " + r.want + "  then apply with: sysctl --system",
+			Fix:       "Create /etc/sysctl.d/60-openvapt-hardening.conf containing:  " + r.key + " = " + r.want + "  then apply with: sysctl --system" + sysctlFixCaution[r.id],
 			Verify:    "sysctl " + r.key + "  should print " + r.want + ".",
 			Refs:      []check.Ref{r.ref},
 			Standards: check.Standards{CWE: []string{r.cwe}, NIST: sysctlNIST(r.id, r.key), CISTopic: "Kernel parameters: " + r.key},
 			Run: func(ctx context.Context, s sys.System) []check.Result {
-				if combinedSysctl[r.id] != nil {
-					return runCombinedSysctl(s, r.id, r.key, r.want)
-				}
-				if perInterfaceSysctl[r.id] {
-					return runPerInterfaceSysctl(s, r.key, r.want, ok)
-				}
-				v, err := collect.Sysctl(s, r.key)
-				if err != nil {
-					return []check.Result{check.SkipR(r.key, "Parameter not available on this kernel")}
-				}
-				for _, good := range ok {
-					if v == good {
-						return []check.Result{check.PassR(r.key, r.key+" = "+v)}
+				res := runSysctlRule(ctx, s, r, ok)
+				if note := sysctlPassNote[r.id]; note != nil && hasFail(res) {
+					if msg, ev, pass := note(ctx, s); pass {
+						return []check.Result{check.PassR(r.key, msg, append(failEvidence(res), ev...)...)}
 					}
 				}
-				if r.id == "HOST-KRN-005" {
-					return []check.Result{runIPForward(ctx, s, r.key, v)}
-				}
-				return []check.Result{check.FailR(r.key, r.key+" = "+v+" (hardened value: "+r.want+")")}
+				return res
 			},
 		})
 	}
+}
+
+// runSysctlRule evaluates one kernel parameter rule.
+func runSysctlRule(ctx context.Context, s sys.System, r sysctlRule, ok []string) []check.Result {
+	if combinedSysctl[r.id] != nil {
+		return runCombinedSysctl(s, r.id, r.key, r.want)
+	}
+	if perInterfaceSysctl[r.id] {
+		return runPerInterfaceSysctl(s, r.key, r.want, ok)
+	}
+	v, err := collect.Sysctl(s, r.key)
+	if err != nil {
+		return []check.Result{check.SkipR(r.key, "Parameter not available on this kernel")}
+	}
+	for _, good := range ok {
+		if v == good {
+			return []check.Result{check.PassR(r.key, r.key+" = "+v)}
+		}
+	}
+	if r.id == "HOST-KRN-005" {
+		return []check.Result{runIPForward(ctx, s, r.key, v)}
+	}
+	return []check.Result{check.FailR(r.key, r.key+" = "+v+" (hardened value: "+r.want+")")}
 }
 
 func slash(k string) string {
@@ -183,6 +194,10 @@ var combinedDetection = map[string]string{
 }
 
 func sysctlDetection(r sysctlRule) string {
+	return sysctlDetectionBase(r) + sysctlDetectionNote[r.id]
+}
+
+func sysctlDetectionBase(r sysctlRule) string {
 	if r.id == "HOST-KRN-005" {
 		return "Reads /proc/sys/net/ipv4/ip_forward directly and compares it with the hardened value 0. When a container runtime or Kubernetes node is detected read-only (runtime sockets such as /var/run/docker.sock, /run/containerd/containerd.sock or /run/crio/crio.sock, /etc/kubernetes, or bridge interfaces such as docker0, cni0, cbr0 or flannel.1 in /sys/class/net), forwarding is required: the check then passes with context when the FORWARD path is filtered (iptables or nftables forward policy drop, or DROP/REJECT rules in DOCKER-USER), fails when forwarded traffic is accepted by default, and is incomplete when the policy cannot be read."
 	}

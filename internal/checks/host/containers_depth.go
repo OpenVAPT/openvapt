@@ -3,7 +3,9 @@ package host
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -228,7 +230,7 @@ func init() {
 		Fix:       "Add to /etc/docker/daemon.json:  \"log-driver\": \"json-file\", \"log-opts\": {\"max-size\": \"10m\", \"max-file\": \"3\"}  (or use journald) and restart Docker; recreate containers that set their own LogConfig.",
 		Verify:    "docker info --format '{{.LoggingDriver}}' ; grep -A3 log-opts /etc/docker/daemon.json",
 		Refs:      []check.Ref{refDockerLogging, refNIST190, refCISDockerBench},
-		Standards: check.Standards{CWE: []string{"CWE-400", "CWE-779"}, NIST: []string{"AU-4", "SC-5", "CM-6"}, CISTopic: "CIS Docker Benchmark 2.12 (centralised and bounded container logging)"},
+		Standards: check.Standards{CWE: []string{"CWE-779", "CWE-770"}, NIST: []string{"AU-4", "SC-5", "CM-6"}, CISTopic: "CIS Docker Benchmark 2.12 (centralised and bounded container logging)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			d, installed, ok := readDaemonMore(ctx, s)
 			if !installed {
@@ -373,7 +375,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "HOST-CTR-009", Title: "Docker Not Running in Rootless Mode", Domain: check.DomainHost,
 		Severity: check.Info, Category: check.CatConfig, Effort: check.EffortHigh,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+		CVSS:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:N",
 		Summary:   "Reports whether the Docker daemon runs as root or in rootless mode. Informational.",
 		Rationale: "In rootless mode the daemon and every container run inside a user namespace as an ordinary account, so a container breakout lands in that account rather than in root. It is not possible for every workload (some networking and storage features differ), so this is information for a design decision, not a failure.",
 		Detection: "Looks for a rootless indicator: a per-user socket at /run/user/*/docker.sock, a per-user daemon configuration at /home/*/.config/docker/daemon.json, or a user systemd unit for docker. Reports root mode when only the system daemon is present.",
@@ -410,8 +412,8 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
 		Summary:   "Checks daemon.json for insecure-registries, debug mode and experimental features.",
 		Rationale: "An insecure registry is pulled over plain HTTP or with an unverified certificate, so anyone on the path can swap the image for a malicious one. Debug logging and experimental features widen the daemon's attack surface and leak internal detail into logs.",
-		Detection: "Reads /etc/docker/daemon.json and fails when insecure-registries is non-empty, debug is true or experimental is true.",
-		Fix:       "Remove insecure-registries (serve the registry over TLS with a trusted certificate, or add its CA to /etc/docker/certs.d/<registry>/ca.crt), set \"debug\": false and \"experimental\": false, then restart Docker.",
+		Detection: "Reads /etc/docker/daemon.json and the ExecStart lines of docker.service and its drop-ins (docker.service.d/*.conf under /etc/systemd/system, /run/systemd/system, /usr/lib/systemd/system and /lib/systemd/system). Fails when insecure-registries is non-empty, debug or experimental is true, or the dockerd command line carries --insecure-registry, --debug (-D) or --experimental. Incomplete when daemon.json exists but cannot be read or parsed, or a unit file cannot be read.",
+		Fix:       "Remove insecure-registries (serve the registry over TLS with a trusted certificate, or add its CA to /etc/docker/certs.d/<registry>/ca.crt), set \"debug\": false and \"experimental\": false in daemon.json, and remove any --insecure-registry, --debug (-D) or --experimental flag from the dockerd ExecStart in docker.service drop-ins (then systemctl daemon-reload). Restart Docker in a maintenance window: running containers stop unless live-restore is on.",
 		Verify:    "docker info | grep -Ei 'insecure|debug|experimental'",
 		Refs:      []check.Ref{refDockerdRef, refNIST190, refCISDockerBench},
 		Standards: check.Standards{CWE: []string{"CWE-494", "CWE-1188"}, NIST: []string{"SI-7", "CM-7"}, CISTopic: "CIS Docker Benchmark 2.4 and 2.10 (no insecure registries; no experimental features)"},
@@ -420,26 +422,37 @@ func init() {
 			if !installed {
 				return []check.Result{check.SkipR("docker", "Docker is not installed")}
 			}
-			if !ok {
-				if _, err := s.Stat("/etc/docker/daemon.json"); err != nil {
-					return []check.Result{check.PassR("/etc/docker/daemon.json", "No daemon.json: no insecure registries, debug or experimental settings")}
+			bad, unitIncomplete := dockerdUnitFlags(ctx, s)
+			jsonNote := ""
+			if ok {
+				for _, r := range d.InsecureRegs {
+					bad = append(bad, "daemon.json insecure-registries: "+r)
 				}
-				return []check.Result{check.IncompleteR("/etc/docker/daemon.json", "daemon.json could not be parsed")}
-			}
-			var bad []string
-			for _, r := range d.InsecureRegs {
-				bad = append(bad, "insecure-registries: "+r)
-			}
-			if d.Debug {
-				bad = append(bad, "debug is true")
-			}
-			if d.Experimental {
-				bad = append(bad, "experimental is true")
+				if d.Debug {
+					bad = append(bad, "daemon.json debug is true")
+				}
+				if d.Experimental {
+					bad = append(bad, "daemon.json experimental is true")
+				}
+			} else if _, err := s.Stat("/etc/docker/daemon.json"); errors.Is(err, fs.ErrNotExist) {
+				jsonNote = "none"
+			} else {
+				jsonNote = "daemon.json exists but could not be read or parsed"
 			}
 			if len(bad) > 0 {
-				return []check.Result{check.FailR("/etc/docker/daemon.json", "Docker daemon allows insecure registries or debug features", bad...)}
+				return []check.Result{check.FailR("docker daemon", "Docker daemon allows insecure registries or debug features", bad...)}
 			}
-			return []check.Result{check.PassR("/etc/docker/daemon.json", "No insecure registries, debug or experimental settings")}
+			if jsonNote != "" && jsonNote != "none" {
+				return []check.Result{check.IncompleteR("/etc/docker/daemon.json", "The daemon settings could not be confirmed: "+jsonNote)}
+			}
+			if len(unitIncomplete) > 0 {
+				return []check.Result{check.IncompleteR("docker.service", "A docker.service unit or drop-in could not be read, so dockerd command-line flags could not be confirmed", unitIncomplete...)}
+			}
+			msg := "No insecure registries, debug or experimental settings in daemon.json or on the dockerd command line"
+			if jsonNote == "none" {
+				msg = "No daemon.json, and no insecure registries, debug or experimental flags on the dockerd command line"
+			}
+			return []check.Result{check.PassR("docker daemon", msg)}
 		},
 	})
 
@@ -453,7 +466,7 @@ func init() {
 		Fix:       "Remove --security-opt seccomp=unconfined and apparmor=unconfined from the container definitions and recreate them; if an application needs one extra system call, write a custom seccomp profile that adds only that call. Delete seccomp-profile from daemon.json.",
 		Verify:    "docker inspect --format '{{.Name}} {{.HostConfig.SecurityOpt}}' $(docker ps -aq)",
 		Refs:      []check.Ref{refDockerSeccomp, {Title: "Docker documentation, AppArmor security profiles", URL: "https://docs.docker.com/engine/security/apparmor/"}, refNIST190},
-		Standards: check.Standards{CWE: []string{"CWE-693", "CWE-250"}, NIST: []string{"AC-6", "SC-39", "CM-7"}, CISTopic: "CIS Docker Benchmark 5.1 and 5.22 (AppArmor profile; seccomp not unconfined)"},
+		Standards: check.Standards{CWE: []string{"CWE-653", "CWE-250"}, NIST: []string{"AC-6", "SC-39", "CM-7"}, CISTopic: "CIS Docker Benchmark 5.1 and 5.22 (AppArmor profile; seccomp not unconfined)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			d, installed, _ := readDaemonMore(ctx, s)
 			if !installed {
@@ -494,7 +507,7 @@ func init() {
 		Fix:       "Recreate each container with --memory (for example 512m) and --pids-limit (for example 256), or set them in the compose file under deploy.resources.limits / pids_limit.",
 		Verify:    "docker inspect --format '{{.Name}} mem={{.HostConfig.Memory}} pids={{.HostConfig.PidsLimit}}' $(docker ps -aq)",
 		Refs:      []check.Ref{refDockerLimits, refNIST190, refCISDockerBench},
-		Standards: check.Standards{CWE: []string{"CWE-770", "CWE-400"}, NIST: []string{"SC-6", "SC-5"}, CISTopic: "CIS Docker Benchmark 5.11 and 5.29 (memory limit; PIDs cgroup limit)"},
+		Standards: check.Standards{CWE: []string{"CWE-770"}, NIST: []string{"SC-6", "SC-5"}, CISTopic: "CIS Docker Benchmark 5.11 and 5.29 (memory limit; PIDs cgroup limit)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return containerCheck(ctx, s, func(c containerInfo) []string {
 				var why []string
@@ -547,7 +560,7 @@ func init() {
 		Fix:       "containerd: remove tcp_address or set tcp_tls_cert and tcp_tls_key, then restart containerd. Podman: delete seccomp_profile = \"unconfined\", set label = true and apparmor_profile = \"container-default\" in containers.conf.",
 		Verify:    "grep -E 'tcp_address|tcp_tls' /etc/containerd/config.toml ; grep -E 'seccomp_profile|^label|apparmor_profile' /etc/containers/containers.conf",
 		Refs:      []check.Ref{refContainerdOps, refPodmanConf, refNIST190},
-		Standards: check.Standards{CWE: []string{"CWE-306", "CWE-693"}, NIST: []string{"AC-3", "SC-8", "CM-6"}},
+		Standards: check.Standards{CWE: []string{"CWE-306", "CWE-1188"}, NIST: []string{"AC-3", "SC-8", "CM-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			var out []check.Result
 			if t, _, ok := readText(ctx, s, "/etc/containerd/config.toml"); ok {
@@ -599,7 +612,7 @@ func init() {
 		Fix:       "Add  DOCKER_CONTENT_TRUST=1  to /etc/environment (or a file in /etc/profile.d) and sign your own images with docker trust sign; images without signatures then need an explicit --disable-content-trust for a deliberate exception.",
 		Verify:    "grep -r DOCKER_CONTENT_TRUST /etc/environment /etc/profile.d",
 		Refs:      []check.Ref{refDockerTrust, refCISDockerBench},
-		Standards: check.Standards{CWE: []string{"CWE-494", "CWE-345"}, NIST: []string{"SI-7", "CM-14"}, CISTopic: "CIS Docker Benchmark 4.5 (enable content trust)"},
+		Standards: check.Standards{CWE: []string{"CWE-494", "CWE-347"}, NIST: []string{"SI-7", "CM-14"}, CISTopic: "CIS Docker Benchmark 4.5 (enable content trust)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			_, installed, _ := readDaemonMore(ctx, s)
 			if !installed {
@@ -626,4 +639,57 @@ func orElse(v, def string) string {
 		return def
 	}
 	return v
+}
+
+// dockerdUnitFlags reads the effective dockerd ExecStart from docker.service
+// and its drop-ins and returns the insecure flags it carries, plus the unit
+// files that exist but could not be read. An empty ExecStart= resets the
+// list, as systemd does.
+func dockerdUnitFlags(ctx context.Context, s sys.System) (bad, unreadable []string) {
+	dirs := []string{"/lib/systemd/system", "/usr/lib/systemd/system", "/run/systemd/system", "/etc/systemd/system"}
+	var paths []string
+	for _, d := range dirs {
+		if _, err := s.Stat(d + "/docker.service"); err == nil {
+			paths = append(paths, d+"/docker.service")
+		}
+	}
+	for _, d := range dirs {
+		g, _ := s.Glob(d + "/docker.service.d/*.conf")
+		sort.Strings(g)
+		paths = append(paths, g...)
+	}
+	type line struct{ src, cmd string }
+	var exec []line
+	for _, p := range paths {
+		text, st := readState(ctx, s, p)
+		if st != fileRead {
+			if st != fileMissing {
+				unreadable = append(unreadable, p)
+			}
+			continue
+		}
+		for _, l := range strings.Split(text, "\n") {
+			k, v, ok := strings.Cut(strings.TrimSpace(l), "=")
+			if !ok || strings.TrimSpace(k) != "ExecStart" {
+				continue
+			}
+			if v = strings.TrimSpace(v); v == "" {
+				exec = nil
+				continue
+			}
+			exec = append(exec, line{p, v})
+		}
+	}
+	for _, e := range exec {
+		f := strings.Fields(e.cmd)
+		for i, a := range f {
+			switch {
+			case a == "--insecure-registry" && i+1 < len(f):
+				bad = append(bad, e.src+": --insecure-registry "+f[i+1])
+			case strings.HasPrefix(a, "--insecure-registry="), a == "-D", a == "--debug", a == "--debug=true", a == "--experimental", a == "--experimental=true":
+				bad = append(bad, e.src+": "+a)
+			}
+		}
+	}
+	return bad, unreadable
 }

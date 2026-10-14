@@ -20,10 +20,10 @@ func init() {
 		Summary:   "Network-reachable IPv6 listeners exist without a default-deny IPv6 firewall policy.",
 		Rationale: "An IPv4-only firewall does not protect IPv6 services, creating an alternate path that bypasses intended filtering.",
 		Detection: "Parses /proc/net/tcp6 and udp6, then inspects nft list ruleset and ip6tables -S for an input drop or reject policy.",
-		Fix:       "Apply equivalent default-deny filtering for IPv6 with nftables or ip6tables and explicitly allow required services.",
+		Fix:       "Apply equivalent default-deny filtering for IPv6 with nftables or ip6tables and explicitly allow required services. Caution: allow SSH and ICMPv6 neighbour discovery and router messages before applying the default deny, or remote IPv6 sessions and IPv6 connectivity are cut.",
 		Verify:    "Run ip6tables -S and nft list ruleset, then confirm the input chain has a default drop or reject policy.",
 		Refs:      []check.Ref{{Title: "NIST SP 800-119, Guidelines for the Secure Deployment of IPv6", URL: "https://csrc.nist.gov/pubs/sp/800/119/final"}},
-		Standards: check.Standards{CWE: []string{"CWE-284"}, NIST: []string{"SC-7"}},
+		Standards: check.Standards{CWE: []string{"CWE-923"}, NIST: []string{"SC-7"}},
 		Run:       runIPv6Firewall})
 	check.Register(&check.Check{
 		ID:        "NET-SVC-003",

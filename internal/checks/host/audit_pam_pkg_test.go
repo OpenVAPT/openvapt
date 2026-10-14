@@ -101,9 +101,18 @@ func TestAuditRuleMatching(t *testing.T) {
 		{"HOST-AUD-007", strings.Replace(full, "-e 2\n", "-e 1\n", 1), check.Fail, "-e 1"},
 		{"HOST-AUD-007", "-e 2\n-w /etc/passwd -p wa\n", check.Fail, "not -e 2"},
 	} {
-		f := fake(map[string]string{"/etc/audit/rules.d/50-x.rules": tc.rules}, []string{"/etc/audit"}, nil)
+		f := fake(map[string]string{"/etc/audit/rules.d/50-x.rules": tc.rules}, []string{"/etc/audit"}, map[string]string{"systemctl is-active auditd": "active"})
 		want(t, tc.id, f, tc.status, tc.ev)
 	}
+	// Rules on disk only count while auditd runs (A2-13).
+	for _, out := range []string{"inactive", "failed"} {
+		f := fake(map[string]string{"/etc/audit/rules.d/50-x.rules": full}, []string{"/etc/audit"}, map[string]string{"systemctl is-active auditd": out})
+		want(t, "HOST-AUD-002", f, check.Incomplete, "not verified")
+	}
+	f := fake(map[string]string{"/etc/audit/rules.d/50-x.rules": full}, []string{"/etc/audit"}, nil)
+	want(t, "HOST-AUD-002", f, check.Incomplete, "could not be confirmed")
+	f = fake(map[string]string{"/etc/audit/rules.d/50-x.rules": strings.Replace(full, "-w /etc/shadow -p wa -k id\n", "", 1)}, []string{"/etc/audit"}, nil)
+	want(t, "HOST-AUD-002", f, check.Fail, "/etc/shadow")
 }
 
 func TestAuditLogPermissions(t *testing.T) {
@@ -234,7 +243,7 @@ func TestLockoutUnlockTime(t *testing.T) {
 		{map[string]string{auth: strings.Replace(withFaillock, "preauth", "preauth unlock_time=0", 1)}, check.Pass, "0"},
 		{map[string]string{auth: strings.Replace(withFaillock, "preauth", "preauth unlock_time=300", 1)}, check.Fail, "300"},
 		{map[string]string{auth: withFaillock, "/etc/security/faillock.conf": "deny = 5\nunlock_time = 1800\n"}, check.Pass, "1800"},
-		{map[string]string{auth: "auth required pam_unix.so\n"}, check.Fail, "No pam_faillock"},
+		{map[string]string{auth: "auth required pam_unix.so\n"}, check.Skip, "HOST-PWD-004"}, // reported once, by HOST-PWD-004
 		{nil, check.Skip, ""},
 	} {
 		want(t, "HOST-PAM-002", fake(tc.files, nil, nil), tc.status, tc.ev)

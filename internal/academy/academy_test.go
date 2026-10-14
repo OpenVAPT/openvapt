@@ -107,8 +107,21 @@ func TestModuleShape(t *testing.T) {
 			t.Errorf("%s does not end its sections with In Summary", m.ID)
 		}
 	}
-	// Section and quiz depth is enforced for the modules written after
-	// 2026-10-14; the older ones are expanded over time (TAP-12).
+	// Quiz depth applies to every module (TAP-12). Section depth applies to
+	// the modules written after 2026-10-14.
+	for _, m := range Modules {
+		if len(m.Quiz) < 5 {
+			t.Errorf("%s has %d quiz questions; want at least 5", m.ID, len(m.Quiz))
+		}
+		for _, q := range m.Quiz {
+			if len(q.Options) < 4 {
+				t.Errorf("%s quiz %q has %d options; want at least 4", m.ID, q.Q, len(q.Options))
+			}
+			if strings.TrimSpace(q.Explain) == "" {
+				t.Errorf("%s quiz %q has no explanation", m.ID, q.Q)
+			}
+		}
+	}
 	for _, id := range []string{"P15", "P16"} {
 		m := Get(id)
 		if m == nil {
@@ -117,12 +130,64 @@ func TestModuleShape(t *testing.T) {
 		if n := len(m.Sections) - 1; n < 3 || n > 5 {
 			t.Errorf("%s has %d sections before the summary; want 3 to 5", id, n)
 		}
-		if len(m.Quiz) < 5 {
-			t.Errorf("%s has %d quiz questions; want at least 5", id, len(m.Quiz))
-		}
+	}
+}
+
+// Every quiz has distinct options and an answer index that points at one of
+// them, so exactly one option is marked correct.
+func TestQuizOptionsDistinctAndAnswerInRange(t *testing.T) {
+	for _, m := range Modules {
 		for _, q := range m.Quiz {
-			if len(q.Options) < 4 {
-				t.Errorf("%s quiz %q has %d options; want at least 4", id, q.Q, len(q.Options))
+			seen := map[string]bool{}
+			for _, o := range q.Options {
+				k := strings.ToLower(strings.TrimSpace(o))
+				if seen[k] {
+					t.Errorf("%s quiz %q repeats option %q", m.ID, q.Q, o)
+				}
+				seen[k] = true
+			}
+			if q.Answer < 0 || q.Answer >= len(q.Options) {
+				t.Errorf("%s quiz %q answer index %d out of range", m.ID, q.Q, q.Answer)
+			}
+		}
+	}
+}
+
+// sentenceAllow lists sentences that may run long because they quote the
+// full title of a published standard. Keep it short.
+var sentenceAllow = map[string]bool{}
+
+// splitSentences breaks text at a full stop, question mark or exclamation
+// mark followed by a space. Dots inside numbers and file names do not split.
+func splitSentences(text string) []string {
+	var out []string
+	start := 0
+	for i := 0; i < len(text)-1; i++ {
+		if (text[i] == '.' || text[i] == '?' || text[i] == '!') && text[i+1] == ' ' {
+			out = append(out, strings.TrimSpace(text[start:i+1]))
+			start = i + 1
+		}
+	}
+	if rest := strings.TrimSpace(text[start:]); rest != "" {
+		out = append(out, rest)
+	}
+	return out
+}
+
+// No sentence in a module summary or body runs over 30 words, so the course
+// stays readable at around grade 8 to 9.
+func TestModuleSentenceLength(t *testing.T) {
+	const max = 30
+	for _, m := range Modules {
+		texts := []string{m.Summary}
+		for _, s := range m.Sections {
+			texts = append(texts, s.Body...)
+		}
+		for _, text := range texts {
+			for _, s := range splitSentences(text) {
+				if n := len(strings.Fields(s)); n > max && !sentenceAllow[s] {
+					t.Errorf("%s has a %d-word sentence: %q", m.ID, n, s)
+				}
 			}
 		}
 	}

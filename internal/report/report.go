@@ -8,6 +8,7 @@ package report
 
 import (
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -28,6 +29,8 @@ type Report struct {
 	Limitations []string   `json:"limitations"`
 	Disclaimer  string     `json:"disclaimer"`
 	Integrity   *Integrity `json:"integrity,omitempty"`
+	// Suppression is set when --suppress was used; see suppress.go.
+	Suppression *SuppressionInfo `json:"suppression,omitempty"`
 }
 
 type Tool struct {
@@ -47,6 +50,9 @@ type Scan struct {
 	Checks   int       `json:"checks"`
 	Sites    []string  `json:"sites"`
 	VulnDB   *VulnDB   `json:"vulndb,omitempty"`
+	// Command is the command line with file paths and other free values
+	// replaced, so it carries no secrets or local names.
+	Command string `json:"command,omitempty"`
 }
 
 // VulnDB describes the offline vulnerability snapshot the CVE checks used,
@@ -121,6 +127,9 @@ type Summary struct {
 	Skipped    int `json:"skipped"`
 	Errors     int `json:"errors"`
 	Incomplete int `json:"incomplete"`
+	// IncompleteTargets counts Incomplete or Error results inside checks
+	// that still passed or failed, matching the per-result SARIF output.
+	IncompleteTargets int `json:"incomplete_targets"`
 }
 
 // Finding is one check with its outcome on this machine.
@@ -141,7 +150,12 @@ type Finding struct {
 	Standards check.Standards `json:"standards"`
 	Source    string          `json:"source"`
 	Academy   []AcademyRef    `json:"academy,omitempty"` // modules that teach this check
-	Results   []check.Result  `json:"results"`
+	// Confidence is high, medium or low; see ConfidenceFor.
+	Confidence string         `json:"confidence,omitempty"`
+	Results    []check.Result `json:"results"`
+	// Suppressed lists failed results covered by the suppression file. They
+	// keep their status; only the --fail-on exit code ignores them.
+	Suppressed []Suppressed `json:"suppressed,omitempty"`
 }
 
 // Integrity lets a reader confirm the report was not edited after it was
@@ -190,7 +204,10 @@ func (r *Report) Posture() string {
 	if r.Summary.Failed > 0 {
 		return "Only lower-severity weaknesses were detected."
 	}
-	return "No checks failed, but incomplete and skipped checks still limit assurance."
+	if r.Summary.Incomplete+r.Summary.Errors+r.Summary.Skipped+r.Summary.IncompleteTargets > 0 {
+		return "No checks failed, but incomplete and skipped checks still limit assurance."
+	}
+	return "No checks failed and every check completed; this is still an automated self-assessment, not proof the machine is free of weaknesses."
 }
 func (r *Report) TopRisks() []Finding {
 	var x []Finding
@@ -199,9 +216,7 @@ func (r *Report) TopRisks() []Finding {
 			x = append(x, f)
 		}
 	}
-	sort.SliceStable(x, func(i, j int) bool {
-		return check.Severity(x[i].Severity).Rank() < check.Severity(x[j].Severity).Rank()
-	})
+	sortTopRisks(x)
 	if len(x) > 5 {
 		x = x[:5]
 	}
@@ -265,28 +280,31 @@ func (r *Report) HeatMap() []HeatRow {
 	}
 	return rows
 }
+
+// ComplianceCoverage counts each check toward the CIS Controls v8 safeguard
+// and NIST CSF 2.0 subcategories it maps to (Standards.CIS and
+// Standards.CSF), not toward every safeguard of its broad category.
 func (r *Report) ComplianceCoverage() []CoverageRow {
 	type key struct{ f, c string }
 	m := map[key]*CoverageRow{}
-	for _, ci := range check.Categories {
-		for _, c := range ci.CIS {
-			m[key{"CIS Controls v8", c}] = &CoverageRow{Framework: "CIS Controls v8", Control: c}
-		}
-		for _, c := range ci.NISTCSF {
-			m[key{"NIST CSF 2.0", c}] = &CoverageRow{Framework: "NIST CSF 2.0", Control: c}
-		}
-	}
 	for _, f := range r.Findings {
-		ci := check.CategoryByID(f.Category)
 		var ks []key
-		for _, c := range ci.CIS {
-			ks = append(ks, key{"CIS Controls v8", c})
+		for _, c := range f.Standards.CIS {
+			if c != "" && c != "none" {
+				ks = append(ks, key{"CIS Controls v8", c})
+			}
 		}
-		for _, c := range ci.NISTCSF {
-			ks = append(ks, key{"NIST CSF 2.0", c})
+		for _, c := range f.Standards.CSF {
+			if c != "" {
+				ks = append(ks, key{"NIST CSF 2.0", c})
+			}
 		}
 		for _, k := range ks {
 			row := m[k]
+			if row == nil {
+				row = &CoverageRow{Framework: k.f, Control: k.c}
+				m[k] = row
+			}
 			row.Checks++
 			if f.Status == string(check.Fail) {
 				row.Failed++
@@ -296,24 +314,46 @@ func (r *Report) ComplianceCoverage() []CoverageRow {
 			}
 		}
 	}
-	var out []CoverageRow
+	out := make([]CoverageRow, 0, len(m))
 	for _, v := range m {
-		if v.Checks > 0 {
-			out = append(out, *v)
-		}
+		out = append(out, *v)
 	}
 	sort.Slice(out, func(i, j int) bool {
 		if out[i].Framework != out[j].Framework {
 			return out[i].Framework < out[j].Framework
 		}
-		return out[i].Control < out[j].Control
+		return safeguardLess(out[i].Control, out[j].Control)
 	})
 	return out
+}
+
+// safeguardLess orders ids like "4.1" < "4.10" and "PR.PS-01" < "PR.PS-02".
+func safeguardLess(a, b string) bool {
+	pa, pb := splitNum(a), splitNum(b)
+	for k := 0; k < len(pa) && k < len(pb); k++ {
+		if pa[k] != pb[k] {
+			na, ea := strconv.Atoi(pa[k])
+			nb, eb := strconv.Atoi(pb[k])
+			if ea == nil && eb == nil {
+				return na < nb
+			}
+			return pa[k] < pb[k]
+		}
+	}
+	return len(pa) < len(pb)
+}
+
+func splitNum(s string) []string {
+	return strings.FieldsFunc(s, func(r rune) bool { return r == '.' || r == '-' })
 }
 
 // Summarise fills in r.Summary from r.Findings.
 func (r *Report) Summarise() {
 	var s Summary
+	for i := range r.Findings {
+		r.Findings[i].Confidence = ConfidenceFor(r.Findings[i])
+		s.IncompleteTargets += incompleteTargets(r.Findings[i])
+	}
 	for _, f := range r.Findings {
 		switch check.Status(f.Status) {
 		case check.Pass:
@@ -349,7 +389,7 @@ var Methodology = []string{
 	"Approach: automated, non-intrusive vulnerability assessment following the planning, discovery, analysis and reporting phases of NIST SP 800-115. No exploitation was attempted.",
 	"Discovery: configuration files, /proc and /sys were read; a short allow-list of read-only commands was run (for example sshd -T and apt-get -s upgrade, which only simulates).",
 	"Web: websites were discovered from the local web server configuration and requested through 127.0.0.1 with GET requests for fixed paths only. No forms were submitted and no attack payloads were sent.",
-	"Rating: each check carries a qualitative severity on the CVSS v3.1 scale with a representative base vector. Environmental factors on your network may raise or lower the real risk.",
+	"Rating: each check carries a qualitative severity on the CVSS v3.1 scale with a representative base vector. Environmental factors on your network may raise or lower the real risk. Detective gaps such as missing logging, auditing or integrity monitoring carry a local attack vector: a missing record opens no network path, it makes a separate intrusion harder to trace.",
 	"Evidence: secrets (passwords, keys, tokens, hashes) were redacted before writing this report.",
 }
 

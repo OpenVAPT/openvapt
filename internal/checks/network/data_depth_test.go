@@ -74,8 +74,8 @@ func TestMySQLDepthTable(t *testing.T) {
 		id, body string
 		want     check.Status
 	}{
-		{"NET-DB-014", "symbolic-links=0\n", check.Pass}, {"NET-DB-014", "skip-symbolic-links\n", check.Pass}, {"NET-DB-014", "symbolic-links=1\n", check.Fail}, {"NET-DB-014", "", check.Fail},
-		{"NET-DB-015", "secure_file_priv=NULL\n", check.Pass}, {"NET-DB-015", "secure-file-priv=/var/lib/mysql-files\n", check.Pass}, {"NET-DB-015", "secure_file_priv=\n", check.Fail}, {"NET-DB-015", "secure_file_priv=\"\"\n", check.Fail}, {"NET-DB-015", "", check.Fail},
+		{"NET-DB-014", "symbolic-links=0\n", check.Pass}, {"NET-DB-014", "skip-symbolic-links\n", check.Pass}, {"NET-DB-014", "symbolic-links=1\n", check.Fail}, {"NET-DB-014", "", check.Incomplete},
+		{"NET-DB-015", "secure_file_priv=NULL\n", check.Pass}, {"NET-DB-015", "secure-file-priv=/var/lib/mysql-files\n", check.Pass}, {"NET-DB-015", "secure_file_priv=\n", check.Fail}, {"NET-DB-015", "secure_file_priv=\"\"\n", check.Fail}, {"NET-DB-015", "", check.Incomplete},
 		{"NET-DB-016", "require_secure_transport=ON\n", check.Pass}, {"NET-DB-016", "require-secure-transport=1\n", check.Pass}, {"NET-DB-016", "require_secure_transport=OFF\n", check.Fail}, {"NET-DB-016", "skip-networking\n", check.Pass}, {"NET-DB-016", "skip_networking=ON\n", check.Pass}, {"NET-DB-016", "skip-networking=OFF\n", check.Fail},
 		{"NET-DB-016", "bind-address=127.0.0.1\n", check.Pass}, {"NET-DB-016", "bind_address=::1\n", check.Pass}, {"NET-DB-016", "bind-address=0.0.0.0\n", check.Fail}, {"NET-DB-016", "bind-address=127.0.0.1,10.0.0.5\n", check.Fail},
 		{"NET-DB-017", "log_error=/var/log/mysql/error.log\n", check.Pass}, {"NET-DB-017", "log-error=/var/log/mysqld.log\n", check.Pass}, {"NET-DB-017", "", check.Fail},
@@ -129,7 +129,11 @@ func TestRedisDangerousCommandsTable(t *testing.T) {
 		{"user app on >x ~* -@dangerous +@all\n", check.Pass},
 		{"user app on >x ~* +@all\n", check.Fail},
 		{"aclfile /etc/redis/users.acl\n", check.Pass},
-		{"bind 127.0.0.1\n", check.Fail},
+		{"bind 127.0.0.1\n", check.Pass},                          // loopback only, protected-mode default yes: pass with note
+		{"bind 127.0.0.1 -::1\nprotected-mode yes\n", check.Pass}, // Redis 7 default
+		{"bind 127.0.0.1\nprotected-mode no\n", check.Fail},
+		{"bind 0.0.0.0\n", check.Fail},
+		{"protected-mode yes\n", check.Fail}, // no bind: every interface
 	} {
 		if r := runDepth(t, "NET-DB-023", rd(tc.body)); r.Status != tc.want {
 			t.Errorf("%q: want %s, got %s %v", tc.body, tc.want, r.Status, r.Evidence)
@@ -155,6 +159,8 @@ func TestMailAndDNSTable(t *testing.T) {
 		{"NET-MAIL-002", "smtpd_tls_security_level = may\nsmtpd_tls_protocols = >=TLSv1\nsmtpd_tls_mandatory_protocols = >=TLSv1.2\n", check.Fail},
 		{"NET-MAIL-002", "smtpd_tls_security_level = none\n", check.Pass}, // handled by NET-MAIL-001
 		{"NET-MAIL-003", "disable_vrfy_command = yes\n", check.Pass}, {"NET-MAIL-003", "disable_vrfy_command = no\n", check.Fail}, {"NET-MAIL-003", "", check.Fail},
+		{"NET-MAIL-003", "inet_interfaces = localhost\n", check.Pass}, {"NET-MAIL-003", "inet_interfaces = loopback-only\n", check.Pass}, {"NET-MAIL-003", "inet_interfaces = 127.0.0.1, [::1]\n", check.Pass}, {"NET-MAIL-003", "inet_interfaces = all\n", check.Fail}, {"NET-MAIL-003", "inet_interfaces = 127.0.0.1, 192.0.2.10\n", check.Fail},
+		{"NET-MAIL-002", "smtpd_tls_security_level = may\ninet_interfaces = localhost\n", check.Pass}, {"NET-MAIL-002", "smtpd_tls_security_level = may\ninet_interfaces = all\n", check.Fail},
 	} {
 		if r := runDepth(t, tc.id, pf(tc.body)); r.Status != tc.want {
 			t.Errorf("%s with %q: want %s, got %s %v", tc.id, tc.body, tc.want, r.Status, r.Evidence)
@@ -201,6 +207,35 @@ func TestPostfixWeakProtocolsTable(t *testing.T) {
 	} {
 		if got := postfixWeakProtocols(tc.in); got != tc.weak {
 			t.Errorf("%q: weak=%v, want %v", tc.in, got, tc.weak)
+		}
+	}
+}
+
+// NET-DB-014 and NET-DB-015 depend on the server flavour when the option
+// files say nothing: MySQL 8 defaults are already restrictive.
+func TestMySQLFlavourDefaults(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		extra map[string]string
+		cmds  map[string]string
+		want  check.Status
+	}{
+		{"mysql 8 dpkg", map[string]string{"/var/lib/dpkg/status": "Package: mysql-server-8.0\nStatus: install ok installed\nVersion: 8.0.39-0ubuntu0.24.04.2\n"}, nil, check.Pass},
+		{"mysql 8 removed", map[string]string{"/var/lib/dpkg/status": "Package: mysql-server-8.0\nStatus: deinstall ok config-files\nVersion: 8.0.39\n"}, nil, check.Incomplete},
+		{"mysql 5.7 dpkg", map[string]string{"/var/lib/dpkg/status": "Package: mysql-server-5.7\nStatus: install ok installed\nVersion: 5.7.42\n"}, nil, check.Fail},
+		{"mariadb binary", map[string]string{"/usr/sbin/mariadbd": ""}, nil, check.Fail},
+		{"mariadb dpkg", map[string]string{"/var/lib/dpkg/status": "Package: mariadb-server\nStatus: install ok installed\nVersion: 1:10.11.6-0+deb12u1\n"}, nil, check.Fail},
+		{"mysql 8 rpm", nil, map[string]string{"rpm -qa --qf %{NAME}\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n": "bash\t0:5.1-1\nmysql-server\t0:8.0.36-1.el9\n"}, check.Pass},
+		{"mariadb rpm", nil, map[string]string{"rpm -qa --qf %{NAME}\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}\n": "mariadb-server\t3:10.5.22-1.el9\n"}, check.Fail},
+	} {
+		for _, id := range []string{"NET-DB-014", "NET-DB-015"} {
+			f := &sys.Fake{Files: map[string]string{"/etc/my.cnf": "[mysqld]\n"}, Commands: tc.cmds}
+			for k, v := range tc.extra {
+				f.Files[k] = v
+			}
+			if r := runDepth(t, id, f); r.Status != tc.want {
+				t.Errorf("%s %s: want %s, got %s %q", id, tc.name, tc.want, r.Status, r.Message)
+			}
 		}
 	}
 }

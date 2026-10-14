@@ -2,7 +2,7 @@
 
 Generated from the code by `internal/sources` (regenerate with `go test ./internal/sources -update`); do not edit by hand. Every reference that any check or Academy module cites is listed here, grouped by publisher, with the publisher's terms and any credit line those terms ask for. OpenVAPT cites sources by title, identifier and link; it does not copy their text. Use of a source does not imply that its publisher endorses OpenVAPT.
 
-Totals: 283 distinct sources from 41 publishers, cited by 307 checks and 31 Academy modules.
+Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Academy modules.
 
 ## NIST (National Institute of Standards and Technology)
 
@@ -91,14 +91,13 @@ Totals: 283 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 | [OWASP WSTG-CONF-02, Test Application Platform Configuration](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration/) | Academy A6, WEB-APP-006, WEB-TOM-005 |
 | [OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/) | WEB-APA-010, WEB-APP-009, WEB-DOC-001, WEB-DOC-003, WEB-EXP-001, WEB-EXP-004, WEB-EXP-007, WEB-EXP-008, WEB-EXP-009, WEB-NGX-007 |
 | [OWASP WSTG-CONF-05, Enumerate Infrastructure and Application Admin Interfaces](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces/) | WEB-EXP-011 |
-| [OWASP WSTG-CONF-06, Test HTTP Methods](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods) | WEB-APA-002 |
+| [OWASP WSTG-CONF-06, Test HTTP Methods](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods/) | WEB-APA-002 |
 | [OWASP WSTG-CONF-09, Test File Permission](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/09-Test_File_Permission/) | WEB-APP-010, WEB-DOC-002 |
 | [OWASP WSTG-ERRH-01, Testing for Improper Error Handling](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/01-Testing_For_Improper_Error_Handling/) | WEB-EXP-012 |
-| [OWASP WSTG-INFO-02, Fingerprint Web Server](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server) | WEB-APA-001, WEB-NGX-001 |
-| [OWASP WSTG-INFO-02, Fingerprint Web Server](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server/) | WEB-EXP-010 |
+| [OWASP WSTG-INFO-02, Fingerprint Web Server](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server/) | WEB-APA-001, WEB-EXP-010, WEB-NGX-001 |
 | [OWASP WSTG-INPV-17, Testing for Host Header Injection](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/07-Input_Validation_Testing/17-Testing_for_Host_Header_Injection/) | WEB-CMS-013 |
 | [OWASP Web Security Testing Guide](https://owasp.org/projects/web-security-testing-guide) | Academy F2 |
-| [OWASP Web Security Testing Guide, Configuration and Deployment Management Testing](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/) | Academy P18 |
+| [OWASP Web Security Testing Guide, Configuration and Deployment Management Testing](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/) | Academy P18 |
 
 ## Center for Internet Security (CIS)
 

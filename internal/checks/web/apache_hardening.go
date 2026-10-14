@@ -46,7 +46,7 @@ func init() {
 		fix:       "Set  ServerTokens Prod  and  ServerSignature Off  in apache2.conf or conf-enabled/security.conf (Debian) or httpd.conf (RHEL), then apachectl configtest and reload.",
 		verify:    "curl -sI https://<site>/ | grep -i '^server:'  should print Server: Apache with nothing after it.",
 		refs:      []check.Ref{{Title: "Apache HTTP Server, ServerTokens directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#servertokens"}, refWSTGFinger},
-		std:       check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"CM-6", "SI-11"}, CISTopic: "Web server banner and version disclosure"},
+		std:       check.Standards{CWE: []string{"CWE-497"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"CM-6", "SI-11"}, CISTopic: "Web server banner and version disclosure"},
 		kind:      apacheKind,
 		evaluate: func(c serverConf) (bool, []string) {
 			prod := c.has("servertokens", func(v string) bool { return v == "prod" || v == "productonly" })
@@ -67,8 +67,8 @@ func init() {
 		detection: "Reads the Apache configuration tree for TraceEnable. Fails when the directive is absent (default On) or set to On or Extended.",
 		fix:       "Add  TraceEnable Off  to the server configuration and reload.",
 		verify:    "curl -s -o /dev/null -w '%{http_code}' -X TRACE https://<site>/  should print 405.",
-		refs:      []check.Ref{{Title: "Apache HTTP Server, TraceEnable directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#traceenable"}, {Title: "OWASP WSTG-CONF-06, Test HTTP Methods", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods"}},
-		std:       check.Standards{CWE: []string{"CWE-693", "CWE-1188"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.5.1"}, WSTG: []string{"WSTG-CONF-06"}, NIST: []string{"CM-7"}, CISTopic: "HTTP methods allowed by the web server"},
+		refs:      []check.Ref{{Title: "Apache HTTP Server, TraceEnable directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#traceenable"}, {Title: "OWASP WSTG-CONF-06, Test HTTP Methods", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods/"}},
+		std:       check.Standards{CWE: []string{"CWE-1188", "CWE-749"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.5.1"}, WSTG: []string{"WSTG-CONF-06"}, NIST: []string{"CM-7"}, CISTopic: "HTTP methods allowed by the web server"},
 		kind:      apacheKind,
 		evaluate: func(c serverConf) (bool, []string) {
 			off := c.has("traceenable", func(v string) bool { return v == "off" })
@@ -112,7 +112,7 @@ func init() {
 		fix:       "Set  AllowOverride None  and move needed rules into the vhost, or allow only what the application needs, for example  AllowOverride FileInfo Indexes Limit  for WordPress permalinks.",
 		verify:    "grep -rn AllowOverride /etc/apache2 /etc/httpd 2>/dev/null  should show no All.",
 		refs:      []check.Ref{{Title: "Apache HTTP Server, AllowOverride directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#allowoverride"}, refApacheSecTips},
-		std:       check.Standards{CWE: []string{"CWE-284", "CWE-1188"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.1.1"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"CM-6", "CM-7"}, CISTopic: "Web server per-directory override scope"},
+		std:       check.Standards{CWE: []string{"CWE-15", "CWE-1188"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.1.1"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"CM-6", "CM-7"}, CISTopic: "Web server per-directory override scope"},
 		kind:      apacheKind,
 		evaluate: func(c serverConf) (bool, []string) {
 			var ev []string
@@ -225,7 +225,7 @@ func init() {
 		fix:       "Consider ModSecurity with the OWASP Core Rule Set in detection-only mode first, or mod_evasive for simple rate limiting, and tune before blocking.",
 		verify:    "apachectl -M 2>/dev/null | grep -E 'security2|evasive'",
 		refs:      []check.Ref{{Title: "OWASP ModSecurity Core Rule Set", URL: "https://coreruleset.org/docs/"}, refApacheSecTips},
-		std:       check.Standards{CWE: []string{"CWE-693"}, OWASP: []string{"A05:2021"}, ASVS: []string{"11.1.4"}, NIST: []string{"SC-5", "SI-10"}, CISTopic: "Web application filtering"},
+		std:       check.Standards{CWE: []string{"CWE-1188"}, OWASP: []string{"A05:2021"}, ASVS: []string{"11.1.4"}, NIST: []string{"SC-5", "SI-10"}, CISTopic: "Web application filtering"},
 		kind:      apacheKind,
 		evaluate: func(c serverConf) (bool, []string) {
 			var ev []string
@@ -258,7 +258,7 @@ func init() {
 		fix:       "Set  FileETag MTime Size  or  FileETag None  and reload.",
 		verify:    "curl -sI https://<site>/robots.txt | grep -i etag  should show a two-part value, not three.",
 		refs:      []check.Ref{{Title: "Apache HTTP Server, FileETag directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#fileetag"}, {Title: "CVE-2003-1418, Apache inode disclosure in ETag", URL: "https://www.cve.org/CVERecord?id=CVE-2003-1418"}},
-		std:       check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"SI-11", "CM-6"}, CISTopic: "Web server information disclosure in headers"},
+		std:       check.Standards{CWE: []string{"CWE-497"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"SI-11", "CM-6"}, CISTopic: "Web server information disclosure in headers"},
 		kind:      apacheKind,
 		evaluate: func(c serverConf) (bool, []string) {
 			var ev []string
@@ -282,7 +282,7 @@ func init() {
 		fix:       "Add to the server configuration:  <DirectoryMatch \"/\\.(git|svn|hg)\"> Require all denied </DirectoryMatch>  and  <FilesMatch \"^\\.(env|git|svn)\"> Require all denied </FilesMatch> , then reload.",
 		verify:    "curl -s -o /dev/null -w '%{http_code}' https://<site>/.git/HEAD  should print 403 or 404.",
 		refs:      []check.Ref{{Title: "Apache HTTP Server, DirectoryMatch directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#directorymatch"}, {Title: "OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/"}},
-		std:       check.Standards{CWE: []string{"CWE-538", "CWE-200"}, OWASP: []string{"A05:2021"}, ASVS: []string{"12.5.1", "14.3.3"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"CM-7", "SC-28"}, CISTopic: "Web server access to hidden files"},
+		std:       check.Standards{CWE: []string{"CWE-538", "CWE-527"}, OWASP: []string{"A05:2021"}, ASVS: []string{"12.5.1", "14.3.3"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"CM-7", "SC-28"}, CISTopic: "Web server access to hidden files"},
 		kind:      apacheKind,
 		evaluateSys: func(ctx context.Context, s sys.System, c serverConf) (bool, []string) {
 			for _, l := range c.Lines {

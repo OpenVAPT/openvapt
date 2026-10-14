@@ -137,7 +137,10 @@ func installedPackages(ctx context.Context, s sys.System) ([]pkg, bool) {
 			}
 		}
 	}
-	if lists, _ := s.Glob("/var/lib/dpkg/info/*.list"); len(lists) > 0 {
+	// The dpkg status file is the source of truth on Debian-family systems:
+	// a package removed but not purged ("rc") keeps its *.list file, so the
+	// .list fallback is used only when the status file could not be read.
+	if lists, _ := s.Glob("/var/lib/dpkg/info/*.list"); !ok && len(lists) > 0 {
 		ok = true
 		sort.Strings(lists)
 		for _, p := range lists {

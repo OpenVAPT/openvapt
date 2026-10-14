@@ -139,8 +139,8 @@ type catalogueEntry struct {
 	Effort     string          `json:"effort"`
 	Summary    string          `json:"summary"`
 	Standards  check.Standards `json:"standards"`
-	CIS        []string        `json:"cis_controls_v8"`
-	NISTCSF    []string        `json:"nist_csf_2"`
+	CIS        []string        `json:"cis_controls_v8"` // safeguard ids this check maps, or "none"
+	NISTCSF    []string        `json:"nist_csf_2"`      // CSF 2.0 subcategory ids
 	Modules    []string        `json:"academy_modules"`
 	Page       string          `json:"page"`
 	Source     string          `json:"source"`
@@ -160,7 +160,7 @@ func writeCatalogueJSON(cs []*check.Check) {
 		entries = append(entries, catalogueEntry{
 			ID: c.ID, Title: c.Title, Domain: string(c.Domain), Severity: string(c.Severity), CVSS: c.CVSS,
 			Category: cat.Name, Effort: string(c.Effort), Summary: c.Summary, Standards: c.Standards,
-			CIS: cat.CIS, NISTCSF: cat.NISTCSF, Modules: mods,
+			CIS: c.Standards.CIS, NISTCSF: c.Standards.CSF, Modules: mods,
 			Page:   pageURL("checks/" + c.ID + ".html"),
 			Source: fmt.Sprintf("%s/blob/%s/%s", repoURL, commit, c.SourceFile), SourceFile: c.SourceFile,
 		})

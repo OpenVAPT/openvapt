@@ -17,7 +17,7 @@ var refMozillaTLS = check.Ref{Title: "Mozilla, Server Side TLS guidelines", URL:
 var refMozillaGen = check.Ref{Title: "Mozilla SSL Configuration Generator", URL: "https://ssl-config.mozilla.org/"}
 var refNISTTLS = check.Ref{Title: "NIST SP 800-52 Rev. 2, Guidelines for TLS Implementations", URL: "https://csrc.nist.gov/pubs/sp/800/52/r2/final"}
 var refOpenSSLConfig = check.Ref{Title: "OpenSSL, config(5): system default TLS settings (MinProtocol)", URL: "https://docs.openssl.org/3.0/man5/config/"}
-var refWSTGFinger = check.Ref{Title: "OWASP WSTG-INFO-02, Fingerprint Web Server", URL: "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server"}
+var refWSTGFinger = check.Ref{Title: "OWASP WSTG-INFO-02, Fingerprint Web Server", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server/"}
 
 func nginxTLSConfigured(c serverConf) bool {
 	return c.anyValue("ssl_certificate") || c.has("listen", func(v string) bool { return strings.Contains(v, " ssl") || strings.HasSuffix(v, "ssl") })
@@ -36,7 +36,7 @@ func init() {
 		fix:       "In the http block of nginx.conf add  server_tokens off;  then run nginx -t and reload.",
 		verify:    "curl -sI https://<site>/ | grep -i '^server:'  should print Server: nginx with no version.",
 		refs:      []check.Ref{refNginxDocs, refWSTGFinger},
-		std:       check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"CM-6", "SI-11"}, CISTopic: "Web server banner and version disclosure"},
+		std:       check.Standards{CWE: []string{"CWE-497"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"CM-6", "SI-11"}, CISTopic: "Web server banner and version disclosure"},
 		kind:      nginxKind,
 		evaluate: func(c serverConf) (bool, []string) {
 			bad := !c.has("server_tokens", off) || c.has("server_tokens", func(v string) bool { return v == "on" || v == "build" })
@@ -197,7 +197,7 @@ func init() {
 		fix:       "Add to every server block:  location ~ /\\. { deny all; access_log off; log_not_found off; }  and keep .well-known reachable with a more specific  location ^~ /.well-known/  block before it.",
 		verify:    "curl -s -o /dev/null -w '%{http_code}' https://<site>/.git/HEAD  should print 403 or 404.",
 		refs:      []check.Ref{refNginxDocs, {Title: "OWASP WSTG-CONF-04, Review Old Backup and Unreferenced Files", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/"}},
-		std:       check.Standards{CWE: []string{"CWE-538", "CWE-200"}, OWASP: []string{"A05:2021"}, ASVS: []string{"12.5.1", "14.3.3"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"CM-7", "SC-28"}, CISTopic: "Web server access to hidden files"},
+		std:       check.Standards{CWE: []string{"CWE-538", "CWE-527"}, OWASP: []string{"A05:2021"}, ASVS: []string{"12.5.1", "14.3.3"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"CM-7", "SC-28"}, CISTopic: "Web server access to hidden files"},
 		kind:      nginxKind,
 		evaluate: func(c serverConf) (bool, []string) {
 			serves := c.anyValue("root") || c.anyValue("alias")
