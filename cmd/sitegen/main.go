@@ -100,6 +100,8 @@ func main() {
 
 	chans := loadChannels()
 	siteChannel = chans
+	siteFeatures = featuresFor(chans)
+	applyFeatures(siteFeatures, faqs)
 
 	checks := check.All()
 	// Fill live counts into FAQ answers so they never go stale.
@@ -140,6 +142,7 @@ func main() {
 		"CiteVersion":  citeVersion(),
 		"Install":      installBoxes(chans),
 		"CiteHero":     citeHero(),
+		"Features":     siteFeatures,
 	}
 	pages := []struct{ file, path, title, desc, section string }{
 		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "Academic, non-commercial VAPT tool with source-available code built by AI Cybersecurity Engineers. Free for own use on your Linux server, 100% at your own risk.", "home"},

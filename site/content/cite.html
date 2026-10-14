@@ -10,7 +10,7 @@
     <a class="btn btn-default" href="#copy">Every Other Style</a>
   </div>
   <ul class="mb-0 mt-5 grid gap-1.5 text-[14px] text-ink-2">
-    <li><strong>Version.</strong> Give the version you used: <code>openvapt version</code> prints it, and <code>openvapt cite</code> prints this citation for that exact build. A build made from source that is not a release says "{{$d.CiteHero.Unreleased}}"; add the commit instead.</li>
+    <li><strong>Version.</strong> Give the version you used: <code>openvapt version</code> prints it{{if $d.Features.Released}}, and <code>openvapt cite</code> prints this citation for that exact build{{else}}; copy the citation below, or use <a href="CITATION.cff">CITATION.cff</a> (<code>openvapt cite</code>, which prints it for your exact build, arrives in the next release){{end}}. A build made from source that is not a release says "{{$d.CiteHero.Unreleased}}"; add the commit instead.</li>
     <li><strong>Access Date.</strong> Styles that ask for one (Harvard, Vancouver, web pages) show today's date in your browser. Use the date you actually used OpenVAPT.</li>
     <li><strong>DOI.</strong> {{$d.CiteHero.DOINote}}</li>
   </ul>

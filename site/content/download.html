@@ -44,10 +44,10 @@
 
   <div class="phases mt-6" role="list" aria-label="NIST SP 800-115 Phases">
     <div class="phase" role="listitem"><p class="phase-k">Planning</p><p class="phase-t">Read the acknowledgements and terms, then preview the scan with <code>--dry-run</code>.</p></div>
-    <div class="phase" role="listitem"><p class="phase-k">Discovery and Analysis</p><p class="phase-t">The read-only scan of this machine, checked against known weak settings and advisories.</p></div>
+    <div class="phase" role="listitem"><p class="phase-k">Discovery</p><p class="phase-t">The read-only scan of this machine, checked against known weak settings and advisories.</p></div>
     <div class="phase" role="listitem"><p class="phase-k">Reporting</p><p class="phase-t">HTML, JSON, SARIF and Markdown reports in a private, dated folder.</p></div>
   </div>
-  <p class="muted mt-3">The phases follow NIST SP 800-115. This is a self-assessment, not a penetration test: there is no attack phase and no exploit code, and it is designed to look only at the machine it runs on.</p>
+  <p class="muted mt-3">The phases follow NIST SP 800-115. This is a self-assessment, not a penetration test: there is no Attack phase and no exploit code, and it is designed to look only at the machine it runs on.</p>
 
   {{$i := $d.Install}}
   <div class="mt-8">
@@ -80,14 +80,17 @@
 
 Installed (Download Only). Nothing has been scanned.</pre>
         <p class="path-h">Where Reports Go</p>
-        <p class="m-0 text-[15px]">Nowhere yet: no scan runs. When you scan later, each scan writes a new folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code> in the home folder of the user who runs it (root's home folder with <code>sudo</code>), unless you choose one with <code>--out</code>.</p>
+        {{if $d.Features.Released}}<p class="m-0 text-[15px]">Nowhere yet: no scan runs. When you scan later, each scan writes a new folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code> in the home folder of the user who runs it, unless you choose one with <code>--out</code>. With <code>sudo</code> that is the home folder sudo sets, usually root's; when sudo keeps your own home folder, the reports are given back to you.</p>
+        {{else}}<p class="m-0 text-[15px]">Nowhere yet: no scan runs. When you scan later, {{$d.Features.Current}} writes a new folder <code>openvapt-report-&lt;time&gt;</code> in the folder you run the scan from. To choose where, add <code>--out</code>, for example <code>sudo openvapt scan --out ~/openvapt-report</code>.</p>
+        <div class="alert alert-info mt-3">{{icon "info"}}<span><strong>Arrives in the next release.</strong> A new private folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code> becomes the default.</span></div>{{end}}
         <p class="path-h">Time and Permissions</p>
         <p class="m-0 text-[15px]">Under a minute. No root, no account, nothing sent anywhere except the downloads from GitHub.</p>
       </div>
     </div>
     <p class="path-h">Scan Later, Yourself</p>
     {{template "copybox" $i.ScanLater}}
-    <p class="m-0 text-[15px] text-ink-2">The scan shows the acknowledgements again and continues only when you type <code>I ACCEPT</code>. With <code>sudo</code> checks can read protected files such as <code>/etc/shadow</code>; without it those checks are reported as Incomplete. Add <code>--open</code> to open the HTML report in a desktop session.</p>
+    <p class="m-0 text-[15px] text-ink-2">The scan shows the acknowledgements again and continues only when you type <code>I ACCEPT</code>. With <code>sudo</code> checks can read protected files such as <code>/etc/shadow</code>; without it those checks are reported as Incomplete. {{if $d.Features.Released}}Add <code>--open</code> to open the HTML report in a desktop session.{{else}}To read the HTML report, open <code>report.html</code> from the report folder in any web browser.{{end}}</p>
+    {{if not $d.Features.Released}}<div class="alert alert-info mt-3">{{icon "info"}}<span><strong>Arrives in the next release.</strong> <code>openvapt scan --open</code> opens the HTML report for you in a desktop session, and scans write to <code>~/openvapt-reports/&lt;UTC time&gt;/</code> by default. Today, add <code>--out ~/openvapt-report</code> to choose the folder.</span></div>{{end}}
 
     <details class="path-more" id="manual">
       <summary>{{icon "shield-check"}}<span>Download the Binary Manually and Verify It</span><span class="chev">{{icon "chevron-right"}}</span></summary>
@@ -194,12 +197,13 @@ openvapt explain HOST-SSH-001    # documentation for one check</pre>
 
   <h3>Scan Your Own Linux Machine</h3>
 <pre class="term">sudo openvapt scan</pre>
-  <p>Before every scan the tool shows the acknowledgements again and continues only when you type <code>I ACCEPT</code> (or you pass <code>--accept-terms</code> for automation, which counts as the same acceptance). Running as root lets checks read protected files such as <code>/etc/shadow</code>; without root those checks are skipped or marked Incomplete. Reports go to a new private folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code> in the home folder of the user running the scan (root's with <code>sudo</code>), or to the folder you name with <code>--out</code>. After the scan OpenVAPT lists every report file and how to open the HTML report. Exit codes: 0 success, 2 invalid arguments, 3 Critical or High findings, 4 incomplete coverage, 5 scan errors, 6 report write failure.</p>
+  <p>Before every scan the tool shows the acknowledgements again and continues only when you type <code>I ACCEPT</code> (or you pass <code>--accept-terms</code> for automation, which counts as the same acceptance). Running as root lets checks read protected files such as <code>/etc/shadow</code>; without root those checks are skipped or marked Incomplete. {{if $d.Features.Released}}Reports go to a new private folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code> in the home folder of the user running the scan, or to the folder you name with <code>--out</code>. With <code>sudo</code> that is the home folder sudo sets, usually root's; when sudo keeps your own home folder, the reports are given back to you. After the scan OpenVAPT lists every report file and how to open the HTML report.{{else}}With {{$d.Features.Current}}, reports go to a new private folder <code>openvapt-report-&lt;time&gt;</code> in the folder you run the scan from, or to the folder you name with <code>--out</code> (for example <code>sudo openvapt scan --out ~/openvapt-report</code>). After the scan OpenVAPT lists every report file; open <code>report.html</code> in any web browser.{{end}} Exit codes: 0 success, 2 invalid arguments, 3 Critical or High findings, 4 incomplete coverage, 5 scan errors, 6 report write failure.</p>
+  {{if not $d.Features.Released}}<div class="alert alert-info mt-3">{{icon "info"}}<span><strong>Arrives in the next release.</strong> The default report folder <code>~/openvapt-reports/&lt;UTC time&gt;/</code>, <code>--open</code> to open the HTML report, and <code>openvapt cite</code> to print the citation for your exact version.</span></div>{{end}}
 
   <h3>Cite OpenVAPT</h3>
-  <p>If OpenVAPT helps your coursework, thesis, paper or project, please cite the version you used (<code>openvapt version</code>). Copy a ready-made reference from <a href="cite.html">How to Cite OpenVAPT</a> or read <a href="legal/citing.html">Citing OpenVAPT</a>.</p>
+  <p>If OpenVAPT helps your coursework, thesis, paper or project, please cite the version you used (<code>openvapt version</code>). Copy a ready-made reference from <a href="cite.html">How to Cite OpenVAPT</a>{{if not $d.Features.Released}} or the <a href="CITATION.cff">CITATION.cff</a> file{{end}}, or read <a href="legal/citing.html">Citing OpenVAPT</a>.{{if $d.Features.Released}} <code>openvapt cite</code> prints the citation for your exact build.{{end}}</p>
 
   <h3>Uninstall</h3>
-  <p>OpenVAPT installs nothing beyond its own binary. Delete the binary (<code>rm ~/.local/bin/openvapt</code> if you used the installer) and your report folders (<code>~/openvapt-reports</code>). If you signed reports, also delete <code>~/.config/openvapt/report-key</code>.</p>
+  <p>OpenVAPT installs nothing beyond its own binary. Delete the binary (<code>rm ~/.local/bin/openvapt</code> if you used the installer) and your report folders ({{if $d.Features.Released}}<code>~/openvapt-reports</code>{{else}}each <code>openvapt-report-&lt;time&gt;</code> folder, or the folders you chose with <code>--out</code>{{end}}). If you signed reports, also delete <code>~/.config/openvapt/report-key</code>.</p>
 </section>
 {{end}}

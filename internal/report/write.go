@@ -106,7 +106,7 @@ func (r *Report) WriteAll(dir string, formats []string) ([]string, error) {
 			return written, err
 		}
 		p := filepath.Join(clean, name)
-		file, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+		file, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_EXCL|noFollow, 0o600)
 		if err != nil {
 			return written, err
 		}
@@ -226,7 +226,7 @@ func (r *Report) Markdown() string {
 		fmt.Fprintf(&b, "- %s\n", m)
 	}
 	c := r.HowToCite()
-	fmt.Fprintf(&b, "\n## How to Cite\n\n%s\n\n%s\n\n**APA 7:** %s\n\n**BibTeX:**\n\n%s\n\n**Credit when you share this report:** %s\n", mdText(c.Reference), mdText(cite.Request), mdText(c.APA), mdFence(c.BibTeX, "bibtex"), mdText(c.Credit))
+	fmt.Fprintf(&b, "\n## How to Cite\n\n%s\n\n%s\n\n**APA 7:**\n\n%s\n\n**BibTeX:**\n\n%s\n\n**Credit when you share this report:**\n\n%s\n", mdFence(c.Reference, "text"), mdText(cite.Request), mdFence(c.APA, "text"), mdFence(c.BibTeX, "bibtex"), mdFence(c.Credit, "text"))
 	return b.String()
 }
 

@@ -61,7 +61,7 @@ func InfoFor(c Channel) Info {
 			return i
 		}
 	}
-	return Info{ID: c, Name: "Development Build", Audience: "The person who built it", Meaning: "Built from source and never promoted."}
+	return Info{ID: c, Name: "Unreleased Build", Audience: "The person who built it", Meaning: "Built from source and never promoted."}
 }
 
 // Previous returns the channel a build is promoted from ("" for Alpha).

@@ -111,10 +111,13 @@ func TestCitationSameEverywhere(t *testing.T) {
 		}
 	}
 	md := r.Markdown()
-	for _, want := range []string{"## How to Cite", "```bibtex\n" + bib + "\n```", "**APA 7:** OpenVAPT. (" + w.Year + ")", "Version " + string(v[1]), "Licence 1.3"} {
+	for _, want := range []string{"## How to Cite", "```bibtex\n" + bib + "\n```", "**APA 7:**\n\n```text\n" + apa + "\n```", "Version " + string(v[1]), "Licence 1.3"} {
 		if !strings.Contains(md, want) {
 			t.Errorf("Markdown report lacks %q", want)
 		}
+	}
+	if strings.Contains(md, `:\/\/`) {
+		t.Error("URLs in the How to Cite block must stay literal in report.md")
 	}
 	// A report read back from a file never lets its BibTeX close the fence.
 	r.Citation.BibTeX = "x\n```\n# injected"

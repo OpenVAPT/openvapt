@@ -116,7 +116,7 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 | `openvapt man` | Print the manual page: `openvapt man > openvapt.1`, then `man ./openvapt.1` |
 | `openvapt completion bash\|zsh\|fish` | Print a shell completion script, for example `source <(openvapt completion bash)` |
 
-Scan flags: `--out` (default: a new folder `~/openvapt-reports/<UTC time>/`, mode 0700, in the home folder of the user running the scan, which is root's under sudo), `--open` (opens `report.html` with `/usr/bin/xdg-open` only in a desktop session, never as root), `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`), `--suppress` (a suppression file, below).
+Scan flags: `--out` (default: a new folder `~/openvapt-reports/<UTC time>/`, mode 0700, in the home folder named by HOME; under sudo that is usually root's, and when sudo keeps your HOME the folder and reports are given back to you), `--open` (opens `report.html` with `/usr/bin/xdg-open` only in a desktop session, never as root), `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`), `--suppress` (a suppression file, below).
 
 ### Suppressing Accepted Findings
 

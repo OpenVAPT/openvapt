@@ -139,12 +139,17 @@ func citeExtras() map[string][]CiteBox {
 	}
 }
 
+// accessedHint labels the access date in page citations: cite.js fills in
+// the reader's own date in the browser (nothing stored or sent); without
+// scripts the build date stays.
+const accessedHint = "Accessed: the date shown is today's date from your own browser (the site's build date without JavaScript); change it to the day you read the page."
+
 // pageCite is the Cite This Page box for one check or Academy module page.
 func pageCite(id, title, collection, path string) []CiteBox {
 	w, p := citeWork(), cite.Page{ID: id, Title: title, Collection: collection, URL: pageURL(path)}
 	return []CiteBox{
-		box("p-apa", "APA 7", "In text: "+w.APAInText(), w.PageAPA(p)),
-		box("p-bib", "BibTeX", "", w.PageBibTeX(p)),
+		box("p-apa", "APA 7", "In text: "+w.APAInText()+". "+accessedHint, w.PageAPA(p)),
+		box("p-bib", "BibTeX", accessedHint, w.PageBibTeX(p)),
 	}
 }
 
@@ -204,7 +209,7 @@ func printCite() string { return plainDates(citeWork().APA()) }
 func llmsCite() string {
 	w := citeWork()
 	return "\n## How to Cite\n\n" + cite.Request + " The author is the group author \"OpenVAPT\"; do not add personal names. " + cite.DOINote +
-		"\n\nAPA 7: " + w.APA() + "\n\nBibTeX:\n\n```bibtex\n" + w.BibTeX() + "\n```\n\nEvery style, and when credit is required (licence section 5.4): " + siteURL + "/cite.html. Command line: `openvapt cite --format bibtex`.\n"
+		"\n\nAPA 7: " + w.APA() + "\n\nBibTeX:\n\n```bibtex\n" + w.BibTeX() + "\n```\n\nEvery style, and when credit is required (licence section 5.4): " + siteURL + "/cite.html. " + citeCLILine(siteFeatures) + "\n"
 }
 
 // citeHero is the recommended APA citation at the top of the cite page.

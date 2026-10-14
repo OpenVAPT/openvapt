@@ -55,7 +55,7 @@ type Work struct {
 }
 
 // Version normalises a build version for citing: "v0.1.0-alpha.3" becomes
-// "0.1.0-alpha.3", and a development build becomes Unreleased.
+// "0.1.0-alpha.3", and an unreleased build made from source becomes Unreleased.
 func Version(v string) string {
 	v = strings.TrimPrefix(strings.TrimSpace(v), "v")
 	if v == "" || strings.HasSuffix(v, "-dev") || v == "unknown" {

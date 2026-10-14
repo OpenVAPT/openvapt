@@ -167,6 +167,7 @@
   <div class="term" tabindex="0" role="log" aria-label="Terminal, scene 1">
 <div class="ln" data-k="cmd"><span class="ps">$ </span><span class="tx">curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh</span></div>
 <div class="ln">OpenVAPT installer</div>
+<div class="ln dim">  [while there is no Stable release, two pre-release WARNING notes are printed around this line, trimmed]</div>
 <div class="ln">  release <span class="ph">vX.Y.Z</span>, linux/amd64</div>
 <div class="ln">  downloading openvapt_linux_amd64 and SHA256SUMS from https://github.com/OpenVAPT/openvapt/releases/download/<span class="ph">vX.Y.Z</span>/</div>
 <div class="ln ok">  checksum verified (sha256 <span class="ph">64 hex digits</span>)</div>
@@ -285,7 +286,7 @@
 <div class="ln">Take its quiz:  openvapt learn F1 --quiz</div>
   </div></div>
 </div>
-<div class="wt-scene" data-gap="500" data-hold="5000" data-caption="Scene 7 of 7, Next. Read the code, then download OpenVAPT or start the free Academy.">
+<div class="wt-scene" data-gap="500" data-hold="5000" data-caption="Scene 7 of 7, Get Started. Read the code, then download OpenVAPT or start the free Academy.">
   <div class="win win-end"><div class="end">
     <p class="ln end-h">Read It. Run It on Your Own Machine.</p>
     <p class="ln end-p">Free for your own use, on machines you own or control, 100% at your own risk.</p>
@@ -307,7 +308,7 @@
     <li><button type="button" data-wt-ch="3"><span class="wt-fill"></span>Summary</button></li>
     <li><button type="button" data-wt-ch="4"><span class="wt-fill"></span>Report</button></li>
     <li><button type="button" data-wt-ch="5"><span class="wt-fill"></span>Explain</button></li>
-    <li><button type="button" data-wt-ch="6"><span class="wt-fill"></span>Next</button></li>
+    <li><button type="button" data-wt-ch="6"><span class="wt-fill"></span>Get Started</button></li>
   </ol>
 </div>
 <details class="wt-transcript">
@@ -315,7 +316,7 @@
 <div class="wt-transcript-body">
 <p>This is a simulated walkthrough using the built-in demo lab. It is built only from real OpenVAPT output; long output is trimmed where marked and every value is kept as printed.</p>
 <ol>
-<li><strong>Install.</strong> Run <code>curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh</code> (Download Only). The installer picks the most stable channel that has a release, downloads the Linux binary and SHA256SUMS, verifies the checksum, checks the Sigstore signature when cosign is installed, and installs to <code>~/.local/bin</code> without root. It prints: "Installed (Download Only). Nothing has been scanned." To scan straight after installing, Download and Scan adds <code>--run</code>: <code>curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh -s -- --run</code>.</li>
+<li><strong>Install.</strong> Run <code>curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh</code> (Download Only). The installer picks the most stable channel that has a release, downloads the Linux binary and SHA256SUMS, verifies the checksum, checks the Sigstore signature when cosign is installed, and installs to <code>~/.local/bin</code> without root. While there is no Stable release it also prints two pre-release warnings (trimmed in the scene). It prints: "Installed (Download Only). Nothing has been scanned." To scan straight after installing, Download and Scan adds <code>--run</code>: <code>curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh -s -- --run</code>.</li>
 <li><strong>Accept.</strong> Run <code>sudo openvapt scan</code>. OpenVAPT prints the terms and ten numbered acknowledgements, then asks you to type <code>I ACCEPT</code>; anything else cancels and nothing is stored. It then prints "Scanning this machine with 307 checks (read-only, local only)...".</li>
 <li><strong>Checks.</strong> The read-only checks cover three domains: Server (for example HOST-SSH-001, HOST-USR-003, HOST-KRN-001), Network (NET-DB-002, NET-FW-001, NET-TLS-001) and Web (WEB-EXP-002, WEB-HDR-002). The terminal prints only the start line and the summary; the scene illustrates the work in between.</li>
 <li><strong>Summary.</strong> <code>openvapt demo</code> scans a simulated vulnerable lab server in memory: 307 checks run, 2 passed, 305 failed, 0 incomplete; failed by severity Critical 14, High 71, Medium 88, Low 123. It writes report.html and report.md only on this machine, lists every report path with a hint on how to open the HTML report, and exits with code 3, meaning findings at or above High severity were found.</li>

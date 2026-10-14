@@ -4,7 +4,13 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
-_No changes recorded yet._
+### Stream: round3 fixes
+
+- Website: until the default release includes them, pages that mention `openvapt cite`, `--open` or the default `~/openvapt-reports` folder say they arrive in the next release and show what the current release does.
+- Under sudo with HOME kept, the default reports folder and its files are given back to the sudo user (checked against the user database); the base folder is checked to be a real folder owned by the expected user, and report files refuse links.
+- Installer: a non-HTTPS OPENVAPT_CHANNELS_URL or OPENVAPT_BASE_URL now stops with a clear reason; its next steps describe where reports go for the installed version.
+- report.md keeps URLs in the How to Cite block literal (fenced text); builds without a version are called "unreleased build" everywhere.
+- NIST SP 800-115 phases worded consistently (Planning, Discovery and Reporting; no Attack phase); walkthrough marks the trimmed pre-release warnings and names its last chapter Get Started; page citations label the access date.
 
 ## [v0.1.0-alpha.3] - 2026-10-14
 ### Stream: install paths
