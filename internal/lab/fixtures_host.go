@@ -62,7 +62,7 @@ func init() {
 		// Docker is installed (see the container fixtures) with an empty
 		// docker group and the socket at its default 660 root:docker.
 		f.Infos["/var/run/docker.sock"] = sys.FileInfo{Path: "/var/run/docker.sock", Mode: fs.ModeSocket | 0o660}
-		f.Files["/etc/security/pwquality.conf"] = "minlen = 14\n"
+		f.Files["/etc/security/pwquality.conf"] = "minlen = 15\n"
 		f.Files["/etc/pam.d/common-auth"] = "auth required pam_faillock.so preauth\nauth [success=1 default=ignore] pam_unix.so\nauth [default=die] pam_faillock.so authfail\n"
 		file(f, "/etc/ssh/ssh_host_ed25519_key", "", 0o600)
 		file(f, "/etc/ssh/sshd_config", "", 0o600)

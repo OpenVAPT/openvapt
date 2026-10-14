@@ -149,7 +149,7 @@ func init() {
 		Summary:   "Checks the firmware's SecureBoot variable to see whether the boot chain is verified.",
 		Rationale: "Secure Boot makes the firmware refuse unsigned boot loaders and kernels, which blocks boot kits and unsigned kernels planted by an attacker with disk or console access. Without it, anything written to the boot partition runs at the next reboot.",
 		Detection: "Reads /sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c (the four-byte attribute header followed by one data byte; 1 means enabled). Machines without /sys/firmware/efi boot in legacy BIOS mode and are skipped, as are UEFI machines that expose no SecureBoot variable; an unreadable variable is incomplete. No command such as mokutil is run.",
-		Fix:       "Enable Secure Boot in the firmware set-up and boot a signed shim and kernel (every mainstream distribution ships them). Custom kernels and out-of-tree modules then need signing with a Machine Owner Key. Where the platform cannot do Secure Boot, record the exception.",
+		Fix:       "Enable Secure Boot in the firmware set-up and boot a signed shim and kernel (every mainstream distribution ships them). Custom kernels and out-of-tree modules then need signing with a Machine Owner Key. Where the platform cannot do Secure Boot, record the exception. Caution: unsigned kernels and modules (for example DKMS drivers such as NVIDIA or ZFS) stop loading once it is on, so sign or replace them first and keep console access for the first boot.",
 		Verify:    "mokutil --sb-state  or  od -An -t u1 /sys/firmware/efi/efivars/SecureBoot-*  (the fifth byte is 1 when enabled).",
 		Refs:      []check.Ref{refUEFI, refNIST800123},
 		Standards: check.Standards{CWE: []string{"CWE-1326"}, NIST: []string{"SI-7", "CM-6"}, CISTopic: "Boot integrity (CIS Controls v8 4.1)"},
@@ -180,7 +180,7 @@ func init() {
 		Summary:   "Checks that the cramfs, freevxfs, jffs2, hfs, hfsplus, udf and squashfs kernel modules are disabled in modprobe.d.",
 		Rationale: "Each filesystem driver is kernel code that parses untrusted data. A local user who can mount removable media or a loop device gets the kernel to parse a crafted image with one of these rarely maintained drivers, and several have had memory-corruption bugs. Removing drivers nobody uses removes that attack surface.",
 		Detection: "Reads /etc/modprobe.d/*.conf and /usr/lib/modprobe.d/*.conf and, for each module, accepts  install <module> /bin/false  (or /bin/true) or  blacklist <module>. squashfs is left out when /snap exists because snaps need it. Modules with neither line fail; an unreadable modprobe.d file makes the check incomplete.",
-		Fix:       "Create /etc/modprobe.d/openvapt-filesystems.conf with, for each module:  install <module> /bin/false  and  blacklist <module>  then unload any loaded one with  modprobe -r <module>.",
+		Fix:       "Create /etc/modprobe.d/openvapt-filesystems.conf with, for each module:  install <module> /bin/false  and  blacklist <module>  then unload any loaded one with  modprobe -r <module>. Caution: first confirm that no listed module is in use (lsmod, findmnt); blocking a filesystem a mount or package format needs (for example squashfs for snap packages, or vfat for the EFI system partition) breaks those mounts at the next boot.",
 		Verify:    "for m in cramfs freevxfs jffs2 hfs hfsplus udf squashfs; do modprobe -n -v $m; lsmod | grep -w $m; done",
 		Refs:      []check.Ref{refModprobeD, refKSPP},
 		Standards: check.Standards{CWE: []string{"CWE-1188"}, NIST: []string{"CM-7", "CM-6"}, CISTopic: "Disable unused filesystem kernel modules (CIS Controls v8 4.8)"},
@@ -241,7 +241,7 @@ func init() {
 		Fix:       "Boot with  module.sig_enforce=1  (or  lockdown=integrity) on the kernel command line and sign any out-of-tree modules, or set  kernel.modules_disabled = 1  from a late boot service once every needed module is loaded (it cannot be turned back on without a reboot).",
 		Verify:    "sysctl kernel.modules_disabled; cat /sys/module/module/parameters/sig_enforce /sys/kernel/security/lockdown",
 		Refs:      []check.Ref{refModSign, refKSPP},
-		Standards: check.Standards{CWE: []string{"CWE-693"}, NIST: []string{"SI-7", "CM-7"}, CISTopic: "Restrict kernel module loading (CIS Controls v8 4.8)"},
+		Standards: check.Standards{CWE: []string{"CWE-1188"}, NIST: []string{"SI-7", "CM-7"}, CISTopic: "Restrict kernel module loading (CIS Controls v8 4.8)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			v, err := collect.Sysctl(s, "kernel.modules_disabled")
 			if err != nil {
@@ -275,7 +275,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "HOST-BOOT-006", Title: "No File Integrity Monitoring", Domain: check.DomainHost,
 		Severity: check.Medium, Category: check.CatLogging, Effort: check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:N/I:H/A:N",
+		CVSS:      "CVSS:3.1/AV:L/AC:H/PR:H/UI:N/S:U/C:N/I:H/A:N",
 		Summary:   "Checks that a file integrity tool (AIDE, Tripwire, Samhain or equivalent) is installed and scheduled to run.",
 		Rationale: "After a compromise the first question is which files changed. Without a baseline and a scheduled comparison, a replaced binary, an added SUID file or an edited PAM stack stays invisible for months.",
 		Detection: "Looks for the tools' programs and configuration (/usr/bin/aide, /usr/sbin/aide, /etc/aide/aide.conf, /etc/aide.conf, /usr/sbin/tripwire, /etc/tripwire, /usr/sbin/samhain, /etc/samhainrc, /usr/sbin/osqueryd and /opt/ossec/bin/ossec-syscheckd) and then for a schedule: a file in /etc/cron.d, /etc/cron.daily or /etc/cron.weekly, a systemd timer under /etc/systemd/system or /usr/lib/systemd/system, or a line in /etc/crontab that names the tool. Tool present with no schedule still fails. Stat and glob only; configuration contents are not read except /etc/crontab.",
@@ -342,7 +342,7 @@ func init() {
 		Fix:       "Undo and remove it:  prelink -ua && apt purge prelink  (or  dnf remove prelink). Then re-initialise the integrity database (aide --init).",
 		Verify:    "command -v prelink  should print nothing.",
 		Refs:      []check.Ref{{Title: "prelink(8), Linux man-pages", URL: "https://man7.org/linux/man-pages/man8/prelink.8.html"}, refNIST80053},
-		Standards: check.Standards{CWE: []string{"CWE-693"}, NIST: []string{"SI-7", "CM-7"}, CISTopic: "Prelink not installed (CIS Controls v8 4.8)"},
+		Standards: check.Standards{CWE: []string{"CWE-344"}, NIST: []string{"SI-7", "CM-7"}, CISTopic: "Prelink not installed (CIS Controls v8 4.8)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			var found []string
 			for _, p := range []string{"/usr/sbin/prelink", "/usr/bin/prelink", "/etc/prelink.conf"} {

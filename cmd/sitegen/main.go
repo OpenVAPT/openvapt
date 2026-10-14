@@ -668,14 +668,21 @@ func chartData(cs []*check.Check) map[string]any {
 					row[i]++
 				}
 			}
-			for _, x := range c.CIS {
-				cis[x]++
-			}
-			for _, x := range c.NISTCSF {
-				csf[x]++
-			}
 		}
 		matrix = append(matrix, row)
+	}
+	// Framework coverage counts each check toward the safeguard and the CSF
+	// subcategories it maps itself (audit A2-08), never toward a whole
+	// control through its category.
+	for _, k := range cs {
+		for _, x := range k.Standards.CIS {
+			if x != check.CISNone {
+				cis[x]++
+			}
+		}
+		for _, x := range k.Standards.CSF {
+			csf[x]++
+		}
 	}
 	toNV := func(m map[string]int, label func(string) string) []nv {
 		var out []nv
@@ -685,26 +692,27 @@ func chartData(cs []*check.Check) map[string]any {
 		sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 		return out
 	}
-	cisNames := map[string]string{"2": "Software Asset Inventory", "3": "Data Protection", "4": "Secure Configuration", "5": "Account Management", "6": "Access Control Management", "7": "Vulnerability Management", "8": "Audit Log Management", "12": "Network Infrastructure", "13": "Network Monitoring and Defense", "16": "Application Software Security"}
-	csfNames := map[string]string{"PR.AA": "Identity Management, Authentication and Access Control", "PR.DS": "Data Security", "PR.PS": "Platform Security", "PR.IR": "Technology Infrastructure Resilience", "ID.RA": "Risk Assessment", "DE.CM": "Continuous Monitoring"}
-	cisNV := toNV(cis, func(k string) string { return "CIS " + k + " " + cisNames[k] })
+	cisNV := toNV(cis, func(k string) string { return "CIS " + k + " " + check.CISSafeguards[k] })
 	sort.Slice(cisNV, func(i, j int) bool { return cisKey(cisNV[i].Name) < cisKey(cisNV[j].Name) })
 	return map[string]any{"severity": sev, "domain": dom, "owasp": owasp, "categories": cats,
 		"severities": []string{"Critical", "High", "Medium", "Low", "Info"}, "matrix": matrix,
-		"cis": cisNV, "csf": toNV(csf, func(k string) string { return k + " " + csfNames[k] })}
+		"cis": cisNV, "csf": toNV(csf, func(k string) string { return k + " " + check.CSFSubcategories[k] })}
 }
 
-// cisKey extracts the control number from "CIS 12 ..." for numeric sorting.
+// cisKey turns "CIS 12.3 ..." into 12003 for numeric sorting by control,
+// then safeguard.
 func cisKey(name string) int {
 	f := strings.Fields(strings.TrimPrefix(name, "CIS "))
 	if len(f) == 0 {
 		return 0
 	}
-	n, err := strconv.Atoi(f[0])
+	ctl, sg, _ := strings.Cut(f[0], ".")
+	n, err := strconv.Atoi(ctl)
 	if err != nil {
 		return 0
 	}
-	return n
+	m, _ := strconv.Atoi(sg)
+	return n*1000 + m
 }
 
 // ---------- SEO / GEO artefacts ----------

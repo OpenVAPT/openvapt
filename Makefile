@@ -8,10 +8,15 @@ COMMIT  ?= $(shell git rev-parse HEAD 2>/dev/null || echo unknown)
 LDFLAGS   := -s -w -X github.com/openvapt/openvapt/internal/version.Version=$(VERSION) -X github.com/openvapt/openvapt/internal/version.Commit=$(COMMIT)
 GOBUILD   := CGO_ENABLED=0 go build -trimpath -buildvcs=false -ldflags "$(LDFLAGS)"
 
-.PHONY: build check test site release vulndb clean
+.PHONY: build check test site release vulndb clean man
 
 build:
 	$(GOBUILD) -o openvapt ./cmd/openvapt
+
+# The manual page is generated from the same command and flag definitions
+# the CLI uses, so it never drifts: openvapt man > openvapt.1
+man:
+	go run ./cmd/openvapt man > openvapt.1
 
 check:
 	test -z "$$(gofmt -l .)"
@@ -45,4 +50,4 @@ release:
 	cd dist/release && sha256sum openvapt_linux_* > SHA256SUMS
 
 clean:
-	rm -rf openvapt dist
+	rm -rf openvapt openvapt.1 dist

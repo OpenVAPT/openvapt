@@ -97,3 +97,32 @@ func TestConfirmTerms(t *testing.T) {
 		}
 	}
 }
+
+// A2-02: a selection that names unknown checks or selects nothing is a usage
+// error (exit 2), and a report with zero checks never exits 0.
+func TestEmptyOrUnknownSelectionIsUsageError(t *testing.T) {
+	for _, c := range []struct{ only, skip, want string }{
+		{"NOPE-999", "", "NOPE-999"},
+		{"HOST-SHH-", "", "HOST-SHH-"},
+		{"", "BOGUS-", "BOGUS-"},
+		{"HOST-", "HOST-", "zero checks"},
+	} {
+		f := scanFlags{formats: "json", only: c.only, skip: c.skip}
+		err := f.prepare()
+		var ee *exitError
+		if !errors.As(err, &ee) || ee.code != 2 || !strings.Contains(err.Error(), c.want) {
+			t.Errorf("only=%q skip=%q: got %v", c.only, c.skip, err)
+		}
+	}
+	if code, _ := exitCode(&report.Report{}, ""); code == 0 {
+		t.Error("a scan that ran zero checks exited 0")
+	}
+}
+
+func TestSafeCommandLineDropsPathsAndSeeds(t *testing.T) {
+	got := safeCommandLine([]string{"/home/alice/bin/openvapt", "demo", "--lab", "practice", "--seed", "S1234567", "--out", "/home/alice/r", "--only=HOST-", "--suppress=/home/alice/s.json", "--no-sign", "--format", "json"})
+	want := "openvapt demo --lab practice --seed <value> --out <value> --only=HOST- --suppress=<value> --no-sign --format json"
+	if got != want {
+		t.Errorf("got  %q\nwant %q", got, want)
+	}
+}

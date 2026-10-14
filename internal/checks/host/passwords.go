@@ -100,10 +100,10 @@ func init() {
 		ID: "HOST-PWD-003", Title: "Short Minimum Password Length", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatIdentity, Effort: check.EffortLow,
 		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
-		Summary:   "Checks that the password quality policy requires at least 12 characters.",
-		Rationale: "Length is the single most effective property against guessing. NIST SP 800-63B recommends allowing long passphrases and rejecting short passwords.",
-		Detection: "Reads minlen from /etc/security/pwquality.conf and /etc/security/pwquality.conf.d/*.conf. A value below 12, or no pwquality configuration, fails.",
-		Fix:       "Install libpam-pwquality (Debian/Ubuntu) or libpwquality (RHEL family) and set  minlen = 12  (or more) in /etc/security/pwquality.conf.",
+		Summary:   "Checks that the password quality policy requires at least 15 characters.",
+		Rationale: "Length is the single most effective property against guessing. NIST SP 800-63B-4 (2025) requires at least 15 characters for a password used as the only authentication factor, and recommends allowing long passphrases.",
+		Detection: "Reads minlen from /etc/security/pwquality.conf and /etc/security/pwquality.conf.d/*.conf. A value of 15 or more passes; a value below 15, or no pwquality configuration, fails.",
+		Fix:       "Install libpam-pwquality (Debian/Ubuntu) or libpwquality (RHEL family) and set  minlen = 15  (or more) in /etc/security/pwquality.conf.",
 		Verify:    "grep -r '^minlen' /etc/security/pwquality.conf /etc/security/pwquality.conf.d/",
 		Refs:      []check.Ref{refPwquality, refNIST63B},
 		Standards: check.Standards{CWE: []string{"CWE-521"}, OWASP: []string{"A07:2021"}, NIST: []string{"IA-5(1)"}, CISTopic: "Password creation requirements"},
@@ -114,8 +114,8 @@ func init() {
 				return []check.Result{check.FailR("pwquality", "No minimum password length is configured (pwquality minlen)")}
 			}
 			n, err := strconv.Atoi(strings.TrimSpace(v))
-			if err != nil || n < 12 {
-				return []check.Result{check.FailR(path, "minlen = "+v+" (recommended 12 or more)")}
+			if err != nil || n < 15 {
+				return []check.Result{check.FailR(path, "minlen = "+v+" (NIST SP 800-63B-4 requires 15 or more for single-factor passwords)")}
 			}
 			return []check.Result{check.PassR(path, "minlen = "+v)}
 		},
@@ -126,9 +126,9 @@ func init() {
 		Severity: check.Medium, Category: check.CatIdentity, Effort: check.EffortMedium,
 		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
 		Summary:   "Checks that PAM temporarily locks accounts after repeated failed logins.",
-		Rationale: "Without lockout, local and PAM-backed remote logins can be guessed indefinitely. A temporary lock after a few failures slows attacks and makes them visible.",
+		Rationale: "Without lockout, local and PAM-backed remote logins can be guessed indefinitely. A temporary lock after a few failures slows attacks and makes them visible. This check covers whether lockout exists and its deny threshold; HOST-PAM-002 covers only how long the lock lasts (unlock_time), so one missing lockout is reported once, here.",
 		Detection: "Reads the PAM authentication stacks (/etc/pam.d/common-auth, /etc/pam.d/system-auth, /etc/pam.d/password-auth) and requires pam_faillock in both the preauth and authfail positions (or pam_tally2) with deny set to 10 or fewer failures (pam_faillock defaults to 3; deny is read from the module line or /etc/security/faillock.conf).",
-		Fix:       "Enable pam_faillock (authselect enable-feature with-faillock on RHEL family; pam-auth-update or a faillock profile on Debian/Ubuntu) with settings such as deny=5 unlock_time=900 in /etc/security/faillock.conf. Test carefully in a second session first.",
+		Fix:       "Enable pam_faillock (authselect enable-feature with-faillock on RHEL family; pam-auth-update or a faillock profile on Debian/Ubuntu) with settings such as deny=5 unlock_time=900 in /etc/security/faillock.conf. Keep a root session open and test a login in a second session before closing it: a wrong PAM line can lock every user out, including administrators. Do not lock root (no even_deny_root) unless console access is assured.",
 		Verify:    "grep -E 'pam_faillock|pam_tally2' /etc/pam.d/common-auth /etc/pam.d/system-auth",
 		Refs:      []check.Ref{refFaillock, refNIST80053},
 		Standards: check.Standards{CWE: []string{"CWE-307"}, OWASP: []string{"A07:2021"}, NIST: []string{"AC-7"}, CISTopic: "Lockout for failed password attempts"},
@@ -280,7 +280,7 @@ func init() {
 		Fix:       "Remove the '+' lines (with vipw / vigr) and use a modern directory service such as SSSD with LDAPS if central accounts are needed.",
 		Verify:    "grep '^+' /etc/passwd /etc/shadow /etc/group  should print nothing.",
 		Refs:      []check.Ref{{Title: "nsswitch.conf(5), Linux man-pages (compat mode)", URL: "https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html"}},
-		Standards: check.Standards{CWE: []string{"CWE-287"}, NIST: []string{"IA-2", "CM-7"}, CISTopic: "No legacy + entries"},
+		Standards: check.Standards{CWE: []string{"CWE-288"}, NIST: []string{"IA-2", "CM-7"}, CISTopic: "No legacy + entries"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			var bad []string
 			for _, p := range []string{"/etc/passwd", "/etc/shadow", "/etc/group"} {
@@ -311,7 +311,7 @@ func init() {
 		Fix:       "Delete .rhosts and .shosts files. Replace .netrc credentials with a secret manager or key-based authentication, then delete the file and rotate the passwords it contained.",
 		Verify:    "Re-run this check; no files should be listed.",
 		Refs:      []check.Ref{{Title: "MITRE ATT&CK T1552.001, Unsecured Credentials: Credentials In Files", URL: "https://attack.mitre.org/techniques/T1552/001/"}},
-		Standards: check.Standards{CWE: []string{"CWE-256", "CWE-287"}, NIST: []string{"IA-5", "CM-6"}, CISTopic: "No .rhosts, .netrc files"},
+		Standards: check.Standards{CWE: []string{"CWE-256", "CWE-290"}, NIST: []string{"IA-5", "CM-6"}, CISTopic: "No .rhosts, .netrc files"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			text, _, ok := readText(ctx, s, "/etc/passwd")
 			if !ok {

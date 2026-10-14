@@ -4,6 +4,49 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Stream: r2-cvss
+
+- CVSS v3.1 vectors of 18 host checks for detective gaps and local-only weaknesses (audit, journal, logging, time sync, SSH log level, martian logging, file integrity monitoring, rootless Docker, running kernel behind installed kernel) now use a local attack vector; severities are unchanged, and the report Methodology explains the rule (A2-09).
+
+### Stream: r2-redact-report
+
+- Redaction now masks PGP and PuTTY private keys, Laravel APP_KEY, Redis masterauth, SSSD ldap_default_authtok, Postfix static: maps, curl -u and --user, sshpass -p values, Azure AccountKey and SAS signatures, Slack webhook URLs, Grafana, SendGrid and npm tokens, user:password@host, and AWS secret keys next to their key id (A2-01).
+- `--only` or `--skip` values that match no check, or a selection of zero checks, now exit 2 with a usage error; a report with zero checks never exits 0 (A2-02).
+- Markdown reports show evidence in code spans sized to the content with no HTML entities, and escape Markdown syntax and autolinks in prose (A2-10).
+- The executive summary in HTML and Markdown is now built from the data: scope, counts, top 5 risks by severity then CVSS with a one-line reason, coverage gaps, suppressions, snapshot age and the main limitation (A2-11).
+- Reports count Incomplete targets inside passed or failed checks (`incomplete_targets`, matching SARIF), give every finding a confidence level (high, medium or low) in all formats, and link each failed finding to the False Positive form and the suppression docs (A2-12).
+- SARIF adds `invocations` (success, start and end time, a command line without paths or seeds) and `partialFingerprints` per result (A2-12).
+### Stream: standards
+
+- NIST SP 800-53 SA-12 (withdrawn in Rev. 5) replaced by SR-3, SR-4 and SR-11 on HOST-PKG-002 and HOST-PKG-003.
+- WSTG references pinned to v4.2 links and labelled "WSTG v4.2" on the site.
+- 86 CWE mappings that MITRE marks Discouraged replaced with specific weaknesses (CWE v4.20); 4 checks without a CWE now carry one.
+- Every check maps to a CIS Controls v8 safeguard (`cis_v8`) and NIST CSF 2.0 subcategories (`csf_2`); the coverage page and catalogue.json count per safeguard and subcategory.
+- HOST-PWD-003 now requires a minimum password length of 15 (NIST SP 800-63B-4 single-factor minimum).
+- New test rejects withdrawn 800-53 controls, Discouraged CWEs, empty CWE and CIS references without a safeguard id.
+### Stream: checks-fp
+
+- Installed packages on Debian and Ubuntu come from /var/lib/dpkg/status entries marked "install ok installed"; a package removed but not purged no longer counts (HOST-SVC-002..012, HOST-PKG-004, HOST-PKG-005).
+- Container detection (/.dockerenv, /run/.containerenv, /proc/1/cgroup, /proc/self/mountinfo, container= in /proc/1/environ): boot, Secure Boot, kernel module, non-namespaced kernel parameter, host mount, time sync, host firewall and auditd checks are Skipped with "this setting belongs to the host", and the report's Limitations say the scan ran in a container.
+- NET-DB-014 and NET-DB-015 judge the default by server flavour and version: pass with a note on MySQL 8.0 and later, fail on MariaDB and MySQL before 8.0, Incomplete when unknown.
+- NET-MAIL-002 and NET-MAIL-003 pass with a note when Postfix inet_interfaces is loopback only; NET-DB-023 passes with a note when Redis binds loopback only with protected-mode on.
+- HOST-KRN-022 passes with a note when AppArmor restricts unprivileged user namespaces (Ubuntu 23.10 and later); HOST-KRN-025 passes with a note when the IPv6 default route was learned from a router advertisement; HOST-KRN-027 passes with a note when kdump is enabled.
+- HOST-PAM-002 is Skipped when no pam_faillock exists, so HOST-PWD-004 alone reports a missing lockout (PWD-004 covers deny, PAM-002 covers unlock_time).
+- HOST-AUD-002..007 need auditd active for a Pass (Incomplete otherwise) and say the loaded rules were not verified; HOST-CTR-010 reads dockerd flags from docker.service drop-ins and is Incomplete when daemon.json cannot be read.
+- HOST-USR-002 rescored to a local attack vector, 7.8 High (Critical only together with HOST-SSH-003).
+- Caution sentences added to Fix text that could lock users out or break services (kernel parameters, PAM, mounts, cron.allow, SUID removal, auditd, Secure Boot, module blocking, firewall, mail and database TLS, legacy service removal).
+
+### Stream: cli-suppress
+
+- `--suppress <file>` for scan and demo: accepted findings need a reason and an expiry (at most 365 days); they stay visible in every report format, carry a SARIF external suppression, and do not count toward `--fail-on`.
+- `openvapt man` prints a manual page generated from the command table; `make man` writes `openvapt.1`.
+- `openvapt completion bash|zsh|fish` prints shell completion generated from the same command and flag definitions.
+- Help, the man page and the README now share one exit code table, checked by a test.
+### Stream: academy-quizzes (2026-10-14)
+- Academy: every module quiz now has at least five questions with four options, plausible distractors and an explanation; the 21 original modules (F1 to F3, P1 to P14, A1 to A4) gained new questions and the newer modules gained options.
+- Academy: long sentences are split so none runs over 30 words (original modules aim for 25 or fewer); tests enforce quiz depth, distinct options, answer ranges and sentence length for every module.
+- Academy fact fixes: P2 now says RFC 9142 deprecates SHA-1 key exchange (it does not cover MACs); P7 states NIST SP 800-63B-4's 15-character minimum for single-factor passwords (8 with another factor); A4 points to the lab fixtures in internal/lab instead of only lab.go.
+
 ### Fix: asset cache busting (2026-10-14)
 - The site's own CSS and JavaScript links carry a content hash (`?v=`), and the chart and catalogue loaders add a hash of the vendored libraries, so the new cache headers can never serve a stale stylesheet or script after a deploy. Found by browser-testing the live site at phone width.
 

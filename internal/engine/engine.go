@@ -50,6 +50,30 @@ func match(id string, list []string) bool {
 	return false
 }
 
+// Unmatched returns the ids or prefixes in list that name no registered
+// check, so a typo in --only or --skip is reported instead of ignored.
+func Unmatched(list []string) []string {
+	var bad []string
+	all := check.All()
+	for _, p := range list {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		found := false
+		for _, c := range all {
+			if match(c.ID, []string{p}) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			bad = append(bad, p)
+		}
+	}
+	return bad
+}
+
 // Select returns the checks chosen by Only/Skip.
 func Select(o Options) []*check.Check {
 	var out []*check.Check
@@ -83,6 +107,7 @@ func Run(ctx context.Context, s sys.System, o Options) *report.Report {
 	}
 	checks := Select(o)
 	started := time.Now().UTC()
+	ctr := collect.DetectContainer(ctx, s)
 
 	findings := make([]report.Finding, len(checks))
 	sem := make(chan struct{}, o.Parallel)
@@ -93,6 +118,10 @@ func Run(ctx context.Context, s sys.System, o Options) *report.Report {
 			defer wg.Done()
 			sem <- struct{}{}
 			defer func() { <-sem }()
+			if ctr.Inside && collect.HostOnly(c.ID) {
+				findings[i] = containerSkip(c, ctr)
+				return
+			}
 			findings[i] = runOne(ctx, s, c, o.Timeout)
 		}(i, c)
 	}
@@ -125,7 +154,7 @@ func Run(ctx context.Context, s sys.System, o Options) *report.Report {
 		},
 		Findings:    findings,
 		Methodology: report.Methodology,
-		Limitations: limitations(),
+		Limitations: limitations(ctr),
 		Disclaimer:  report.Disclaimer,
 	}
 	r.Scan.VulnDB = snapshotInfo(ctx, s, r.Scan.Finished)
@@ -211,6 +240,14 @@ func runOne(parent context.Context, s sys.System, c *check.Check, timeout time.D
 	return f
 }
 
+// containerSkip records a host-only check as Skipped inside a container.
+func containerSkip(c *check.Check, ctr collect.Container) report.Finding {
+	f := report.FromCheck(c)
+	f.Results = []check.Result{check.SkipR(c.ID, collect.ContainerSkipMessage(ctr))}
+	f.Status = string(check.Skip)
+	return f
+}
+
 // overall never lets a Pass hide incomplete coverage.
 func overall(rs []check.Result) check.Status {
 	has := map[check.Status]bool{}
@@ -227,8 +264,11 @@ func overall(rs []check.Result) check.Status {
 
 // limitations adds a pre-release notice to the standard limitations when
 // the report was produced by an Alpha, Beta, Release Candidate or local build.
-func limitations() []string {
+func limitations(ctr collect.Container) []string {
 	out := append([]string{}, report.Limitations...)
+	if ctr.Inside {
+		out = append(out, "This scan ran inside a container ("+ctr.Type+"; "+ctr.Evidence+"). Boot loader, Secure Boot, kernel module, non-namespaced kernel parameter, host mount, time synchronisation, host firewall and audit daemon checks were skipped because those settings belong to the host; scan the host itself to assess them.")
+	}
 	if version.PreRelease() {
 		out = append(out, "This report was produced by a pre-release build of OpenVAPT ("+version.ChannelName()+", "+version.Version+"). Pre-release builds may be incomplete or wrong; confirm important findings by hand.")
 	}

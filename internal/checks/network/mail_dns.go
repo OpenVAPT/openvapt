@@ -93,7 +93,7 @@ func init() {
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
 		summary:   "smtpd_tls_protocols or smtpd_tls_mandatory_protocols is unset or still allows TLSv1 or TLSv1.1.",
 		rationale: "The Postfix default for opportunistic TLS still admits TLS 1.0 and 1.1, which RFC 8996 deprecates. Setting a floor of TLS 1.2 is compatible with every current mail server and client. Severity is Medium rather than High because SMTP opportunistic TLS already tolerates fallback to plaintext. Postfix uses the system OpenSSL, so when its configuration already sets a floor of TLS 1.2 (MinProtocol in openssl.cnf on Debian 12 and Ubuntu 22.04 and later, or a crypto policy of DEFAULT, FUTURE or FIPS on the RHEL family) the old versions cannot be negotiated whatever main.cf says; the check then reports Pass and names the floor, and the directives remain worth setting so the configuration says what it does.",
-		detection: "When smtpd_tls_security_level is not none, reads smtpd_tls_protocols and smtpd_tls_mandatory_protocols. Fails when either is unset or, in list form, does not exclude both TLSv1 and TLSv1.1, or, in >= form, names a version below TLSv1.2, unless /etc/crypto-policies/config or openssl.cnf (with its .include files) shows the system library already refuses TLS 1.0 and 1.1, in which case the result is Pass with the floor as evidence.",
+		detection: "When smtpd_tls_security_level is not none, reads smtpd_tls_protocols and smtpd_tls_mandatory_protocols. Fails when either is unset or, in list form, does not exclude both TLSv1 and TLSv1.1, or, in >= form, names a version below TLSv1.2, unless /etc/crypto-policies/config or openssl.cnf (with its .include files) shows the system library already refuses TLS 1.0 and 1.1, in which case the result is Pass with the floor as evidence. Also passes with a note when inet_interfaces is loopback only (localhost, loopback-only or loopback addresses), since no network client can connect.",
 		fix:       "Add  smtpd_tls_protocols = >=TLSv1.2  and  smtpd_tls_mandatory_protocols = >=TLSv1.2  (Postfix 3.6 and newer; on older releases use  !SSLv2, !SSLv3, !TLSv1, !TLSv1.1 ), then postfix reload.",
 		verify:    "postconf smtpd_tls_protocols smtpd_tls_mandatory_protocols",
 		patterns:  postfixFiles, markers: postfixMarkers,
@@ -102,6 +102,9 @@ func init() {
 		evaluateSys: func(ctx context.Context, s sys.System, fs []collect.ConfigFile) (bool, []string, string) {
 			if postfixTLSLevel(fs) == "none" {
 				return false, []string{"smtpd_tls_security_level is none; see NET-MAIL-001"}, ""
+			}
+			if ev, ok := postfixLoopbackOnly(fs); ok {
+				return false, ev, "Postfix listens on loopback only (inet_interfaces), so no network client can negotiate an old TLS version; set a TLS 1.2 floor before accepting mail from the network"
 			}
 			var ev []string
 			bad := false
@@ -135,18 +138,24 @@ func init() {
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		summary:   "disable_vrfy_command is not yes, so anyone who connects can ask the server whether a mailbox exists.",
 		rationale: "VRFY lets a sender enumerate valid addresses one by one, which feeds spam lists and targeted phishing. Legitimate mail flow never needs it.",
-		detection: "Reads main.cf for disable_vrfy_command. Fails when absent (default no) or set to no.",
+		detection: "Reads main.cf for disable_vrfy_command. Fails when absent (default no) or set to no, unless inet_interfaces is loopback only (localhost, loopback-only or loopback addresses): then no network client can connect and the result is Pass with a note.",
 		fix:       "Add  disable_vrfy_command = yes  to main.cf and postfix reload.",
 		verify:    "postconf disable_vrfy_command  should print yes; an authorised  VRFY postmaster  over a local SMTP session should return 502.",
 		patterns:  postfixFiles, markers: postfixMarkers,
 		refs: []check.Ref{{Title: "Postfix, disable_vrfy_command", URL: "https://www.postfix.org/postconf.5.html#disable_vrfy_command"}, {Title: "RFC 5321, Simple Mail Transfer Protocol, section 7.3", URL: "https://www.rfc-editor.org/rfc/rfc5321.html#section-7.3"}},
-		std:  check.Standards{CWE: []string{"CWE-204", "CWE-200"}, OWASP: []string{"A05:2021"}, NIST: []string{"CM-7", "SI-11"}, CISTopic: "Mail server user enumeration"},
-		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
+		std:  check.Standards{CWE: []string{"CWE-204"}, OWASP: []string{"A05:2021"}, NIST: []string{"CM-7", "SI-11"}, CISTopic: "Mail server user enumeration"},
+		evaluateSys: func(_ context.Context, _ sys.System, fs []collect.ConfigFile) (bool, []string, string) {
 			ev := evidence(fs, "disable_vrfy_command")
-			if len(ev) == 0 {
-				return true, []string{"disable_vrfy_command is not set; the default is no"}
+			if hasValue(fs, func(v string) bool { return v == "yes" }, "disable_vrfy_command") {
+				return false, ev, ""
 			}
-			return !hasValue(fs, func(v string) bool { return v == "yes" }, "disable_vrfy_command"), ev
+			if lo, ok := postfixLoopbackOnly(fs); ok {
+				return false, append(ev, lo...), "VRFY is not disabled, but Postfix listens on loopback only (inet_interfaces), so no network client can use it; disable it before accepting mail from the network"
+			}
+			if len(ev) == 0 {
+				return true, []string{"disable_vrfy_command is not set; the default is no"}, ""
+			}
+			return true, ev, ""
 		},
 		passMsg: "VRFY is disabled",
 	})
@@ -157,7 +166,7 @@ func init() {
 		summary:   "Dovecot's ssl setting is yes or no instead of required, so IMAP and POP3 clients may use unencrypted sessions.",
 		rationale: "With ssl = yes, TLS is offered but a client may keep the whole session in the clear, and non-plaintext mechanisms still travel unprotected. ssl = required refuses any command before STARTTLS or implicit TLS, which makes disable_plaintext_auth (NET-DB-013) effective.",
 		detection: "Reads dovecot.conf, conf.d/10-ssl.conf and local.conf for ssl. Fails unless the last value is required. ssl_min_protocol is reported as evidence.",
-		fix:       "Set  ssl = required  and  ssl_min_protocol = TLSv1.2  in conf.d/10-ssl.conf, then doveadm reload. Prefer implicit TLS ports 993 and 995 for clients.",
+		fix:       "Set  ssl = required  and  ssl_min_protocol = TLSv1.2  in conf.d/10-ssl.conf, then doveadm reload. Prefer implicit TLS ports 993 and 995 for clients. Caution: clients set to plaintext stop connecting, so confirm every mail client uses TLS first.",
 		verify:    "doveconf ssl ssl_min_protocol  should print required and TLSv1.2.",
 		patterns:  dovecotFiles, markers: dovecotMarkers,
 		refs: []check.Ref{refDovecotSSL, refRFC8996},
@@ -184,7 +193,7 @@ func init() {
 		verify:    "dig @127.0.0.1 version.bind txt chaos +short  should print the chosen string.",
 		patterns:  bindFiles, markers: bindMarkers,
 		refs: []check.Ref{{Title: "BIND 9 Administrator Reference Manual, version statement", URL: "https://bind9.readthedocs.io/en/latest/reference.html#namedconf-statement-version"}, refBINDOptions},
-		std:  check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021"}, NIST: []string{"CM-6", "SI-11"}, CISTopic: "DNS server version disclosure"},
+		std:  check.Standards{CWE: []string{"CWE-497"}, OWASP: []string{"A05:2021"}, NIST: []string{"CM-6", "SI-11"}, CISTopic: "DNS server version disclosure"},
 		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
 			raw := strings.ToLower(joinRaw(fs))
 			if len(values(fs, "version")) > 0 || strings.Contains(raw, "version \"") || strings.Contains(raw, "version none") {
@@ -205,7 +214,7 @@ func init() {
 		verify:    "dig @127.0.0.1 dnssec-failed.org a  should return SERVFAIL, and a signed name should show the ad flag.",
 		patterns:  bindFiles, markers: bindMarkers,
 		refs: []check.Ref{{Title: "BIND 9 Administrator Reference Manual, dnssec-validation", URL: "https://bind9.readthedocs.io/en/latest/reference.html#namedconf-statement-dnssec-validation"}, {Title: "NIST SP 800-81 Rev. 2, Secure Domain Name System Deployment Guide", URL: "https://csrc.nist.gov/pubs/sp/800/81/r2/final"}},
-		std:  check.Standards{CWE: []string{"CWE-345", "CWE-350"}, OWASP: []string{"A08:2021"}, NIST: []string{"SC-20", "SC-21"}, CISTopic: "DNS resolver validation"},
+		std:  check.Standards{CWE: []string{"CWE-347", "CWE-350"}, OWASP: []string{"A08:2021"}, NIST: []string{"SC-20", "SC-21"}, CISTopic: "DNS resolver validation"},
 		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
 			raw := strings.ToLower(joinRaw(fs))
 			i := strings.Index(raw, "dnssec-validation")
@@ -237,4 +246,25 @@ func joinRaw(fs []collect.ConfigFile) string {
 		}
 	}
 	return b.String()
+}
+
+// postfixLoopbackOnly reports whether main.cf limits Postfix to loopback
+// interfaces. The default inet_interfaces is all.
+func postfixLoopbackOnly(fs []collect.ConfigFile) ([]string, bool) {
+	v := values(fs, "inet_interfaces")
+	if len(v) == 0 {
+		return nil, false
+	}
+	last := strings.ToLower(strings.TrimSpace(v[len(v)-1]))
+	if last == "loopback-only" {
+		return []string{"inet_interfaces = " + last}, true
+	}
+	var addrs []string
+	for _, a := range strings.FieldsFunc(last, func(r rune) bool { return r == ',' || r == ' ' || r == '\t' }) {
+		addrs = append(addrs, strings.Trim(a, "[]"))
+	}
+	if allLoopback(addrs) {
+		return []string{"inet_interfaces = " + last}, true
+	}
+	return nil, false
 }

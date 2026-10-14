@@ -94,16 +94,24 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 | `openvapt diff old.json new.json` | What was fixed, what is new, what is still open |
 | `openvapt verify report.json [--key-id ID]` | Confirm a signed report was not edited |
 | `openvapt terms` / `version` | Terms of use, version |
+| `openvapt man` | Print the manual page: `openvapt man > openvapt.1`, then `man ./openvapt.1` |
+| `openvapt completion bash\|zsh\|fish` | Print a shell completion script, for example `source <(openvapt completion bash)` |
 
-Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`).
+Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`), `--suppress` (a suppression file, below).
+
+### Suppressing Accepted Findings
+
+`--suppress <file>` names a JSON list of accepted findings, in the spirit of the Grype and Trivy ignore files but stricter. No file is ever loaded unless you name it. Each entry has `id` (a check id, required), `target` (optional: an exact target or a glob such as `/etc/ssh/sshd_config.d/*`; empty means every target of that check), `reason` (required, non-empty), `expires` (required, `YYYY-MM-DD`, at most 365 days ahead) and `added_by` (optional). See [docs/suppress.sample.json](docs/suppress.sample.json).
+
+A malformed file, an unknown key, an unknown check id, or an entry without a reason or expiry is refused with exit code 2 before any scanning starts. Expired entries are ignored and listed as a warning. Suppressions are visible, never silent: a suppressed finding keeps its Fail status and severity in every format, appears in a Suppressed Findings section of the HTML and Markdown reports with its reason and expiry, carries a SARIF `suppressions` entry of kind `external` with the reason as justification, and the report header states how many results were suppressed and the file's SHA-256. Suppressed findings do not count toward `--fail-on`; coverage gaps and errors still do. The file is read with the same bounded regular-file reader as reports (1 MiB cap).
 
 Exit codes, for scripts and CI:
 
 | Code | Meaning |
 |---|---|
-| 0 | Completed; no finding at or above the `--fail-on` severity, and no coverage gap |
-| 2 | Invalid arguments or usage |
-| 3 | Findings at or above the `--fail-on` severity (default: Critical or High) |
+| 0 | Completed; no unsuppressed finding at or above the `--fail-on` severity, and no coverage gap |
+| 2 | Invalid arguments or usage, including a rejected `--suppress` or `--baseline` file |
+| 3 | Unsuppressed findings at or above the `--fail-on` severity (default: Critical or High) |
 | 4 | Incomplete coverage: at least one check could not observe enough to decide |
 | 5 | Internal error, a check ended with an error, or the scan was interrupted |
 | 6 | The report could not be written |

@@ -67,7 +67,7 @@ func init() {
 			fix:       "Keep manifests outside the public web root (for example serve only a public/ subfolder), or deny them at the web server.",
 			verify:    "curl -s -o /dev/null -w '%{http_code}' https://<site>/composer.lock  should print 403 or 404.",
 			refs:      []check.Ref{refWSTGConf04},
-			std:       check.Standards{CWE: []string{"CWE-200", "CWE-538"}, OWASP: []string{"A05:2021", "A06:2021"}, ASVS: []string{"12.5.1"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"CM-7"}},
+			std:       check.Standards{CWE: []string{"CWE-538"}, OWASP: []string{"A05:2021", "A06:2021"}, ASVS: []string{"12.5.1"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"CM-7"}},
 			probes: []probe{{"/composer.json", jsonWith(`"require"`)}, {"/composer.lock", jsonWith(`"packages"`)}, {"/package.json", jsonWith(`"dependencies"`)},
 				{"/package-lock.json", jsonWith(`"lockfileVersion"`)}, {"/yarn.lock", statusWith("# yarn lockfile")}, {"/Gemfile.lock", statusWith("GEM\n", "BUNDLED WITH")}},
 		},
@@ -80,7 +80,7 @@ func init() {
 			fix:       "Remove the default site or replace its index page, and disable unused virtual hosts.",
 			verify:    "Open the site in a browser; the default page should not appear.",
 			refs:      []check.Ref{refWSTGInfo02},
-			std:       check.Standards{CWE: []string{"CWE-1188", "CWE-200"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-INFO-02", "WSTG-CONF-02"}, NIST: []string{"CM-7"}},
+			std:       check.Standards{CWE: []string{"CWE-1188", "CWE-497"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-INFO-02", "WSTG-CONF-02"}, NIST: []string{"CM-7"}},
 			probes:    []probe{{"/", statusWith("<h1>It works!</h1>", "Apache2 Default Page", "Apache2 Ubuntu Default Page", "Welcome to nginx!", "Test Page for the Apache HTTP Server", "Congratulations! Your LiteSpeed Web Server")}},
 		},
 		exposureRule{
@@ -125,7 +125,7 @@ func init() {
 			fix:       "Restrict the users endpoint to authenticated requests with a security plugin or a small rest_endpoints filter, and use login names that differ from public display names.",
 			verify:    "curl -s https://<site>/wp-json/wp/v2/users  should return 401, 403 or 404.",
 			refs:      []check.Ref{{Title: "WordPress Developer Resources, REST API Users endpoint", URL: "https://developer.wordpress.org/rest-api/reference/users/"}},
-			std:       check.Standards{CWE: []string{"CWE-200", "CWE-204"}, OWASP: []string{"A07:2021"}, WSTG: []string{"WSTG-IDNT-04"}, NIST: []string{"CM-6", "SI-11"}},
+			std:       check.Standards{CWE: []string{"CWE-204"}, OWASP: []string{"A07:2021"}, WSTG: []string{"WSTG-IDNT-04"}, NIST: []string{"CM-6", "SI-11"}},
 			probes:    []probe{{"/wp-json/wp/v2/users", jsonWith(`"slug"`, `"id"`)}},
 		},
 	} {

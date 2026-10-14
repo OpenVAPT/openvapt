@@ -34,7 +34,7 @@ var auditPamPkg = []Module{
 				"Every local log can be edited by root. A copy that already left the machine, through rsyslog forwarding, syslog-ng or systemd-journal-upload, is the record an investigation can trust (HOST-AUD-011). Forward over TLS so the logs are not readable in transit. This is AU-9(2), storing audit records on a separate system, and CIS Controls v8 safeguard 8.9.",
 			}},
 			{"In Summary", []string{
-				"Running auditd is not the same as recording. Load rules for identity files, logins, time changes, modules and privileged commands, lock the configuration, protect the log directory, make the daemon act when the disk fills, keep the journal persistent and send a copy somewhere an attacker cannot reach.",
+				"Running auditd is not the same as recording. Load rules for identity files, logins, time changes, modules and privileged commands, and lock the configuration. Protect the log directory and make the daemon act when the disk fills. Keep the journal persistent and send a copy somewhere an attacker cannot reach.",
 			}},
 		},
 		KeyTerms:      []string{"Audit Rule", "Audit Trail", "Immutable Audit Configuration", "Log Forwarding", "Persistent Journal"},
@@ -46,10 +46,11 @@ var auditPamPkg = []Module{
 			"On a test machine you own: sudo openvapt scan --only HOST-AUD- and read auditctl -l alongside the report.",
 		},
 		Quiz: []Question{
-			{"auditd is active but /etc/audit/rules.d contains only -D and -b 8192. What is being recorded?", []string{"Every file change on the system", "Almost nothing: there are no watch or system call rules", "Only failed logins"}, 1, "Those lines clear the rules and set a buffer size. Without -w or -a rules, there is no audit trail."},
-			{"What does -e 2 at the end of the audit rules do?", []string{"Enables two audit log files", "Locks the rules until the next reboot so root cannot remove them", "Sets the log level to 2"}, 1, "The immutable flag means the only way to change the rules is a reboot, which is itself a logged event."},
-			{"Why forward logs to another machine when the local disk has plenty of space?", []string{"To save disk space", "Because an intruder with root can edit or delete the local copy", "Because journald cannot write to disk"}, 1, "A copy that already left the machine is the one an investigation can trust."},
-			{"journald.conf has Storage=volatile. What happens to the journal at reboot?", []string{"It is compressed", "It is kept in /var/log/journal", "It is lost: volatile means memory only"}, 2, "Set Storage=persistent (and create /var/log/journal) so the journal survives."},
+			{"auditd is active but /etc/audit/rules.d contains only -D and -b 8192. What is being recorded?", []string{"Every file change on the system", "Almost nothing: there are no watch or system call rules", "Only failed logins", "Only kernel messages"}, 1, "Those lines clear the rules and set a buffer size. Without -w or -a rules, there is no audit trail."},
+			{"What does -e 2 at the end of the audit rules do?", []string{"Enables two audit log files", "Locks the rules until the next reboot so root cannot remove them", "Sets the log level to 2", "Turns auditing off"}, 1, "The immutable flag means the only way to change the rules is a reboot, which is itself a logged event."},
+			{"Why forward logs to another machine when the local disk has plenty of space?", []string{"To save disk space", "Because an intruder with root can edit or delete the local copy", "Because journald cannot write to disk", "Because remote logs are faster to search"}, 1, "A copy that already left the machine is the one an investigation can trust."},
+			{"journald.conf has Storage=volatile. What happens to the journal at reboot?", []string{"It is compressed", "It is kept in /var/log/journal", "It is lost: volatile means memory only", "It is forwarded to another machine"}, 2, "Set Storage=persistent (and create /var/log/journal) so the journal survives."},
+			{"Which events should the audit rules record?", []string{"Changes to identity files, logins, time changes, kernel modules and privileged commands", "Only web server requests", "Only failed SSH logins", "Every keystroke of every user"}, 0, "These are the events an investigation needs to show who changed what and when."},
 		},
 		Refs: []Ref{
 			{"NIST SP 800-92, Guide to Computer Security Log Management", "https://csrc.nist.gov/pubs/sp/800/92/final"},
@@ -61,7 +62,7 @@ var auditPamPkg = []Module{
 	{
 		ID: "P22", Title: "Authentication Policy and Package Hygiene", Level: Practitioner, Minutes: 35,
 		Prereqs: []string{"P7", "P15"},
-		Summary: "The PAM and login.defs settings that decide how passwords are checked, reused and locked, how root's environment can be hijacked, and how packages arrive on the machine and which services came with them.",
+		Summary: "The PAM and login.defs settings that decide how passwords are checked, reused and locked, and how root's environment can be hijacked. How packages arrive on the machine and which services came with them.",
 		Objectives: []string{
 			"Explain what pam_pwquality, pam_faillock, pam_pwhistory and pam_wheel each decide, and read their options from a PAM stack.",
 			"Explain the login.defs and useradd defaults that govern password age and inactive accounts, and where current NIST guidance differs from older practice.",
@@ -70,7 +71,7 @@ var auditPamPkg = []Module{
 		},
 		Sections: []Section{
 			{"PAM: Where Password Rules Are Enforced", []string{
-				"Linux checks passwords through Pluggable Authentication Modules. A setting in pwquality.conf does nothing unless the password stack (/etc/pam.d/common-password or system-auth) calls pam_pwquality (HOST-PAM-001). NIST SP 800-63B-4 asks verifiers to reject dictionary words and known-breached passwords rather than to impose composition rules, so the check looks at the module and its dictionary and user-name checks, not at character classes.",
+				"Linux checks passwords through Pluggable Authentication Modules. A setting in pwquality.conf does nothing unless the password stack (/etc/pam.d/common-password or system-auth) calls pam_pwquality (HOST-PAM-001). NIST SP 800-63B-4 asks verifiers to reject dictionary words and known-breached passwords rather than impose composition rules. So the check looks at the module and its dictionary and user-name checks, not at character classes.",
 				"pam_faillock counts failures (HOST-PWD-004); its unlock_time decides how long the lock lasts. The default of 600 seconds lets guessing resume every ten minutes; 900 or more, or 0 for a manual unlock, makes online guessing impractical (HOST-PAM-002). pam_pwhistory or pam_unix remember= stops a user who was told to change a compromised password from setting it straight back (HOST-PAM-004). pam_wheel restricts su to an administrative group so a compromised service account cannot sit and guess the root password (HOST-PAM-003).",
 			}},
 			{"login.defs and Account Lifecycle", []string{
@@ -80,14 +81,14 @@ var auditPamPkg = []Module{
 				"When root's PATH contains . or an empty element, typing ls in a directory an attacker controls runs the attacker's ls as root. A world-writable directory on the PATH has the same effect for any command name not found earlier. HOST-PAM-008 reads root's shell start-up files for these entries; MITRE ATT&CK calls the technique path interception. TMOUT (HOST-PAM-009) closes an idle shell so a root session left on an unattended terminal is not free privilege for the next person.",
 			}},
 			{"How Packages Arrive", []string{
-				"Package installation runs as root, so each repository is a supplier trusted with the whole machine. apt and dnf verify a signature over the repository index before trusting any package; trusted=yes, AllowUnauthenticated or gpgcheck=0 switches that off and lets a mirror operator or anyone on the network path deliver modified packages (HOST-PKG-002). Third-party repositories are not wrong in themselves, but each needs an owner and a reason (HOST-PKG-003); NIST SP 800-161 treats this as supply chain risk.",
-				"Updates only help once they are in effect. Repository metadata must be refreshed on a schedule or no tool can see pending updates (HOST-PKG-006); a kernel update protects nothing until the machine boots into it (HOST-PKG-005); and every old kernel left installed stays bootable with every vulnerability it had (HOST-PKG-004). NIST SP 800-40 Rev. 4 covers this lifecycle; the checks map to CIS Controls v8 safeguard 7.4.",
+				"Package installation runs as root, so each repository is a supplier trusted with the whole machine. apt and dnf verify a signature over the repository index before trusting any package. trusted=yes, AllowUnauthenticated or gpgcheck=0 switches that off. Then a mirror operator or anyone on the network path can deliver modified packages (HOST-PKG-002). Third-party repositories are not wrong in themselves, but each needs an owner and a reason (HOST-PKG-003); NIST SP 800-161 treats this as supply chain risk.",
+				"Updates only help once they are in effect. Repository metadata must be refreshed on a schedule or no tool can see pending updates (HOST-PKG-006). A kernel update protects nothing until the machine boots into it (HOST-PKG-005). Every old kernel left installed stays bootable with every vulnerability it had (HOST-PKG-004). NIST SP 800-40 Rev. 4 covers this lifecycle; the checks map to CIS Controls v8 safeguard 7.4.",
 			}},
 			{"Services That Came Along", []string{
-				"A service that is installed but stopped comes back with the next upgrade or reboot and is one command away from running. HOST-SVC-001 asks what is active now; HOST-SVC-002 to 012 read the package database and the systemd boot links for Telnet, the r-services and finger, TFTP, FTP, NIS, Avahi and CUPS, NFS and rpcbind, DHCP and DNS servers, Samba, SNMP and Squid, and inetd super-servers. The cleartext protocols (Telnet, rsh, TFTP, FTP, NIS) rate Medium because they send credentials or data unencrypted; the rest rate Low as attack surface with no purpose on a typical server. Where a machine legitimately runs one, the suppression file records the reason so the finding stays visible but accepted. This is NIST SP 800-123's advice to remove or disable unnecessary services, NIST SP 800-53 CM-7, and CIS Controls v8 safeguard 4.8.",
+				"A service that is installed but stopped comes back with the next upgrade or reboot and is one command away from running. HOST-SVC-001 asks what is active now. HOST-SVC-002 to 012 read the package database and the systemd boot links. They cover Telnet, the r-services and finger, TFTP, FTP, NIS, Avahi and CUPS, NFS and rpcbind. They also cover DHCP and DNS servers, Samba, SNMP and Squid, and inetd super-servers. The cleartext protocols (Telnet, rsh, TFTP, FTP, NIS) rate Medium because they send credentials or data unencrypted. The rest rate Low as attack surface with no purpose on a typical server. Where a machine legitimately runs one, the suppression file records the reason so the finding stays visible but accepted. This is NIST SP 800-123's advice to remove or disable unnecessary services, NIST SP 800-53 CM-7, and CIS Controls v8 safeguard 4.8.",
 			}},
 			{"In Summary", []string{
-				"Password policy is enforced by PAM and login.defs together, so check both. Keep root's PATH clean, expire and warn on schedule, only install packages from signed repositories you recognise, refresh package lists, retire old kernels and remove the legacy services that arrived with the image.",
+				"Password policy is enforced by PAM and login.defs together, so check both. Keep root's PATH clean and expire and warn on schedule. Only install packages from signed repositories you recognise, and refresh package lists. Retire old kernels and remove the legacy services that arrived with the image.",
 			}},
 		},
 		KeyTerms: []string{"PAM", "Password History", "Path Interception", "Repository Signing", "Legacy Service", "Idle Timeout"},
@@ -101,10 +102,11 @@ var auditPamPkg = []Module{
 			"On a test machine you own: sudo openvapt scan --only HOST-PAM-,HOST-PKG-,HOST-SVC- and compare with  grep pam_ /etc/pam.d/common-password  and  dpkg -l | grep '^ii' .",
 		},
 		Quiz: []Question{
-			{"pwquality.conf sets minlen = 14, but /etc/pam.d/common-password has no pam_pwquality line. What is enforced?", []string{"A 14-character minimum", "Nothing from pwquality: the module is never called", "Only a dictionary check"}, 1, "PAM settings take effect only through the modules the stack actually calls."},
-			{"Root's .bashrc sets PATH=.:/usr/bin:/bin. What can a local user do?", []string{"Nothing: . is harmless", "Place a program named ls in a directory root will visit and have it run as root", "Read root's files"}, 1, "A leading . (or empty element) runs programs from the current directory first."},
-			{"A sources.list entry carries [trusted=yes]. What does apt skip for it?", []string{"Downloading the package", "Verifying the repository signature", "Installing dependencies"}, 1, "Without signature verification a tampered mirror or intercepted download installs as root."},
-			{"telnetd is installed but systemctl says telnet.socket is inactive. Why do the HOST-SVC checks still report it?", []string{"Because active and installed are the same thing", "Because an installed service comes back with the next upgrade or reboot and is one command from running", "Because Telnet is encrypted"}, 1, "Installed-but-stopped is latent attack surface; remove what is not needed."},
+			{"pwquality.conf sets minlen = 14, but /etc/pam.d/common-password has no pam_pwquality line. What is enforced?", []string{"A 14-character minimum", "Nothing from pwquality: the module is never called", "Only a dictionary check", "A 14-character minimum for root only"}, 1, "PAM settings take effect only through the modules the stack actually calls."},
+			{"Root's .bashrc sets PATH=.:/usr/bin:/bin. What can a local user do?", []string{"Nothing: . is harmless", "Place a program named ls in a directory root will visit and have it run as root", "Read root's files", "Change root's password"}, 1, "A leading . (or empty element) runs programs from the current directory first."},
+			{"A sources.list entry carries [trusted=yes]. What does apt skip for it?", []string{"Downloading the package", "Verifying the repository signature", "Installing dependencies", "Checking free disk space"}, 1, "Without signature verification a tampered mirror or intercepted download installs as root."},
+			{"telnetd is installed but systemctl says telnet.socket is inactive. Why do the HOST-SVC checks still report it?", []string{"Because active and installed are the same thing", "Because an installed service comes back with the next upgrade or reboot and is one command from running", "Because Telnet is encrypted", "Because the socket is always active anyway"}, 1, "Installed-but-stopped is latent attack surface; remove what is not needed."},
+			{"Why does an installed kernel update not protect the machine straight away?", []string{"The old kernel keeps running until the machine boots into the new one", "Kernels update themselves while running", "It needs a new licence first", "Updates are only downloaded, never installed"}, 0, "A kernel update protects nothing until the machine boots into it (HOST-PKG-005)."},
 		},
 		Refs: []Ref{
 			{"NIST SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management", "https://pages.nist.gov/800-63-4/sp800-63b.html"},

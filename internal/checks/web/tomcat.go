@@ -78,7 +78,7 @@ func init() {
 		fix:       "If you do not use them, delete the manager and host-manager folders (or apt remove tomcatN-admin). Otherwise keep the default valve in META-INF/context.xml: <Valve className=\"org.apache.catalina.valves.RemoteAddrValve\" allow=\"127\\.\\d+\\.\\d+\\.\\d+|::1|0:0:0:0:0:0:0:1\" /> and reach the Manager through an SSH tunnel.",
 		verify:    "grep -A2 RemoteAddrValve <webapps>/manager/META-INF/context.xml",
 		refs:      []check.Ref{refTomcatSec, {Title: "Apache Tomcat 10.1, Manager App How-To", URL: "https://tomcat.apache.org/tomcat-10.1-doc/manager-howto.html"}},
-		std:       check.Standards{CWE: []string{"CWE-284", "CWE-1188"}, OWASP: []string{"A01:2021", "A05:2021"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"AC-3", "CM-7"}},
+		std:       check.Standards{CWE: []string{"CWE-1188", "CWE-923"}, OWASP: []string{"A01:2021", "A05:2021"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"AC-3", "CM-7"}},
 		eval: func(ctx context.Context, s sys.System, t collect.TomcatInstance) []string {
 			var bad []string
 			for _, app := range []string{"manager", "host-manager"} {
@@ -173,7 +173,7 @@ func init() {
 		fix:       "If you do not use AJP (most sites proxy over HTTP), delete or comment out the AJP <Connector>. Otherwise set address=\"127.0.0.1\", a long random secret=\"...\" with secretRequired=\"true\", and the same secret in the proxy (mod_proxy_ajp: ProxyPass ... secret=...). Upgrade Tomcat to a supported release.",
 		verify:    "grep -i ajp <conf>/server.xml  and  ss -tlnp | grep 8009  shows nothing or 127.0.0.1 only.",
 		refs:      []check.Ref{refTomcatSec, {Title: "Apache Tomcat 10.1 Configuration Reference, The AJP Connector", URL: "https://tomcat.apache.org/tomcat-10.1-doc/config/ajp.html"}, {Title: "NVD, CVE-2020-1938", URL: "https://nvd.nist.gov/vuln/detail/cve-2020-1938"}},
-		std:       check.Standards{CWE: []string{"CWE-306", "CWE-284"}, OWASP: []string{"A05:2021", "A06:2021"}, NIST: []string{"SC-7", "AC-3", "CM-7"}},
+		std:       check.Standards{CWE: []string{"CWE-306", "CWE-1327"}, OWASP: []string{"A05:2021", "A06:2021"}, NIST: []string{"SC-7", "AC-3", "CM-7"}},
 		eval: func(ctx context.Context, s sys.System, t collect.TomcatInstance) []string {
 			var bad []string
 			for _, c := range collect.XMLElements(readText(ctx, s, t.Conf+"/server.xml"), "Connector") {
@@ -201,7 +201,7 @@ func init() {
 		fix:       "Delete the examples and docs folders from webapps (or apt remove tomcatN-examples tomcatN-docs) and restart Tomcat.",
 		verify:    "ls <webapps>  lists only your own applications (and ROOT).",
 		refs:      []check.Ref{refTomcatSec, {Title: "OWASP WSTG-CONF-02, Test Application Platform Configuration", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/02-Test_Application_Platform_Configuration/"}},
-		std:       check.Standards{CWE: []string{"CWE-1188", "CWE-200"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-CONF-02"}, NIST: []string{"CM-7"}},
+		std:       check.Standards{CWE: []string{"CWE-1188"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-CONF-02"}, NIST: []string{"CM-7"}},
 		eval: func(ctx context.Context, s sys.System, t collect.TomcatInstance) []string {
 			var bad []string
 			for _, w := range t.Webapps {

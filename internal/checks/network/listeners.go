@@ -37,7 +37,7 @@ func init() {
 		Fix:       "Stop or uninstall services you do not need (systemctl disable --now <unit>). Bind internal services to 127.0.0.1. Block the rest at the firewall.",
 		Verify:    "ss -tulpn  shows the same list with process names.",
 		Refs:      []check.Ref{{Title: "NIST SP 800-115, Technical Guide to Information Security Testing and Assessment", URL: "https://csrc.nist.gov/pubs/sp/800/115/final"}, {Title: "proc_net(5), Linux man-pages", URL: "https://man7.org/linux/man-pages/man5/proc_net.5.html"}},
-		Standards: check.Standards{NIST: []string{"CM-7", "CM-8"}, CISTopic: "Network services inventory"},
+		Standards: check.Standards{CWE: []string{"CWE-1327"}, NIST: []string{"CM-7", "CM-8"}, CISTopic: "Network services inventory"},
 		Run: func(_ context.Context, s sys.System) []check.Result {
 			ls, err := collect.Listeners(s)
 			if err != nil {
@@ -67,11 +67,11 @@ func init() {
 		Summary:   "Checks whether databases, caches, search engines or the Docker API listen on a network-reachable address.",
 		Rationale: "Exposed databases and caches (Redis, MongoDB, Elasticsearch, Memcached) are among the most common causes of mass data breaches and ransom wipes, often because they ship without authentication.",
 		Detection: "Matches network-reachable listening ports from /proc/net against a list of well-known data service ports (IANA registry).",
-		Fix:       "Bind the service to 127.0.0.1 (MySQL: bind-address = 127.0.0.1; Redis: bind 127.0.0.1 ::1 and protected-mode yes; MongoDB: net.bindIp: 127.0.0.1) and restart it. If remote access is needed, allow only specific source IPs in the firewall and require TLS and authentication.",
+		Fix:       "Bind the service to 127.0.0.1 (MySQL: bind-address = 127.0.0.1; Redis: bind 127.0.0.1 ::1 and protected-mode yes; MongoDB: net.bindIp: 127.0.0.1) and restart it. Caution: confirm first that no application on another machine connects to it, or that application loses its database. If remote access is needed, allow only specific source IPs in the firewall and require TLS and authentication.",
 		Verify:    "ss -tlnp | grep -E ':(3306|5432|6379|27017|9200|11211)'  should show only 127.0.0.1 or ::1.",
 		Refs: []check.Ref{{Title: "OWASP Database Security Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html"},
 			{Title: "Redis security", URL: "https://redis.io/docs/latest/operate/oss_and_stack/management/security/"}},
-		Standards: check.Standards{CWE: []string{"CWE-668", "CWE-306"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Network exposure of data services"},
+		Standards: check.Standards{CWE: []string{"CWE-1327", "CWE-306"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Network exposure of data services"},
 		Run: func(_ context.Context, s sys.System) []check.Result {
 			ls, err := collect.Listeners(s)
 			if err != nil {

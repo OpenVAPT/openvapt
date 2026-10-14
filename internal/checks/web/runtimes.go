@@ -270,7 +270,7 @@ func init() {
 		Fix:       "List the real domain names: ALLOWED_HOSTS = ['example.com', 'www.example.com'], and restart the application.",
 		Verify:    "python manage.py check --deploy",
 		Refs:      []check.Ref{refDjangoDeploy, {Title: "Django settings reference, ALLOWED_HOSTS", URL: "https://docs.djangoproject.com/en/6.1/ref/settings/#allowed-hosts"}},
-		Standards: check.Standards{CWE: []string{"CWE-20"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-INPV-17"}, NIST: []string{"CM-6", "SI-10"}},
+		Standards: check.Standards{CWE: []string{"CWE-346"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-INPV-17"}, NIST: []string{"CM-6", "SI-10"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return djangoCheck(ctx, s, func(fs []djangoFile) []string { return matching(fs, djHostsAny, "ALLOWED_HOSTS allows any host") }, "Django accepts any Host header")
 		},

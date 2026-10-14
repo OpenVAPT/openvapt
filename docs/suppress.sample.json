@@ -1,0 +1,15 @@
+[
+  {
+    "id": "HOST-SSH-005",
+    "target": "/etc/ssh/sshd_config",
+    "reason": "Accepted risk: legacy client needs this until the migration finishes; tracked in ticket OPS-123",
+    "expires": "2027-03-31",
+    "added_by": "ops team"
+  },
+  {
+    "id": "WEB-HDR-001",
+    "target": "http://*.internal.example/*",
+    "reason": "Internal test vhosts only, not reachable from outside; review at next quarter",
+    "expires": "2027-01-15"
+  }
+]

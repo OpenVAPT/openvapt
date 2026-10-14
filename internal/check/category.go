@@ -9,8 +9,9 @@ package check
 //   - NIST Cybersecurity Framework 2.0 categories.
 //     https://www.nist.gov/cyberframework
 //
-// The mapping is at control/category level, deliberately not per safeguard,
-// so it stays accurate without copying any benchmark content.
+// This category mapping is broad orientation at control/category level.
+// Each check's own safeguard and CSF subcategory live in Standards.CIS and
+// Standards.CSF (see frameworks.go); coverage counts use those.
 type Category string
 
 const (
