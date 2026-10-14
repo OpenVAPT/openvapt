@@ -44,7 +44,7 @@ CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
 ./openvapt demo                                       # scan the simulated vulnerable lab (safe, in memory)
 ./openvapt learn                                      # the OpenVAPT Academy, offline
 ./openvapt scan --dry-run                             # preview every file, command and request
-sudo ./openvapt scan --out ~/report                   # assess this Linux machine
+sudo ./openvapt scan                                  # assess this Linux machine; reports go to ~/openvapt-reports/<UTC time>/
 ```
 
 **Vulnerability snapshot.** The repository embeds only a tiny test fixture in `internal/vulndb/data/`, so a plain source build has no advisory data: `HOST-CVE-001`, `HOST-CVE-002`, `HOST-CVE-003` and `WEB-CVE-001` then report Incomplete (never Pass), and `openvapt vulndb` prints `Fixture: true`. To match real advisories, generate the snapshot from the public OSV exports and the CISA KEV feed before building:
@@ -59,19 +59,21 @@ Release builds run the same generator (see `docs/VULNDB.md`). Every report heade
 
 ### One-Command Install
 
-One command downloads the Linux binary of the chosen release channel (Stable by default, or `--channel rc|beta|alpha` on test machines) for your CPU, verifies its SHA-256 checksum (always) and its Sigstore signature (when `cosign` is installed), and installs it to `~/.local/bin` without root. It scans nothing. Read [scripts/install.sh](scripts/install.sh) first; it is short.
+One command downloads the Linux binary for your CPU from the most stable release channel that has a release (Stable, then Release Candidate, then Beta, then Alpha; it warns and names the channel when that is a pre-release, and `--channel NAME` forces one), verifies its SHA-256 checksum (always) and its Sigstore signature (when `cosign` is installed), and installs it to `~/.local/bin` without root. Read [scripts/install.sh](scripts/install.sh) first. There are two ways to run it.
+
+**Download Only** (the default) installs, verifies and prints the next steps. It scans nothing; you scan later with `openvapt scan --dry-run`, then `sudo openvapt scan`.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh
 ```
 
-To install and then start an interactive scan of this machine in the same command (the scan still shows the acknowledgements and waits for you to type `I ACCEPT`):
+**Download and Scan** (`--run`) installs, verifies, then scans this machine in the same terminal. The scan still shows the acknowledgements and waits for you to type `I ACCEPT` (read from the terminal even when the script is piped; the installer never accepts for you, and with no terminal it refuses). It writes every report (HTML, JSON, SARIF, Markdown, signed) to a new folder `~/openvapt-reports/<UTC time>/` (mode 0700), then prints the severity summary, the exit code and what it means, every report path and how to open the HTML report.
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh)" -- --run
+curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/install.sh | sh -s -- --run
 ```
 
-Options: `--version vX.Y.Z` pins a release, `--dir DIR` chooses the folder. If the chosen channel has no release yet, the installer says so and lists the channels that have one.
+Options: `--sudo` (with `--run`) runs only the scan with sudo for full coverage, `--out DIR` chooses a new report folder, `--open` opens `report.html` with `xdg-open` only in a desktop session, `--dry-run` previews what a scan would read and run without scanning, `--version vX.Y.Z` pins a release, `--dir DIR` chooses the install folder. A forced channel with no release fails and lists the channels that have one.
 
 The installer downloads only over HTTPS with TLS 1.2 or newer, including redirects. To refuse installation unless the Sigstore signature is verified (instead of continuing with the checksum alone when `cosign` is missing), set `OPENVAPT_REQUIRE_SIGNATURE=1`:
 
@@ -97,7 +99,7 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 | `openvapt man` | Print the manual page: `openvapt man > openvapt.1`, then `man ./openvapt.1` |
 | `openvapt completion bash\|zsh\|fish` | Print a shell completion script, for example `source <(openvapt completion bash)` |
 
-Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`), `--suppress` (a suppression file, below).
+Scan flags: `--out` (default: a new folder `~/openvapt-reports/<UTC time>/`, mode 0700, in the home folder of the user running the scan, which is root's under sudo), `--open` (opens `report.html` with `/usr/bin/xdg-open` only in a desktop session, never as root), `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`), `--suppress` (a suppression file, below).
 
 ### Suppressing Accepted Findings
 
