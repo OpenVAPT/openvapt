@@ -46,10 +46,18 @@ jobs:
         run: |
           echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' || { echo "bad tag $TAG"; exit 1; }
           echo "$COMMIT" | grep -Eq '^[0-9a-f]{40}$' || { echo "bad commit $COMMIT"; exit 1; }
+      # Check out the default branch, then move to the requested commit only
+      # after proving it is an ancestor of main (the gates ran on it there), so
+      # no caller-supplied ref is ever checked out directly.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          ref: ${{ inputs.commit }}
+          fetch-depth: 0
           persist-credentials: false
+      - name: Move to the verified commit
+        run: |
+          git fetch --quiet origin "$COMMIT" || true
+          git merge-base --is-ancestor "$COMMIT" origin/main || { echo "commit $COMMIT is not on main"; exit 1; }
+          git checkout --quiet --detach "$COMMIT"
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version-file: go.mod
@@ -130,10 +138,18 @@ jobs:
         run: |
           echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' || { echo "bad tag $TAG"; exit 1; }
           echo "$COMMIT" | grep -Eq '^[0-9a-f]{40}$' || { echo "bad commit $COMMIT"; exit 1; }
+      # Check out the default branch, then move to the requested commit only
+      # after proving it is an ancestor of main (the gates ran on it there), so
+      # no caller-supplied ref is ever checked out directly.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          ref: ${{ inputs.commit }}
+          fetch-depth: 0
           persist-credentials: false
+      - name: Move to the verified commit
+        run: |
+          git fetch --quiet origin "$COMMIT" || true
+          git merge-base --is-ancestor "$COMMIT" origin/main || { echo "commit $COMMIT is not on main"; exit 1; }
+          git checkout --quiet --detach "$COMMIT"
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version-file: go.mod
