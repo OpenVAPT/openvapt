@@ -7,13 +7,13 @@ package main
 // filled in from the build.
 
 import (
-	"encoding/json"
 	"github.com/openvapt/openvapt/internal/channels"
 	"html/template"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/openvapt/openvapt/internal/cite"
 	"github.com/openvapt/openvapt/internal/version"
 )
 
@@ -82,88 +82,31 @@ func box(id, label, hint, text string) CiteBox {
 	return CiteBox{ID: id, Label: label, Hint: hint, Text: htmlDates(text)}
 }
 
-const citeTitle = "OpenVAPT: An Open Academic Vulnerability Assessment Tool"
+const citeTitle = cite.Title
 
-func bibSoftware(v, y string) string {
-	return `@software{openvapt_` + y + `,
-  author       = {{OpenVAPT}},
-  title        = {{` + citeTitle + `}},
-  year         = {` + y + `},
-  version      = {` + v + `},
-  url          = {` + repoURL + `},
-  note         = {Built by AI Cybersecurity Engineers. https://openvapt.com},
-  license      = {LicenseRef-OpenVAPT-SAL-1.3}
-}`
-}
-
-func bibMisc(v, y string) string {
-	return `@misc{openvapt_` + y + `,
-  author       = {{OpenVAPT}},
-  title        = {{` + citeTitle + `}},
-  year         = {` + y + `},
-  howpublished = {\url{` + repoURL + `}},
-  note         = {Computer software, version ` + v + `. Accessed ` + dLong + `}
-}`
-}
-
-func bibLaTeX(v, y string) string {
-	return `@software{openvapt_` + y + `,
-  author       = {{OpenVAPT}},
-  title        = {` + citeTitle + `},
-  date         = {` + y + `},
-  version      = {` + v + `},
-  url          = {` + repoURL + `},
-  urldate      = {` + dISO + `},
-  organization = {OpenVAPT},
-  addendum     = {Built by AI Cybersecurity Engineers}
-}`
-}
-
-func risText(v, y string) string {
-	return "TY  - COMP\nAU  - OpenVAPT\nTI  - " + citeTitle + "\nPY  - " + y + "\nET  - " + v + "\nUR  - " + repoURL + "\nN1  - Built by AI Cybersecurity Engineers. https://openvapt.com\nER  - "
-}
-
-func cslJSON(v, y string) string {
-	s := `[
-  {
-    "id": "openvapt_` + y + `",
-    "type": "software",
-    "author": [{ "literal": "OpenVAPT" }],
-    "title": "` + citeTitle + `",
-    "version": "` + v + `",
-    "issued": { "date-parts": [[` + y + `]] },
-    "URL": "` + repoURL + `",
-    "note": "Built by AI Cybersecurity Engineers"
-  }
-]`
-	if !json.Valid([]byte(s)) {
-		panic("CSL-JSON citation is not valid JSON")
-	}
-	return s
+// citeWork is the work the website cites, with date tokens the page script
+// (or plainDates, for files) fills in.
+func citeWork() cite.Work {
+	return cite.Work{Version: citeVersion(), Year: citeYear(), Date: cite.Dates{Long: dLong, US: dUS, ISO: dISO, Van: dVan, IEEE: dIEEE}}
 }
 
 // citeStyles is the style switcher on the How to Cite page.
 func citeStyles() []CiteStyle {
 	v, y, r := citeVersion(), citeYear(), repoURL
+	w := citeWork()
 	return []CiteStyle{
-		{"apa", "APA 7", []CiteBox{box("c-apa", "APA 7", "In text: (OpenVAPT, "+y+")",
-			"OpenVAPT. ("+y+"). OpenVAPT: An open academic vulnerability assessment tool (Version "+v+") [Computer software]. "+r)}},
-		{"ieee", "IEEE", []CiteBox{box("c-ieee", "IEEE", "",
-			`OpenVAPT, "`+citeTitle+`," version `+v+", "+y+". [Online]. Available: "+r)}},
-		{"harvard", "Harvard", []CiteBox{box("c-harvard", "Harvard", "In text: (OpenVAPT, "+y+")",
-			"OpenVAPT ("+y+") "+citeTitle+". Version "+v+" [Computer program]. Available at: "+r+" (Accessed: "+dLong+").")}},
-		{"mla", "MLA 9", []CiteBox{box("c-mla", "MLA 9", "In text: (OpenVAPT)",
-			"OpenVAPT. "+citeTitle+". Version "+v+", "+y+". GitHub, github.com/OpenVAPT/openvapt.")}},
-		{"chicago", "Chicago", []CiteBox{box("c-chicago", "Chicago (17th Edition, Author-Date)", "In text: (OpenVAPT "+y+")",
-			"OpenVAPT. "+y+". "+citeTitle+". Version "+v+". Computer software. "+r+".")}},
-		{"vancouver", "Vancouver", []CiteBox{box("c-vancouver", "Vancouver", "",
-			"OpenVAPT. OpenVAPT: an open academic vulnerability assessment tool [Internet]. Version "+v+". "+y+" [cited "+dVan+"]. Available from: "+r)}},
+		{"apa", "APA 7", []CiteBox{box("c-apa", "APA 7", "In text: "+w.APAInText(), w.APA())}},
+		{"ieee", "IEEE", []CiteBox{box("c-ieee", "IEEE", "", w.IEEE())}},
+		{"harvard", "Harvard", []CiteBox{box("c-harvard", "Harvard", "In text: (OpenVAPT, "+y+")", w.Harvard())}},
+		{"mla", "MLA 9", []CiteBox{box("c-mla", "MLA 9", "In text: (OpenVAPT)", w.MLA())}},
+		{"chicago", "Chicago", []CiteBox{box("c-chicago", "Chicago (17th Edition, Author-Date)", "In text: (OpenVAPT "+y+")", w.Chicago())}},
+		{"vancouver", "Vancouver", []CiteBox{box("c-vancouver", "Vancouver", "", w.Vancouver())}},
 		{"bibtex", "BibTeX", []CiteBox{
-			box("c-bibtex", "BibTeX (@software, for biblatex or Modern Styles)", "The double braces keep OpenVAPT as one group author.", bibSoftware(v, y)),
-			box("c-bibmisc", "BibTeX (@misc, for Classic Styles)", "Use this if your style does not know @software.", bibMisc(v, y))}},
-		{"biblatex", "BibLaTeX", []CiteBox{box("c-biblatex", "BibLaTeX", "", bibLaTeX(v, y))}},
-		{"ris", "RIS", []CiteBox{box("c-ris", "RIS (EndNote, Zotero, Mendeley)", "", risText(v, y))}},
-		{"csl", "CSL-JSON", []CiteBox{box("c-csl", "CSL-JSON (Zotero, Pandoc)", "", cslJSON(v, y))}},
+			box("c-bibtex", "BibTeX (@software, for biblatex or Modern Styles)", "The double braces keep OpenVAPT as one group author.", w.BibTeX()),
+			box("c-bibmisc", "BibTeX (@misc, for Classic Styles)", "Use this if your style does not know @software.", w.BibMisc())}},
+		{"biblatex", "BibLaTeX", []CiteBox{box("c-biblatex", "BibLaTeX", "", w.BibLaTeX())}},
+		{"ris", "RIS", []CiteBox{box("c-ris", "RIS (EndNote, Zotero, Mendeley)", "", w.RIS())}},
+		{"csl", "CSL-JSON", []CiteBox{box("c-csl", "CSL-JSON (Zotero, Pandoc)", "", w.CSL())}},
 		{"plain", "Plain Text", []CiteBox{
 			box("c-plain", "Plain Text", "", "OpenVAPT ("+y+"). "+citeTitle+", version "+v+". Built by AI Cybersecurity Engineers. https://openvapt.com"),
 			box("c-ack", "Acknowledgements Section of a Thesis or Paper", "", "This work used OpenVAPT (version "+v+", https://openvapt.com), an academic vulnerability assessment tool built by AI Cybersecurity Engineers.")}},
@@ -196,28 +139,22 @@ func citeExtras() map[string][]CiteBox {
 	}
 }
 
-// texEscape escapes the characters BibTeX treats specially in a title.
-func texEscape(s string) string {
-	return strings.NewReplacer(`\`, `\textbackslash{}`, "{", `\{`, "}", `\}`, "&", `\&`, "%", `\%`, "$", `\$`, "#", `\#`, "_", `\_`).Replace(s)
-}
-
 // pageCite is the Cite This Page box for one check or Academy module page.
 func pageCite(id, title, collection, path string) []CiteBox {
-	v, y, u := citeVersion(), citeYear(), pageURL(path)
-	key := "openvapt_" + strings.ToLower(strings.NewReplacer("-", "_", " ", "_").Replace(id))
+	w, p := citeWork(), cite.Page{ID: id, Title: title, Collection: collection, URL: pageURL(path)}
 	return []CiteBox{
-		box("p-apa", "APA 7", "In text: (OpenVAPT, "+y+")", "OpenVAPT. ("+y+"). "+title+" (Version "+v+"). "+collection+". Retrieved "+dUS+", from "+u),
-		box("p-bib", "BibTeX", "", "@misc{"+key+",\n  author       = {{OpenVAPT}},\n  title        = {{"+texEscape(title)+"}},\n  year         = {"+y+"},\n  howpublished = {\\url{"+u+"}},\n  note         = {"+collection+", version "+v+". Accessed "+dLong+"}\n}"),
+		box("p-apa", "APA 7", "In text: "+w.APAInText(), w.PageAPA(p)),
+		box("p-bib", "BibTeX", "", w.PageBibTeX(p)),
 	}
 }
 
 // writeCiteFiles writes the downloadable reference files to the site root.
 func writeCiteFiles() {
-	v, y := citeVersion(), citeYear()
+	w := citeWork()
 	files := map[string]string{
-		"openvapt.bib":  "% OpenVAPT citation. See https://openvapt.com/cite.html and CITING.md.\n% Classic BibTeX styles that do not know @software: use @misc (see the cite page).\n\n" + bibSoftware(v, y) + "\n",
-		"openvapt.ris":  risText(v, y) + "\n",
-		"openvapt.json": cslJSON(v, y) + "\n",
+		"openvapt.bib":  "% OpenVAPT citation. See https://openvapt.com/cite.html and CITING.md.\n% Classic BibTeX styles that do not know @software: use @misc (see the cite page).\n\n" + w.BibTeX() + "\n",
+		"openvapt.ris":  w.RIS() + "\n",
+		"openvapt.json": w.CSL() + "\n",
 	}
 	cff, err := os.ReadFile("CITATION.cff")
 	must(err)
@@ -225,4 +162,52 @@ func writeCiteFiles() {
 	for name, body := range files {
 		must(os.WriteFile(filepath.Join(*outDir, name), []byte(plainDates(body)), 0o644)) // #nosec G306 -- public website file
 	}
+}
+
+// QuickCite is the compact Cite panel in the header and footer of every
+// page. Prefix keeps element ids unique between the two copies.
+type QuickCite struct {
+	Prefix, Base, Request, DOINote string
+	Styles                         []CiteStyle
+	Page                           []CiteBox // set on check and Academy module pages
+	PageKind                       string    // "Check" or "Module"
+}
+
+// quickCite builds the panel for page p.
+func quickCite(prefix string, p Page) QuickCite {
+	q := QuickCite{Prefix: prefix, Base: p.Base, Request: cite.Request, DOINote: cite.DOINote}
+	re := func(b CiteBox) CiteBox { b.ID = prefix + "-" + b.ID; return b }
+	all := citeStyles()
+	for _, id := range cite.Styles {
+		for _, s := range all {
+			if s.ID == id {
+				q.Styles = append(q.Styles, CiteStyle{ID: prefix + "-" + s.ID, Label: s.Label, Boxes: []CiteBox{re(s.Boxes[0])}})
+			}
+		}
+	}
+	for _, b := range p.PageCite {
+		q.Page = append(q.Page, re(b))
+	}
+	if len(q.Page) > 0 {
+		q.PageKind = "Module"
+		if strings.HasPrefix(p.Path, "checks/") {
+			q.PageKind = "Check"
+		}
+	}
+	return q
+}
+
+// printCite is the APA citation printed at the bottom of every printed page.
+func printCite() string { return plainDates(citeWork().APA()) }
+
+// llmsCite is the How to Cite section of llms.txt.
+func llmsCite() string {
+	w := citeWork()
+	return "\n## How to Cite\n\n" + cite.Request + " The author is the group author \"OpenVAPT\"; do not add personal names. " + cite.DOINote +
+		"\n\nAPA 7: " + w.APA() + "\n\nBibTeX:\n\n```bibtex\n" + w.BibTeX() + "\n```\n\nEvery style, and when credit is required (licence section 5.4): " + siteURL + "/cite.html. Command line: `openvapt cite --format bibtex`.\n"
+}
+
+// citeHero is the recommended APA citation at the top of the cite page.
+func citeHero() map[string]any {
+	return map[string]any{"APA": citeWork().APA(), "Request": cite.Request, "DOINote": cite.DOINote, "Unreleased": cite.Unreleased}
 }

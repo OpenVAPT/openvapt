@@ -69,6 +69,7 @@ type Page struct {
 	Channel                            string // most mature released channel, or Pre-Release
 	PreRelease                         bool
 	JSONLD                             template.JS
+	PageCite                           []CiteBox // set on check and Academy module pages
 	Body                               template.HTML
 	Data                               any
 }
@@ -137,6 +138,7 @@ func main() {
 		"CiteStyles":   citeStyles(),
 		"CiteExtras":   citeExtras(),
 		"CiteVersion":  citeVersion(),
+		"CiteHero":     citeHero(),
 	}
 	pages := []struct{ file, path, title, desc, section string }{
 		{"index.html", "index.html", "OpenVAPT, an Academic Vulnerability Assessment Tool", "Academic, non-commercial VAPT tool with source-available code built by AI Cybersecurity Engineers. Free for own use on your Linux server, 100% at your own risk.", "home"},
@@ -256,6 +258,7 @@ type gen struct {
 	problems []string
 	inputs   []string          // source files of the page being rendered (for lastmod)
 	mods     map[string]string // path -> lastmod date
+	pageCite []CiteBox         // Cite This Page boxes of the page being rendered, for the header and footer Cite panels
 }
 
 // Search snippet limits checked at build time for every page.
@@ -342,6 +345,9 @@ func (g *gen) render(file, path, title, desc, section string, data any) {
 	if err := t.ExecuteTemplate(&body, "content", pageFor(path, title, desc, section, "", data)); err != nil {
 		log.Fatalf("%s: %v", file, err)
 	}
+	if m, ok := data.(map[string]any); ok {
+		g.pageCite, _ = m["PageCite"].([]CiteBox)
+	}
 	g.page(file, path, title, desc, section, template.HTML(body.String())) // #nosec G203 -- output of html/template, already escaped
 }
 
@@ -355,6 +361,7 @@ func (g *gen) page(_, path, title, desc, section string, body template.HTML) {
 		log.Printf("%s: description is %d characters (want %d to %d): %q", path, len(desc), minDesc, maxDesc, desc)
 	}
 	p := pageFor(path, title, desc, section, body, nil)
+	p.PageCite, g.pageCite = g.pageCite, nil
 	if len(g.inputs) > 0 {
 		p.LastMod = lastMod(g.inputs...)
 	}
@@ -414,6 +421,7 @@ func funcs() template.FuncMap {
 		"add":       func(a, b int) int { return a + b },
 		"slug":      slug,
 		"hasPrefix": strings.HasPrefix,
+		"quick":     quickCite, "printCite": printCite,
 		"json": func(v any) template.JS {
 			b, err := json.Marshal(v) // escapes <, > and & so it is safe inside a script element
 			must(err)
@@ -746,7 +754,7 @@ func jsonLD(p Page) template.JS {
 				"author": map[string]string{"@id": siteURL + "/#org"}, "publisher": map[string]string{"@id": siteURL + "/#org"},
 				"copyrightHolder": map[string]string{"@id": siteURL + "/#org"}, "copyrightYear": citeYear(),
 				"license": siteURL + "/legal/licence-text.html", "isAccessibleForFree": true, "inLanguage": "en",
-				"creditText": "OpenVAPT. (" + citeYear() + "). OpenVAPT: An open academic vulnerability assessment tool (Version " + v + ") [Computer software]. " + repoURL,
+				"creditText": citeWork().APA(),
 				"identifier": repoURL + "/tree/" + commit, "targetProduct": map[string]string{"@id": siteURL + "/#software"},
 				"sameAs": []string{repoURL}})
 	case p.Path == "checks/index.html":
@@ -855,6 +863,7 @@ func writeSEO(paths []string, mods map[string]string, cs []*check.Check) {
 	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How It Is Built, With Code Citations"}, {"checks/", "Check Catalogue"}, {"standards.html", "Standards and Methodology"}, {"compare.html", "Comparison With Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What It Does Not Do"}, {"learn.html", "Lessons and Lab"}, {"teach.html", "For Teachers: Course Plans, Worksheets, Rubric, Practice Labs"}, {"legal/teaching.html", "Teaching Terms"}, {"download.html", "Download and Acknowledgements"}, {"channels.html", "Release Channels and Promotion Gates"}, {"no-data.html", "No Data Collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}, {"legal/licence.html", "Licence"}, {"cite.html", "How to Cite OpenVAPT (APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, RIS, CSL-JSON)"}, {"legal/citing.html", "Citing OpenVAPT: Credit and Citation Guide"}, {"legal/credits.html", "Credits, Sources and Citations"}, {"legal/sources.html", "Every Source Cited, by Publisher"}, {"legal/governance.html", "Governance, Control and Assurance Framework"}, {"academy/", "OpenVAPT Academy: Free VAPT Course From Theory to Application"}, {"glossary.html", "VAPT Glossary"}, {"coverage.html", "Coverage Dashboard: Checks by Category, Severity and Framework"}, {"checks/catalogue.json", "Check Catalogue Dataset (JSON)"}, {"legal/ai-disclosure.html", "AI Disclosure"}, {"legal/agents.html", "AI Cybersecurity Engineer Policy"}, {".well-known/security.txt", "Security Contact (RFC 9116 security.txt)"}} {
 		l.WriteString("- [" + p[1] + "](" + siteURL + "/" + p[0] + ")\n")
 	}
+	l.WriteString(llmsCite())
 	l.WriteString("\n## FAQ\n\n")
 	for _, f := range faqs {
 		l.WriteString("### " + f.Q + "\n" + f.A + "\n\n")
