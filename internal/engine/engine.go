@@ -158,6 +158,7 @@ func Run(ctx context.Context, s sys.System, o Options) *report.Report {
 		Disclaimer:  report.Disclaimer,
 	}
 	r.Scan.VulnDB = snapshotInfo(ctx, s, r.Scan.Finished)
+	r.Citation = report.NewCitation(version.Version, started)
 	r.Summarise()
 	return r
 }
