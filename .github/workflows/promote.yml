@@ -135,12 +135,16 @@ jobs:
     needs: [plan, verify, release]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # The record is pushed over SSH with the RECORD_DEPLOY_KEY deploy key,
+    # the only bypass actor of the main-branch ruleset (ADR 0010). The
+    # workflow token itself needs no write access here.
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
+          ssh-key: ${{ secrets.RECORD_DEPLOY_KEY }}
           # Kept: this job pushes the record. It runs no third-party code
           # beyond setup-go and the repository's own go run ./cmd/channel.
           persist-credentials: true
