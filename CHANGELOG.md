@@ -7,6 +7,14 @@ All notable changes are documented here. This project follows Semantic Versionin
 _No changes recorded yet._
 
 ## [v0.1.0-alpha.3] - 2026-10-14
+### Stream: install paths
+
+- Installer: fixed the default install failing for everyone while no Stable release exists. Without `--channel` it now picks the most stable channel that has a release (Stable, then Release Candidate, Beta, Alpha) and warns, naming the channel, when that is a pre-release; a forced `--channel` without a release fails and lists the channels that have one.
+- Installer: two ways to start. Download Only (the default) installs, verifies and prints the next steps. Download and Scan (`--run`) then scans this machine interactively (acknowledgements and `I ACCEPT` read from the terminal, refused without one), writes all four signed reports to `~/openvapt-reports/<UTC time>/` (0700) or `--out DIR`, and prints the severity summary, the exit code and its meaning, every report path and how to open the HTML report. New `--sudo` (scan only), `--open` (desktop sessions only) and `--dry-run`.
+- CLI: `openvapt scan` without `--out` now writes to a new folder `~/openvapt-reports/<UTC time>/` (0700, never reused) instead of the current directory; `--out` is unchanged and `demo` keeps its current-directory default. Every scan and demo ends with a Reports block listing each file and how to open the HTML report. New `--open` opens report.html with `/usr/bin/xdg-open`, only in a desktop session and never as root.
+- Website: the download page offers Download Only and Download and Scan as accessible tabs, each with a copy-ready command, the steps, sample output, where reports go and time and permission notes, mapped to the NIST SP 800-115 phases; manual binary links and verification steps follow the channel record. Two new FAQ entries; the walkthrough matches the new commands and output.
+- Tests: scripts/test-install.sh covers channel fallback, Download Only, `--run` without a terminal, Download and Scan in a scripted terminal (accept and cancel), `--out`, `--dry-run` and checksum refusal, using a test double that scans only the simulated lab; CI runs it.
+- EULA section 8.6 and Privacy Policy section 3: factual additions describing the default report folder and `--open`.
 
 ### Website redesign and walkthrough
 
