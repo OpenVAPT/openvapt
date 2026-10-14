@@ -4,6 +4,15 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Stream: cite
+
+- Citation: new internal/cite package is the single source of every citation; the website, `openvapt cite`, every report and the README render from it, and tests keep them identical and free of personal names.
+- Website: a Cite pill in the header (in-flow disclosure panel, never an overlay) and a Cite OpenVAPT disclosure in the footer of every page, with APA, IEEE, Harvard, MLA, Chicago and BibTeX, Copy buttons with a spoken Copied confirmation, .bib, .ris, CITATION.cff and CSL-JSON downloads, and Cite This Check or Cite This Module on check and Academy pages. Printed pages end with the APA citation.
+- Website: How to Cite page gains a recommended APA citation with a Copy APA button, and notes on version, access date and the absence of a DOI. llms.txt gains a How to Cite section; FAQ gains How Do I Cite OpenVAPT?
+- CLI: `openvapt cite [--format apa|ieee|harvard|mla|chicago|bibtex|ris|csl|cff] [--check ID] [--module ID]` prints the citation for the exact build ("unreleased build" for builds from source); every scan and demo ends with a one-line request to cite.
+- Reports: every HTML and Markdown report ends with a How to Cite block (report reference line, APA, BibTeX, licence credit line); JSON gains a `citation` field and SARIF run properties carry the same block.
+- README: Cite OpenVAPT section near the top with APA and BibTeX, test-checked against CITATION.cff.
+
 ### Website redesign and walkthrough
 
 - Website: a calmer, near-monochrome visual language. White canvas, near-black ink and soft greys with one restrained blue accent, very large headings with tight tracking, hairline borders, pill buttons and navigation, 16px cards and 24px media frames, a lighter footer, and recoloured ECharts and AG Grid themes. IBM Plex stays the only typeface. Light theme only, no sticky or fixed elements, every page, URL, notice, structured data block and zero-data rule unchanged.
