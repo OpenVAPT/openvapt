@@ -215,7 +215,7 @@ func writeSecurityTxt() {
 		"Contact: " + repoURL + "/security/advisories/new\n" +
 		"Policy: " + repoURL + "/blob/main/SECURITY.md\n" +
 		"Expires: " + expires + "\n" +
-		"Preferred-Languages: en, ms\n" +
+		"Preferred-Languages: en\n" +
 		"Canonical: " + root() + "/" + securityTxtPath + "\n"
 	dst := filepath.Join(*outDir, securityTxtPath)
 	must(os.MkdirAll(filepath.Dir(dst), 0o755))  // #nosec G301 -- public website output

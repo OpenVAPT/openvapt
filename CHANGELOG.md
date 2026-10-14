@@ -4,6 +4,12 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Stream: worldwide audience (owner instruction 2026-10-14)
+- OpenVAPT is stated to be open to anyone, in any country: EULA 2.5 (section 22, acknowledgements 1.8 statement 8 names computer misuse laws from several regions as examples, liability cap USD 1 or its equivalent instead of RM1), Disclaimer 1.8, Privacy 1.7 (section 6 written for worldwide data protection laws), Teaching 1.4, SECURITY.md accepts reports in any language, security.txt lists English only.
+- Academy F2, the teaching plan, the teach and limits pages, ADR 0001 and AGENTS.md name laws from several regions instead of Malaysian law only; Malaysian law still governs the Agreement because that is where the licensor is.
+- New FAQ entry "Who Can Use OpenVAPT, and in Which Countries?"; README, llms.txt and JSON-LD (audience: Worldwide) say the same.
+- Two fresh-context AI legal reviews approved the revision (release/legal-review.json).
+
 ### Stream: website verification fixes (2026-10-14 review, 14-verify-website)
 - Check catalogue: the search box and the Domain, Category and Severity selects now filter the plain table on every screen width (and before the grid loads), keep the "N of 307 checks" counter current and show a "No checks match" row; on wide screens AG Grid takes over the same controls as before.
 - Academy: modules are listed in teaching order (F1 to F3, P1 to P22, A1 to A6) on the website, in `openvapt learn` and in the worksheets, whatever file defines them; a test enforces the order.

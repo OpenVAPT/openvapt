@@ -1,6 +1,6 @@
 # Teaching With OpenVAPT
 
-Version 1.3, effective 2026-10-14. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.3 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
+Version 1.4, effective 2026-10-14. These are the authoritative terms for teaching with OpenVAPT. They form part of the OpenVAPT Source-Available Licence 1.3 (section 2, "Teaching") and the End User Licence Agreement. They were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. They are not legal advice.
 
 OpenVAPT is academic, non-commercial, source-available code built by AI Cybersecurity Engineers, free to use and used 100% at your own risk. Teachers are welcome to use it. These terms say exactly how.
 
@@ -67,7 +67,7 @@ Before a class runs OpenVAPT on any real machine, the teacher must:
 1. **Get authorisation** in writing, or by the institution's normal process, from the person responsible for the lab machines or virtual machines.
 2. **Isolate the lab.** Use machines and virtual machines that are separated from production systems and contain no real personal data or secrets.
 3. **Use no third-party targets.** Make sure no student runs it on, or aims anything at, a machine the institution does not own or control.
-4. **Brief ethics and law.** Explain that accessing a computer without authorisation is an offence under Malaysia's Computer Crimes Act 1997, and that similar laws apply elsewhere, and that authorisation must come from the owner of the machine.
+4. **Brief ethics and law.** Explain that accessing a computer without authorisation is an offence in most countries (for example under the Computer Fraud and Abuse Act in the United States, the Computer Misuse Act 1990 in the United Kingdom, Directive 2013/40/EU in the European Union and the Computer Crimes Act 1997 in Malaysia), that students must follow the law of the country where they and the machine are, and that authorisation must come from the owner of the machine.
 5. **Check every student has accepted** personally, or has a parent's or guardian's acceptance if under 18.
 6. **Preview first** with `openvapt scan --dry-run`, and tell students that reports describe weaknesses and must not be shared outside the class.
 7. **Explain the limits.** Results may be wrong or incomplete, pre-release builds may be unstable, and a clean report does not prove a system is secure.
@@ -80,7 +80,7 @@ The teacher and the institution are responsible for how OpenVAPT is used in thei
 
 These terms may be updated. Each version is dated and kept in the public Git history. The version provided with your copy of OpenVAPT applies to that copy.
 
-Version history: 1.0 (2026-10-13) first version. 1.1 (2026-10-13) states that answer keys are public in every release channel and how to set fair graded work (section 5). 1.2 (2026-10-13) refers to licence 1.2 in the credit line and adds section 11 on citing OpenVAPT in students' and teachers' work. 1.3 (2026-10-14) refers to licence 1.3 in the credit line; no teaching term changed.
+Version history: 1.0 (2026-10-13) first version. 1.1 (2026-10-13) states that answer keys are public in every release channel and how to set fair graded work (section 5). 1.2 (2026-10-13) refers to licence 1.2 in the credit line and adds section 11 on citing OpenVAPT in students' and teachers' work. 1.3 (2026-10-14) refers to licence 1.3 in the credit line; no teaching term changed. 1.4 (2026-10-14) gives examples of computer misuse laws from several regions so the briefing in section 8 suits teachers in any country; no teaching term changed.
 
 ## 11. Citing OpenVAPT in Coursework, Theses and Teaching
 

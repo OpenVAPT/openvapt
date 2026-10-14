@@ -66,7 +66,7 @@ var foundation = []Module{
 				"OpenVAPT implements planning (scope fixed in code), discovery (read-only collection), analysis (checks) and reporting. The attack phase is absent by design.",
 			}},
 			{"Authorisation, Scope and the Law", []string{
-				"Testing a system without permission can be a crime. In Malaysia, unauthorised access to computer material is an offence under the Computer Crimes Act 1997. The Cyber Security Act 2024 regulates providers of cyber security services. Other countries have similar laws.",
+				"Testing a system without permission is a crime in most countries. Examples are the Computer Fraud and Abuse Act in the United States, the Computer Misuse Act 1990 in the United Kingdom, Directive 2013/40/EU in the European Union, the Computer Crimes Act 1997 in Malaysia and the Council of Europe Convention on Cybercrime, which many countries have joined. Some countries also license people who sell security testing as a service. Always follow the law where you and the machine are.",
 				"Professional testers work only with written authorisation that defines scope, timing and rules of engagement. OpenVAPT enforces the strictest possible scope in code: the machine it runs on and nothing else. Even so, you need the right to run it on that machine.",
 			}},
 			{"In Summary", []string{

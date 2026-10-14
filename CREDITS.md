@@ -73,7 +73,7 @@ Everything else in the repository (all Go code under `cmd/` and `internal/`, tem
 | Go BSD 3-Clause licence | Included word for word in THIRD_PARTY_NOTICES.md | https://go.dev/LICENSE |
 | Contributor Covenant 2.1 | Adopted by reference (linked, not copied) | https://www.contributor-covenant.org/version/2/1/code_of_conduct/ |
 | Developer Certificate of Origin 1.1 | Referenced for commit sign-off | https://developercertificate.org/ |
-| Malaysian legislation named in the legal documents | Referred to by name only; no text copied | Computer Crimes Act 1997, Cyber Security Act 2024, Personal Data Protection Act 2010 (as amended 2024), Contracts Act 1950, Consumer Protection Act 1999, Strategic Trade Act 2010, Copyright Act 1987, Communications and Multimedia Act 1998, Electronic Commerce Act 2006 |
+| Legislation named in the legal documents and the Academy | Referred to by name only as examples; no text copied | United States: Computer Fraud and Abuse Act, California Consumer Privacy Act, Export Administration Regulations. United Kingdom: Computer Misuse Act 1990, UK GDPR. European Union: Directive 2013/40/EU, General Data Protection Regulation, Regulation (EU) 2021/821. Council of Europe: Convention on Cybercrime. Malaysia (the owner's country, whose law governs the Agreement): Computer Crimes Act 1997, Cyber Security Act 2024, Personal Data Protection Act 2010, Contracts Act 1950, Consumer Protection Act 1999, Strategic Trade Act 2010, Copyright Act 1987, Communications and Multimedia Act 1998. |
 
 The licence, EULA, Disclaimer, Privacy Policy and Acceptable Use Policy are original drafts written by AI Cybersecurity Engineers. They were not copied from any template.
 

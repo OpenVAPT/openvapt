@@ -1,7 +1,7 @@
 {
   "version": "Unreleased",
   "reviewed": "2026-10-14",
-  "reviewer": "AI legal reviewer (Claude Fable 5.1 sub-agent; an AI system, not a human lawyer)",
+  "reviewer": "AI legal reviewer (Claude Opus 5.5 sub-agent, fresh context; an AI system, not a human lawyer)",
   "open_high_risks": 0,
   "accepted_high_risks": [
     "No legal entity: OpenVAPT is a project name, so the human owner is the licensor in law and personally bears any claim. Accepted by the owner in chat on 2026-10-13 (Accept personal risk, launch now); not closed. Legal risk register item 1.",
@@ -10,18 +10,26 @@
   "public_launch_approved": true,
   "documents": {
     "LICENSE": "563501d1451c207004ce873fde7c2cc64c4ef7800983d3939f14c9d430326194",
-    "EULA.md": "352e033ef83d8a2b3512b2b6b21367f331b9f3112e99ac758351d87c0cac61ac",
+    "EULA.md": "39f5522ad7e8270c69a5adaa15606f2bc4e14176946481dba4bfe826b9ac1ba6",
     "ACCEPTABLE_USE.md": "cdddd181a9ffb07fc8b8cd80346b69df4cb4279c1d93745f9397f0cfdefb73df",
-    "DISCLAIMER.md": "bfb5542714b00da7b127d814e4b03a81e00800c5742f11134876e2995305daeb",
-    "PRIVACY.md": "ba5d6fa8cebb4e79d679866adeb03a06f7794a5b5d04486c1252d0725aa1f504",
-    "TEACHING.md": "4507f5802c8ea1421d241f977ea1a4b7c530f143c2479d5115b73a6016a3e37a",
+    "DISCLAIMER.md": "25cc6b4cf7f3cdb7ae8d959e701c62b9bcef0ddd07dc8c6d27a01519ad01a33b",
+    "PRIVACY.md": "21d52c273a4b66a6899342cd120cb968ea4c453054e653d079d44d2ac6756441",
+    "TEACHING.md": "75df38c0f41d64232352af512142a78ce3e86c6abf56c15886bccec7f57f506a",
     "CITING.md": "758e5fc066b5027d304f3d769a3d5d447200e606c898467ad11f21a998a6f9db",
     "LICENSING.md": "b10203d29f8b7e340d9f02f080c507c85ad842eca61295ca446f3015c035cd2e",
     "NOTICE": "0377d7b7880c27fff5816670b81acd0f855a21761b64e4a1edf5b2f568acb4fb",
-    "internal/terms/terms.go": "cb251177ef7aa2147339aabfa4dc410d7dee7306410543760a9e59a993eea168"
+    "internal/terms/terms.go": "e6aadd9e43161903291a668f5b7b4451934a5546607a6d7670c8191751a21b22"
   },
-  "notes": "Covers the Unreleased working tree on main after v0.1.0-alpha.2 as of 2026-10-14: EULA 2.4, Licence 1.3, acknowledgements 1.7, Disclaimer 1.7, Acceptable Use 1.6, Teaching 1.3, Licensing 2.3, Citing 1.1, Privacy 1.6, AGENTS.md 1.4, GCA 1.1. Self-check: no absolute safety claims added (every safety property says designed to); consistency matrix re-run across LICENSE, EULA, LICENSING, DISCLAIMER, AUP, TEACHING, CITING, README, terms.go, FAQ, llms text, footer and download gate: Own Use, no services, acknowledgements 1 to 10, licence version 1.3, Codex role, embedded advisory data and the Disclaimer travel list all agree; TestAcknowledgementsAreInSync, TestEULAStatesTheCurrentAcknowledgementsVersion and TestTerminology pass. open_high_risks 0 is true: no High risk is open; the two accepted Highs are named in accepted_high_risks. public_launch_approved carries over the owner's 2026-10-13 approval of the public website and pre-release downloads. This record does not cover any beta, rc or stable candidate: each needs its own entry with its own version string before promotion (AGENTS.md 5.2, 5.4). Second fresh-context review completed 2026-10-14; hashes re-verified. Hashes refreshed 2026-10-14 after factual additions to EULA s8 and PRIVACY s3 for the coverage expansion.",
+  "notes": "Worldwide revision review of the Unreleased working tree on integrate, 2026-10-14, after the owner's chat instruction that OpenVAPT is open to anyone in any country: EULA 2.5, acknowledgements 1.8, Disclaimer 1.8, Privacy 1.7, Teaching 1.4, Licence 1.3 unchanged, terms.go 1.8, README, SECURITY.md, AGENTS.md precedence, AI-DISCLOSURE, CREDITS, Academy F2, teaching plan, teach.html, limits.html, FAQ, llms facts and JSON-LD. Law names checked: Computer Fraud and Abuse Act (18 U.S.C. 1030), Computer Misuse Act 1990, Directive 2013/40/EU, Regulation (EU) 2021/821, Export Administration Regulations, GDPR, UK GDPR, CCPA, Council of Europe Convention on Cybercrime (Budapest), Malaysian Acts; all named correctly and only as examples. Reviewer fixes: PRIVACY s6 rewritten (removed a duplicated sentence, a dangling reference to 'the Act' and the 'we do not target EU visitors' sentence that contradicted worldwide availability; rights requests via GitHub issue or Private Vulnerability Reporting) and a 1.7 history note added in s11; DISCLAIMER 1.8 history note added; EULA s22 keeps mandatory protections of the user's country of residence, s27 note and the acknowledgements version note updated for 1.8; FAQ notes sanctions and export laws as the only country limit. USD 1 or equivalent cap accepted: a currency-neutral nominal cap reads better worldwide, it applies only where the law permits a cap of that size, and section 14.4 and consumer mandatory law still apply. Acknowledgements identical in EULA, README and terms.go. open_high_risks 0 is true; the two accepted Highs are unchanged. Wording drafted in this run (PRIVACY s6, EULA s22 sentence, history notes, FAQ clause) needs a second fresh-context review before publication (AGENTS.md 6.2). Does not cover any beta, rc or stable candidate. Second fresh-context review of the worldwide wording completed 2026-10-14. Second reviewer corrections: PRIVACY s6 and the 1.7 note now disclose the pre-2026-10-13 web server logs with IP addresses (section 2) instead of saying no personal data is held at all; FAQ no longer presents sanctions and export laws as a restriction in the licence, and mentions mandatory protections of the user's country.",
   "history": [
+    {
+      "version": "Unreleased",
+      "reviewed": "2026-10-14",
+      "reviewer": "AI legal reviewer (Claude Fable 5.1 sub-agent; an AI system, not a human lawyer)",
+      "open_high_risks": 0,
+      "public_launch_approved": true,
+      "notes": "Covers the Unreleased working tree on main after v0.1.0-alpha.2 as of 2026-10-14: EULA 2.4, Licence 1.3, acknowledgements 1.7, Disclaimer 1.7, Acceptable Use 1.6, Teaching 1.3, Licensing 2.3, Citing 1.1, Privacy 1.6, AGENTS.md 1.4, GCA 1.1. Self-check: no absolute safety claims added (every safety property says designed to); consistency matrix re-run across LICENSE, EULA, LICENSING, DISCLAIMER, AUP, TEACHING, CITING, README, terms.go, FAQ, llms text, footer and download gate: Own Use, no services, acknowledgements 1 to 10, licence version 1.3, Codex role, embedded advisory data and the Disclaimer travel list all agree; TestAcknowledgementsAreInSync, TestEULAStatesTheCurrentAcknowledgementsVersion and TestTerminology pass. open_high_risks 0 is true: no High risk is open; the two accepted Highs are named in accepted_high_risks. public_launch_approved carries over the owner's 2026-10-13 approval of the public website and pre-release downloads. This record does not cover any beta, rc or stable candidate: each needs its own entry with its own version string before promotion (AGENTS.md 5.2, 5.4). Second fresh-context review completed 2026-10-14; hashes re-verified. Hashes refreshed 2026-10-14 after factual additions to EULA s8 and PRIVACY s3 for the coverage expansion."
+    },
     {
       "version": "v0.1.0-alpha.2",
       "reviewed": "2026-10-13",

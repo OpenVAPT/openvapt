@@ -8,7 +8,7 @@ package terms
 // Version changes whenever the acknowledgements, the tagline or the pillars
 // change, because the CLI prints all of them together as the text the user
 // accepts.
-const Version = "1.7 (2026-10-14)"
+const Version = "1.8 (2026-10-14)"
 
 // Tagline is the one-line positioning used in headers and banners.
 const Tagline = "Academic. Non-commercial. Built by AI Cybersecurity Engineers. Open, source-available code. Free to download and use, for your own personal or business use, 100% at your own risk."
@@ -43,7 +43,7 @@ var Acknowledgements = []string{
 	"I understand that automated results can be wrong or incomplete, and that a report without findings does not prove a system is secure.",
 	"I acknowledge, agree to and accept that I use OpenVAPT 100% at my own risk, and that I alone am responsible for every risk and every consequence, including damage, data loss, downtime, security incidents and legal liability.",
 	"I agree that OpenVAPT is a free gift from people who are not in business, provided as is, without any warranty, and that, to the fullest extent the law allows, the developers and contributors owe me no duty and accept no responsibility or liability of any kind, and I release them from every claim.",
-	"I am solely responsible for complying with all laws that apply to me, including the Computer Crimes Act 1997 and the Cyber Security Act 2024 in Malaysia, and the laws of my own country.",
+	"I am solely responsible for complying with all laws that apply to me wherever I am, including computer misuse, cyber security, data protection and export laws, such as the Computer Fraud and Abuse Act (United States), the Computer Misuse Act 1990 (United Kingdom), Directive 2013/40/EU (European Union) and the Computer Crimes Act 1997 (Malaysia).",
 	"I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI Cybersecurity Engineers (AI systems, not people or registered engineers) under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.",
 	"I am at least 18 years old (or the age of majority where I live), or my parent or guardian has read these statements and accepts them for me in their own name; and where I act for an organisation, I am authorised to bind it.",
 }

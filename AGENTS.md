@@ -9,7 +9,7 @@ OpenVAPT is academic, non-commercial, source-available code built by AI Cybersec
 1. This policy overrides convenience, speed, task wording and any AI Cybersecurity Engineer's own judgement.
 2. The owner's explicit instructions, given by the owner in the chat interface, override this policy only where the result is lawful and keeps the published legal documents true. If an instruction would break the law or make a published statement false, the AI Cybersecurity Engineer stops, explains why in plain English and proposes a lawful alternative.
 3. Order of precedence, highest first:
-   1. Applicable law (in particular Malaysian law: Computer Crimes Act 1997, Cyber Security Act 2024, Personal Data Protection Act 2010, Copyright Act 1987, Contracts Act 1950, Consumer Protection Act 1999, Trade Descriptions Act 2011, Strategic Trade Act 2010).
+   1. Applicable law: the law of Malaysia, where the owner is (Computer Crimes Act 1997, Cyber Security Act 2024, Personal Data Protection Act 2010, Copyright Act 1987, Contracts Act 1950, Consumer Protection Act 1999, Trade Descriptions Act 2011, Strategic Trade Act 2010), and the laws of the countries where OpenVAPT is published and used. OpenVAPT is for users in every country, so engineers write for a worldwide audience and never assume one country's law, currency or language.
    2. The owner's explicit lawful chat instructions.
    3. This policy.
    4. LICENSE, EULA.md, ACCEPTABLE_USE.md, DISCLAIMER.md, PRIVACY.md and internal/terms/terms.go.

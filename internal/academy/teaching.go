@@ -33,7 +33,7 @@ var Courses = []Course{
 		ID: "intro-4", Title: "Four-Week Introduction to Vulnerability Assessment", Audience: "Diploma, first-year degree or upper secondary students with basic Linux (students under 18 need a parent's or guardian's acceptance before downloading)", Hours: "4 Sessions of 2 Hours",
 		Summary: "From what VAPT is, and the law around it, to running and reading a first assessment on the simulated lab.",
 		Sessions: []Session{
-			{1, "Security Basics, Ethics and the Law", []string{"F1", "F2"}, "Discuss the Computer Crimes Act 1997 and authorisation; students accept the acknowledgements personally and run openvapt demo."},
+			{1, "Security Basics, Ethics and the Law", []string{"F1", "F2"}, "Discuss computer misuse law in the students' own country and authorisation; students accept the acknowledgements personally and run openvapt demo."},
 			{2, "Vulnerabilities and Ratings", []string{"F3", "P10"}, "Read three findings in the demo report and explain their CVE, CWE and CVSS."},
 			{3, "Server and Network Exposure", []string{"P1", "P3"}, "Practice lab: each student scans their own seeded practice server and lists the five most serious findings."},
 			{4, "Reporting", []string{"A1", "A3"}, "Write a one-page assessment report of the practice server, marked with the rubric."},

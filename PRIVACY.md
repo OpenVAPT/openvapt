@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Version 1.6, effective 2026-10-14. This policy was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. It is an information notice, not a contract.
+Version 1.7, effective 2026-10-14. This policy was drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it. It is an information notice, not a contract.
 
 ## Summary
 
@@ -49,7 +49,7 @@ There is no separate preview site. Every release channel (alpha, beta, release c
 
 The source code, bug reports, discussions, security reports and the automated build pipeline are hosted on **GitHub, Inc.** (a subsidiary of Microsoft), at github.com/OpenVAPT/openvapt.
 
-- If you visit the repository, download from it, open an issue, start a discussion, submit a pull request or send a private vulnerability report, **GitHub** processes your data under the GitHub Privacy Statement. GitHub may store data on servers outside Malaysia, including in the United States.
+- If you visit the repository, download from it, open an issue, start a discussion, submit a pull request or send a private vulnerability report, **GitHub** processes your data under the GitHub Privacy Statement. GitHub may store data on servers in other countries, including the United States.
 - Anything you post publicly on GitHub (issues, discussions, pull requests, comments) is public to everyone and may be copied or archived by others. **Never post secrets, full reports, hostnames, IP addresses or personal data.**
 - Private vulnerability reports are visible only to the project maintainers and GitHub until a fix is published, after which a public security advisory describes the issue.
 - The maintainers can see what GitHub shows any repository maintainer (for example your GitHub username on issues you open). We do not copy, export or keep that information anywhere else.
@@ -60,7 +60,7 @@ The website uses self-hosted copies of AG Grid Community, Apache ECharts, Lucide
 
 ## 6. Legal Basis and Your Rights
 
-OpenVAPT is an academic, non-commercial project that accepts no payments or donations. Malaysia's Personal Data Protection Act 2010 (as amended in 2024) applies to personal data processed in respect of commercial transactions, and we carry out none. We also do not collect personal data through the website or the software. For these reasons we believe the Act's obligations about notice, consent, access, correction, retention, breach notification, data protection officers and cross-border transfer do not apply to us. We nevertheless follow its spirit by collecting nothing. We do not target visitors in the European Union and we collect no data, so we believe the EU General Data Protection Regulation does not apply either. If you believe we hold any data about you, tell us publicly on GitHub (without posting the data) and we will check and answer honestly.
+OpenVAPT is an academic, non-commercial project that accepts no payments or donations, and it is used in many countries. We collect no personal data through the website or the software. The only exception is the older web server log files described in section 2, which were created before logging was turned off on 2026-10-13, contain IP addresses, are kept in an access-restricted area, are not used for any purpose and will be permanently deleted after 2026-11-12. Apart from those old logs, we believe we do not act as a controller, processor or business holding your personal data under laws such as the EU General Data Protection Regulation, the UK GDPR, the California Consumer Privacy Act or Malaysia's Personal Data Protection Act 2010, and that their obligations about notice, consent, access, correction, retention, breach notification, data protection officers and cross-border transfer have little or nothing to apply to. We follow their spirit by collecting nothing new. GitHub is responsible for the data it processes under its own privacy statement (section 4). If you believe we hold any data about you, or you wish to exercise a right that any such law gives you, tell us through a GitHub issue (without posting the data) or privately through GitHub Private Vulnerability Reporting, and we will check and answer honestly.
 
 ## 7. Children
 
@@ -80,4 +80,4 @@ Ask publicly in GitHub Discussions at github.com/OpenVAPT/openvapt. There is no 
 
 ## 11. Changes
 
-Any change to this policy will be dated, published here and kept in the public Git history before it takes effect. We do not intend ever to start collecting data. Version 1.6 (2026-10-14) adds to section 3 the full list of files and folders the software reads after its coverage expansion; it is a factual addition that describes what the software already did and changes nothing about what we receive, which remains nothing.
+Any change to this policy will be dated, published here and kept in the public Git history before it takes effect. We do not intend ever to start collecting data. Version 1.6 (2026-10-14) adds to section 3 the full list of files and folders the software reads after its coverage expansion; it is a factual addition that describes what the software already did and changes nothing about what we receive, which remains nothing. Version 1.7 (2026-10-14) states that OpenVAPT is used in many countries, explains in section 6 why we believe data protection laws such as the GDPR, the UK GDPR, the CCPA and the Personal Data Protection Act 2010 have little or nothing to apply to, apart from the older log files described in section 2, and says GitHub may store data in other countries; what we collect is unchanged, which remains nothing.
