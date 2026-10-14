@@ -50,8 +50,8 @@ func TestIndexedMatchAndEcosystemCoverage(t *testing.T) {
 	// Embedded is decoded once and shared.
 	a, e1 := Embedded()
 	b, e2 := Embedded()
-	if e1 != nil || e2 != nil || len(a.Advisories) != len(b.Advisories) || !a.Header.Fixture {
-		t.Errorf("embedded fixture: %v %v", e1, e2)
+	if e1 != nil || e2 != nil || len(a.Advisories) != len(b.Advisories) {
+		t.Errorf("embedded snapshot: %v %v", e1, e2)
 	}
 }
 
