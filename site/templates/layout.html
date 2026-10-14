@@ -36,6 +36,7 @@
 <header class="shell">
   <div class="shell-row">
     <span class="flex items-center gap-3"><a class="brand" href="{{.Base}}"><img src="{{.Base}}assets/icon.svg" alt="" width="26" height="26">OpenVAPT</a>{{if .PreRelease}}<a class="tag tag-medium no-underline" href="{{.Base}}channels.html" title="Release channel of the newest build">{{.Channel}}</a>{{end}}</span>
+    <div class="shell-end">
     <nav class="nav" aria-label="Main">
       <a href="{{.Base}}checks/" {{if eq .Section "checks"}}aria-current="page"{{end}}>Checks</a>
       <a href="{{.Base}}how-it-works.html" {{if eq .Section "built"}}aria-current="page"{{end}}>How It's Built</a>
@@ -47,7 +48,11 @@
       <a href="{{.Base}}faq.html" {{if eq .Section "faq"}}aria-current="page"{{end}}>FAQ</a>
       <a href="{{.Base}}contribute.html" {{if eq .Section "contribute"}}aria-current="page"{{end}}>Contribute</a>
     </nav>
+    <a class="cite-pill" href="{{.Base}}cite.html" data-cite-link>{{icon "quote"}}<span>Cite</span></a>
+    <button type="button" class="cite-pill" aria-expanded="false" aria-controls="qc-h" data-cite-toggle hidden>{{icon "quote"}}<span>Cite</span><span class="chev">{{icon "chevron-down"}}</span></button>
+    </div>
   </div>
+  <section id="qc-h" class="qc-drop" aria-label="Cite OpenVAPT" hidden><div class="qc-wrap">{{template "citequick" (quick "h" .)}}</div></section>
 </header>
 <div class="wrap pt-4">
   {{/* Phones: one compact strip with both leads; Read More opens the full notices below it. Wider screens: the full notices. The text is the same; only one copy is shown. */}}
@@ -60,6 +65,7 @@
 <main id="main" class="wrap pb-16 pt-12 md:pt-16">
 {{.Body}}
 </main>
+<p class="print-cite"><strong>Cite This Work:</strong> {{printCite}}</p>
 <footer class="foot">
   <div class="wrap grid gap-10 md:grid-cols-[2fr_1fr_1fr]">
     <div>
@@ -91,13 +97,17 @@
       <a href="{{.Base}}legal/governance.html">Governance and Assurance</a>
     </div>
   </div>
+  <details class="wrap qc-foot mt-8">
+    <summary class="cite-pill">{{icon "quote"}}<span>Cite OpenVAPT</span><span class="chev">{{icon "chevron-down"}}</span></summary>
+    <div class="qc-foot-body">{{template "citequick" (quick "f" .)}}</div>
+  </details>
   <div class="wrap mt-8 border-t border-line pt-5 text-[13px] text-ink-3">Built {{.Built}} from commit <a href="{{repo}}/tree/{{.Commit}}" rel="noreferrer" class="inline"><code>{{.CommitShort}}</code></a>. OpenVAPT Source-Available Licence 1.3: own use only, no services, no selling. Provided as is, at your own risk. Third-party names identify their owners only, with no affiliation or endorsement.</div>
 </footer>
 {{if eq .Path "checks/index.html"}}<script src="{{.Base}}{{asset "catalogue.js"}}" data-vendor="{{.Base}}assets/vendor/" data-vendor-v="{{vendorv}}" defer></script>{{end}}
 {{if eq .Path "download.html"}}<script src="{{.Base}}{{asset "acknowledge.js"}}" defer></script>{{end}}
 {{if or (eq .Path "index.html") (eq .Path "how-it-works.html") (eq .Path "download.html")}}<script src="{{.Base}}{{asset "walkthrough.js"}}" defer></script>{{end}}
 {{if hasPrefix .Path "academy/"}}<script src="{{.Base}}{{asset "academy.js"}}" defer></script>{{end}}
-{{if or (eq .Path "cite.html") (and (hasPrefix .Path "checks/") (ne .Path "checks/index.html")) (hasPrefix .Path "academy/")}}<script src="{{.Base}}{{asset "cite.js"}}" defer></script>{{end}}
+<script src="{{.Base}}{{asset "cite.js"}}" defer></script>
 {{if or (eq .Path "index.html") (eq .Path "standards.html") (eq .Path "coverage.html")}}<script src="{{.Base}}{{asset "charts.js"}}" data-vendor="{{.Base}}assets/vendor/" data-vendor-v="{{vendorv}}"{{if eq .Path "coverage.html"}} data-eager="1"{{end}} defer></script>{{end}}
 </body>
 </html>{{end}}
@@ -110,6 +120,20 @@
 <div class="code-body" tabindex="0"><table>{{range .Lines}}<tr><td class="n">{{.N}}</td><td class="l">{{.Text}}</td></tr>{{end}}</table></div>
 </figure>{{end}}
 
+{{define "citequick"}}<div class="qc" data-copy-scope>
+<p class="qc-ask">{{.Request}}</p>
+{{if .Page}}<h2 class="qc-h">Cite This {{.PageKind}}</h2>
+<div class="qc-boxes">{{range .Page}}{{template "copybox" .}}{{end}}</div>
+<h2 class="qc-h">Cite OpenVAPT</h2>{{end}}
+<div class="seg seg-sm" role="tablist" aria-label="Citation Style" data-tabs hidden>
+{{range $i, $s := .Styles}}<button type="button" role="tab" id="tab-{{$s.ID}}" aria-controls="panel-{{$s.ID}}" aria-selected="{{if eq $i 0}}true{{else}}false{{end}}" tabindex="{{if eq $i 0}}0{{else}}-1{{end}}">{{$s.Label}}</button>{{end}}
+</div>
+{{range .Styles}}<div class="cite-panel qc-panel" role="tabpanel" id="panel-{{.ID}}" aria-labelledby="tab-{{.ID}}">{{range .Boxes}}{{template "copybox" .}}{{end}}</div>{{end}}
+<p class="qc-dl"><span>Download:</span> <a href="{{.Base}}openvapt.bib" download>BibTeX (.bib)</a> <a href="{{.Base}}openvapt.ris" download>RIS (.ris)</a> <a href="{{.Base}}CITATION.cff" download>CITATION.cff</a> <a href="{{.Base}}openvapt.json" download>CSL-JSON</a></p>
+<p class="qc-more"><a href="{{.Base}}cite.html">Every Style and When Credit Is Required</a><span class="qc-note">Author: "OpenVAPT", no personal names. {{.DOINote}}</span></p>
+<p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
+</div>{{end}}
+
 {{define "sev"}}<span class="tag tag-{{.}}">{{title (print .)}}</span>{{end}}
 
 {{define "copybox"}}<div class="cite-box">
@@ -120,7 +144,7 @@
 
 {{define "citepage"}}<details class="cite-page">
 <summary>{{icon "quote"}}<span>Cite This Page</span><span class="chev">{{icon "chevron-right"}}</span></summary>
-<div class="cite-page-body">
+<div class="cite-page-body" data-copy-scope>
 <p class="m-0 text-[15px] text-ink-2">If this page helped your work, please cite it. The version and web address are filled in; the access date is today's date in your browser. Every other style, and when credit is required, is on <a href="../cite.html">How to Cite OpenVAPT</a>.</p>
 {{range .}}{{template "copybox" .}}{{end}}
 <p class="muted m-0">Citing OpenVAPT does not mean OpenVAPT endorses, approves or has reviewed your work.</p>
