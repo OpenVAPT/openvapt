@@ -4,6 +4,9 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+### Fix: vulnerability data sources (2026-10-14)
+- The release snapshot no longer requests a WordPress export: OSV publishes none, and the request failed the release build. WordPress core is still inventoried and WEB-CVE-001 reports it Incomplete, never Pass; README, CREDITS, THIRD_PARTY_NOTICES and docs/VULNDB.md now say so. A test checks every configured ecosystem against OSV's published list.
+
 ### Stream: r2-cvss
 
 - CVSS v3.1 vectors of 18 host checks for detective gaps and local-only weaknesses (audit, journal, logging, time sync, SSH log level, martian logging, file integrity monitoring, rootless Docker, running kernel behind installed kernel) now use a local attack vector; severities are unchanged, and the report Methodology explains the rule (A2-09).
