@@ -102,3 +102,9 @@ Update an existing ruleset with `--method PUT repos/OpenVAPT/openvapt/rulesets/<
 ## Note (2026-10-14, second verifier)
 
 `required_linear_history` was removed from the ruleset: the project merges work branches with `--no-ff` on purpose (merge commits are the audit trail, and `channel head` reads first-parent history), so a linear-history rule would reject every integration merge. Force pushes and deletions stay blocked.
+
+## Applied 2026-10-14 (partial)
+
+GitHub rejected the repository-level ruleset with the GitHub Actions integration as a bypass actor ("Actor GitHub Actions integration must be part of the ruleset source or owner organization", HTTP 422). Applying the pull-request and required-check rules without that bypass would break the promotion workflow's record commits. Applied instead: a ruleset on the default branch with `deletion` and `non_fast_forward` only (no force-push, no branch deletion). Also enabled: secret scanning, push protection, Dependabot security updates, web commit sign-off, and required SHA pinning for actions.
+
+Open follow-up (owner decision): either create the ruleset at the organisation level, where the Actions integration can be a bypass actor, or change `promote.yml` so the record step opens a pull request that the workflow merges after `ci`, and then add the `pull_request` and `required_status_checks` rules here.
