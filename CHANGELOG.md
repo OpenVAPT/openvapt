@@ -4,7 +4,13 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
-_No changes recorded yet._
+### Stream: discovery (SEO, GEO, AEO, LLM parsing)
+
+- Website: an Atom feed of every release at /feed.xml (linked from every page and the footer), a web app manifest, PNG icons (favicon.ico, 192, 512, Apple touch) beside the SVG mark, codemeta.json for research-software catalogues, and an IndexNow key file with scripts/indexnow.sh to notify Bing, Yandex and other IndexNow engines after a deploy.
+- Website: a Markdown twin of every check page, every Academy module, the FAQ and the glossary (same address with .md), each with front matter naming the canonical page, licence and last change date; pages link them with rel="alternate" type="text/markdown" and a visible "Also available as plain Markdown" note; llms.txt explains the convention. The root .htaccess marks .md files noindex so the HTML stays the one indexed address.
+- Website: new page For Machines and AI (/machine-readable.html) listing every data file for search engines, AI answer engines, researchers and tools.
+- Website: structured data enriched. Organization logo as a 512 px PNG ImageObject; SoftwareApplication gains author, image, releaseNotes, softwareHelp, installUrl and softwareRequirements; TechArticle (checks) and LearningResource (modules) gain author, image, datePublished (first git commit), mainEntityOfPage, licence, keywords, section, level, time required and the Markdown encoding; FAQ and home gain SpeakableSpecification; every page carries hreflang en and x-default, a robots directive allowing full snippets and large image previews, and og:type article with published and modified times on check and module pages.
+- Repository: README badges and quick links, SUPPORT.md, extra GitHub topics.
 
 ## [v0.1.0-alpha.4] - 2026-10-14
 
