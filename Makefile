@@ -38,7 +38,7 @@ site:
 # exports and the CISA KEV feed into the embed path, so a source build
 # matches real advisories instead of the test fixture. Network access is
 # needed for this target only; scans never go online.
-ECOSYSTEMS ?= Debian:11,Debian:12,Debian:13,Ubuntu:20.04:LTS,Ubuntu:22.04:LTS,Ubuntu:24.04:LTS,AlmaLinux:8,AlmaLinux:9,Rocky Linux:8,Rocky Linux:9,Packagist,npm,WordPress:Core
+ECOSYSTEMS ?= Debian:11,Debian:12,Debian:13,Ubuntu:20.04:LTS,Ubuntu:22.04:LTS,Ubuntu:24.04:LTS,AlmaLinux:8,AlmaLinux:9,Rocky Linux:8,Rocky Linux:9,Packagist,npm
 vulndb:
 	go run ./cmd/vulndbgen -out internal/vulndb/data/snapshot.json.gz -ecosystems "$(ECOSYSTEMS)" -packages docs/vulndb-packages.txt
 
