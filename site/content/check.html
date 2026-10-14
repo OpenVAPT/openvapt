@@ -11,7 +11,9 @@
   <dt>CVSS v3.1 Vector</dt><dd><code>{{$c.CVSS}}</code></dd>
   {{with catInfo $c.Category}}<dt>Control Category</dt><dd>{{.Name}}: CIS Controls v8 {{join .CIS ", "}}; NIST CSF 2.0 {{join .NISTCSF ", "}}</dd>{{end}}
   <dt>Fix Effort</dt><dd>{{title (print $c.Effort)}}</dd>
-  {{with $c.Standards.WSTG}}<dt>OWASP WSTG</dt><dd>{{join . ", "}}</dd>{{end}}
+  {{with $c.Standards.CIS}}<dt>CIS Controls v8 Safeguard</dt><dd>{{join . ", "}}</dd>{{end}}
+  {{with $c.Standards.CSF}}<dt>NIST CSF 2.0 Subcategory</dt><dd>{{join . ", "}}</dd>{{end}}
+  {{with $c.Standards.WSTG}}<dt>OWASP WSTG v4.2</dt><dd>{{join . ", "}}</dd>{{end}}
   {{with $c.Standards.CWE}}<dt>CWE</dt><dd>{{range $i, $x := .}}{{if $i}}, {{end}}<a href="{{cwe $x}}" rel="noreferrer">{{$x}}</a>{{end}}</dd>{{end}}
   {{with $c.Standards.OWASP}}<dt>OWASP Top 10</dt><dd>{{join . ", "}}</dd>{{end}}
   {{with $c.Standards.ASVS}}<dt>OWASP ASVS 4.0.3</dt><dd>{{join . ", "}}</dd>{{end}}

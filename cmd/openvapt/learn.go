@@ -16,10 +16,18 @@ import (
 // cmdLearn is the offline OpenVAPT Academy: it lists the course, prints a
 // module, runs a module's self-check quiz, or looks up a glossary term.
 // Quiz answers are checked in memory and never stored.
-func cmdLearn(args []string) error {
+func learnFlagSet(quiz *bool, term *string) *flag.FlagSet {
 	fs := flag.NewFlagSet("learn", flag.ExitOnError)
-	quiz := fs.Bool("quiz", false, "run the module's self-check quiz")
-	term := fs.String("term", "", "look up a glossary term")
+	fs.BoolVar(quiz, "quiz", false, "run the module's self-check quiz")
+	fs.StringVar(term, "term", "", "look up a glossary term")
+	return fs
+}
+
+func cmdLearn(args []string) error {
+	var quizV bool
+	var termV string
+	quiz, term := &quizV, &termV
+	fs := learnFlagSet(quiz, term)
 	var id string
 	if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
 		id, args = args[0], args[1:]

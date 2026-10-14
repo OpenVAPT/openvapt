@@ -142,7 +142,7 @@ func init() {
 		"Checks that each site limits what URL information is leaked to other sites in the Referer header.",
 		"Full URLs can contain session tokens, password-reset links or personal data, which would otherwise be sent to every third-party resource and outbound link.",
 		"Send  Referrer-Policy: strict-origin-when-cross-origin  (or no-referrer). Never use unsafe-url.",
-		check.Low, check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.4.6"}, NIST: []string{"CM-6"}})
+		check.Low, check.Standards{CWE: []string{"CWE-201"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.4.6"}, NIST: []string{"CM-6"}})
 	simpleHeader("WEB-HDR-006", "Missing Permissions-Policy", "Permissions-Policy", "",
 		"Checks that each site restricts powerful browser features (camera, microphone, geolocation) it does not use.",
 		"Restricting features limits what injected or third-party scripts can do in your visitors' browsers.",
@@ -161,7 +161,7 @@ func init() {
 		Fix:       "Apache: ServerTokens Prod and ServerSignature Off . nginx: server_tokens off; . PHP: expose_php = Off in php.ini . Remove X-Powered-By in the application or proxy.",
 		Verify:    "curl -sI https://<site>/ | grep -Ei '^(server|x-powered-by)'",
 		Refs:      []check.Ref{refHTTPHeadersCS, {Title: "Apache HTTP Server, ServerTokens directive", URL: "https://httpd.apache.org/docs/2.4/mod/core.html#servertokens"}},
-		Standards: check.Standards{CWE: []string{"CWE-200", "CWE-497"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"CM-7", "SI-11"}},
+		Standards: check.Standards{CWE: []string{"CWE-497"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"CM-7", "SI-11"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			ver := regexp.MustCompile(`\d+\.\d+`)
 			return ForEachSite(ctx, s, func(st Site) check.Result {

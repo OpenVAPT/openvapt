@@ -135,7 +135,7 @@ func registerExposureChecks() {
 		Fix:       "Bind control planes to loopback or a dedicated management address, require mutual TLS or strong authentication, and filter access to approved source networks or a VPN.",
 		Verify:    "Review ss -tulpn and the host firewall from a trusted administrative session.",
 		Refs:      []check.Ref{{Title: "Docker Protect the Daemon Socket", URL: "https://docs.docker.com/engine/security/protect-access/"}, {Title: "Kubernetes Ports and Protocols", URL: "https://kubernetes.io/docs/reference/networking/ports-and-protocols/"}, {Title: "IANA Service Name and Transport Protocol Port Number Registry", URL: "https://www.iana.org/assignments/service-names-port-numbers"}},
-		Standards: check.Standards{CWE: []string{"CWE-284", "CWE-668"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-17", "CM-7", "SC-7"}},
+		Standards: check.Standards{CWE: []string{"CWE-1327", "CWE-923"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-17", "CM-7", "SC-7"}},
 		Run:       portListRun(controlPorts, "Control plane or remote desktop ports are network-reachable", "No control plane or remote desktop port is network-reachable"),
 	})
 	check.Register(&check.Check{
@@ -152,7 +152,7 @@ func registerExposureChecks() {
 		Fix:       "Bind the panel or exporter to 127.0.0.1 or a management address, put it behind a reverse proxy with authentication, or restrict the port to monitoring hosts in the firewall.",
 		Verify:    "ss -tulpn shows these ports on 127.0.0.1, ::1 or a management address only.",
 		Refs:      []check.Ref{{Title: "Prometheus, Security model", URL: "https://prometheus.io/docs/operating/security/"}, {Title: "IANA Service Name and Transport Protocol Port Number Registry", URL: "https://www.iana.org/assignments/service-names-port-numbers"}},
-		Standards: check.Standards{CWE: []string{"CWE-668", "CWE-1188"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-17", "CM-7", "SC-7"}},
+		Standards: check.Standards{CWE: []string{"CWE-1188", "CWE-1327"}, OWASP: []string{"A05:2021"}, NIST: []string{"AC-17", "CM-7", "SC-7"}},
 		Run:       portListRun(managementPorts, "Management panel or monitoring ports are network-reachable", "No management panel or monitoring port is network-reachable"),
 	})
 }

@@ -76,7 +76,7 @@ func init() {
 	iniRule("WEB-PHP-002", "PHP Version Exposed in Headers", "expose_php",
 		"Checks whether PHP adds an X-Powered-By header with its version.",
 		"The header advertises the exact PHP version to every visitor and scanner.",
-		"In php.ini set  expose_php = Off  and restart PHP.", check.Low, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N", check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"CM-7", "SI-11"}}, on)
+		"In php.ini set  expose_php = Off  and restart PHP.", check.Low, "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N", check.Standards{CWE: []string{"CWE-497"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-02"}, NIST: []string{"CM-7", "SI-11"}}, on)
 	iniRule("WEB-PHP-003", "PHP Allows Remote File Inclusion", "allow_url_include",
 		"Checks whether include() and require() may load code from URLs.",
 		"With allow_url_include on, a single file-inclusion bug lets an attacker run their own PHP code from their own server (remote file inclusion).",

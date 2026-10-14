@@ -13,10 +13,13 @@ import (
 // The hardened server has each fix applied. PASS_MIN_DAYS and PASS_WARN_AGE
 // live in fixtures_host.go with the rest of login.defs.
 
-// dpkgInfo marks packages as installed through their dpkg info list files.
+// dpkgInfo marks packages as installed: a dpkg info list file plus an
+// "install ok installed" entry in /var/lib/dpkg/status, which is the source
+// of truth (a .list file alone is not proof of installation).
 func dpkgInfo(f *sys.Fake, names ...string) {
 	for _, n := range names {
 		f.Files["/var/lib/dpkg/info/"+n+".list"] = ""
+		f.Files["/var/lib/dpkg/status"] += "\n\nPackage: " + n + "\nStatus: install ok installed\nVersion: 1\n"
 	}
 }
 

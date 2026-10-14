@@ -21,7 +21,7 @@ func init() {
 		Fix:       "Investigate who created each account. Remove it (userdel <name>) or give it a normal UID (usermod -u <new-uid> <name>). Grant admin rights through sudo instead.",
 		Verify:    "awk -F: '$3==0' /etc/passwd  should print only the root line.",
 		Refs:      []check.Ref{{Title: "passwd(5), Linux man-pages", URL: "https://man7.org/linux/man-pages/man5/passwd.5.html"}, refNIST80053},
-		Standards: check.Standards{CWE: []string{"CWE-250", "CWE-269"}, NIST: []string{"AC-2", "AC-6"}, CISTopic: "User accounts: root is the only UID 0 account"},
+		Standards: check.Standards{CWE: []string{"CWE-250", "CWE-266"}, NIST: []string{"AC-2", "AC-6"}, CISTopic: "User accounts: root is the only UID 0 account"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			r, err := s.ReadFile(ctx, "/etc/passwd")
 			if err != nil {
@@ -48,10 +48,10 @@ func init() {
 		ID:        "HOST-USR-002",
 		Title:     "Accounts Without a Password",
 		Domain:    check.DomainHost,
-		Severity:  check.Critical,
-		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+		Severity:  check.High,
+		CVSS:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
 		Summary:   "Checks /etc/shadow for accounts whose password field is empty.",
-		Rationale: "An empty password field means the account can log in with no password at all on any service that allows password logins.",
+		Rationale: "An empty password field means the account can log in with no password at all on any service that allows password logins. The score uses a local attack vector: any local user can switch to the account (su) without a password, while the SSH daemon refuses empty passwords unless PermitEmptyPasswords is yes. If HOST-SSH-003 also fails, the same account is open from the network and should be treated as Critical.",
 		Detection: "Reads /etc/shadow (needs root) and lists entries whose second field is empty. Locked ('!' or '*') entries pass. Hashes are never copied into the report.",
 		Fix:       "For each listed user either set a password (passwd <user>) or lock the account (passwd -l <user>).",
 		Verify:    "awk -F: '$2==\"\"' /etc/shadow  should print nothing.",
@@ -91,7 +91,7 @@ func init() {
 		Fix:       "Edit with visudo and remove NOPASSWD, or restrict it to one specific, harmless command for automation accounts.",
 		Verify:    "grep -r NOPASSWD /etc/sudoers /etc/sudoers.d  should print nothing, or only narrowly scoped commands.",
 		Refs:      []check.Ref{{Title: "sudoers(5) manual", URL: "https://www.sudo.ws/docs/man/sudoers.man/"}},
-		Standards: check.Standards{CWE: []string{"CWE-269"}, NIST: []string{"AC-6", "IA-11"}, CISTopic: "Sudo: re-authentication for privilege escalation"},
+		Standards: check.Standards{CWE: []string{"CWE-306"}, NIST: []string{"AC-6", "IA-11"}, CISTopic: "Sudo: re-authentication for privilege escalation"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			files := []string{"/etc/sudoers"}
 			more, _ := s.Glob("/etc/sudoers.d/*")

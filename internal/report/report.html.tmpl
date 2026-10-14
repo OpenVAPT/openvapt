@@ -35,9 +35,11 @@ a{color:var(--accent)}ul{padding-left:20px}
 <h1>OpenVAPT Self-Assessment Report</h1>
 <p class="muted">{{.Scan.Host}} - {{.Scan.OS}} - {{.Scan.Started.Format "2006-01-02 15:04 UTC"}}</p>
 <div class="note">{{.Disclaimer}}</div>
+{{with .SuppressionNotice}}<div class="note"><strong>Suppressions Used.</strong> {{.}}</div>{{end}}
 
 <h2>Executive Summary</h2>
-<p>{{.Posture}}</p>
+{{$ex := .Executive}}{{range $ex.Paragraphs}}<p>{{.}}</p>
+{{end}}
 <div class="stats">
 <div class="stat"><b class="critical">{{.Summary.Critical}}</b><span>Critical</span></div>
 <div class="stat"><b class="high">{{.Summary.High}}</b><span>High</span></div>
@@ -45,6 +47,7 @@ a{color:var(--accent)}ul{padding-left:20px}
 <div class="stat"><b class="low">{{.Summary.Low}}</b><span>Low</span></div>
 <div class="stat"><b class="pass">{{.Summary.Passed}}</b><span>Passed</span></div>
 <div class="stat"><b>{{.Summary.Incomplete}}</b><span>Incomplete</span></div>
+<div class="stat"><b>{{.Summary.IncompleteTargets}}</b><span>Incomplete Targets</span></div>
 <div class="stat"><b>{{.Summary.Skipped}}</b><span>Skipped</span></div>
 <div class="stat"><b>{{.Summary.Errors}}</b><span>Errors</span></div>
 </div>
@@ -57,9 +60,11 @@ a{color:var(--accent)}ul{padding-left:20px}
 </table>
 
 <h3>Top 5 Risks</h3>
-<table><tr><th>ID</th><th>Risk</th><th>Severity</th><th>Category</th></tr>
-{{range .TopRisks}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{catName .Category}}</td></tr>{{end}}
+<table><tr><th>ID</th><th>Risk</th><th>Severity</th><th>CVSS</th><th>Why It Matters</th></tr>
+{{range $ex.Top}}<tr><td><code>{{.ID}}</code></td><td>{{.Title}}</td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{.Score}}</td><td>{{.Why}}</td></tr>{{end}}
 </table>
+{{with $ex.Gaps}}<h3>Notable Coverage Gaps</h3>
+<ul>{{range .}}<li>{{.}}</li>{{end}}</ul>{{end}}
 
 <h2>Risk Heat Map</h2>
 <p class="muted">Failed checks by security control area and severity.</p>
@@ -69,7 +74,7 @@ a{color:var(--accent)}ul{padding-left:20px}
 
 <h2>Compliance Coverage</h2>
 <p>Coverage shows mapped automated checks and does not certify compliance.</p>
-<table><tr><th>Framework</th><th>Control or Category</th><th>Checks Run</th><th>Failed</th><th>Passed</th></tr>
+<table><tr><th>Framework</th><th>Safeguard or Subcategory</th><th>Checks Run</th><th>Failed</th><th>Passed</th></tr>
 {{range .ComplianceCoverage}}<tr><td>{{.Framework}}</td><td>{{.Control}}</td><td>{{.Checks}}</td><td>{{.Failed}}</td><td>{{.Passed}}</td></tr>{{end}}
 </table>
 
@@ -83,26 +88,34 @@ a{color:var(--accent)}ul{padding-left:20px}
 <header><span class="sev {{.Severity}}">{{upper .Severity}}</span><h3>{{.Title}}</h3><code class="muted">{{.ID}}</code></header>
 <p>{{.Summary}}</p>
 <p><strong>Why it matters.</strong> {{.Rationale}}</p>
-{{range fails .Results}}<p><strong>{{.Target}}:</strong> {{.Message}}</p>{{range .Evidence}}<pre>{{.}}</pre>{{end}}{{end}}
+{{$f := .}}{{range fails .Results}}<p><strong>{{.Target}}:</strong> {{.Message}}{{with $f.SuppressionFor .}} <em>(suppressed until {{.Expires}})</em>{{end}}</p>{{range .Evidence}}<pre>{{.}}</pre>{{end}}{{end}}
 <dl>
 <dt>Fix</dt><dd>{{.Fix}}</dd>
 <dt>Verify</dt><dd><code>{{.Verify}}</code></dd>
 <dt>CVSS v3.1</dt><dd><code>{{.CVSS}}</code></dd>
 <dt>Category</dt><dd>{{catName .Category}}</dd>
 <dt>Effort</dt><dd>{{title .Effort}}</dd>
+<dt>Confidence</dt><dd>{{title .Confidence}}</dd>
 {{if .Standards.CWE}}<dt>Standards</dt><dd>{{join .Standards.CWE ", "}}{{if .Standards.OWASP}}, OWASP {{join .Standards.OWASP ", "}}{{end}}{{if .Standards.ASVS}}, ASVS {{join .Standards.ASVS ", "}}{{end}}{{if .Standards.NIST}}, NIST 800-53 {{join .Standards.NIST ", "}}{{end}}</dd>{{end}}
 <dt>References</dt><dd>{{range .Refs}}<a href="{{.URL}}" rel="noreferrer">{{.Title}}</a><br>{{end}}</dd>
 {{if .Academy}}<dt>Learn</dt><dd>{{range .Academy}}<a href="{{.URL}}" rel="noreferrer">{{.ID}}: {{.Title}}</a> (offline: <code>openvapt learn {{.ID}}</code>)<br>{{end}}</dd>{{end}}
 <dt>Source</dt><dd><code>{{.Source}}</code></dd>
 </dl>
+<p class="muted">If you believe this is a false positive, report it with the <a href="{{fpURL}}" rel="noreferrer">False Positive form</a>, or accept it with an expiry date in a <a href="{{supURL}}" rel="noreferrer">suppression file</a>.</p>
 </article>
 {{end}}{{end}}
 {{if not $any}}<p>No check failed. This does not prove the machine is secure; see Limitations.</p>{{end}}
 
+{{if .Suppression}}<h2>Suppressed Findings</h2>
+<p>These failed results were accepted in the suppression file. They keep their Fail status and severity; only the --fail-on exit code ignores them.</p>
+<table><tr><th>ID</th><th>Severity</th><th>Target</th><th>Reason</th><th>Expires</th><th>Added By</th></tr>
+{{range .SuppressedRows}}<tr><td><code>{{.ID}}</code></td><td><span class="{{.Severity}}">{{title .Severity}}</span></td><td>{{.Target}}</td><td>{{.Reason}}</td><td>{{.Expires}}</td><td>{{.AddedBy}}</td></tr>{{end}}
+</table>
+{{end}}
 <h2>Coverage Gaps</h2>
 <p>Incomplete, Error and Skipped checks did not establish that the affected area is secure. Review the reason and rerun with the required access or corrected configuration.</p>
 <table><tr><th>ID</th><th>Status</th><th>Affected Area and Reason</th></tr>
-{{range .Findings}}{{$f := .}}{{if coverage .}}{{range .Results}}<tr><td><code>{{$f.ID}}</code></td><td>{{title .Status}}</td><td><strong>{{.Target}}</strong>: {{.Message}}</td></tr>{{end}}{{end}}{{end}}
+{{range .Findings}}{{$f := .}}{{range gapResults .}}<tr><td><code>{{$f.ID}}</code></td><td>{{title .Status}}</td><td><strong>{{.Target}}</strong>: {{.Message}}</td></tr>{{end}}{{end}}
 </table>
 
 <h2>All Checks</h2>

@@ -137,7 +137,7 @@ func registerHardening() {
 		Fix:       "Set  HostbasedAuthentication no ,  IgnoreRhosts yes  and  PermitUserEnvironment no  in /etc/ssh/sshd_config, then reload sshd.",
 		Verify:    "sshd -T | grep -Ei 'hostbasedauthentication|ignorerhosts|permituserenvironment'",
 		Refs:      []check.Ref{refSSHDManual},
-		Standards: check.Standards{CWE: []string{"CWE-287", "CWE-15"}, NIST: []string{"IA-2", "CM-6"}, CISTopic: "SSH host-based authentication and user environment"},
+		Standards: check.Standards{CWE: []string{"CWE-290", "CWE-15"}, NIST: []string{"IA-2", "CM-6"}, CISTopic: "SSH host-based authentication and user environment"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			cfg, ok := collect.SSHD(ctx, s)
 			if !ok {
@@ -163,7 +163,7 @@ func registerHardening() {
 	check.Register(&check.Check{
 		ID: "HOST-SSH-012", Title: "SSH Logging Level Too Low", Domain: check.DomainHost,
 		Severity: check.Low, Category: check.CatLogging, Effort: check.EffortLow,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+		CVSS:      "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:N",
 		Summary:   "Checks that sshd logs at INFO or VERBOSE level.",
 		Rationale: "QUIET, FATAL or ERROR levels drop login records, so failed and successful logins cannot be investigated. VERBOSE also records the key fingerprint used.",
 		Detection: "Reads loglevel from the effective sshd configuration; INFO and VERBOSE pass.",
@@ -339,7 +339,7 @@ func registerHardening() {
 		Summary:   "Checks for desktop and legacy network services that servers rarely need.",
 		Rationale: "Each running service adds attack surface. Zeroconf discovery, printing, RPC portmapping and inetd-style super-servers are common, long-forgotten exposures.",
 		Detection: "Asks systemd whether avahi-daemon, cups, rpcbind, xinetd, telnet.socket, rsh.socket, rlogin.socket or vsftpd is active.",
-		Fix:       "systemctl disable --now <service>  for each listed service you do not need, or remove its package.",
+		Fix:       "systemctl disable --now <service>  for each listed service you do not need, or remove its package. Caution: check first that nothing depends on it (systemctl list-dependencies --reverse <service>) and keep console access when disabling network or remote-access services.",
 		Verify:    "systemctl is-active avahi-daemon cups rpcbind xinetd",
 		Refs:      []check.Ref{{Title: "NIST SP 800-123, Guide to General Server Security", URL: "https://csrc.nist.gov/pubs/sp/800/123/final"}},
 		Standards: check.Standards{CWE: []string{"CWE-1188"}, NIST: []string{"CM-7"}, CISTopic: "Remove or disable unnecessary services"},
@@ -367,7 +367,7 @@ func registerHardening() {
 		Fix:       "Remove users who do not need it from the docker group (gpasswd -d <user> docker); consider rootless Docker or Podman; keep docker.sock at 660 root:docker.",
 		Verify:    "getent group docker ; stat -c '%a %U:%G' /var/run/docker.sock",
 		Refs:      []check.Ref{{Title: "Docker documentation, Docker daemon attack surface", URL: "https://docs.docker.com/engine/security/#docker-daemon-attack-surface"}},
-		Standards: check.Standards{CWE: []string{"CWE-269", "CWE-250"}, NIST: []string{"AC-6"}},
+		Standards: check.Standards{CWE: []string{"CWE-250", "CWE-266"}, NIST: []string{"AC-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			var ev []string
 			if t, _, ok := readText(ctx, s, "/etc/group"); ok {
@@ -461,7 +461,7 @@ func registerHardening() {
 		Fix:       "Install logrotate (apt install logrotate / dnf install logrotate) and keep its daily timer enabled, or set SystemMaxUse= in journald.conf.",
 		Verify:    "ls /etc/logrotate.conf ; systemctl is-active logrotate.timer",
 		Refs:      []check.Ref{{Title: "logrotate(8), Linux man-pages", URL: "https://man7.org/linux/man-pages/man8/logrotate.8.html"}},
-		Standards: check.Standards{CWE: []string{"CWE-400"}, NIST: []string{"AU-4", "AU-11"}},
+		Standards: check.Standards{CWE: []string{"CWE-770"}, NIST: []string{"AU-4", "AU-11"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			if _, err := s.Stat("/etc/logrotate.conf"); err == nil {
 				return []check.Result{check.PassR("/etc/logrotate.conf", "logrotate is configured")}

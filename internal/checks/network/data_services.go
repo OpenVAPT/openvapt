@@ -117,7 +117,7 @@ func init() {
 		"PostgreSQL accepts trust authentication or unrestricted client networks.",
 		"Trust authentication and all-address client rules can allow database access without a password from untrusted networks.",
 		"Reads postgresql.conf and pg_hba.conf, flags listen_addresses '*' or 0.0.0.0, trust methods, and 0.0.0.0/0 or ::/0 client ranges.",
-		"Bind PostgreSQL to required interfaces only and replace trust or unrestricted pg_hba.conf rules with narrow CIDRs and scram-sha-256.",
+		"Bind PostgreSQL to required interfaces only and replace trust or unrestricted pg_hba.conf rules with narrow CIDRs and scram-sha-256. Caution: users whose passwords are stored as md5 cannot log in with scram-sha-256 until their password is set again with password_encryption = scram-sha-256, so reset them first and reload, not restart, to test.",
 		"Run pg_ctl reload through normal operations, then use pg_hba_file_rules and ss -tlnp to verify the effective rules.",
 		"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		check.Critical,
@@ -263,7 +263,7 @@ var dataCWE = map[string][]string{
 	"NET-DB-008": {"CWE-732", "CWE-306"},  // NFS exports
 	"NET-DB-009": {"CWE-732", "CWE-306"},  // Samba guest
 	"NET-DB-010": {"CWE-406"},             // open recursion
-	"NET-DB-011": {"CWE-200", "CWE-668"},  // zone transfer
+	"NET-DB-011": {"CWE-497"},             // zone transfer
 	"NET-DB-012": {"CWE-441"},             // open relay
 	"NET-DB-013": {"CWE-319", "CWE-523"},  // cleartext mail authentication
 }

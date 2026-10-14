@@ -10,3 +10,4 @@ node_modules/
 .cache/
 /cmd/openvapt/openvapt
 /openvapt-demo-report-*/
+/openvapt.1

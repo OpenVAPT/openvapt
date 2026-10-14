@@ -129,7 +129,7 @@ func init() {
 		Summary:   "Checks that new passwords pass through pam_pwquality with its dictionary check on, so dictionary words and user-name variants are rejected.",
 		Rationale: "NIST SP 800-63B-4 asks verifiers to reject passwords found in dictionaries and blocklists rather than to impose composition rules. pam_pwquality does that work on Linux, but only when the password stack actually calls it and its dictcheck and usercheck options are not switched off. A minlen in pwquality.conf (HOST-PWD-003) does nothing if the module is never invoked.",
 		Detection: "Reads /etc/pam.d/common-password, /etc/pam.d/system-auth and /etc/pam.d/password-auth for an active pam_pwquality (or pam_passwdqc or pam_cracklib) line, then reads dictcheck, usercheck and enforcing from /etc/security/pwquality.conf.d/*.conf and /etc/security/pwquality.conf and from the module line. A missing module, dictcheck=0, usercheck=0 or enforcing=0 fails. Skipped when no password stack exists; Incomplete when one exists but cannot be read.",
-		Fix:       "Install libpam-pwquality (Debian/Ubuntu) or libpwquality (RHEL family). Make sure the password stack has  password requisite pam_pwquality.so retry=3  before pam_unix (pam-auth-update or authselect enable-feature with-pwquality), and in /etc/security/pwquality.conf keep  dictcheck = 1  and  usercheck = 1 . Pair it with a breached-password blocklist where possible.",
+		Fix:       "Install libpam-pwquality (Debian/Ubuntu) or libpwquality (RHEL family). Make sure the password stack has  password requisite pam_pwquality.so retry=3  before pam_unix (pam-auth-update or authselect enable-feature with-pwquality), and in /etc/security/pwquality.conf keep  dictcheck = 1  and  usercheck = 1 . Pair it with a breached-password blocklist where possible. Keep a root session open and test a login and a password change in a second session before closing it: a wrong PAM line can lock every user out.",
 		Verify:    "grep pam_pwquality /etc/pam.d/common-password /etc/pam.d/system-auth 2>/dev/null; grep -rE '^(dictcheck|usercheck|enforcing)' /etc/security/pwquality.conf /etc/security/pwquality.conf.d/",
 		Refs:      []check.Ref{refPwquality, refNIST63B},
 		Standards: check.Standards{CWE: []string{"CWE-521"}, OWASP: []string{"A07:2021"}, NIST: []string{"IA-5(1)"}, CISTopic: "Password creation requirements enforced through PAM (CIS Controls v8 5.2)"},
@@ -174,9 +174,9 @@ func init() {
 		Severity: check.Low, Category: check.CatIdentity, Effort: check.EffortLow,
 		CVSS:      lowIdentity,
 		Summary:   "Checks that a locked account stays locked for at least 15 minutes (or until an administrator unlocks it).",
-		Rationale: "HOST-PWD-004 checks that pam_faillock counts failures. How long the lock lasts decides whether it slows an attacker: pam_faillock's default unlock_time of 600 seconds lets guessing resume every ten minutes. Fifteen minutes or more, or 0 (manual unlock), makes online guessing impractical.",
-		Detection: "Reads unlock_time from the pam_faillock lines of /etc/pam.d/common-auth, /etc/pam.d/system-auth and /etc/pam.d/password-auth, then from /etc/security/faillock.conf, else uses the module default of 600. A value of 0 or at least 900 passes. No pam_faillock at all fails (there is no lockout to time). Skipped when no authentication stack exists; Incomplete when one exists but cannot be read.",
-		Fix:       "In /etc/security/faillock.conf set  unlock_time = 900  (or 0 to require an administrator to run faillock --reset), keeping deny between 3 and 10. Test in a second session before closing the first.",
+		Rationale: "This check and HOST-PWD-004 split one control so a single root cause is never counted twice: HOST-PWD-004 covers whether lockout exists and its deny threshold (how many failures lock the account); this check covers only unlock_time (how long the lock lasts). How long the lock lasts decides whether it slows an attacker: pam_faillock's default unlock_time of 600 seconds lets guessing resume every ten minutes. Fifteen minutes or more, or 0 (manual unlock), makes online guessing impractical.",
+		Detection: "Reads unlock_time from the pam_faillock lines of /etc/pam.d/common-auth, /etc/pam.d/system-auth and /etc/pam.d/password-auth, then from /etc/security/faillock.conf, else uses the module default of 600. A value of 0 or at least 900 passes. No pam_faillock at all is skipped, because HOST-PWD-004 already reports the missing lockout. Skipped when no authentication stack exists; Incomplete when one exists but cannot be read.",
+		Fix:       "In /etc/security/faillock.conf set  unlock_time = 900  (or 0 to require an administrator to run faillock --reset), keeping deny between 3 and 10. Keep a root session open and test in a second session before closing the first: a wrong PAM line can lock every user out, and unlock_time = 0 means locked accounts, administrators included, wait for faillock --reset.",
 		Verify:    "grep -E 'unlock_time' /etc/security/faillock.conf /etc/pam.d/common-auth /etc/pam.d/system-auth 2>/dev/null",
 		Refs:      []check.Ref{refFaillock, refNIST80053},
 		Standards: check.Standards{CWE: []string{"CWE-307"}, OWASP: []string{"A07:2021"}, NIST: []string{"AC-7"}, CISTopic: "Lockout duration for failed password attempts (CIS Controls v8 5.2)"},
@@ -196,7 +196,9 @@ func init() {
 				}
 			}
 			if stack.Path == "" {
-				return []check.Result{check.FailR("pam", "No pam_faillock in the authentication stack, so no lockout duration applies (see HOST-PWD-004)")}
+				// HOST-PWD-004 reports the missing lockout; failing here as
+				// well would count one root cause twice.
+				return []check.Result{check.SkipR("pam", "No pam_faillock in the authentication stack, so there is no lockout duration to check; HOST-PWD-004 reports the missing lockout")}
 			}
 			unlock, src := 600, "pam_faillock default"
 			if v, ok := pamOption(stack.Text, "pam_faillock", "unlock_time"); ok {
@@ -222,10 +224,10 @@ func init() {
 		Summary:   "Checks that only members of a named group (wheel or sudo) may use su to become another user.",
 		Rationale: "Without pam_wheel, every local account, including a compromised web service user, can run su and start guessing the root password. Restricting su to an administrative group removes that path and leaves sudo, which logs each command, as the way to gain privilege.",
 		Detection: "Reads /etc/pam.d/su for an active line  auth required pam_wheel.so  (any control value, with or without use_uid and group=). Skipped when the file does not exist; Incomplete when it cannot be read.",
-		Fix:       "In /etc/pam.d/su uncomment or add  auth required pam_wheel.so use_uid group=sudo  (group=wheel on the RHEL family), and make sure the group contains only administrators.",
+		Fix:       "In /etc/pam.d/su uncomment or add  auth required pam_wheel.so use_uid group=sudo  (group=wheel on the RHEL family), and make sure the group contains only administrators. Caution: add every administrator who uses su to that group first and test from a second session, or they lose su access.",
 		Verify:    "grep -E '^auth\\s+required\\s+pam_wheel.so' /etc/pam.d/su",
 		Refs:      []check.Ref{refPAMWheel, refNIST80053},
-		Standards: check.Standards{CWE: []string{"CWE-250", "CWE-269"}, NIST: []string{"AC-6(2)", "AC-3"}, CISTopic: "Access to the su command is restricted (CIS Controls v8 5.4)"},
+		Standards: check.Standards{CWE: []string{"CWE-250", "CWE-862"}, NIST: []string{"AC-6(2)", "AC-3"}, CISTopic: "Access to the su command is restricted (CIS Controls v8 5.4)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			text, st := readState(ctx, s, "/etc/pam.d/su")
 			switch st {
@@ -251,7 +253,7 @@ func init() {
 		Summary:   "Checks that PAM remembers at least the last 5 passwords so a changed password cannot be changed straight back.",
 		Rationale: "When a password must be changed after a suspected compromise, the point is lost if the user can set the old one again. pam_pwhistory (or pam_unix remember=) keeps recent hashes and refuses reuse. Five is a common minimum.",
 		Detection: "Reads /etc/pam.d/common-password, /etc/pam.d/system-auth and /etc/pam.d/password-auth for remember=N on a pam_pwhistory or pam_unix line, or remember in /etc/security/pwhistory.conf. N of 5 or more passes. Skipped when no password stack exists; Incomplete when one exists but cannot be read.",
-		Fix:       "Add  password required pam_pwhistory.so remember=5 use_authtok  before pam_unix in the password stack (pam-auth-update on Debian/Ubuntu, authselect enable-feature with-pwhistory on the RHEL family), or set  remember = 5  in /etc/security/pwhistory.conf.",
+		Fix:       "Add  password required pam_pwhistory.so remember=5 use_authtok  before pam_unix in the password stack (pam-auth-update on Debian/Ubuntu, authselect enable-feature with-pwhistory on the RHEL family), or set  remember = 5  in /etc/security/pwhistory.conf. Keep a root session open and test a password change in a second session before closing it: a wrong PAM line can block password changes or logins.",
 		Verify:    "grep -E 'remember' /etc/pam.d/common-password /etc/pam.d/system-auth /etc/security/pwhistory.conf 2>/dev/null",
 		Refs:      []check.Ref{refPAMPwhistory, refPAMUnix, refNIST63B},
 		Standards: check.Standards{CWE: []string{"CWE-262"}, OWASP: []string{"A07:2021"}, NIST: []string{"IA-5(1)"}, CISTopic: "Password reuse is limited (CIS Controls v8 5.2)"},
@@ -311,7 +313,7 @@ func init() {
 		Summary:   "Checks that new accounts are set to lock automatically after a password has been expired and unused for at most 30 days.",
 		Rationale: "Accounts of people who left, or test accounts nobody remembers, stay usable for years unless something disables them. The INACTIVE default in /etc/default/useradd makes new accounts lock themselves a fixed number of days after their password expires.",
 		Detection: "Reads INACTIVE from /etc/default/useradd. A value from 0 to 30 passes; -1 (never) or an unset value fails, because useradd's built-in default is -1. A missing file also fails for the same reason; Incomplete when the file cannot be read.",
-		Fix:       "useradd -D -f 30  (writes INACTIVE=30 to /etc/default/useradd), and for existing accounts  chage --inactive 30 <user> .",
+		Fix:       "useradd -D -f 30  (writes INACTIVE=30 to /etc/default/useradd), and for existing accounts  chage --inactive 30 <user> . Caution: this locks accounts whose password has expired for 30 days, so exempt break-glass and rarely used administrator accounts or keep their passwords current.",
 		Verify:    "useradd -D | grep INACTIVE",
 		Refs:      []check.Ref{refUseradd, refNIST80053},
 		Standards: check.Standards{CWE: []string{"CWE-262"}, NIST: []string{"AC-2(3)"}, CISTopic: "Inactive password lock (CIS Controls v8 5.3)"},
@@ -407,7 +409,7 @@ func init() {
 		Summary:   "Checks that interactive shells log out after at most 15 minutes without input (TMOUT).",
 		Rationale: "A root shell left open on an unattended terminal, or a forgotten SSH session on a shared workstation, is free privilege for whoever sits down next. TMOUT makes bash and ksh close an idle session automatically; readonly stops users from switching it off.",
 		Detection: "Reads /etc/profile, /etc/profile.d/*.sh, /etc/bash.bashrc and /etc/bashrc for a TMOUT=N assignment (optionally readonly, export, typeset -x or declare -x). N from 1 to 900 passes; 0, a larger value or no assignment fails. Incomplete when none of the files can be read.",
-		Fix:       "Create /etc/profile.d/99-tmout.sh with  TMOUT=900 ; readonly TMOUT ; export TMOUT  (mode 644, owned by root). Sessions that must stay open should use a multiplexer such as tmux with its own lock, not a longer TMOUT.",
+		Fix:       "Create /etc/profile.d/99-tmout.sh with  TMOUT=900 ; readonly TMOUT ; export TMOUT  (mode 644, owned by root). Sessions that must stay open should use a multiplexer such as tmux with its own lock, not a longer TMOUT. Caution: a readonly TMOUT ends idle interactive shells, including foreground jobs left waiting in them; run long jobs under nohup, systemd-run or a multiplexer.",
 		Verify:    "grep -rE '^\\s*(readonly |export )?TMOUT=' /etc/profile /etc/profile.d/ /etc/bash.bashrc /etc/bashrc 2>/dev/null",
 		Refs:      []check.Ref{refBash, refNIST80053},
 		Standards: check.Standards{CWE: []string{"CWE-613"}, OWASP: []string{"A07:2021"}, NIST: []string{"AC-11", "AC-12"}, CISTopic: "Default user shell timeout (CIS Controls v8 4.3)"},

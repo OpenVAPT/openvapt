@@ -37,7 +37,7 @@ func init() {
 		Fix:       "Keep WordPress updated (automatic minor updates on). Remove the generator tag (remove_action('wp_head','wp_generator')) and delete readme.html after each update, or block it at the web server.",
 		Verify:    "curl -s https://<site>/ | grep -i 'name=\"generator\"'",
 		Refs:      []check.Ref{{Title: "WordPress Developer Resources, Hardening WordPress", URL: "https://developer.wordpress.org/advanced-administration/security/hardening/"}},
-		Standards: check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021", "A06:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-08"}, NIST: []string{"CM-7", "SI-11"}},
+		Standards: check.Standards{CWE: []string{"CWE-497"}, OWASP: []string{"A05:2021", "A06:2021"}, ASVS: []string{"14.3.3"}, WSTG: []string{"WSTG-INFO-08"}, NIST: []string{"CM-7", "SI-11"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			gen := regexp.MustCompile(`(?i)<meta name="generator" content="WordPress ([\d.]+)"`)
 			return ForEachSite(ctx, s, func(st Site) check.Result {

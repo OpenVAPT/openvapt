@@ -290,7 +290,7 @@ func init() {
 		Fix:       "Set management.endpoints.web.exposure.include=health,info (and exclude env,heapdump,configprops), move management.server.port to a port that is not published, and require authentication for every actuator endpoint with Spring Security.",
 		Verify:    "curl -s -o /dev/null -w '%{http_code}' https://<site>/actuator/env  prints 401, 403 or 404.",
 		Refs:      []check.Ref{refSpringAct, {Title: "Spring Boot documentation, Securing HTTP endpoints", URL: "https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.security"}, refWSTGConf02},
-		Standards: check.Standards{CWE: []string{"CWE-200", "CWE-306"}, OWASP: []string{"A05:2021", "A01:2021"}, ASVS: []string{"14.3.2", "4.3.2"}, WSTG: []string{"WSTG-CONF-02", "WSTG-CONF-05"}, NIST: []string{"CM-7", "AC-3", "SI-11"}},
+		Standards: check.Standards{CWE: []string{"CWE-306", "CWE-497"}, OWASP: []string{"A05:2021", "A01:2021"}, ASVS: []string{"14.3.2", "4.3.2"}, WSTG: []string{"WSTG-CONF-02", "WSTG-CONF-05"}, NIST: []string{"CM-7", "AC-3", "SI-11"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			paths := collect.ProjectFiles(ctx, s, "application.properties", "application.yml", "application.yaml",
 				"application-prod.properties", "application-prod.yml", "config/application.properties", "config/application.yml")

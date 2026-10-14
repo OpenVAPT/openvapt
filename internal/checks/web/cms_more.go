@@ -214,7 +214,7 @@ func init() {
 		Fix:       "Block the folder at the web server (Apache: <Directory \"/path/administrator/manifests\"> Require all denied </Directory>; nginx: location ^~ /administrator/manifests/ { deny all; }) and keep Joomla updated.",
 		Verify:    "curl -s -o /dev/null -w '%{http_code}' https://<site>/administrator/manifests/files/joomla.xml  prints 403 or 404.",
 		Refs:      []check.Ref{{Title: "Joomla Documentation, Security Checklist", URL: "https://docs.joomla.org/Security_Checklist"}, {Title: "NVD, CVE-2023-23752", URL: "https://nvd.nist.gov/vuln/detail/cve-2023-23752"}},
-		Standards: check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021", "A06:2021"}, WSTG: []string{"WSTG-INFO-08"}, NIST: []string{"SI-11"}},
+		Standards: check.Standards{CWE: []string{"CWE-497"}, OWASP: []string{"A05:2021", "A06:2021"}, WSTG: []string{"WSTG-INFO-08"}, NIST: []string{"SI-11"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			ver := regexp.MustCompile(`<version>([^<]+)</version>`)
 			return ForEachSite(ctx, s, func(st Site) check.Result {
@@ -239,7 +239,7 @@ func init() {
 		Fix:       "Delete the changelog files after each update, or deny *.txt files in the Drupal root and core folders at the web server, and keep Drupal updated.",
 		Verify:    "curl -s -o /dev/null -w '%{http_code}' https://<site>/core/CHANGELOG.txt  prints 403 or 404.",
 		Refs:      []check.Ref{{Title: "Drupal.org, Security advisories", URL: "https://www.drupal.org/security"}, {Title: "NVD, CVE-2018-7600", URL: "https://nvd.nist.gov/vuln/detail/cve-2018-7600"}},
-		Standards: check.Standards{CWE: []string{"CWE-200"}, OWASP: []string{"A05:2021", "A06:2021"}, WSTG: []string{"WSTG-INFO-08"}, NIST: []string{"SI-11"}},
+		Standards: check.Standards{CWE: []string{"CWE-497"}, OWASP: []string{"A05:2021", "A06:2021"}, WSTG: []string{"WSTG-INFO-08"}, NIST: []string{"SI-11"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {
 				for _, p := range []string{"/CHANGELOG.txt", "/core/CHANGELOG.txt"} {

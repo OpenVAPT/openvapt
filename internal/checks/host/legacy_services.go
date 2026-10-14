@@ -82,7 +82,7 @@ var legacyRules = []legacyRule{
 	},
 	{
 		id: "HOST-SVC-006", title: "NIS Server or Client Installed or Enabled", sev: check.Medium, cvss: cvssLegacyMedium,
-		cwe:       []string{"CWE-319", "CWE-287"},
+		cwe:       []string{"CWE-319", "CWE-522"},
 		pkgs:      []string{"nis", "ypserv", "ypbind", "yp-tools"},
 		units:     []string{"ypserv.service", "ypbind.service", "nis.service", "yppasswdd.service"},
 		summary:   "Checks whether the Network Information Service (NIS, ypserv or ypbind) is installed or enabled.",
@@ -103,7 +103,7 @@ var legacyRules = []legacyRule{
 	},
 	{
 		id: "HOST-SVC-008", title: "NFS Server or rpcbind Installed or Enabled", sev: check.Low, cvss: cvssLegacyLow,
-		cwe:       []string{"CWE-1188", "CWE-284"},
+		cwe:       []string{"CWE-1188", "CWE-306"},
 		pkgs:      []string{"nfs-kernel-server", "rpcbind"},
 		units:     []string{"nfs-server.service", "rpcbind.service", "rpcbind.socket", "nfs-kernel-server.service"},
 		summary:   "Checks whether the NFS server or the RPC port mapper (rpcbind) is installed or enabled.",
@@ -164,7 +164,7 @@ func init() {
 }
 
 func registerLegacy(r legacyRule) {
-	detect := "Reads installed packages from /var/lib/dpkg/status, /var/lib/dpkg/info/*.list and the allow-listed rpm -qa, and looks for " + strings.Join(r.pkgs, ", ") +
+	detect := "Reads installed packages from /var/lib/dpkg/status (only entries marked 'install ok installed'; /var/lib/dpkg/info/*.list is a fallback used only when the status file cannot be read) and the allow-listed rpm -qa, and looks for " + strings.Join(r.pkgs, ", ") +
 		". Reads the *.wants links under /etc/systemd/system (and asks the allow-listed systemctl is-enabled) for " + strings.Join(r.units, ", ") +
 		". Either an installed package or an enabled unit fails. Incomplete when no package database and no systemd unit directory could be read."
 	cwe := r.cwe
@@ -183,7 +183,7 @@ func registerLegacy(r legacyRule) {
 		Summary:   r.summary,
 		Rationale: rationale,
 		Detection: detect,
-		Fix:       r.fix,
+		Fix:       r.fix + " Before removing a package, check that no application on this machine or the network still uses the service, and keep console access when the service is remote-access related.",
 		Verify:    "dpkg -l " + strings.Join(r.pkgs, " ") + " 2>/dev/null | grep '^ii' ; systemctl is-enabled " + strings.Join(r.units, " ") + " 2>/dev/null",
 		Refs:      r.refs,
 		Standards: check.Standards{CWE: cwe, NIST: nist, CISTopic: r.cisTopic},

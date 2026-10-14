@@ -22,7 +22,7 @@ func init() {
 		Summary:   "A local TLS service accepts an RC4, 3DES, or CBC with SHA-1 cipher suite under TLS 1.2.",
 		Rationale: "Obsolete cipher constructions lack modern authenticated encryption and are prohibited by current TLS hardening guidance.",
 		Detection: "Offers restricted TLS 1.2 cipher lists to loopback services. A successful handshake proves the weak suite is accepted. Go does not implement NULL, EXPORT, or anonymous suites, so those cannot be actively offered and remain a documented limitation.",
-		Fix:       "Allow only modern AEAD suites for TLS 1.2 and prefer TLS 1.3. Remove RC4, 3DES, NULL, EXPORT, anonymous, and CBC with SHA-1 suites.",
+		Fix:       "Allow only modern AEAD suites for TLS 1.2 and prefer TLS 1.3. Remove RC4, 3DES, NULL, EXPORT, anonymous, and CBC with SHA-1 suites. Caution: very old clients and devices that support only those suites stop connecting; check the access logs for them first.",
 		Verify:    "Use an approved local TLS scanner and confirm each prohibited TLS 1.2 suite is rejected. Implicit TLS mail ports 465, 993, and 995 are included; STARTTLS is out of scope.",
 		Refs:      refTLS,
 		Standards: check.Standards{CWE: []string{"CWE-326", "CWE-327"}, OWASP: []string{"A02:2021"}, WSTG: []string{"WSTG-CRYP-01"}, ASVS: []string{"9.1.3"}, NIST: []string{"SC-8", "SC-13"}},
