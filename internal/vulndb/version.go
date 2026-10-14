@@ -314,3 +314,40 @@ func ComposerCompare(a, b string) int {
 	}
 	return numericParts(an, bn)
 }
+
+// WordPressCompare orders WordPress core, plugin and theme versions: dot
+// separated numbers of any length (6.4 equals 6.4.0), followed by an
+// optional pre-release tag (6.5-beta1 < 6.5-RC1 < 6.5), compared the way
+// WordPress's own version_compare does for these shapes.
+func WordPressCompare(a, b string) int {
+	parse := func(s string) (string, string) {
+		s = strings.TrimPrefix(strings.TrimSpace(strings.ToLower(s)), "v")
+		base, pre, _ := strings.Cut(s, "-")
+		return base, pre
+	}
+	an, ap := parse(a)
+	bn, bp := parse(b)
+	if x := numericParts(an, bn); x != 0 {
+		return x
+	}
+	if ap == "" && bp != "" {
+		return 1
+	}
+	if bp == "" && ap != "" {
+		return -1
+	}
+	rank := func(p string) (int, string) {
+		for i, tag := range []string{"alpha", "beta", "rc"} {
+			if strings.HasPrefix(p, tag) {
+				return i, strings.TrimLeft(p[len(tag):], "-.")
+			}
+		}
+		return -1, p
+	}
+	ar, anum := rank(ap)
+	br, bnum := rank(bp)
+	if ar != br {
+		return sign(ar - br)
+	}
+	return numericParts(anum, bnum)
+}

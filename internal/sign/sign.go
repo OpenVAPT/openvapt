@@ -214,17 +214,9 @@ func VerifyBytes(b []byte, wantKeyID string) (*report.Report, error) {
 // VerifyFile reads path (at most report.MaxReportSize bytes) and calls
 // VerifyBytes.
 func VerifyFile(path string, wantKeyID string) (*report.Report, error) {
-	f, err := os.Open(path)
+	b, err := report.ReadFile(path)
 	if err != nil {
 		return nil, err
-	}
-	defer f.Close()
-	b, err := io.ReadAll(io.LimitReader(f, report.MaxReportSize+1))
-	if err != nil {
-		return nil, err
-	}
-	if len(b) > report.MaxReportSize {
-		return nil, errors.New("report file is too large")
 	}
 	return VerifyBytes(b, wantKeyID)
 }

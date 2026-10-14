@@ -14,20 +14,29 @@ import (
 // listening. A firewall that is "on" can still let a database through, keep
 // holes open for services long gone, or be bypassed by Docker.
 
-// appPorts are the default ports of application servers and developer tools
-// that are meant to sit behind a reverse proxy, never face the network.
-// Sources: Apache Tomcat, Node.js, Django, Flask, Vite, Jupyter and PHP-FPM
+// codePorts are debuggers, management protocols and shutdown ports of
+// application servers that give code execution or control to whoever
+// connects. Sources: Node.js, Apache Tomcat, PHP-FPM and Jupyter
 // documentation.
+var codePorts = map[int]string{
+	9229: "Node.js inspector (debugger)", 8009: "Tomcat AJP connector", 8005: "Tomcat shutdown port",
+	9000: "PHP-FPM FastCGI", 8888: "Jupyter Notebook",
+}
+
+// appPorts are the default HTTP ports of application servers and developer
+// tools that are meant to sit behind a reverse proxy, never face the
+// network. Reaching one directly bypasses TLS, headers and limits, but the
+// port number alone does not prove code execution, so the severity is lower
+// than codePorts. Sources: Node.js, Django, Flask, Vite and Tomcat docs.
 var appPorts = map[int]string{
 	3000: "Node.js / Express app server", 3001: "Node.js app server", 4000: "app server", 4200: "Angular dev server",
 	5000: "Flask / Python dev server", 5173: "Vite dev server", 8000: "Django / Gunicorn / Uvicorn", 8008: "app server",
-	8080: "Tomcat / Java HTTP connector", 8081: "app server", 8088: "app server", 8888: "Jupyter Notebook",
-	9000: "PHP-FPM FastCGI", 8009: "Tomcat AJP connector", 8005: "Tomcat shutdown port", 9229: "Node.js inspector (debugger)",
+	8080: "Tomcat / Java HTTP connector", 8081: "app server", 8088: "app server",
 }
 
 // sensitivePort names a data, administrative or application server port.
 func sensitivePort(p int) (string, bool) {
-	for _, m := range []map[int]string{dataPorts, adminPorts, appPorts} {
+	for _, m := range []map[int]string{dataPorts, controlPorts, managementPorts, codePorts, appPorts} {
 		if n, ok := m[p]; ok {
 			return n, true
 		}
@@ -209,34 +218,66 @@ func init() {
 	})
 
 	check.Register(&check.Check{
-		ID: "NET-APP-001", Title: "Application Server Ports Exposed Directly", Domain: check.DomainNetwork,
+		ID: "NET-APP-001", Title: "Debugger or Application Control Ports Exposed", Domain: check.DomainNetwork,
 		Severity: check.High, Category: check.CatNetwork, Effort: check.EffortLow,
 		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:L",
-		Summary:   "Checks whether application servers, debuggers or developer tools (Node.js, Tomcat, Django, Flask, PHP-FPM, Jupyter) listen on network-reachable addresses.",
-		Rationale: "Application servers are designed to sit behind a reverse proxy that adds TLS, security headers and request limits. Reached directly they bypass all of that, and some of these ports (Node.js inspector 9229, Tomcat AJP 8009, PHP-FPM 9000, Jupyter 8888) give remote code execution to whoever connects.",
-		Detection: "Matches network-reachable listening sockets from /proc/net against the default ports of common application servers and developer tools. No packets are sent.",
-		Fix:       "Bind the application to 127.0.0.1 (Node.js: app.listen(3000, '127.0.0.1'); Gunicorn: --bind 127.0.0.1:8000; Tomcat: address=\"127.0.0.1\" on the Connector; PHP-FPM: listen = 127.0.0.1:9000 or a Unix socket) and publish it only through nginx or Apache. Never expose a debugger.",
+		Summary:   "Checks whether the Node.js inspector, Tomcat AJP or shutdown port, PHP-FPM FastCGI or Jupyter listen on network-reachable addresses.",
+		Rationale: "These ports are not web pages: the Node.js inspector and Jupyter run code for whoever connects, Tomcat AJP has been abused for file read and code execution (Ghostcat), the shutdown port stops the server, and PHP-FPM executes scripts handed to it. None of them is designed to face a network.",
+		Detection: "Matches network-reachable listening TCP sockets from /proc/net against the default ports of these debuggers and control protocols, recording how each is bound. Plain application HTTP ports are rated separately by NET-APP-002. No packets are sent.",
+		Fix:       "Bind each to 127.0.0.1 or a Unix socket (node --inspect=127.0.0.1:9229; Tomcat Connector address=\"127.0.0.1\" or remove the AJP connector; PHP-FPM listen = /run/php/php-fpm.sock; jupyter --ip=127.0.0.1) and never expose a debugger.",
+		Verify:    "ss -tlnp  shows these ports on 127.0.0.1 or ::1 only.",
+		Refs: []check.Ref{{Title: "Node.js, Inspector security implications", URL: "https://nodejs.org/en/learn/getting-started/debugging#security-implications"},
+			{Title: "Apache Tomcat 9, AJP Connector", URL: "https://tomcat.apache.org/tomcat-9.0-doc/config/ajp.html"}},
+		Standards: check.Standards{CWE: []string{"CWE-668", "CWE-1188"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Expose applications only through a hardened front end"},
+		Run:       appPortRun(codePorts, "Debugger or application control ports are network-reachable", "No debugger or application control port is network-reachable"),
+	})
+
+	check.Register(&check.Check{
+		ID: "NET-APP-002", Title: "Application Server Ports Reachable Without a Reverse Proxy", Domain: check.DomainNetwork,
+		Severity: check.Medium, Category: check.CatNetwork, Effort: check.EffortLow,
+		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+		Summary:   "Checks whether application servers and developer tools (Node.js, Tomcat, Django, Flask, Vite) serve HTTP on network-reachable addresses.",
+		Rationale: "Application servers are designed to sit behind a reverse proxy that adds TLS, security headers, logging and request limits. Reached directly they bypass all of that, and development servers on these ports often run with debug pages on. The port number alone does not prove a weakness, so this is rated Medium and should be reviewed.",
+		Detection: "Matches network-reachable listening TCP sockets from /proc/net against the default HTTP ports of common application servers and developer tools, recording how each is bound and whether a web server listens on port 80 or 443 on this machine (which suggests the application was meant to be proxied). No packets are sent.",
+		Fix:       "Bind the application to 127.0.0.1 (Node.js: app.listen(3000, '127.0.0.1'); Gunicorn: --bind 127.0.0.1:8000; Tomcat: address=\"127.0.0.1\" on the Connector) and publish it only through nginx or Apache.",
 		Verify:    "ss -tlnp  shows these ports on 127.0.0.1 or ::1 only.",
 		Refs: []check.Ref{{Title: "OWASP Node.js Security Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html"},
 			{Title: "Gunicorn documentation, Deploying Gunicorn (behind a proxy)", URL: "https://gunicorn.org/deploy/"}},
 		Standards: check.Standards{CWE: []string{"CWE-668", "CWE-1188"}, OWASP: []string{"A05:2021"}, NIST: []string{"SC-7", "CM-7"}, CISTopic: "Expose applications only through a hardened front end"},
-		Run: func(_ context.Context, s sys.System) []check.Result {
-			pub, inc := publicListeners(s)
-			if inc != nil {
-				return inc
-			}
-			var bad []string
-			for _, l := range pub {
-				if n, ok := appPorts[l.Port]; ok && strings.HasPrefix(l.Proto, "tcp") {
-					bad = append(bad, l.String()+" "+n)
-				}
-			}
-			if len(bad) > 0 {
-				return []check.Result{check.FailR("sockets", "Application server ports are network-reachable", bad...)}
-			}
-			return []check.Result{check.PassR("sockets", "No application server ports are network-reachable")}
-		},
+		Run:       appPortRun(appPorts, "Application server ports are network-reachable", "No application server port is network-reachable"),
 	})
+}
+
+// appPortRun reports network-reachable TCP listeners on the given ports,
+// noting whether a web server (80 or 443) is present to front them.
+func appPortRun(ports map[int]string, failMsg, passMsg string) func(context.Context, sys.System) []check.Result {
+	return func(_ context.Context, s sys.System) []check.Result {
+		pub, inc := publicListeners(s)
+		if inc != nil {
+			return inc
+		}
+		var bad []string
+		web := false
+		for _, l := range pub {
+			if l.Port == 80 || l.Port == 443 {
+				web = true
+			}
+		}
+		for _, l := range pub {
+			if n, ok := ports[l.Port]; ok && strings.HasPrefix(l.Proto, "tcp") {
+				bad = append(bad, l.String()+" "+n+", bound to "+exposure(l))
+			}
+		}
+		if len(bad) > 0 {
+			if web {
+				bad = append(bad, "a web server listens on port 80 or 443 on this machine: bind the application to 127.0.0.1 and publish it through that proxy")
+			} else {
+				bad = append(bad, "no web server listens on port 80 or 443 on this machine")
+			}
+			return []check.Result{check.FailR("sockets", failMsg, bad...)}
+		}
+		return []check.Result{check.PassR("sockets", passMsg)}
+	}
 }
 
 // portName labels a port with its well-known service, if any.

@@ -1,10 +1,14 @@
 # Offline Vulnerability Snapshot
 
-The embedded snapshot is a small, hand-written test fixture. Its advisory ranges are illustrative and do not represent a complete security feed. Every scan prints the snapshot date, fixture status and a reminder that outdated data misses newer vulnerabilities.
+The snapshot committed to the repository is a small, hand-written test fixture (`Fixture: true`). It carries no advisory data, so on a build that embeds it HOST-CVE-001, HOST-CVE-002, HOST-CVE-003 and WEB-CVE-001 report Incomplete with the evidence line "No advisory data: the embedded snapshot is test fixture data", never Pass. `make vulndb` runs cmd/vulndbgen into the embed path (`internal/vulndb/data/snapshot.json.gz`); the release workflow does the same before building. Every report header shows the snapshot date, advisory count and age in days; a snapshot older than 90 days is flagged in the header and by HOST-CVE-003 (Low), never as a failure of the scan.
+
+The simulated labs (`openvapt demo`, engine tests) carry their own illustrative snapshot in memory (`internal/lab/fixtures_vulndb.go`), so the lab behaves the same whichever snapshot the binary embeds.
+
+Ecosystems: Debian, Ubuntu, AlmaLinux and Rocky Linux releases, Packagist, npm and WordPress:Core (OSV's WordPress ecosystem with the `:Core` suffix; the inventory reads `wp-includes/version.php`). Every CVE finding names its matcher: "exact version" (the version is listed by the advisory), "range" (OSV range evaluation with the ecosystem's version ordering) or "heuristic" (the version was read from a file header, such as a jQuery banner, rather than a package record). WEB-CVE-001 reports Incomplete for an inventoried ecosystem the snapshot has no advisories for, instead of a silent Pass.
 
 The release pipeline can run cmd/vulndbgen with -out, -ecosystems and -packages. Runtime scans use only the embedded gzip file and never access the network. The generator reads OSV ecosystem export ZIPs and the CISA KEV JSON feed. The default package list is in vulndb-packages.txt.
 
-Sources and licence metadata: OSV ecosystem exports at https://osv-vulnerabilities.storage.googleapis.com/ - check source. CISA KEV at https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json - check source. These labels avoid assuming a licence not stated by the fetched records.
+Sources and licence metadata: OSV ecosystem exports at https://osv-vulnerabilities.storage.googleapis.com/ are aggregated by OSV, and each advisory is licensed by its originating database (GitHub Advisory Database advisories under CC BY 4.0; Debian, Ubuntu, AlmaLinux and Rocky Linux records under their security teams' terms). The CISA KEV catalogue at https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json is a work of the United States Government (public domain in the United States). The snapshot header records these statements and `openvapt version` prints them; THIRD_PARTY_NOTICES.md carries the notice.
 
 Matching uses exact binary package names. OSV advisories that name only a source package may be missed. Web discovery is bounded to configured document roots and recognizes composer.lock, package-lock.json versions 1 through 3, wp-includes/version.php, and a best-effort jQuery header. Missing lockfiles or truncated reads make coverage incomplete.
 

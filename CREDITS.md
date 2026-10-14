@@ -69,11 +69,11 @@ Everything else in the repository (all Go code under `cmd/` and `internal/`, tem
 
 | Text | How Used | Source |
 |---|---|---|
-| OpenVAPT Source-Available Licence 1.2 (1.0 before the Teaching terms, 1.1 before the Credit condition) | Original text drafted by an AI Cybersecurity Engineer in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
+| OpenVAPT Source-Available Licence 1.3 (1.0 before the Teaching terms, 1.1 before the Credit condition, 1.2 before the Disclaimer travelled with shared copies) | Original text drafted by an AI Cybersecurity Engineer in `LICENSE`; replaced the PolyForm Noncommercial License 1.0.0 before any release, and no PolyForm text is retained | `LICENSE` |
 | Go BSD 3-Clause licence | Included word for word in THIRD_PARTY_NOTICES.md | https://go.dev/LICENSE |
 | Contributor Covenant 2.1 | Adopted by reference (linked, not copied) | https://www.contributor-covenant.org/version/2/1/code_of_conduct/ |
 | Developer Certificate of Origin 1.1 | Referenced for commit sign-off | https://developercertificate.org/ |
-| Malaysian legislation named in the legal documents | Referred to by name only; no text copied | Computer Crimes Act 1997, Cyber Security Act 2024, Personal Data Protection Act 2010 (as amended 2024), Contracts Act 1950, Consumer Protection Act 1999, Strategic Trade Act 2010, Copyright Act 1987, Communications and Multimedia Act 1998, Electronic Commerce Act 2006 |
+| Legislation named in the legal documents and the Academy | Referred to by name only as examples; no text copied | United States: Computer Fraud and Abuse Act, California Consumer Privacy Act, Export Administration Regulations. United Kingdom: Computer Misuse Act 1990, UK GDPR. European Union: Directive 2013/40/EU, General Data Protection Regulation, Regulation (EU) 2021/821. Council of Europe: Convention on Cybercrime. Malaysia (the owner's country, whose law governs the Agreement): Computer Crimes Act 1997, Cyber Security Act 2024, Personal Data Protection Act 2010, Contracts Act 1950, Consumer Protection Act 1999, Strategic Trade Act 2010, Copyright Act 1987, Communications and Multimedia Act 1998. |
 
 The licence, EULA, Disclaimer, Privacy Policy and Acceptable Use Policy are original drafts written by AI Cybersecurity Engineers. They were not copied from any template.
 
@@ -116,8 +116,8 @@ OpenVAPT cites these sources by title, identifier and link and does not copy the
 
 | Source | Used For | Licence |
 |---|---|---|
-| OSV (osv.dev) ecosystem exports | Advisories for Debian, Ubuntu, AlmaLinux, Rocky Linux, Packagist and npm, downloaded only in the release pipeline by `cmd/vulndbgen` | Varies by originating source; each release records what the sources state (see docs/VULNDB.md) |
-| CISA Known Exploited Vulnerabilities catalogue | Marking advisories that are known to be exploited | See the CISA site; recorded per release |
+| OSV (osv.dev) ecosystem exports | Advisories for Debian, Ubuntu, AlmaLinux, Rocky Linux, Packagist, npm and WordPress core, downloaded only in the release pipeline by `cmd/vulndbgen` | Aggregated by OSV; each advisory is licensed by its originating database (GitHub Advisory Database CC BY 4.0; distribution security teams' terms). Recorded in the snapshot header and THIRD_PARTY_NOTICES.md (see docs/VULNDB.md) |
+| CISA Known Exploited Vulnerabilities catalogue | Marking advisories that are known to be exploited | Work of the United States Government (public domain in the United States); recorded in the snapshot header |
 
 The repository currently ships a small, hand-written **test fixture** snapshot whose versions are illustrative, not authoritative.
 

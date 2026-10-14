@@ -4,10 +4,10 @@ An open academic project that shows, in full and in public, how a vulnerability 
 
 OpenVAPT runs read-only checks on the Linux machine it is installed on (and only that machine) to **identify** weaknesses in the server, its network exposure and its websites, **evaluate** them with CVSS v3.1 ratings, **propose fixes** with cited sources, and **verify** them. It writes a report to your own disk and is designed never to send data anywhere.
 
-> **Academic. Non-commercial. Built by AI Cybersecurity Engineers. Open, source-available code. Free to download and use, for your own personal or business use, 100% at your own risk.**
+> **Academic. Non-commercial. Built by AI Cybersecurity Engineers. Open, source-available code. Free to download and use, for your own personal or business use, 100% at your own risk. Open to anyone, in any country.**
 > You may download and use OpenVAPT on computers and servers you own or control (or that your employer owns or controls and has authorised you to assess), for your own use. You may **not** sell it and you may **not** provide any service to anyone else with anything from or produced by OpenVAPT (no consulting, no scanning for clients, no hosted service, no reselling reports), paid or unpaid, even with their permission. The project itself is not a business and accepts no payments or donations. It comes as is, with no warranty, and the developers accept no responsibility for anything that happens.
 >
-> **All of OpenVAPT was researched, developed and built by AI Cybersecurity Engineers** (Claude by Anthropic through Claude Code, with code review and fixes by OpenAI Codex), directed and approved by the human project owner. It has not been audited by an independent human security expert. The legal documents were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. See [AI-DISCLOSURE.md](AI-DISCLOSURE.md).
+> **All of OpenVAPT was researched, developed and built by AI Cybersecurity Engineers** (Claude by Anthropic through Claude Code, with code review, fixes and some checks and components built by OpenAI Codex), directed and approved by the human project owner. It has not been audited by an independent human security expert. The legal documents were drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed them. See [AI-DISCLOSURE.md](AI-DISCLOSURE.md).
 >
 > AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude Code, and OpenAI Codex) acting in a cyber security engineering role. They are not people, not registered or professional engineers, and provide no professional engineering or security service.
 
@@ -15,17 +15,18 @@ OpenVAPT runs read-only checks on the Linux machine it is installed on (and only
 
 ## Read and Accept Before Use
 
-Before downloading or running OpenVAPT, read, study and understand the [EULA](EULA.md), [Disclaimer](DISCLAIMER.md), [Acceptable Use Policy](ACCEPTABLE_USE.md) and [Licence](LICENSING.md). By downloading, building or using it, you acknowledge, agree to and accept every statement below. The tool shows the same statements before every scan and continues only when you type `I ACCEPT`, or when you pass `--accept-terms` for automation, which counts as the same acceptance.
+Before downloading or running OpenVAPT, read, study and understand the [EULA](EULA.md), [Disclaimer](DISCLAIMER.md), [Acceptable Use Policy](ACCEPTABLE_USE.md), [Licence](LICENSING.md), [Teaching With OpenVAPT](TEACHING.md) and [Citing OpenVAPT](CITING.md). By downloading, building or using it, you acknowledge, agree to and accept every statement below. The tool shows the same statements before every scan and continues only when you type `I ACCEPT`, or when you pass `--accept-terms` for automation, which counts as the same acceptance.
 
-1. I have read, studied and understood the End User Licence Agreement, the Disclaimer, the Acceptable Use Policy and the Licence.
+1. I have read, studied and understood the End User Licence Agreement, the Disclaimer, the Acceptable Use Policy, the Licence, the Teaching With OpenVAPT terms and Citing OpenVAPT.
 2. I understand that OpenVAPT is an academic, non-commercial project made for learning, and that it is not a penetration test, an audit, a certification, a service or professional advice.
 3. I will download and use OpenVAPT only for my own use, personal or business, and only on computers and servers that I own or control, or that my employer owns or controls and has authorised me to assess.
 4. I will not sell OpenVAPT, include it in a product, or use it to provide services of any kind to anyone else, paid or unpaid.
 5. I understand that automated results can be wrong or incomplete, and that a report without findings does not prove a system is secure.
 6. I acknowledge, agree to and accept that I use OpenVAPT 100% at my own risk, and that I alone am responsible for every risk and every consequence, including damage, data loss, downtime, security incidents and legal liability.
 7. I agree that OpenVAPT is a free gift from people who are not in business, provided as is, without any warranty, and that, to the fullest extent the law allows, the developers and contributors owe me no duty and accept no responsibility or liability of any kind, and I release them from every claim.
-8. I am solely responsible for complying with all laws that apply to me, including the Computer Crimes Act 1997 and the Cyber Security Act 2024 in Malaysia, and the laws of my own country.
+8. I am solely responsible for complying with all laws that apply to me wherever I am, including computer misuse, cyber security, data protection and export laws, such as the Computer Fraud and Abuse Act (United States), the Computer Misuse Act 1990 (United Kingdom), Directive 2013/40/EU (European Union) and the Computer Crimes Act 1997 (Malaysia).
 9. I understand that OpenVAPT's code, documentation, website and legal texts were researched, developed, built and reviewed by AI Cybersecurity Engineers (AI systems, not people or registered engineers) under the direction of the project owner, may contain mistakes, and have not been audited by a human security expert or drafted or reviewed by a human lawyer.
+10. I am at least 18 years old (or the age of majority where I live), or my parent or guardian has read these statements and accepts them for me in their own name; and where I act for an organisation, I am authorised to bind it.
 
 Website: https://openvapt.com (generated from this repository; every check page cites its source file and line numbers). Every component, standard, source and AI tool used is credited in [CREDITS.md](CREDITS.md).
 
@@ -45,6 +46,16 @@ CGO_ENABLED=0 go build -trimpath -o openvapt ./cmd/openvapt
 ./openvapt scan --dry-run                             # preview every file, command and request
 sudo ./openvapt scan --out ~/report                   # assess this Linux machine
 ```
+
+**Vulnerability snapshot.** The repository embeds only a tiny test fixture in `internal/vulndb/data/`, so a plain source build has no advisory data: `HOST-CVE-001`, `HOST-CVE-002`, `HOST-CVE-003` and `WEB-CVE-001` then report Incomplete (never Pass), and `openvapt vulndb` prints `Fixture: true`. To match real advisories, generate the snapshot from the public OSV exports and the CISA KEV feed before building:
+
+```bash
+make vulndb                                           # downloads OSV and KEV data, writes internal/vulndb/data/snapshot.json.gz
+make build                                            # embeds it
+./openvapt vulndb                                     # shows the snapshot date and Fixture: false
+```
+
+Release builds run the same generator (see `docs/VULNDB.md`). Every report header shows the snapshot date and age; a snapshot older than 90 days is marked in the header and fails only the Low check `HOST-CVE-003`.
 
 ### One-Command Install
 
@@ -70,7 +81,7 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 
 ### Verify
 
-**Optional verified binaries.** For machines without Go, each release publishes Linux binaries built only by GitHub Actions through the promotion workflow (promote.yml, after every channel gate passed), with `SHA256SUMS`, Sigstore signature bundles, build provenance, an SBOM and a source archive. See [docs/REPORT_SIGNING.md](docs/REPORT_SIGNING.md) for the `gh attestation verify` and `cosign verify-blob` commands. You can rebuild the same bytes yourself with `make release VERSION=<tag>` using the same Go version, and compare checksums.
+**Optional verified binaries.** For machines without Go, each release publishes Linux binaries built only by GitHub Actions through the promotion workflow (promote.yml, after every channel gate passed), with `SHA256SUMS`, Sigstore signature bundles, build provenance, an SBOM and a source archive. See [docs/REPORT_SIGNING.md](docs/REPORT_SIGNING.md) for the `gh attestation verify` and `cosign verify-blob` commands. You can rebuild the same bytes yourself with `GOTOOLCHAIN=go1.26.9 make release VERSION=<tag>` using the same Go version, and compare checksums.
 
 ## Commands
 
@@ -84,11 +95,24 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 | `openvapt verify report.json [--key-id ID]` | Confirm a signed report was not edited |
 | `openvapt terms` / `version` | Terms of use, version |
 
-Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--parallel`. Exit code 3 means Critical or High findings exist.
+Scan flags: `--out`, `--format`, `--only`, `--skip`, `--baseline`, `--dry-run`, `--accept-terms`, `--no-sign`, `--quiet`, `--parallel` (1 to 32), `--timeout` (whole scan, for example `30m`), `--fail-on` (`critical`, `high`, `medium`, `low`, `info` or `none`; default `high`).
+
+Exit codes, for scripts and CI:
+
+| Code | Meaning |
+|---|---|
+| 0 | Completed; no finding at or above the `--fail-on` severity, and no coverage gap |
+| 2 | Invalid arguments or usage |
+| 3 | Findings at or above the `--fail-on` severity (default: Critical or High) |
+| 4 | Incomplete coverage: at least one check could not observe enough to decide |
+| 5 | Internal error, a check ended with an error, or the scan was interrupted |
+| 6 | The report could not be written |
+
+Checked in order 5, 4, 3: an error or coverage gap is reported before findings, so a clean exit 0 means every selected check reached a verdict. `--fail-on none` never returns 3.
 
 ## What It Covers
 
-165 checks in three domains and ten control categories mapped to CIS Controls v8 and NIST CSF 2.0: server (patching and lifecycle, accounts and password policy, SSH, sudo, file and key permissions, mount options, kernel hardening, mandatory access control, services, systemd service hardening, logging and auditing), network and data services (listening services, firewalls including IPv6, firewall rules compared with what is actually listening, Docker firewall bypass, exposed application server ports, Redis, MongoDB, PostgreSQL, MySQL, Memcached, Elasticsearch, NFS, Samba, DNS and mail configuration, admin ports, TLS versions, ciphers, keys and certificates), containers (Docker daemon, privileged containers, socket mounts, kubelet, etcd), known vulnerabilities (offline matching of OS packages and web libraries against OSV and CISA KEV data) and web apps (security headers, cookies, CORS, HTTPS, exposed files, logs, debug pages and admin tools, secrets and backups inside web roots on disk, PHP and WordPress hygiene), application stacks (Apache Tomcat Manager, AJP, users and sample apps; Node.js runtime lifecycle, inspector and production mode; Django and Flask debug, host and secret key settings, development servers) and deeper CMS checks (WordPress, Joomla and Drupal configuration permissions, debug output, file editor, automatic updates and version files). Run `openvapt checks` for the full list.
+307 checks in three domains and ten control categories mapped to CIS Controls v8 and NIST CSF 2.0: server (patching and lifecycle, accounts and password policy, SSH, sudo, file and key permissions, mount options, kernel hardening, mandatory access control, services, systemd service hardening, logging and auditing), network and data services (listening services rated by service identity and how they are bound, firewalls including IPv6, firewall rules compared with what is actually listening, Docker firewall bypass, exposed debugger and application server ports, Redis, MongoDB, PostgreSQL, MySQL, Memcached, Elasticsearch, NFS, Samba, DNS and mail configuration, admin ports, TLS versions, ciphers, keys and certificates), containers (Docker daemon, privileged containers, socket mounts, kubelet, etcd), known vulnerabilities (offline matching of OS packages, web libraries and WordPress core against OSV and CISA KEV data, each match labelled with its matcher) and web apps (security headers, cookies, CORS, HTTPS, exposed files, logs, debug pages and admin tools, secrets and backups inside web roots on disk, PHP and WordPress hygiene), application stacks (Apache Tomcat Manager, AJP, users and sample apps; Node.js runtime lifecycle, inspector and production mode; Django and Flask debug, host and secret key settings, development servers) and deeper CMS checks (WordPress, Joomla and Drupal configuration permissions, debug output, file editor, automatic updates and version files). Run `openvapt checks` for the full list.
 
 ## What It Does Not Do
 
@@ -130,7 +154,7 @@ OpenVAPT and openvapt.com collect no data. See [PRIVACY.md](PRIVACY.md).
 
 ## Licence
 
-OpenVAPT Source-Available Licence 1.2 (`LicenseRef-OpenVAPT-SAL-1.2`, file [LICENSE](LICENSE)): Own Use only, no services, no selling, credit required when you copy, quote, adapt or present OpenVAPT material. Source-available, not OSI open source. See [LICENSING.md](LICENSING.md).
+OpenVAPT Source-Available Licence 1.3 (`LicenseRef-OpenVAPT-SAL-1.3`, file [LICENSE](LICENSE)): Own Use only, no services, no selling, credit required when you copy, quote, adapt or present OpenVAPT material. Source-available, not OSI open source. See [LICENSING.md](LICENSING.md).
 
 ## Citing OpenVAPT
 

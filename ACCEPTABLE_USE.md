@@ -1,6 +1,6 @@
 # Acceptable Use Policy
 
-Version 1.5, effective 2026-10-13. Drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it.
+Version 1.6, effective 2026-10-14. Drafted by an AI Cybersecurity Engineer and reviewed by a separate AI system acting as the project's legal reviewer; no human lawyer drafted or reviewed it.
 
 OpenVAPT is for academic, learning and Own Use only. It is not a business and must never be used to provide services.
 
@@ -9,7 +9,7 @@ OpenVAPT is for academic, learning and Own Use only. It is not a business and mu
 - Reading, studying and discussing the source code and documentation.
 - Downloading OpenVAPT to your own server and running it there for personal testing and learning.
 - Running OpenVAPT to test your own company's servers, on machines your company owns or controls and has authorised you to assess.
-- Users under 18 may use OpenVAPT only with a parent's or guardian's agreement.
+- Users under 18 may use OpenVAPT only after a parent or guardian has accepted the EULA for them, in the parent's or guardian's own name (EULA section 5).
 - Running `openvapt demo` against the simulated lab for your own learning.
 - Teaching under the Teaching With OpenVAPT terms (TEACHING.md): the simulated lab, the website Academy, supervised use on institution machines and virtual machines that are authorised and isolated, adapted teaching materials with attribution and notices, online and recorded classes, and free assessment, projects and capture-the-flag exercises on those machines. Each student accepts the EULA personally, or through a parent or guardian if under 18.
 - Using pre-release builds (alpha, beta, rc), which may be wrong or unstable, only at your own risk and preferably on a non-production machine.
@@ -27,4 +27,4 @@ OpenVAPT is for academic, learning and Own Use only. It is not a business and mu
 
 ## Consequences
 
-This policy is a condition of the OpenVAPT Source-Available Licence 1.2. Using OpenVAPT outside this policy is outside your licence, which then ends automatically as described in section 6 of the licence. You alone are responsible for any consequences.
+This policy is a condition of the OpenVAPT Source-Available Licence 1.3. Using OpenVAPT outside this policy is outside your licence, which then ends automatically as described in section 6 of the licence. You alone are responsible for any consequences.

@@ -1,10 +1,89 @@
 // Check catalogue grid (AG Grid Community, self-hosted).
 // Progressive enhancement: the page already contains a plain HTML table, which
 // stays visible if scripts are off. This script stores nothing and sends nothing.
+// The search box and the three selects always filter the static table, so
+// they work on every screen and before the grid loads. On screens narrower
+// than 640 px the static table is kept and the 425 KB grid is never loaded;
+// otherwise the grid script and its two stylesheets are loaded when the
+// catalogue scrolls near the viewport and take over the same controls.
 (function () {
   var dataEl = document.getElementById('catalogue-data');
   var host = document.getElementById('grid');
-  if (!dataEl || !host || !window.agGrid) return;
+  if (!dataEl || !host) return;
+  var q = document.getElementById('q'), dom = document.getElementById('domain'),
+      sev = document.getElementById('severity'), cat = document.getElementById('category'), shown = document.getElementById('shown');
+  var controls = [q, dom, sev, cat];
+  if (controls.some(function (el) { return !el; }) || !shown) return;
+  var staticTable = document.getElementById('static-table');
+  var staticRows = staticTable ? Array.prototype.filter.call(staticTable.querySelectorAll('tbody tr'), function (tr) { return tr.id !== 'no-match'; }) : [];
+  var noMatch = document.getElementById('no-match');
+  var total = staticRows.length;
+  var gridApi = null;
+
+  // Plain filter for the static table: a row stays when its text contains the
+  // search words and its data-* attributes match the selected values.
+  function filterStatic() {
+    var words = q.value.toLowerCase().split(/\s+/).filter(Boolean);
+    var kept = 0;
+    staticRows.forEach(function (tr) {
+      var text = tr.textContent.toLowerCase();
+      var ok = (!dom.value || tr.getAttribute('data-domain') === dom.value) &&
+               (!sev.value || tr.getAttribute('data-severity') === sev.value) &&
+               (!cat.value || tr.getAttribute('data-category') === cat.value) &&
+               words.every(function (w) { return text.indexOf(w) !== -1; });
+      tr.hidden = !ok;
+      if (ok) kept++;
+    });
+    if (noMatch) noMatch.hidden = kept !== 0;
+    shown.textContent = kept + ' of ' + total + ' checks';
+  }
+  function apply() {
+    if (gridApi) {
+      gridApi.setGridOption('quickFilterText', q.value);
+      gridApi.setFilterModel({
+        domain: dom.value ? { filterType: 'text', type: 'equals', filter: dom.value } : null,
+        severity: sev.value ? { filterType: 'text', type: 'equals', filter: sev.value } : null,
+        category: cat.value ? { filterType: 'text', type: 'equals', filter: cat.value } : null
+      });
+    } else {
+      filterStatic();
+    }
+  }
+  controls.forEach(function (el) { el.addEventListener('input', apply); el.addEventListener('change', apply); });
+  if (q.value || dom.value || sev.value || cat.value) filterStatic();
+
+  if (!window.matchMedia || !window.matchMedia('(min-width: 640px)').matches) return;
+  var vendor = (document.currentScript && document.currentScript.getAttribute('data-vendor')) || 'assets/vendor/';
+  var loaded = false;
+  function css(name) {
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = vendor + name;
+    document.head.appendChild(l);
+  }
+  function load() {
+    if (loaded) return;
+    loaded = true;
+    css('ag-grid.min.css');
+    css('ag-theme-quartz.min.css');
+    if (window.agGrid) { mount(); return; }
+    var s = document.createElement('script');
+    s.src = vendor + 'ag-grid-community.min.js';
+    s.defer = true;
+    s.onload = mount;
+    document.head.appendChild(s);
+  }
+  var target = document.getElementById('static-table') || host;
+  if (window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (entries) {
+      if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
+    }, { rootMargin: '400px 0px' });
+    io.observe(target);
+  } else {
+    load();
+  }
+  function mount() {
+  if (!window.agGrid) return;
   var rows = JSON.parse(dataEl.textContent);
   var domainName = { host: 'Server', network: 'Network', web: 'Web Apps' };
   var sevRank = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
@@ -45,20 +124,13 @@
     ]
   });
 
-  var q = document.getElementById('q'), dom = document.getElementById('domain'),
-      sev = document.getElementById('severity'), cat = document.getElementById('category'), shown = document.getElementById('shown');
-  function apply() {
-    api.setGridOption('quickFilterText', q.value);
-    api.setFilterModel({
-      domain: dom.value ? { filterType: 'text', type: 'equals', filter: dom.value } : null,
-      severity: sev.value ? { filterType: 'text', type: 'equals', filter: sev.value } : null,
-      category: cat.value ? { filterType: 'text', type: 'equals', filter: cat.value } : null
-    });
-  }
   api.addEventListener('modelUpdated', function () {
     shown.textContent = api.getDisplayedRowCount() + ' of ' + rows.length + ' checks';
   });
-  [q, dom, sev, cat].forEach(function (el) { el.addEventListener('input', apply); });
-  document.getElementById('static-table').hidden = true;
+  gridApi = api;
+  // Carry over whatever the reader already typed or selected into the grid.
+  apply();
+  if (staticTable) staticTable.hidden = true;
   host.hidden = false;
+  }
 })();

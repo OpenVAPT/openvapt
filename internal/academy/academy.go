@@ -45,6 +45,7 @@ type Module struct {
 	Level         Level
 	Minutes       int
 	Summary       string
+	Prereqs       []string // module ids to read first; each must appear earlier in Modules
 	Objectives    []string
 	Sections      []Section
 	KeyTerms      []string // glossary term names

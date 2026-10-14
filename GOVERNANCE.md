@@ -1,6 +1,7 @@
 # Governance
 
 - **Maintainers** review and merge pull requests, cut releases and handle security reports. The current maintainer is the project owner, one individual who publishes the project under the name OpenVAPT, working with AI Cybersecurity Engineers. "OpenVAPT" is a project name, not a registered legal entity.
+- **Worldwide**: OpenVAPT is for the whole world: it is offered to anyone, in any country, and everything about it is written for a worldwide audience. Decisions are made for users, learners, teachers and contributors in every country; Malaysian law applies to the project's own licence and agreement only because the owner is there.
 - **Decisions** are made in public issues and pull requests. Significant design decisions are recorded as Architecture Decision Records in `docs/adr/`.
 - **New maintainers** are invited after a sustained record of reviewed contributions, by agreement of the existing maintainers, recorded in a public issue.
 - **Continuity**: if the project becomes unmaintained, the repository stays public and archived so that the code remains available for study.

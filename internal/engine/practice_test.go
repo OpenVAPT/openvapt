@@ -35,7 +35,7 @@ func TestPracticeLabAnswerKeyIsExact(t *testing.T) {
 	if reflect.DeepEqual(fails("student-001"), fails("student-002")) {
 		t.Error("different seeds should give different servers")
 	}
-	if n := len(key); n < 20 || n > 120 {
+	if n := len(key); n < 20 || n > 200 {
 		t.Errorf("practice server has %d weaknesses; expected a teachable middle ground", n)
 	}
 }

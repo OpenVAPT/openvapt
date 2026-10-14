@@ -15,9 +15,44 @@ import (
 var sensitiveNames = []struct{ pattern, why string }{
 	{".env", "environment secrets"}, {".env.*", "environment secrets"}, {"*.sql", "database dump"}, {"*.sql.gz", "database dump"},
 	{"*.bak", "backup copy"}, {"*.old", "backup copy"}, {"*.orig", "backup copy"}, {"*~", "editor backup"},
-	{"*.swp", "editor swap file"}, {"backup*.zip", "backup archive"}, {"backup*.tar.gz", "backup archive"},
-	{"*.tar.gz", "archive"}, {"*.tgz", "archive"}, {"id_rsa", "SSH private key"}, {"id_ed25519", "SSH private key"},
-	{"*.pem", "key or certificate"}, {"*.key", "private key"}, {"*.p12", "key store"}, {"wp-config.php.*", "WordPress config copy"},
+	{"*.swp", "editor swap file"}, {"backup*.zip", "backup archive"}, {"backup*.tar.gz", "backup archive"}, {"backup*.tgz", "backup archive"},
+	{"*dump*.tar.gz", "database dump archive"}, {"*dump*.tgz", "database dump archive"}, {"*dump*.zip", "database dump archive"},
+	{"id_rsa", "SSH private key"}, {"id_ed25519", "SSH private key"}, {"id_ecdsa", "SSH private key"},
+	{"*key*.pem", "private key"}, {"*priv*.pem", "private key"}, {"*.key", "private key"}, {"*.p12", "key store"}, {"*.pfx", "key store"}, {"wp-config.php.*", "WordPress config copy"},
+}
+
+// reviewNames are files that are often legitimate inside a web root (a
+// published certificate chain, a downloadable release archive) but deserve a
+// look, because the same names also carry private keys and site backups.
+// They are rated Medium by WEB-DOC-003, not High by WEB-DOC-001 (C-09).
+var reviewNames = []struct{ pattern, why string }{
+	{"*.pem", "certificate or key material; confirm it holds no private key"}, {"*.crt", "certificate; confirm the key is not beside it"},
+	{"*.tar.gz", "archive; confirm it is a published download, not a site backup"}, {"*.tgz", "archive; confirm it is a published download, not a site backup"},
+	{"*.tar", "archive; confirm it is a published download, not a site backup"}, {"*.7z", "archive; confirm it is a published download, not a site backup"},
+}
+
+// downloadFolder reports a path under a folder whose purpose is publishing
+// files, where archives are expected.
+func downloadFolder(path string) bool {
+	l := strings.ToLower(path)
+	for _, d := range []string{"/download/", "/downloads/", "/releases/", "/dist/", "/.well-known/"} {
+		if strings.Contains(l, d) {
+			return true
+		}
+	}
+	return false
+}
+
+func review(name string) (string, bool) {
+	if _, hi := sensitive(name); hi {
+		return "", false
+	}
+	for _, s := range reviewNames {
+		if ok, _ := filepath.Match(s.pattern, name); ok {
+			return s.why, true
+		}
+	}
+	return "", false
 }
 
 func sensitive(name string) (string, bool) {
@@ -36,7 +71,7 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
 		Summary:   "Looks on disk inside each web document root for environment files, database dumps, backups, archives and private keys.",
 		Rationale: "Anything inside a document root may be downloadable, now or after a configuration change. Dumps, backups and keys there are a leading cause of data breaches; finding them on disk catches files the URL checks cannot guess.",
-		Detection: "Reads document roots from the local Apache, nginx and LiteSpeed configuration, walks each one (metadata only, up to 50000 files, symlinks not followed) and matches file names such as .env, *.sql, *.bak, *.tar.gz, id_rsa and *.key. File contents are never read.",
+		Detection: "Reads document roots from the local Apache, nginx and LiteSpeed configuration, walks each one (metadata only, up to 50000 files, symlinks not followed) and matches file names such as .env, *.sql, *.bak, backup*.tar.gz, id_rsa, *key*.pem and *.key. File contents are never read. Plain archives and certificates (*.tar.gz, *.pem) are reviewed separately at Medium by WEB-DOC-003, because they are often published on purpose.",
 		Fix:       "Move each listed file outside the document root (for example to a 700 folder in the account's home), delete what is not needed, and rotate any secret or key that was exposed. Keep backups in a dedicated location outside every web root.",
 		Verify:    "Re-run this check; no files should be listed.",
 		Refs:      []check.Ref{refWSTGConf04, {Title: "OWASP Secrets Management Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"}},
@@ -68,6 +103,59 @@ func init() {
 					out = append(out, check.IncompleteR(root, "Web root could not be fully walked"))
 				default:
 					out = append(out, check.PassR(root, fmt.Sprintf("No sensitive files among %d checked", len(w.Files))))
+				}
+			}
+			if len(out) == 0 {
+				return []check.Result{check.SkipR("web roots", "Document roots could not be read")}
+			}
+			return out
+		},
+	})
+
+	check.Register(&check.Check{
+		ID: "WEB-DOC-003", Title: "Archives or Certificates Inside a Web Root", Domain: check.DomainWeb,
+		Severity: check.Medium, Category: check.CatExposure, Effort: check.EffortLow,
+		CVSS:      "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+		Summary:   "Lists archives (*.tar.gz, *.tgz, *.tar, *.7z) and certificate files (*.pem, *.crt) inside each web document root for review, outside download folders.",
+		Rationale: "A tarball inside a web root is often a site or database backup left after a migration, and a .pem file sometimes carries the private key next to the certificate. Both are downloadable by anyone who guesses the name. But download sites publish archives on purpose and public certificates are harmless, so this is a Medium review item, not a High finding; names that clearly mean backup, dump or key are rated High by WEB-DOC-001.",
+		Detection: "Walks each document root (metadata only, up to 50000 files, symlinks not followed) and lists files matching the archive and certificate patterns that WEB-DOC-001 does not already rate High. Files under /download/, /downloads/, /releases/, /dist/ or /.well-known/ are noted as expected publications and do not fail. File contents are never read.",
+		Fix:       "Confirm each file is meant to be public. Move backups and anything holding a private key outside the document root, rotate any exposed key, and keep published downloads in a dedicated folder such as /downloads/.",
+		Verify:    "Re-run this check; only files you have confirmed as intended downloads should remain, in a download folder.",
+		Refs:      []check.Ref{refWSTGConf04, {Title: "OWASP Secrets Management Cheat Sheet", URL: "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"}},
+		Standards: check.Standards{CWE: []string{"CWE-538", "CWE-552"}, OWASP: []string{"A05:2021"}, ASVS: []string{"12.5.1"}, WSTG: []string{"WSTG-CONF-04"}, NIST: []string{"SC-28", "CM-6"}},
+		Run: func(ctx context.Context, s sys.System) []check.Result {
+			roots := collect.DocRoots(ctx, s)
+			if len(roots) == 0 {
+				return []check.Result{check.SkipR("web roots", "No document roots found in the local web server configuration")}
+			}
+			var out []check.Result
+			for _, root := range roots {
+				w, err := s.Walk(ctx, root, 50000)
+				if err != nil && len(w.Files) == 0 {
+					continue
+				}
+				var hits, expected []string
+				for _, f := range w.Files {
+					why, ok := review(filepath.Base(f.Path))
+					if !ok {
+						continue
+					}
+					if downloadFolder(f.Path) {
+						expected = append(expected, f.Path+" (in a download folder, expected)")
+						continue
+					}
+					hits = append(hits, f.Path+" ("+why+")")
+				}
+				switch {
+				case len(hits) > 0:
+					if len(hits) > 30 {
+						hits = append(hits[:30], fmt.Sprintf("... and %d more", len(hits)-30))
+					}
+					out = append(out, check.FailR(root, fmt.Sprintf("%d archive or certificate file(s) inside the web root to review", len(hits)), append(hits, expected...)...))
+				case !w.Complete:
+					out = append(out, check.IncompleteR(root, "Web root could not be fully walked"))
+				default:
+					out = append(out, check.PassR(root, fmt.Sprintf("No archives or certificates to review among %d files", len(w.Files)), expected...))
 				}
 			}
 			if len(out) == 0 {

@@ -71,7 +71,7 @@ func registerConfig(r configRule) {
 			if anyIncomplete(fs) {
 				return []check.Result{check.IncompleteR(fs[0].Path, "Configuration input was truncated; a secure result cannot be established")}
 			}
-			return []check.Result{check.PassR(fs[0].Path, "Required security settings are present")}
+			return []check.Result{check.PassR(fs[0].Path, "Required security settings are present", ev...)}
 		},
 	})
 }
@@ -156,18 +156,14 @@ func init() {
 		title:     "Memcached UDP or Broad Listen Address",
 		summary:   "Memcached enables UDP or listens on a non-loopback address.",
 		rationale: "Unauthenticated Memcached exposure can disclose cached data and UDP mode has been abused for amplification attacks.",
-		detection: "Parses memcached configuration for -U or UDP_PORT and -l or listen address.",
+		detection: "Parses memcached.conf (one option per line) and /etc/sysconfig/memcached (OPTIONS and UDP_PORT) for -U or UDP_PORT and -l. A UDP port other than 0 fails; a listen address fails unless every address is loopback (127.0.0.1, ::1 or localhost); no -l at all means every interface and fails. The actual values are the evidence.",
 		fix:       "Set UDP_PORT=0 or -U 0 and bind with -l 127.0.0.1. Use a firewall for any explicitly required clients.",
 		verify:    "Confirm ss -ltnup shows Memcached only on loopback and no UDP port 11211.",
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
 		severity:  check.High,
 		patterns:  []string{"/etc/memcached.conf", "/etc/sysconfig/memcached"},
 		ref:       check.Ref{Title: "memcached Configuration", URL: "https://docs.memcached.org/serverguide/configuring/"},
-		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
-			raw := strings.ToLower(strings.Join(flattenValues(fs), " "))
-			bad := strings.Contains(raw, "-u 11211") || strings.Contains(raw, "udp_port=11211") || !strings.Contains(raw, "127.0.0.1")
-			return bad, []string{"Memcached network options reviewed"}
-		}})
+		evaluate:  memcachedEvaluate})
 	registerConfig(configRule{
 		id:        "NET-DB-007",
 		title:     "Elasticsearch Security and Network Binding",
@@ -187,19 +183,69 @@ func init() {
 	_ = no
 }
 
+// memcachedEvaluate judges memcached's listen addresses and UDP port, quoting
+// the values it saw.
+func memcachedEvaluate(fs []collect.ConfigFile) (bool, []string) {
+	var listen, udp, ev []string
+	for _, f := range fs {
+		for k, vals := range f.Values {
+			for _, v := range vals {
+				v = strings.Trim(strings.TrimSpace(v), `"'`)
+				switch k {
+				case "-l":
+					listen = append(listen, v)
+				case "-u", "udp_port":
+					if k == "-u" {
+						k = "-U"
+					}
+					udp = append(udp, v)
+				case "options":
+					flds := strings.Fields(v)
+					for i := 0; i+1 < len(flds); i++ {
+						switch flds[i] {
+						case "-l":
+							listen = append(listen, flds[i+1])
+						case "-U":
+							udp = append(udp, flds[i+1])
+						}
+					}
+				default:
+					continue
+				}
+				ev = append(ev, f.Path+": "+k+" "+v)
+			}
+		}
+	}
+	bad := false
+	if len(listen) == 0 {
+		bad = true
+		ev = append(ev, "no -l listen address: memcached listens on every interface")
+	}
+	for _, l := range listen {
+		for _, a := range strings.Split(l, ",") {
+			a = strings.TrimSpace(a)
+			if i := strings.LastIndex(a, ":"); i > 0 && strings.Count(a, ":") == 1 {
+				a = a[:i] // 127.0.0.1:11211
+			}
+			if a != "127.0.0.1" && a != "::1" && a != "localhost" {
+				bad = true
+			}
+		}
+	}
+	for _, u := range udp {
+		if strings.TrimSpace(u) != "0" {
+			bad = true
+		}
+	}
+	return bad, ev
+}
+
 func flatten(m map[string][]string) []string {
 	var out []string
 	for k, v := range m {
 		for _, x := range v {
 			out = append(out, k+" "+x)
 		}
-	}
-	return out
-}
-func flattenValues(fs []collect.ConfigFile) []string {
-	var out []string
-	for _, f := range fs {
-		out = append(out, flatten(f.Values)...)
 	}
 	return out
 }

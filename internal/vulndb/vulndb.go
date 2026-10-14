@@ -9,6 +9,7 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -65,30 +66,111 @@ type Advisory struct {
 type Snapshot struct {
 	Header     Header
 	Advisories []Advisory
+
+	// index maps ecosystem + package to the positions of the advisories
+	// that name it, so Match never scans the whole snapshot. It is built
+	// once by Decode and shared read-only between copies of the Snapshot.
+	index map[string][]int
 }
 
-func Embedded() (Snapshot, error) {
-	b, e := files.ReadFile("data/snapshot.json.gz")
-	if e != nil {
-		return Snapshot{}, e
-	}
-	return Decode(bytes.NewReader(b))
+// Matcher names how a version was matched, in the style of other
+// vulnerability scanners, so a reader can weigh the evidence.
+const (
+	MatcherExact = "exact version"
+	MatcherRange = "range"
+)
+
+// Match is one advisory that applies to a package version, with the way
+// the version was matched.
+type Match struct {
+	Advisory Advisory
+	Matcher  string
 }
+
+var (
+	embeddedOnce sync.Once
+	embeddedSnap Snapshot
+	embeddedErr  error
+)
+
+// Embedded returns the snapshot compiled into the binary. It is decoded and
+// indexed once; every CVE check shares the same copy.
+func Embedded() (Snapshot, error) {
+	embeddedOnce.Do(func() {
+		b, e := files.ReadFile("data/snapshot.json.gz")
+		if e != nil {
+			embeddedErr = e
+			return
+		}
+		embeddedSnap, embeddedErr = Decode(bytes.NewReader(b))
+	})
+	return embeddedSnap, embeddedErr
+}
+
+// Decode reads a gzip-compressed JSON snapshot.
 func Decode(r io.Reader) (Snapshot, error) {
 	z, e := gzip.NewReader(r)
 	if e != nil {
 		return Snapshot{}, e
 	}
 	defer z.Close()
+	return DecodeJSON(io.LimitReader(z, 64<<20))
+}
+
+// DecodeJSON reads an uncompressed JSON snapshot (the simulated labs carry
+// one in memory) and builds the package index.
+func DecodeJSON(r io.Reader) (Snapshot, error) {
 	var s Snapshot
-	e = json.NewDecoder(io.LimitReader(z, 64<<20)).Decode(&s)
+	e := json.NewDecoder(io.LimitReader(r, 64<<20)).Decode(&s)
 	if e != nil {
 		return s, e
 	}
 	if s.Header.Schema != 1 {
 		return s, errors.New("unsupported vulnerability snapshot schema")
 	}
+	s.buildIndex()
 	return s, nil
+}
+
+func indexKey(eco, pkg string) string { return eco + "\x00" + pkg }
+
+func (s *Snapshot) buildIndex() {
+	s.index = make(map[string][]int, len(s.Advisories))
+	for i, a := range s.Advisories {
+		seen := map[string]bool{}
+		for _, p := range a.Affected {
+			k := indexKey(p.Ecosystem, p.Package)
+			if !seen[k] {
+				seen[k] = true
+				s.index[k] = append(s.index[k], i)
+			}
+		}
+	}
+}
+
+// HasEcosystem reports whether any advisory in the snapshot names an
+// ecosystem equal to, or starting with, prefix (for example "WordPress").
+// A check that inventories an ecosystem the snapshot never covers must
+// report Incomplete, not Pass.
+func (s Snapshot) HasEcosystem(prefix string) bool {
+	for _, a := range s.Advisories {
+		for _, p := range a.Affected {
+			if strings.HasPrefix(p.Ecosystem, prefix) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// AgeDays returns how many days old the snapshot is at now, or -1 when the
+// generation date cannot be parsed.
+func (s Snapshot) AgeDays(now time.Time) int {
+	d, e := time.Parse("2006-01-02", s.Header.Generated)
+	if e != nil {
+		return -1
+	}
+	return int(now.UTC().Sub(d).Hours() / 24)
 }
 func (s Snapshot) Age(now time.Time) (bool, error) {
 	d, e := time.Parse("2006-01-02", s.Header.Generated)
@@ -104,25 +186,52 @@ func (s Snapshot) Notice() string {
 	}
 	return n
 }
-func (s Snapshot) Match(ecosystem, packageName, version string) []Advisory {
-	var out []Advisory
-	for _, a := range s.Advisories {
+
+// Match returns every advisory that applies to the package version, with
+// the matcher that decided it.
+func (s Snapshot) Match(ecosystem, packageName, version string) []Match {
+	var out []Match
+	visit := func(a Advisory) {
 		for _, p := range a.Affected {
 			if p.Ecosystem != ecosystem || p.Package != packageName {
 				continue
 			}
-			if affected(p, version) {
-				out = append(out, a)
+			if how, ok := affectedBy(p, version); ok {
+				out = append(out, Match{Advisory: a, Matcher: how})
 				break
 			}
 		}
 	}
+	if s.index != nil {
+		for _, i := range s.index[indexKey(ecosystem, packageName)] {
+			visit(s.Advisories[i])
+		}
+		return out
+	}
+	for _, a := range s.Advisories {
+		visit(a)
+	}
 	return out
 }
+
+// Advisories returns only the advisories of Match.
+func Advisories(ms []Match) []Advisory {
+	out := make([]Advisory, 0, len(ms))
+	for _, m := range ms {
+		out = append(out, m.Advisory)
+	}
+	return out
+}
+
 func affected(a Affected, v string) bool {
+	_, ok := affectedBy(a, v)
+	return ok
+}
+
+func affectedBy(a Affected, v string) (string, bool) {
 	for _, x := range a.Versions {
 		if x == v {
-			return true
+			return MatcherExact, true
 		}
 	}
 	for _, r := range a.Ranges {
@@ -134,10 +243,10 @@ func affected(a Affected, v string) bool {
 			continue // a branch name has no place on a version line
 		}
 		if rangeAffects(r.Events, v, cmp) {
-			return true
+			return MatcherRange, true
 		}
 	}
-	return false
+	return "", false
 }
 
 // eventVersion returns the version an event refers to and its kind.
@@ -232,6 +341,8 @@ func comparator(eco, kind string) func(string, string) int {
 		return SemverCompare
 	case eco == "Packagist":
 		return ComposerCompare
+	case eco == "WordPress" || strings.HasPrefix(eco, "WordPress:"):
+		return WordPressCompare
 	}
 	return nil
 }

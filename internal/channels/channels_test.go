@@ -1,8 +1,12 @@
 package channels
 
 import (
+	"crypto/sha256"
 	"errors"
+	"fmt"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -139,8 +143,43 @@ func TestRepositoryStateIsValid(t *testing.T) {
 			t.Errorf("current %s holds %s", c, r.Version)
 		}
 	}
-	if _, err := LoadLegal("../../release/legal-review.json"); err != nil {
-		t.Errorf("legal review record: %v", err)
+	lr, err := LoadLegal("../../release/legal-review.json")
+	if err != nil {
+		t.Fatalf("legal review record: %v", err)
+	}
+	// The record must be self-describing (AGENTS.md 5.8): it names the
+	// accepted High risks and hashes every legal document it reviewed.
+	if len(lr.Documents) == 0 {
+		t.Error("legal review record lists no reviewed documents")
+	}
+	for _, must := range []string{"LICENSE", "EULA.md", "ACCEPTABLE_USE.md", "DISCLAIMER.md", "PRIVACY.md", "TEACHING.md", "internal/terms/terms.go"} {
+		if _, ok := lr.Documents[must]; !ok {
+			t.Errorf("legal review record does not hash %s", must)
+		}
+	}
+	if lr.OpenHighRisks == 0 && len(lr.AcceptedHighRisks) == 0 {
+		t.Error("open_high_risks is 0 but no accepted High risks are named; the register records accepted Highs")
+	}
+	if stale := lr.StaleDocuments("../.."); len(stale) > 0 {
+		t.Errorf("legal documents changed since the AI legal reviewer's record; a new review entry is needed for: %v", stale)
+	}
+}
+
+func TestStaleDocuments(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "a.md"), []byte("hello\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	sum := fmt.Sprintf("%x", sha256.Sum256([]byte("hello\n")))
+	lr := LegalReview{Documents: map[string]string{"a.md": sum}}
+	if s := lr.StaleDocuments(dir); len(s) != 0 {
+		t.Errorf("matching document reported stale: %v", s)
+	}
+	lr.Documents["a.md"] = "0000"
+	lr.Documents["missing.md"] = sum
+	s := lr.StaleDocuments(dir)
+	if len(s) != 2 || s[0] != "a.md" || !strings.HasPrefix(s[1], "missing.md: ") {
+		t.Errorf("stale and missing documents not reported: %v", s)
 	}
 }
 

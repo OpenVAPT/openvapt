@@ -1,0 +1,7 @@
+# Commits the ci DCO check skips: full hash, one space, one-line reason.
+# Everything after these carries a Signed-off-by trailer (git commit -s).
+2704c9848747e2094567249b93b3ac6ea4bb0d1b merge of the OpenAI Codex offline vulnerability matching branch, made before the DCO check existed
+256638bbcf263463c030bc034a1c391b45bf12f5 merge of the OpenAI Codex network, data-service and TLS checks branch, made before the DCO check existed
+a7ea7acfa8dafdc20087548ffd8959f8e43ef605 merge of the OpenAI Codex review fixes branch, made before the DCO check existed
+08400cd5497828ba55bab0f8afcba78f40e2b674 release record commit for v0.1.0-alpha.1 by the release agent before the record step signed off
+d4ab6427a8477da26261794061e17b5cddc4e2ba release record commit for v0.1.0-alpha.2 by the release agent before the record step signed off

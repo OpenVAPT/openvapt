@@ -192,7 +192,9 @@ func init() {
 				if out, err := s.Run(ctx, cmd[0], cmd[1:]...); err == nil {
 					var sec []string
 					for _, line := range strings.Split(out, "\n") {
-						if f := strings.Fields(line); len(f) >= 3 {
+						// Only advisory lines count ("ALSA-2024:1234 Important/Sec. pkg"),
+						// never the header or a footer dnf may print.
+						if f := strings.Fields(line); len(f) >= 3 && advisoryIDRe.MatchString(f[0]) {
 							sec = append(sec, f[0]+" "+f[2])
 						}
 					}
@@ -206,6 +208,10 @@ func init() {
 		},
 	})
 }
+
+// advisoryIDRe matches vendor advisory ids such as RHSA-2024:1234,
+// ALSA-2024:5678, RLSA-2024:1 or FEDORA-2024-abcdef.
+var advisoryIDRe = regexp.MustCompile(`^[A-Z]{2,10}-\d{4}[:-][0-9a-zA-Z]+$`)
 
 func firstN(in []string, n int) []string {
 	if len(in) <= n {

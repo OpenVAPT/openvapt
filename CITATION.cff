@@ -8,7 +8,7 @@ authors:
     website: "https://openvapt.com"
 repository-code: "https://github.com/OpenVAPT/openvapt"
 url: "https://openvapt.com"
-license: LicenseRef-OpenVAPT-SAL-1.2
+# The licence is not on the SPDX list, so CFF 1.2.0 allows only license-url here (schema: license is an SPDX enum).
 license-url: "https://github.com/OpenVAPT/openvapt/blob/main/LICENSE"
 version: "0.1.0-alpha.2"
 date-released: "2026-10-13"

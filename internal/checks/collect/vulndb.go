@@ -14,6 +14,18 @@ type Installed struct {
 	Package   string
 	Version   string
 	Path      string
+	// Heuristic marks a version read from a file header or comment rather
+	// than a package manager record, so a match is weaker evidence.
+	Heuristic bool
+}
+
+// Matcher labels how an inventory item's version was established, so a CVE
+// finding can say "exact version", "range" or "heuristic" in its evidence.
+func (i Installed) Matcher(rangeMatcher string) string {
+	if i.Heuristic {
+		return "heuristic (version read from a file header)"
+	}
+	return rangeMatcher
 }
 
 func Ecosystem(m map[string]string) string {
@@ -52,7 +64,7 @@ func HostInventory(ctx context.Context, s sys.System) ([]Installed, bool) {
 				}
 			}
 			if m["Status"] == "install ok installed" && m["Package"] != "" && m["Version"] != "" {
-				out = append(out, Installed{eco, m["Package"], m["Version"], "/var/lib/dpkg/status"})
+				out = append(out, Installed{Ecosystem: eco, Package: m["Package"], Version: m["Version"], Path: "/var/lib/dpkg/status"})
 			}
 		}
 		return out, r.Complete && len(out) > 0
@@ -65,7 +77,7 @@ func HostInventory(ctx context.Context, s sys.System) ([]Installed, bool) {
 		for _, l := range strings.Split(v, "\n") {
 			f := strings.Split(l, "\t")
 			if len(f) == 2 && f[0] != "" && f[1] != "" {
-				out = append(out, Installed{eco, f[0], f[1], "rpm database"})
+				out = append(out, Installed{Ecosystem: eco, Package: f[0], Version: f[1], Path: "rpm database"})
 			}
 		}
 		return out, len(out) > 0
@@ -116,7 +128,7 @@ func WebInventory(ctx context.Context, s sys.System) ([]Installed, bool) {
 					continue
 				}
 				for _, a := range append(x.Packages, x.PackagesDev...) {
-					out = append(out, Installed{"Packagist", a.Name, strings.TrimPrefix(a.Version, "v"), p})
+					out = append(out, Installed{Ecosystem: "Packagist", Package: a.Name, Version: strings.TrimPrefix(a.Version, "v"), Path: p})
 				}
 			case "package-lock.json":
 				var x struct {
@@ -129,22 +141,22 @@ func WebInventory(ctx context.Context, s sys.System) ([]Installed, bool) {
 					continue
 				}
 				for n, a := range x.Dependencies {
-					out = append(out, Installed{"npm", n, a.Version, p})
+					out = append(out, Installed{Ecosystem: "npm", Package: n, Version: a.Version, Path: p})
 				}
 				for n, a := range x.Packages {
 					if strings.HasPrefix(n, "node_modules/") {
-						out = append(out, Installed{"npm", strings.TrimPrefix(n, "node_modules/"), a.Version, p})
+						out = append(out, Installed{Ecosystem: "npm", Package: strings.TrimPrefix(n, "node_modules/"), Version: a.Version, Path: p})
 					}
 				}
 			case "version.php":
 				if m := wpVersion.FindSubmatch(r.Data); m != nil {
-					out = append(out, Installed{"WordPress", "wordpress", string(m[1]), p})
+					out = append(out, Installed{Ecosystem: "WordPress:Core", Package: "wordpress", Version: string(m[1]), Path: p})
 				} else {
 					complete = false
 				}
 			default:
 				if m := jqVersion.FindSubmatch(r.Data); m != nil {
-					out = append(out, Installed{"npm", "jquery", string(m[1]), p})
+					out = append(out, Installed{Ecosystem: "npm", Package: "jquery", Version: string(m[1]), Path: p, Heuristic: true})
 				}
 			}
 		}

@@ -18,7 +18,7 @@ func TestNewConfigCheckTreatsPartialSecureInputAsIncomplete(t *testing.T) {
 }
 
 func TestNewChecksHaveProfessionalMetadata(t *testing.T) {
-	newIDs := map[string]bool{"NET-DB-002": true, "NET-DB-003": true, "NET-DB-004": true, "NET-DB-005": true, "NET-DB-006": true, "NET-DB-007": true, "NET-DB-008": true, "NET-DB-009": true, "NET-DB-010": true, "NET-DB-011": true, "NET-DB-012": true, "NET-DB-013": true, "NET-SVC-002": true, "NET-FW-002": true, "NET-SVC-003": true, "NET-TLS-004": true, "NET-TLS-005": true, "NET-TLS-006": true}
+	newIDs := map[string]bool{"NET-DB-002": true, "NET-DB-003": true, "NET-DB-004": true, "NET-DB-005": true, "NET-DB-006": true, "NET-DB-007": true, "NET-DB-008": true, "NET-DB-009": true, "NET-DB-010": true, "NET-DB-011": true, "NET-DB-012": true, "NET-DB-013": true, "NET-SVC-002": true, "NET-SVC-004": true, "NET-APP-001": true, "NET-APP-002": true, "NET-FW-002": true, "NET-SVC-003": true, "NET-TLS-004": true, "NET-TLS-005": true, "NET-TLS-006": true}
 	for _, c := range check.All() {
 		if !newIDs[c.ID] {
 			continue
