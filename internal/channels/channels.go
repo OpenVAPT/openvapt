@@ -11,10 +11,13 @@
 package channels
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -192,6 +195,14 @@ type LegalReview struct {
 	OpenHighRisks        int    `json:"open_high_risks"`
 	PublicLaunchApproved bool   `json:"public_launch_approved"`
 	Notes                string `json:"notes"`
+	// AcceptedHighRisks names every High risk the owner has accepted rather
+	// than closed, so that "0 open" is never read as "0 accepted". It does not
+	// affect any gate (AGENTS.md 5.8).
+	AcceptedHighRisks []string `json:"accepted_high_risks,omitempty"`
+	// Documents maps each legal document reviewed (repository path) to the
+	// SHA-256 hex digest of its content at review time. A unit test compares
+	// them with the working tree so a changed document calls for a new review.
+	Documents map[string]string `json:"documents,omitempty"`
 }
 
 // LoadLegal reads the legal review record.
@@ -202,6 +213,26 @@ func LoadLegal(path string) (LegalReview, error) {
 		return l, err
 	}
 	return l, json.Unmarshal(b, &l)
+}
+
+// StaleDocuments returns the reviewed documents whose current content, read
+// relative to root, no longer matches the hash recorded in the review, plus
+// any that cannot be read. An empty result means every recorded document is
+// the one the AI legal reviewer saw.
+func (l LegalReview) StaleDocuments(root string) []string {
+	var stale []string
+	for path, want := range l.Documents {
+		b, err := os.ReadFile(filepath.Join(root, filepath.Clean(path))) // #nosec G304 -- paths come from the repository's own record
+		if err != nil {
+			stale = append(stale, path+": "+err.Error())
+			continue
+		}
+		if got := fmt.Sprintf("%x", sha256.Sum256(b)); got != want {
+			stale = append(stale, path)
+		}
+	}
+	sort.Strings(stale)
+	return stale
 }
 
 // Evidence is what CI observed for the candidate commit.

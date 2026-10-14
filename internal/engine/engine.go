@@ -27,11 +27,18 @@ import (
 
 // Options select which checks to run.
 type Options struct {
-	Only     []string // run only these ids (or id prefixes such as "WEB-")
-	Skip     []string // skip these ids or prefixes
-	Parallel int      // concurrent checks, default 4
-	Timeout  time.Duration
+	Only     []string      // run only these ids (or id prefixes such as "WEB-")
+	Skip     []string      // skip these ids or prefixes
+	Parallel int           // concurrent checks, default 4, at most MaxParallel
+	Timeout  time.Duration // per check, default 90 s
+	// Deadline bounds the whole scan (the --timeout flag). When it passes,
+	// checks still waiting end with an Error result ("timed out") instead of
+	// running, so the report is written and the exit code says what happened.
+	Deadline time.Duration
 }
+
+// MaxParallel caps --parallel so a typo cannot start hundreds of checks.
+const MaxParallel = 32
 
 func match(id string, list []string) bool {
 	for _, p := range list {
@@ -63,8 +70,16 @@ func Run(ctx context.Context, s sys.System, o Options) *report.Report {
 	if o.Parallel <= 0 {
 		o.Parallel = 4
 	}
+	if o.Parallel > MaxParallel {
+		o.Parallel = MaxParallel
+	}
 	if o.Timeout <= 0 {
 		o.Timeout = 90 * time.Second
+	}
+	if o.Deadline > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, o.Deadline)
+		defer cancel()
 	}
 	checks := Select(o)
 	started := time.Now().UTC()
@@ -113,8 +128,19 @@ func Run(ctx context.Context, s sys.System, o Options) *report.Report {
 		Limitations: limitations(),
 		Disclaimer:  report.Disclaimer,
 	}
+	r.Scan.VulnDB = snapshotInfo(ctx, s, r.Scan.Finished)
 	r.Summarise()
 	return r
+}
+
+// snapshotInfo records the vulnerability snapshot the CVE checks used.
+func snapshotInfo(ctx context.Context, s sys.System, now time.Time) *report.VulnDB {
+	db, err := collect.VulnDB(context.WithoutCancel(ctx), s)
+	if err != nil {
+		return nil
+	}
+	age := db.AgeDays(now)
+	return &report.VulnDB{Generated: db.Header.Generated, Fixture: db.Header.Fixture, Advisories: len(db.Advisories), AgeDays: age, Stale: age < 0 || age > report.StaleAfterDays}
 }
 
 func statusRank(s string) int {
@@ -139,6 +165,11 @@ func statusRank(s string) int {
 // stalling the scan.
 func runOne(parent context.Context, s sys.System, c *check.Check, timeout time.Duration) report.Finding {
 	f := report.FromCheck(c)
+	if parent.Err() != nil {
+		f.Results = []check.Result{{Status: check.Error, Target: c.ID, Message: "not run: the scan deadline passed or the scan was interrupted before this check started"}}
+		f.Status = string(check.Error)
+		return f
+	}
 	ctx, cancel := context.WithTimeout(parent, timeout)
 	defer cancel()
 	type outcome struct {

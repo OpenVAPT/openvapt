@@ -3,12 +3,12 @@ package host
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/openvapt/openvapt/internal/check"
 	"github.com/openvapt/openvapt/internal/checks/collect"
 	"github.com/openvapt/openvapt/internal/sys"
-	"github.com/openvapt/openvapt/internal/vulndb"
-	"strings"
-	"time"
 )
 
 var cveRefs = []check.Ref{{Title: "OSV vulnerability database", URL: "https://osv.dev/"}, {Title: "NVD", URL: "https://nvd.nist.gov/"}, {Title: "CISA KEV", URL: "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"}}
@@ -39,22 +39,21 @@ func init() {
 			CVSS:      x.cvss,
 			Summary:   "Checks installed packages against an offline vulnerability snapshot.",
 			Rationale: "Known vulnerable package versions can expose a server to documented attacks.",
-			Detection: "Reads installed package versions and matches OSV ecosystem ranges; the snapshot date and fixture status are reported.",
-			Fix:       "Install the vendor security update and regenerate the release snapshot.",
+			Detection: "Reads installed package versions and matches OSV ecosystem ranges; each match names its matcher (exact version or range) and the snapshot date. When the binary carries only the test fixture snapshot (a source build without 'make vulndb'), the check reports Incomplete rather than Pass, because no advisory data was available.",
+			Fix:       "Install the vendor security update. For a source build, run 'make vulndb' to embed a snapshot generated from OSV and CISA KEV, then rebuild.",
 			Verify:    "Re-run OpenVAPT after patching and confirm the finding is absent.",
 			Refs:      cveRefs,
 			Standards: cveStandards,
 			Run: func(ctx context.Context, s sys.System) []check.Result {
-				db, e := vulndb.Embedded()
+				db, e := collect.VulnDB(ctx, s)
 				if e != nil {
 					return []check.Result{check.IncompleteR("vulnerability snapshot", "Snapshot could not be read")}
 				}
+				if db.Header.Fixture {
+					return []check.Result{check.IncompleteR("vulnerability snapshot", "No advisory data: the embedded snapshot is test fixture data", collect.FixtureNotice, db.Notice())}
+				}
 				if x.age {
-					if f, ok := s.(*sys.Fake); ok && f.Files["/run/openvapt/lab-snapshot-date"] != "" {
-						db.Header.Generated = f.Files["/run/openvapt/lab-snapshot-date"]
-						db.Header.Fixture = false
-					}
-					if f, _ := db.Age(snapshotClock(s)); f {
+					if old, _ := db.Age(time.Now()); old {
 						return []check.Result{check.FailR("vulnerability snapshot", db.Notice())}
 					}
 					return []check.Result{check.PassR("vulnerability snapshot", db.Notice())}
@@ -65,7 +64,8 @@ func init() {
 				}
 				var out []check.Result
 				for _, p := range items {
-					for _, a := range db.Match(p.Ecosystem, p.Package, p.Version) {
+					for _, m := range db.Match(p.Ecosystem, p.Package, p.Version) {
+						a := m.Advisory
 						if x.kev && !a.KEV {
 							continue
 						}
@@ -84,7 +84,7 @@ func init() {
 								}
 							}
 						}
-						out = append(out, check.FailR(p.Package, fmt.Sprintf("%s %s: %s (%s), fixed in %s, severity %s", p.Package, p.Version, a.ID, strings.Join(a.Aliases, ", "), fixed, a.Severity), db.Notice()))
+						out = append(out, check.FailR(p.Package, fmt.Sprintf("%s %s: %s (%s), fixed in %s, severity %s", p.Package, p.Version, a.ID, strings.Join(a.Aliases, ", "), fixed, a.Severity), "matcher: "+p.Matcher(m.Matcher), db.Notice()))
 					}
 				}
 				if len(out) == 0 {
@@ -94,14 +94,4 @@ func init() {
 			},
 		})
 	}
-}
-func snapshotClock(s sys.System) time.Time {
-	if f, ok := s.(*sys.Fake); ok {
-		if v := f.Files["/run/openvapt/lab-snapshot-date"]; v != "" {
-			if t, e := time.Parse("2006-01-02", v); e == nil {
-				return t
-			}
-		}
-	}
-	return time.Now()
 }

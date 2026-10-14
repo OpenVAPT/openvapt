@@ -4,6 +4,7 @@ Thank you for helping. OpenVAPT is an academic project, so clear explanations ma
 
 ## Ground Rules
 
+- Contributors are welcome from anywhere in the world. Write for a worldwide reader: plain English, no assumption of one country's law, currency or customs, and laws named only as examples from several regions.
 - AI Cybersecurity Engineers (Claude, OpenAI Codex and any other) must follow [AGENTS.md](AGENTS.md), the AI Cybersecurity Engineer governance policy.
 - Detection only. No exploit code, payloads, brute force or intrusive techniques will be accepted.
 - This machine only. Never weaken `internal/scope` or the `internal/sys` allow-list.
@@ -22,13 +23,17 @@ Thank you for helping. OpenVAPT is an academic project, so clear explanations ma
 
 - Sign off each commit under the Developer Certificate of Origin: `git commit -s`. See https://developercertificate.org/.
 - Use Conventional Commits: `feat(web): add check for ...`, `fix(scope): ...`, `docs: ...`.
-- Contributions are licensed under the OpenVAPT Source-Available Licence 1.2, and you grant the licensor a licence to relicense them (LICENSE, section 10). No payment or credit is owed.
+- Contributions are licensed under the OpenVAPT Source-Available Licence 1.3, and you grant the licensor a licence to relicense them (LICENSE, section 10). You also authorise the licensor to accept the EULA's protections for contributors on your behalf (LICENSE, section 10(d)). No payment or credit is owed.
 - One topic per pull request. CI must be green.
 
 ## Reporting Bugs
 
-Use the issue templates: Bug, False Positive, False Negative, New Check, Documentation.
+Use the issue templates: Bug Report, False Positive, False Negative, New Check, Documentation, Factual Error, Teaching Feedback. Security flaws go through GitHub Private Vulnerability Reporting, never a public issue.
 
 ## Code of Conduct
 
 Participation is governed by [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## Release Heads
+
+The promotion workflow treats a commit that changes only `CHANGELOG.md`, `CITATION.cff` or files under `release/` as a record commit, not a new release head, so a CHANGELOG-only commit never starts a new alpha on its own.

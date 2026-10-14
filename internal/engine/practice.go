@@ -60,6 +60,7 @@ func Practice(ctx context.Context, seed string, o Options) *report.Report {
 		return a.ID < b.ID
 	})
 	r.Scan.Host = "lab-practice (simulated, seed " + seed + ")"
+	r.Scan.AsRoot = false // a simulated server says nothing about the operator
 	r.Scan.Sites = v.Scan.Sites
 	r.Summarise()
 	return r

@@ -15,7 +15,7 @@ import (
 var dataPorts = map[int]string{
 	3306: "MySQL/MariaDB", 5432: "PostgreSQL", 1433: "Microsoft SQL Server", 1521: "Oracle DB",
 	27017: "MongoDB", 6379: "Redis", 11211: "Memcached", 9200: "Elasticsearch/OpenSearch",
-	5984: "CouchDB", 9042: "Cassandra", 2375: "Docker API (no TLS)", 2379: "etcd", 5672: "RabbitMQ",
+	5984: "CouchDB", 9042: "Cassandra", 5672: "RabbitMQ",
 }
 
 // cleartextPorts are legacy services that send credentials unencrypted.
@@ -123,11 +123,10 @@ func init() {
 }
 
 func label(port int) string {
-	if n, ok := dataPorts[port]; ok {
-		return " (" + n + ")"
-	}
-	if n, ok := cleartextPorts[port]; ok {
-		return " (" + n + ")"
+	for _, m := range []map[int]string{dataPorts, cleartextPorts, controlPorts, managementPorts} {
+		if n, ok := m[port]; ok {
+			return " (" + n + ")"
+		}
 	}
 	switch port {
 	case 22:
@@ -146,8 +145,18 @@ func label(port int) string {
 		return " (IMAPS)"
 	case 995:
 		return " (POP3S)"
-	case 10000:
-		return " (Webmin)"
 	}
 	return ""
+}
+
+// exposure describes how a network-reachable socket is bound, so a reader
+// can tell a service on every interface from one on a single address.
+func exposure(l collect.Listener) string {
+	if l.IP.IsUnspecified() {
+		return "all interfaces"
+	}
+	if l.IP.IsPrivate() || l.IP.IsLinkLocalUnicast() {
+		return "private address"
+	}
+	return "public address"
 }

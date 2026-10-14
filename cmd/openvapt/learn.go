@@ -75,6 +75,9 @@ func printCourse() {
 
 func printModule(m *academy.Module) {
 	fmt.Printf("%s  %s  (%s, about %d minutes)\n\n%s\n", m.ID, m.Title, m.Level, m.Minutes, m.Summary)
+	if len(m.Prereqs) > 0 {
+		fmt.Printf("\nRead first: %s\n", strings.Join(m.Prereqs, ", "))
+	}
 	fmt.Println("\nYou will be able to:")
 	for _, o := range m.Objectives {
 		fmt.Println("  - " + o)

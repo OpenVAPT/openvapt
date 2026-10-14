@@ -4,6 +4,7 @@ var practitioner = []Module{
 	{
 		ID: "P1", Title: "Linux Server Hardening", Level: Practitioner, Minutes: 30,
 		Summary: "Patching, accounts, privileges, file permissions, scheduled jobs and kernel settings: the foundations of a defensible Linux server.",
+		Prereqs: []string{"F1", "F3"},
 		Objectives: []string{
 			"Explain why unsupported releases and pending security updates are high risk.",
 			"Recognise dangerous account, sudo and permission configurations.",
@@ -20,11 +21,14 @@ var practitioner = []Module{
 				"World-writable files under /etc or in cron directories let any local user change what root runs. SUID programs run with their owner's rights; one placed in /tmp or a web folder is a classic privilege escalation trick. The sticky bit on /tmp stops users deleting each other's files.",
 			}},
 			{"Kernel Hardening and Logging", []string{
-				"Kernel parameters such as address space layout randomisation, restricted kernel pointers and disabled ICMP redirects make exploitation harder. Persistent logs, an audit daemon and synchronised time are what let you investigate afterwards.",
+				"Kernel parameters such as address space layout randomisation, restricted kernel pointers and disabled ICMP redirects make exploitation harder. Persistent logs, an audit daemon and synchronised time are what let you investigate afterwards. Module P16 covers them in depth.",
+			}},
+			{"In Summary", []string{
+				"Keep the release supported and patched. Watch for extra root accounts, NOPASSWD sudo rules and loose permissions. Kernel settings make exploitation harder. Logs and time sync let you investigate later.",
 			}},
 		},
 		KeyTerms:      []string{"End of Life", "Patch Management", "Least Privilege", "SUID", "Sticky Bit", "ASLR", "Hardening"},
-		RelatedChecks: []string{"HOST-OS-", "HOST-PKG-", "HOST-UPD-", "HOST-FS-", "HOST-KRN-", "HOST-MAC-", "HOST-SVC-", "HOST-LOG-", "HOST-TIME-", "HOST-IDS-"},
+		RelatedChecks: []string{"HOST-OS-", "HOST-PKG-", "HOST-UPD-", "HOST-FS-", "HOST-KRN-", "HOST-MAC-", "HOST-SVC-"},
 		Lab: []string{
 			"Run: openvapt demo --only HOST- --out p1",
 			"For each failed HOST check, find the line in internal/lab/lab.go that differs between the vulnerable and hardened server.",
@@ -40,6 +44,7 @@ var practitioner = []Module{
 	{
 		ID: "P2", Title: "SSH Security", Level: Practitioner, Minutes: 15,
 		Summary: "How SSH authentication and cryptography settings decide whether remote administration is a strength or a door.",
+		Prereqs: []string{"P1"},
 		Objectives: []string{
 			"Explain why key-based authentication beats passwords for SSH.",
 			"Explain the risk of direct root login.",
@@ -53,7 +58,10 @@ var practitioner = []Module{
 				"Root is the one account name every attacker knows, and logging in as root directly loses the record of which person acted. Log in as a named user and use sudo. A low MaxAuthTries makes guessing slower and noisier.",
 			}},
 			{"Cryptography", []string{
-				"Old algorithms such as CBC-mode ciphers, RC4, MD5 and SHA-1 MACs, and 1024-bit Diffie-Hellman have known weaknesses. Modern OpenSSH defaults are strong; most weak settings come from old custom configuration lines.",
+				"Old algorithms such as CBC-mode ciphers, RC4 and MD5 MACs have known weaknesses. SHA-1 MACs and 1024-bit Diffie-Hellman key exchange are deprecated by RFC 9142. Modern OpenSSH defaults are strong. Most weak settings come from old custom configuration lines.",
+			}},
+			{"In Summary", []string{
+				"Use keys, not passwords. Do not let root log in directly. Keep attempt limits low. Remove old cipher, MAC and key exchange lines so OpenSSH uses its modern defaults.",
 			}},
 		},
 		KeyTerms:      []string{"Public-Key Authentication", "Brute Force", "Cipher", "MAC", "Key Exchange"},
@@ -73,6 +81,7 @@ var practitioner = []Module{
 	{
 		ID: "P3", Title: "Network Exposure and Firewalls", Level: Practitioner, Minutes: 20,
 		Summary: "What a server exposes to the network, why databases and cleartext services should not be reachable, and how a host firewall acts as a safety net.",
+		Prereqs: []string{"F1", "F3"},
 		Objectives: []string{
 			"Explain the difference between binding to 127.0.0.1 and to 0.0.0.0.",
 			"Explain why exposed databases and caches cause mass breaches.",
@@ -87,6 +96,9 @@ var practitioner = []Module{
 			}},
 			{"Host Firewalls", []string{
 				"A default-deny host firewall allows only the ports you intend, such as SSH and HTTPS, and drops everything else. It protects you when a service is installed or misconfigured by mistake. Always allow SSH before enabling a firewall on a remote server.",
+			}},
+			{"In Summary", []string{
+				"Every listening port is attack surface. Bind services to loopback where you can. A default deny firewall closes the rest. Cleartext services belong behind TLS or off the network.",
 			}},
 		},
 		KeyTerms:      []string{"Attack Surface", "Port", "Loopback", "Firewall", "Default Deny", "Cleartext"},
@@ -106,6 +118,7 @@ var practitioner = []Module{
 	{
 		ID: "P4", Title: "TLS, Certificates and HTTPS", Level: Practitioner, Minutes: 20,
 		Summary: "How encryption in transit works in practice, which TLS versions are acceptable, and how certificates and HSTS keep users safe.",
+		Prereqs: []string{"P3"},
 		Objectives: []string{
 			"Explain why TLS 1.0 and 1.1 are deprecated.",
 			"Recognise expired, self-signed and mismatched certificates.",
@@ -120,6 +133,9 @@ var practitioner = []Module{
 			}},
 			{"HTTPS Everywhere", []string{
 				"Serving pages over plain HTTP lets anyone on the path read or change them. Redirecting HTTP to HTTPS, and sending Strict-Transport-Security so browsers refuse to downgrade, closes that gap.",
+			}},
+			{"In Summary", []string{
+				"Offer TLS 1.2 and 1.3 only. A certificate must match the name, be valid and be renewed in time. HSTS stops a downgrade to plain HTTP.",
 			}},
 		},
 		KeyTerms:      []string{"TLS", "Certificate", "HSTS", "Downgrade Attack"},
@@ -138,6 +154,7 @@ var practitioner = []Module{
 	{
 		ID: "P5", Title: "Web Security Headers and Cookies", Level: Practitioner, Minutes: 20,
 		Summary: "The HTTP response headers and cookie flags that let browsers defend users against cross-site scripting, clickjacking and session theft.",
+		Prereqs: []string{"F3"},
 		Objectives: []string{
 			"Explain what Content-Security-Policy, X-Frame-Options and X-Content-Type-Options defend against.",
 			"Explain the Secure, HttpOnly and SameSite cookie flags.",
@@ -148,6 +165,9 @@ var practitioner = []Module{
 			}},
 			{"Cookie Flags", []string{
 				"Secure keeps a cookie off plain HTTP. HttpOnly hides it from JavaScript, so an XSS bug cannot read the session. SameSite limits when it is sent with cross-site requests, which reduces cross-site request forgery.",
+			}},
+			{"In Summary", []string{
+				"Headers tell the browser what to allow. CSP limits scripts and frame-ancestors stops clickjacking. Cookies need the Secure, HttpOnly and SameSite flags.",
 			}},
 		},
 		KeyTerms:      []string{"Content Security Policy", "Cross-Site Scripting", "Clickjacking", "Cookie Flags", "CSRF"},
@@ -166,6 +186,7 @@ var practitioner = []Module{
 	{
 		ID: "P6", Title: "Information Exposure and Misconfiguration", Level: Practitioner, Minutes: 25,
 		Summary: "How forgotten files, verbose errors and version banners hand attackers the map, and sometimes the keys.",
+		Prereqs: []string{"P5"},
 		Objectives: []string{
 			"Explain the impact of exposed .git folders, .env files and backups.",
 			"Explain why directory listing, status pages and version disclosure matter.",
@@ -180,6 +201,9 @@ var practitioner = []Module{
 			}},
 			{"Platform Settings", []string{
 				"PHP's display_errors prints internals into pages, and allow_url_include turns a file-inclusion bug into remote code execution. Unsupported PHP versions stop receiving fixes. WordPress version disclosure and an open XML-RPC endpoint invite automated attacks.",
+			}},
+			{"In Summary", []string{
+				"Exposed .git, .env, backup files and directory listings leak secrets and code. Default pages and version banners help attackers aim. Debug mode must be off in production.",
 			}},
 		},
 		KeyTerms:      []string{"Information Disclosure", "Security Misconfiguration", "Directory Listing", "Secrets Management"},
@@ -198,6 +222,7 @@ var practitioner = []Module{
 	{
 		ID: "P7", Title: "Identity, Passwords and Privilege", Level: Practitioner, Minutes: 25,
 		Summary: "How accounts, password storage, lockout and privilege escalation paths decide who really controls a server.",
+		Prereqs: []string{"P1"},
 		Objectives: []string{
 			"Explain why password hashing algorithms and lengths matter.",
 			"Recognise privilege escalation paths: UID 0 accounts, NOPASSWD sudo and the docker group.",
@@ -206,14 +231,17 @@ var practitioner = []Module{
 		Sections: []Section{
 			{"Storing Passwords", []string{
 				"Linux stores password hashes in /etc/shadow. Modern algorithms such as yescrypt and SHA-512 crypt are salted and deliberately slow, so a stolen shadow file is expensive to crack. MD5-crypt and DES are fast and obsolete. Old hashes stay until each user changes their password.",
-				"NIST SP 800-63B emphasises length over complexity rules and recommends blocking known-breached passwords. A minimum of 12 characters and an account lockout after repeated failures make online guessing impractical.",
+				"NIST SP 800-63B-4 favours length over complexity rules and asks for known-breached passwords to be blocked. It requires at least 8 characters and rate limiting of failed attempts. OpenVAPT recommends at least 12 characters and a lockout after repeated failures. Together they make online guessing impractical.",
 			}},
 			{"Who Is Really Root", []string{
-				"Root is not a name but user id 0. Extra UID 0 accounts, duplicate UIDs, NOPASSWD sudo rules and membership of the docker group (which can mount the host filesystem) all give root, often without a password.",
+				"Root is not a name but user id 0. Extra UID 0 accounts, duplicate UIDs and NOPASSWD sudo rules all give root, often without a password. So does membership of the docker group, which can mount the host filesystem.",
 				"Sudo should run commands in a pseudo-terminal and log them to a dedicated file, so privileged actions are recorded and cannot linger.",
 			}},
 			{"Legacy Trust", []string{
 				".rhosts and .shosts files trust whole machines instead of people, and .netrc files hold plain-text passwords. Legacy '+' NIS entries can import unexpected accounts. Service accounts should never have a login shell.",
+			}},
+			{"In Summary", []string{
+				"Root is UID 0, not a name. Slow, salted hashing protects a stolen password file. Lockout slows guessing. NOPASSWD sudo and the docker group are root without a password.",
 			}},
 		},
 		KeyTerms:      []string{"Least Privilege", "Brute Force", "Privilege Escalation", "Password Hashing", "Account Lockout"},
@@ -233,6 +261,7 @@ var practitioner = []Module{
 	{
 		ID: "P8", Title: "Data Services: Databases, File Shares, DNS and Mail", Level: Practitioner, Minutes: 30,
 		Summary: "Why databases, caches, file shares, DNS and mail servers cause so many breaches, and the configuration settings that decide whether they are safe.",
+		Prereqs: []string{"P3"},
 		Objectives: []string{
 			"Explain why databases and caches must require authentication and bind to loopback.",
 			"Recognise unsafe NFS exports and Samba guest access.",
@@ -248,6 +277,9 @@ var practitioner = []Module{
 			}},
 			{"DNS and Mail", []string{
 				"A DNS server that answers recursive queries for anyone is used to amplify denial-of-service attacks, and one that allows zone transfers to anyone publishes the whole internal name map. A mail server whose relay rules are too broad becomes a spam relay, and allowing passwords over unencrypted connections exposes mail accounts.",
+			}},
+			{"In Summary", []string{
+				"Databases, file shares, DNS and mail should listen only where they are needed. Default accounts, open relays and open recursion invite abuse.",
 			}},
 		},
 		KeyTerms:      []string{"Attack Surface", "Default Deny", "Open Relay", "DNS Recursion", "Cleartext"},
@@ -267,6 +299,7 @@ var practitioner = []Module{
 	{
 		ID: "P9", Title: "Containers and Kubernetes", Level: Practitioner, Minutes: 25,
 		Summary: "How container isolation really works, the configuration mistakes that break it, and how to protect the Docker and Kubernetes control planes on a host.",
+		Prereqs: []string{"P1"},
 		Objectives: []string{
 			"Explain why control of the Docker API equals root on the host.",
 			"Recognise privileged containers, host namespaces, dangerous capabilities and sensitive mounts.",
@@ -282,6 +315,9 @@ var practitioner = []Module{
 			}},
 			{"Kubernetes on the Node", []string{
 				"Each node runs a kubelet whose API can execute commands in its pods; it must require authentication and use Webhook authorisation, never anonymous access or AlwaysAllow, and its unauthenticated read-only port should be off. etcd stores every cluster object, including Secrets, so its data directory and the cluster's kubeconfig and CA key files must be readable only by root.",
+			}},
+			{"In Summary", []string{
+				"Containers share the host kernel. Privileged containers, host mounts and extra capabilities break isolation. Kubernetes needs the same least privilege thinking at every layer.",
 			}},
 		},
 		KeyTerms:      []string{"Container", "Namespace", "Capability", "Least Privilege", "Privilege Escalation"},
@@ -301,6 +337,7 @@ var practitioner = []Module{
 	{
 		ID: "P10", Title: "Vulnerability Management: CVE, OSV and Known Exploited Vulnerabilities", Level: Practitioner, Minutes: 25,
 		Summary: "How known vulnerabilities are matched to installed software, why version comparison is subtle, and how to prioritise with the CISA Known Exploited Vulnerabilities list.",
+		Prereqs: []string{"F3"},
 		Objectives: []string{
 			"Explain how a package inventory is matched against vulnerability data.",
 			"Explain why Debian, RPM and semantic versions must be compared with their own rules.",
@@ -316,6 +353,9 @@ var practitioner = []Module{
 			}},
 			{"Prioritising", []string{
 				"Severity alone is a poor queue. The CISA Known Exploited Vulnerabilities catalogue lists flaws attackers are known to use in practice; those should be fixed first. Offline data also ages: a snapshot from months ago cannot know about last week's vulnerabilities, so every report states the snapshot date.",
+			}},
+			{"In Summary", []string{
+				"Know what software you run. Match it against CVE and OSV data. Fix known exploited vulnerabilities first.",
 			}},
 		},
 		KeyTerms:      []string{"CVE", "CVSS", "Patch Management", "Software Inventory", "Known Exploited Vulnerability"},

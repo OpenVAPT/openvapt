@@ -9,8 +9,10 @@ name: promote
 #            that exact commit
 #   release  publishes it (release.yml): binaries, checksums, Sigstore
 #            signatures, provenance, SBOM; pre-release for alpha, beta, rc
-#   record   re-checks every gate with the real evidence and appends the
-#            promotion to release/channels.json and release/channels.txt
+#   record   re-checks every gate with the real evidence, appends the
+#            promotion to release/channels.json and release/channels.txt,
+#            points CITATION.cff at the release and turns the CHANGELOG.md
+#            [Unreleased] section into the section for this version
 on:
   schedule:
     - cron: "17 2 * * *" # daily
@@ -23,6 +25,7 @@ concurrency:
 jobs:
   plan:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     outputs:
       target: ${{ steps.plan.outputs.target }}
       commit: ${{ steps.plan.outputs.commit }}
@@ -44,6 +47,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           signed=""
+          # shellcheck disable=SC2013
           for v in $(awk '!/^#/ && NF { print $2 }' release/channels.txt); do
             echo "$v" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' || continue
             assets=$(gh release view "$v" --json assets -q '.assets[].name' 2>/dev/null || true)
@@ -67,15 +71,18 @@ jobs:
         env:
           SIGNED: ${{ steps.signed.outputs.signed }}
         run: |
-          # The newest commit that changed anything outside release/, so that
-          # recording a promotion never counts as a new build by itself.
-          head=$(git log -1 --format=%H -- . ':(exclude)release')
+          # The newest commit that changed anything outside the files the
+          # record job writes (release/, CITATION.cff, CHANGELOG.md), so that
+          # recording a promotion never counts as a new build by itself
+          # (cmd/channel head, tested in cmd/channel/head_test.go).
+          head=$(go run ./cmd/channel head | sed -n 's/^head=//p')
           go run ./cmd/channel plan --head "$head" --signed "$SIGNED"
 
   verify:
     needs: plan
     if: needs.plan.outputs.target != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -127,6 +134,7 @@ jobs:
   record:
     needs: [plan, verify, release]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write
     steps:
@@ -157,8 +165,9 @@ jobs:
             git fetch -q origin main && git reset -q --hard origin/main
             go run ./cmd/channel promote "$TARGET" --version "$VERSION" \
               --commit "$COMMIT" --ci-green --lab-pass --installer-e2e --signed "$SIGNED"
-            git add release/channels.json release/channels.txt CITATION.cff
-            git commit -q -m "release: promote $VERSION to $TARGET"
+            git add release/channels.json release/channels.txt CITATION.cff CHANGELOG.md
+            # Signed off (DCO, CONTRIBUTING.md) so the ci DCO check accepts the record commit.
+            git commit -q -s -m "release: promote $VERSION to $TARGET"
             if git push -q origin HEAD:main; then exit 0; fi
             sleep $((attempt * 10))
           done

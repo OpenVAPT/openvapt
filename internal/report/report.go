@@ -8,8 +8,10 @@ package report
 
 import (
 	"sort"
+	"strings"
 	"time"
 
+	"github.com/openvapt/openvapt/internal/academy"
 	"github.com/openvapt/openvapt/internal/check"
 )
 
@@ -44,6 +46,67 @@ type Scan struct {
 	AsRoot   bool      `json:"as_root"`
 	Checks   int       `json:"checks"`
 	Sites    []string  `json:"sites"`
+	VulnDB   *VulnDB   `json:"vulndb,omitempty"`
+}
+
+// VulnDB describes the offline vulnerability snapshot the CVE checks used,
+// so every report says how fresh its advisory data was. A snapshot older
+// than StaleAfterDays is flagged as a warning, never as a failure.
+type VulnDB struct {
+	Generated  string `json:"generated"`  // YYYY-MM-DD
+	Fixture    bool   `json:"fixture"`    // test fixture data, no CVE matching possible
+	Advisories int    `json:"advisories"` // advisories in the snapshot
+	AgeDays    int    `json:"age_days"`   // age at scan time, -1 if unknown
+	Stale      bool   `json:"stale"`      // older than StaleAfterDays
+}
+
+// StaleAfterDays is the age at which a snapshot is flagged in the header.
+const StaleAfterDays = 90
+
+// Notice is the one-line snapshot status printed in report headers.
+func (v *VulnDB) Notice() string {
+	if v == nil {
+		return "Vulnerability snapshot: not available"
+	}
+	if v.Fixture {
+		return "Vulnerability snapshot: test fixture data only (no CVE matching was possible; build with make vulndb or use a release build)"
+	}
+	age := "age unknown"
+	if v.AgeDays >= 0 {
+		age = itoa(v.AgeDays) + " days old"
+	}
+	n := "Vulnerability snapshot: " + v.Generated + " (" + age + ", " + itoa(v.Advisories) + " advisories)"
+	if v.Stale {
+		n += ". Warning: older than " + itoa(StaleAfterDays) + " days; newer vulnerabilities are not in it. This warning is not a failure."
+	}
+	return n
+}
+
+func itoa(n int) string {
+	if n < 0 {
+		return "-" + itoa(-n)
+	}
+	if n < 10 {
+		return string(rune('0' + n))
+	}
+	return itoa(n/10) + string(rune('0'+n%10))
+}
+
+// AcademyRef points a finding at the Academy module that teaches it.
+type AcademyRef struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	URL   string `json:"url"`
+}
+
+// AcademyFor returns the Academy modules that teach a check, with the
+// website address of each module page (/academy/<module id>.html).
+func AcademyFor(checkID string) []AcademyRef {
+	var out []AcademyRef
+	for _, m := range academy.ForCheck(checkID) {
+		out = append(out, AcademyRef{ID: m.ID, Title: m.Title, URL: "https://openvapt.com/academy/" + strings.ToLower(m.ID) + ".html"})
+	}
+	return out
 }
 
 // Summary counts failed checks by severity, plus outcomes overall.
@@ -77,6 +140,7 @@ type Finding struct {
 	Refs      []check.Ref     `json:"refs"`
 	Standards check.Standards `json:"standards"`
 	Source    string          `json:"source"`
+	Academy   []AcademyRef    `json:"academy,omitempty"` // modules that teach this check
 	Results   []check.Result  `json:"results"`
 }
 
@@ -100,7 +164,7 @@ func FromCheck(c *check.Check) Finding {
 	return Finding{
 		ID: c.ID, Title: c.Title, Domain: string(c.Domain), Severity: string(c.Severity), Category: c.Category, Effort: c.Effort, CVSS: c.CVSS,
 		Summary: c.Summary, Rationale: c.Rationale, Fix: c.Fix, Verify: c.Verify,
-		Refs: c.Refs, Standards: c.Standards, Source: c.SourceFile,
+		Refs: c.Refs, Standards: c.Standards, Source: c.SourceFile, Academy: AcademyFor(c.ID),
 	}
 }
 
@@ -294,7 +358,7 @@ var Methodology = []string{
 var Limitations = []string{
 	"An automated self-assessment is not a penetration test. It does not prove that the machine is secure; absence of findings is not proof of absence of vulnerabilities.",
 	"Only the checks listed in this report were performed. Application logic flaws (for example SQL injection, broken access control or business logic errors) require manual testing or code review.",
-	"Some checks need root to read protected files. Checks that could not read what they needed are marked Skipped.",
+	"Some checks need root to read protected files or the real daemon state. A check that could not read what it needed is marked Skipped (it did not apply or could not start) or Incomplete (it ran, but part of its input was unreadable, truncated or missing); neither is a Pass.",
 	"Results reflect the machine at the time of the scan. Configuration drift after the scan is not covered.",
 	"End-of-life and version tables are dated and may be out of date for releases newer than this version of OpenVAPT.",
 }

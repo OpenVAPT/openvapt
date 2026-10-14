@@ -31,7 +31,7 @@ func networkVulnerable(f *sys.Fake) {
 	f.Files["/etc/postfix/main.cf"] = "mynetworks = 0.0.0.0/0\nsmtpd_relay_restrictions = permit_mynetworks\nsmtpd_tls_auth_only = no\n"
 	f.Files["/etc/dovecot/conf.d/10-auth.conf"] = "disable_plaintext_auth = no\n"
 	f.Files["/etc/ntp.conf"] = "restrict default kod nomodify notrap nopeer\n"
-	f.Files["/proc/net/tcp"] = procTCP([2]string{"00000000", "0016"}, [2]string{"00000000", "0050"}, [2]string{"00000000", "01BB"}, [2]string{"00000000", "0CEA"}, [2]string{"00000000", "18EB"}, [2]string{"00000000", "0015"}, [2]string{"00000000", "0927"}, [2]string{"00000000", "196B"}, [2]string{"00000000", "3D38"})
+	f.Files["/proc/net/tcp"] = procTCP([2]string{"00000000", "0016"}, [2]string{"00000000", "0050"}, [2]string{"00000000", "01BB"}, [2]string{"00000000", "0CEA"}, [2]string{"00000000", "18EB"}, [2]string{"00000000", "0015"}, [2]string{"00000000", "0947"}, [2]string{"00000000", "192B"}, [2]string{"00000000", "3D38"})
 	f.Files["/proc/net/tcp6"] = procTCP([2]string{"00000000000000000000000000000000", "2710"})
 	f.Files["/proc/net/udp"] = procUDP([2]string{"00000000", "007B"}, [2]string{"00000000", "007B"}, [2]string{"00000000", "2BCB"}, [2]string{"00000000", "00A1"})
 	f.Files["/proc/net/udp6"] = procUDP()

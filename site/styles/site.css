@@ -63,8 +63,8 @@
   .shell{@apply bg-white border-b border-line-2}
   .shell-row{@apply mx-auto w-full max-w-[1312px] px-4 md:px-8 flex min-h-14 flex-wrap items-center justify-between gap-x-8 gap-y-1}
   .brand{@apply flex items-center gap-2.5 font-semibold text-ink text-[17px] hover:no-underline hover:text-ink}
-  .nav{@apply flex flex-wrap gap-x-1}
-  .nav a{@apply text-ink-2 text-[14px] px-2.5 py-2 md:px-3 md:py-4 hover:text-ink hover:no-underline border-b-2 border-transparent}
+  .nav{@apply flex flex-wrap gap-x-0.5 md:gap-x-1}
+  .nav a{@apply text-ink-2 text-[13px] px-2 py-1.5 md:text-[14px] md:px-3 md:py-4 hover:text-ink hover:no-underline border-b-2 border-transparent}
   .nav a[aria-current=page]{@apply text-blue-7 border-blue-7}
 
   /* Ant Alert */
@@ -179,10 +179,40 @@
   .foot{@apply mt-16 border-t border-line-2 bg-layer py-12 text-[14px]}
   .foot a{@apply block py-1 text-ink-2 hover:text-blue-7}
   .foot-h{@apply mb-2 font-semibold text-ink}
+
+  /* Phone notice strip: both leads in one line, Read More opens the full notices */
+  .notice-compact{@apply rounded-card border border-gold-3 bg-gold-1 text-[13px] leading-[1.5] text-ink}
+  .notice-compact summary{@apply flex cursor-pointer list-none items-start gap-2 px-3 py-2}
+  .notice-compact summary::-webkit-details-marker{display:none}
+  .notice-compact summary svg{@apply mt-0.5 size-4 shrink-0 text-gold-7}
+  .notice-more,.notice-less{@apply ml-1 whitespace-nowrap font-medium text-blue-7 underline}
+  .notice-less,.notice-compact[open] .notice-more,.notice-compact[open] .notice-lead{display:none}
+  .notice-compact[open] .notice-less{display:inline}
+  .notice-body{@apply grid gap-3 border-t border-gold-3 px-3 py-3}
+  .notice-body .alert{@apply mb-0}
+
+  /* The numbers behind a chart, as a disclosure under it */
+  .chart-table{@apply mt-3 text-[14px]}
+  .chart-table summary{@apply inline-flex cursor-pointer list-none items-center gap-1.5 rounded-ctl px-2 py-1 font-medium text-blue-7 hover:bg-blue-1}
+  .chart-table summary::-webkit-details-marker{display:none}
+  .chart-table summary svg{@apply size-4}
+  .chart-table .table-wrap{@apply mb-0 mt-2}
+  .chart-table th[scope=row]{@apply text-left font-normal text-ink-2}
+
+  .print-only{display:none}
 }
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-@media print{.shell,.foot,.filters,.alert,.no-print{display:none}.worksheet{font-size:12pt}}
+@media print{
+  .shell,.foot,.filters,.alert,.notice-compact,.no-print,.cite-page,.crumbs,.quiz-result,.chart-table summary{display:none}
+  .print-only{display:block}
+  .worksheet{font-size:12pt}
+  body{font-size:11pt;line-height:1.45}
+  a{color:inherit;text-decoration:none}
+  h2{margin-top:20pt;break-after:avoid}
+  .card,.card-layer,.table-wrap{break-inside:avoid;box-shadow:none}
+  .quiz label{break-inside:avoid}
+}
 
 /* AG Grid Quartz theme tuned to Ant Design tokens */
 .ag-theme-quartz.ov-grid{--ag-font-family:var(--font-sans);--ag-font-size:14px;--ag-active-color:#1677ff;--ag-header-background-color:#fafafa;

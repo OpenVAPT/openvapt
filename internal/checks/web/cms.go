@@ -9,6 +9,19 @@ import (
 	"github.com/openvapt/openvapt/internal/sys"
 )
 
+// wpReadmeRe matches the signature of WordPress's own readme.html: the logo
+// heading followed by the version line, for example
+// <h1 id="logo"><a href="https://wordpress.org/">WordPress</a><br /> Version 6.4</h1>.
+var wpReadmeRe = regexp.MustCompile(`(?is)<h1 id="logo">.{0,200}?wordpress.{0,200}?version\s+(\d+(?:\.\d+)+)`)
+
+// wpReadmeVersion returns the version stated by a WordPress readme.html.
+func wpReadmeVersion(body string) (string, bool) {
+	if m := wpReadmeRe.FindStringSubmatch(body); m != nil {
+		return m[1], true
+	}
+	return "", false
+}
+
 func today() string { return time.Now().UTC().Format("2006-01-02") }
 
 func init() {
@@ -20,7 +33,7 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
 		Summary:   "Checks whether WordPress sites reveal their exact version in the page or in readme.html.",
 		Rationale: "The version number lets automated tools pick matching exploits for outdated cores and plugins.",
-		Detection: "Looks for the WordPress generator meta tag on the home page and requests /readme.html for the version line.",
+		Detection: "Looks for the WordPress generator meta tag on the home page and requests /readme.html, which counts only when it carries the WordPress readme signature (the logo heading and a Version line), so a soft-404 page that merely mentions WordPress does not fire.",
 		Fix:       "Keep WordPress updated (automatic minor updates on). Remove the generator tag (remove_action('wp_head','wp_generator')) and delete readme.html after each update, or block it at the web server.",
 		Verify:    "curl -s https://<site>/ | grep -i 'name=\"generator\"'",
 		Refs:      []check.Ref{{Title: "WordPress Developer Resources, Hardening WordPress", URL: "https://developer.wordpress.org/advanced-administration/security/hardening/"}},
@@ -32,8 +45,10 @@ func init() {
 				if m := gen.FindStringSubmatch(st.Home.Body); m != nil {
 					ev = append(ev, "generator tag: WordPress "+m[1])
 				}
-				if r, err := st.Get(ctx, s, "/readme.html"); err == nil && r.Status == 200 && regexp.MustCompile(`(?i)wordpress`).MatchString(r.Body) {
-					ev = append(ev, "/readme.html is public")
+				if r, err := st.Get(ctx, s, "/readme.html"); err == nil && r.Status == 200 {
+					if v, ok := wpReadmeVersion(r.Body); ok {
+						ev = append(ev, "/readme.html is public and states WordPress "+v)
+					}
 				}
 				if len(ev) > 0 {
 					return check.FailR(st.Name, "WordPress version is disclosed", ev...)

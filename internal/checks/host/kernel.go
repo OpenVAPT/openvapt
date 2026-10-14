@@ -102,7 +102,14 @@ var sysctlRules = []sysctlRule{
 
 func init() {
 	for _, r := range sysctlRules {
-		r := r
+		registerSysctl(r)
+	}
+}
+
+// registerSysctl turns one kernel parameter rule into a registered check.
+// kernel_depth.go registers its own table through the same function.
+func registerSysctl(r sysctlRule) {
+	{
 		ok := append([]string{r.want}, r.allowed...)
 		check.Register(&check.Check{
 			ID: r.id, Title: r.title, Domain: check.DomainHost, Severity: r.sev, CVSS: r.cvss,
@@ -151,7 +158,7 @@ func slash(k string) string {
 // perInterfaceSysctl lists the rules whose kernel parameter also exists per
 // network interface. The kernel combines "all" with each interface value, so
 // every one of all, default and each interface must hold the hardened value.
-var perInterfaceSysctl = map[string]bool{"HOST-KRN-006": true, "HOST-KRN-015": true, "HOST-KRN-017": true}
+var perInterfaceSysctl = map[string]bool{"HOST-KRN-006": true, "HOST-KRN-015": true, "HOST-KRN-017": true, "HOST-KRN-023": true, "HOST-KRN-024": true, "HOST-KRN-025": true}
 
 // combinedSysctl lists IPv4 rules where the kernel combines the "all" value
 // with each interface value in a rule-specific way (include/linux/inetdevice.h):

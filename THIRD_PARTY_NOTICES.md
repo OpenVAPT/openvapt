@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-OpenVAPT has no third-party Go module dependencies (see `go.mod`). The compiled program statically includes the Go standard library and runtime.
+OpenVAPT has no third-party Go module dependencies (see `go.mod`). The compiled program statically includes the Go standard library and runtime and, in release builds, an embedded snapshot of public vulnerability advisory data (see "Vulnerability Advisory Data" below).
 
 ## Go Standard Library
 
@@ -13,6 +13,10 @@ Redistribution and use in source and binary forms, with or without modification,
 - Neither the name of Google LLC nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+## Vulnerability Advisory Data (release builds only)
+
+Release binaries embed a snapshot built by `cmd/vulndbgen` from: OSV ecosystem exports (osv.dev), which aggregate the Debian Security Tracker, Ubuntu Security Notices, AlmaLinux and Rocky Linux errata and the GitHub Advisory Database (npm and Packagist advisories, CC BY 4.0, (c) GitHub, Inc. and contributors), and OSV's WordPress ecosystem (WordPress core advisories, used under the terms stated in the OSV record for each advisory); and the CISA Known Exploited Vulnerabilities catalogue (a work of the United States Government). Advisory identifiers, affected ranges and short summaries are included; full texts are not. Each publisher's own terms apply to its data. The snapshot header records the sources, their web addresses and licence statements, and `openvapt version` prints them. The snapshot in the source repository is a small hand-written test fixture.
 
 ## Referenced, Not Included
 
