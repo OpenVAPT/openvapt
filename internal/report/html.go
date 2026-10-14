@@ -32,8 +32,20 @@ func (r *Report) HTML() ([]byte, error) {
 			}
 			return out
 		},
-		"join":  strings.Join,
-		"short": short,
+		"gapResults": func(f Finding) []check.Result {
+			whole := f.Status == string(check.Incomplete) || f.Status == string(check.Error) || f.Status == string(check.Skip)
+			var out []check.Result
+			for _, x := range f.Results {
+				if whole || x.Status == check.Incomplete || x.Status == check.Error {
+					out = append(out, x)
+				}
+			}
+			return out
+		},
+		"fpURL":  func() string { return FalsePositiveURL },
+		"supURL": func() string { return SuppressionDocsURL },
+		"join":   strings.Join,
+		"short":  short,
 		"catName": func(c check.Category) string {
 			if n := check.CategoryByID(c).Name; n != "" {
 				return n

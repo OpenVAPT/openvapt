@@ -35,6 +35,9 @@ type depthRule struct {
 	// string replaces passMsg so the Pass can say why.
 	evaluateSys func(ctx context.Context, s sys.System, fs []collect.ConfigFile) (bad bool, ev []string, pass string)
 	passMsg     string
+	// evaluateFull, when set, replaces both and may also report that the
+	// answer depends on something that could not be observed (incomplete).
+	evaluateFull func(ctx context.Context, s sys.System, fs []collect.ConfigFile) (bad bool, ev []string, pass, incomplete string)
 }
 
 func installed(s sys.System, markers []string) bool {
@@ -62,7 +65,13 @@ func registerDepth(r depthRule) {
 			var bad bool
 			var ev []string
 			var pass string
-			if r.evaluateSys != nil {
+			if r.evaluateFull != nil {
+				var inc string
+				bad, ev, pass, inc = r.evaluateFull(ctx, s, fs)
+				if inc != "" && !bad {
+					return []check.Result{check.IncompleteR(fs[0].Path, inc, ev...)}
+				}
+			} else if r.evaluateSys != nil {
 				bad, ev, pass = r.evaluateSys(ctx, s, fs)
 			} else {
 				bad, ev = r.evaluate(fs)
@@ -168,19 +177,29 @@ func init() {
 		cvss:      "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L",
 		summary:   "MySQL or MariaDB does not disable symbolic links for table files (skip-symbolic-links or symbolic-links=0).",
 		rationale: "With symlinks allowed, a user who can create tables can point table files at paths outside the data directory and read or overwrite them with the server's privileges. The MySQL manual recommends disabling the feature unless it is needed.",
-		detection: "Parses the MySQL and MariaDB option files for skip-symbolic-links, symbolic-links or skip_symbolic_links under [mysqld]. Fails when none disables the feature.",
+		detection: "Parses the MySQL and MariaDB option files for skip-symbolic-links, symbolic-links or skip_symbolic_links under [mysqld]. When none disables the feature, reads the server flavour and version (the MariaDB binary or option folder, installed packages in the dpkg status file or the allow-listed rpm -qa): fails on MariaDB and MySQL before 8.0, passes with a note on MySQL 8.0 and later (off by default), and reports Incomplete when the version cannot be read.",
 		fix:       "Add  symbolic-links=0  (or  skip-symbolic-links ) under [mysqld] and restart the service in a maintenance window.",
 		verify:    "SHOW VARIABLES LIKE 'have_symlink';  from an administrator session should print DISABLED.",
 		patterns:  mysqlFiles, markers: mysqlMarkers,
 		refs: []check.Ref{{Title: "MySQL 8.4 Reference Manual, Using Symbolic Links", URL: "https://dev.mysql.com/doc/refman/8.4/en/symbolic-links.html"}, refMySQLSec},
 		std:  dbStd([]string{"CWE-59", "CWE-732"}, "CM-6", "AC-6"),
-		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
+		evaluateFull: func(ctx context.Context, s sys.System, fs []collect.ConfigFile) (bool, []string, string, string) {
 			ok := mysqlSet(fs, "skip-symbolic-links") || anyMySQL(fs, "symbolic-links", isOff)
 			ev := mysqlEvidence(fs, "skip_symbolic_links", "symbolic_links")
-			if len(ev) == 0 {
-				ev = []string{"no symbolic-links setting; the feature stays enabled on most builds"}
+			if ok {
+				return false, ev, "", ""
 			}
-			return !ok, ev
+			if len(mysqlValues(fs, "symbolic-links")) > 0 {
+				return true, ev, "", "" // explicitly enabled
+			}
+			fl := detectMySQLFlavor(ctx, s)
+			if fl.modernMySQL() {
+				return false, append(ev, "server is "+fl.String()), "No symbolic-links setting, but MySQL 8.0 and later disable symbolic links by default (the option is removed in 8.4)", ""
+			}
+			if !fl.known() {
+				return false, append(ev, "no symbolic-links setting"), "", "No symbolic-links setting, and the server flavour and version could not be read: MariaDB and MySQL before 8.0 allow symbolic links by default, MySQL 8.0 and later do not"
+			}
+			return true, append(ev, "no symbolic-links setting; "+fl.String()+" allows symbolic links by default"), "", ""
 		},
 	})
 
@@ -189,25 +208,31 @@ func init() {
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:L/A:N",
 		summary:   "secure_file_priv is not set, or is set to an empty value, so LOAD DATA and SELECT ... INTO OUTFILE can read and write anywhere the server process can.",
 		rationale: "File import and export statements run with the database server's filesystem rights. Limiting them to one folder, or disabling them with NULL, stops an injected query from reading /etc files or dropping a web shell into the document root.",
-		detection: "Parses the option files for secure_file_priv (or secure-file-priv) under [mysqld]. Fails when absent or set to an empty string. NULL or a folder path passes.",
+		detection: "Parses the option files for secure_file_priv (or secure-file-priv) under [mysqld]. NULL or a folder path passes; an explicit empty value fails. When the setting is absent, reads the server flavour and version (the MariaDB binary or option folder, installed packages in the dpkg status file or the allow-listed rpm -qa): fails on MariaDB and MySQL before 8.0, passes with a note on packaged MySQL 8.0 and later (restricted by default), and reports Incomplete when the version cannot be read.",
 		fix:       "Add  secure_file_priv = NULL  (no file operations) or  secure_file_priv = /var/lib/mysql-files  under [mysqld] and restart in a maintenance window.",
 		verify:    "SHOW VARIABLES LIKE 'secure_file_priv';  should print NULL or the chosen folder.",
 		patterns:  mysqlFiles, markers: mysqlMarkers,
 		refs: []check.Ref{{Title: "MySQL 8.4 Reference Manual, secure_file_priv", URL: "https://dev.mysql.com/doc/refman/8.4/en/server-system-variables.html#sysvar_secure_file_priv"}, refMySQLSec},
 		std:  dbStd([]string{"CWE-73", "CWE-250"}, "CM-6", "AC-6", "SI-10"),
-		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
+		evaluateFull: func(ctx context.Context, s sys.System, fs []collect.ConfigFile) (bool, []string, string, string) {
 			vals := mysqlValues(fs, "secure_file_priv")
-			bad := true
+			ev := mysqlEvidence(fs, "secure_file_priv")
 			for _, v := range vals {
 				if strings.TrimSpace(v) != "" {
-					bad = false
+					return false, ev, "", ""
 				}
 			}
-			ev := mysqlEvidence(fs, "secure_file_priv")
-			if len(vals) == 0 {
-				ev = []string{"secure_file_priv is not set in the option files"}
+			if len(vals) > 0 {
+				return true, ev, "", "" // explicitly set to an empty value
 			}
-			return bad, ev
+			fl := detectMySQLFlavor(ctx, s)
+			if fl.modernMySQL() {
+				return false, []string{"secure_file_priv is not set in the option files", "server is " + fl.String()}, "secure_file_priv is not set, but packaged MySQL 8.0 and later builds default it to a dedicated folder (usually /var/lib/mysql-files)", ""
+			}
+			if !fl.known() {
+				return false, []string{"secure_file_priv is not set in the option files"}, "", "secure_file_priv is not set, and the server flavour and version could not be read: MariaDB defaults it to empty (unrestricted), packaged MySQL 8.0 and later restrict it"
+			}
+			return true, []string{"secure_file_priv is not set in the option files; " + fl.String() + " leaves it empty by default"}, "", ""
 		},
 	})
 
@@ -413,13 +438,13 @@ func init() {
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:L",
 		summary:   "redis.conf neither renames nor disables CONFIG, FLUSHALL, FLUSHDB, DEBUG and KEYS, and no ACL user excludes the @dangerous category.",
 		rationale: "An attacker who reaches Redis with any credential can wipe data with FLUSHALL, rewrite the configuration with CONFIG SET to write files (the classic path to a cron job or SSH key), or stall the server with KEYS *. Removing or renaming these for application users limits what a stolen credential can do.",
-		detection: "Parses redis.conf for rename-command lines covering CONFIG, FLUSHALL, FLUSHDB, DEBUG and KEYS, or an ACL definition (user lines, or an aclfile) that excludes @dangerous or @admin. Fails when neither protection exists.",
+		detection: "Parses redis.conf for rename-command lines covering CONFIG, FLUSHALL, FLUSHDB, DEBUG and KEYS, or an ACL definition (user lines, or an aclfile) that excludes @dangerous or @admin. Fails when neither protection exists, unless every bind address is loopback and protected-mode is not off: then only local processes can reach Redis and the result is Pass with a note (Low exposure).",
 		fix:       "Prefer ACLs on Redis 6 and newer:  user app on >secret ~app:* -@all +@read +@write -@dangerous . Otherwise add  rename-command FLUSHALL \"\"  (and the same for FLUSHDB, CONFIG, DEBUG, KEYS) and restart.",
 		verify:    "redis-cli -a <secret> ACL LIST  or  redis-cli CONFIG GET dir  should be refused for the application user.",
 		patterns:  redisFiles, markers: redisMarkers,
 		refs: []check.Ref{refRedisSec, refRedisACL},
-		std:  check.Standards{CWE: []string{"CWE-250", "CWE-269"}, OWASP: []string{"A01:2021", "A05:2021"}, ASVS: []string{"14.1.3"}, NIST: []string{"AC-6", "CM-7"}, CISTopic: "Data store administrative command restriction"},
-		evaluate: func(fs []collect.ConfigFile) (bool, []string) {
+		std:  check.Standards{CWE: []string{"CWE-749"}, OWASP: []string{"A01:2021", "A05:2021"}, ASVS: []string{"14.1.3"}, NIST: []string{"AC-6", "CM-7"}, CISTopic: "Data store administrative command restriction"},
+		evaluateSys: func(_ context.Context, _ sys.System, fs []collect.ConfigFile) (bool, []string, string) {
 			renamed := map[string]bool{}
 			for _, v := range values(fs, "rename-command") {
 				f := strings.Fields(strings.ToLower(v))
@@ -442,9 +467,34 @@ func init() {
 			if len(ev) == 0 {
 				ev = []string{"no rename-command, user or aclfile directive"}
 			}
-			return !(allRenamed || aclRestricts), ev
+			if allRenamed || aclRestricts {
+				return false, ev, ""
+			}
+			if redisLoopbackOnly(fs) {
+				return false, append(ev, evidence(fs, "bind", "protected-mode")...), "Dangerous commands are not restricted, but Redis binds to loopback only with protected-mode on, so only local processes can reach them (Low exposure); restrict them before exposing the port"
+			}
+			return true, ev, ""
 		},
 	})
+}
+
+// redisLoopbackOnly reports whether redis.conf binds only to loopback
+// addresses (a leading "-" marks an optional address in Redis 7) and keeps
+// protected-mode on. A missing bind line listens on every interface.
+func redisLoopbackOnly(fs []collect.ConfigFile) bool {
+	binds := values(fs, "bind")
+	if len(binds) == 0 {
+		return false
+	}
+	last := strings.Fields(binds[len(binds)-1])
+	for i, a := range last {
+		last[i] = strings.TrimPrefix(a, "-")
+	}
+	if !allLoopback(last) {
+		return false
+	}
+	pm := values(fs, "protected-mode")
+	return len(pm) == 0 || strings.ToLower(strings.TrimSpace(pm[len(pm)-1])) != "no"
 }
 
 // skipNetworking reports whether the option files turn TCP off: a bare

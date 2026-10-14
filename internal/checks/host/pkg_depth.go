@@ -132,7 +132,7 @@ func init() {
 		Fix:       "Remove trusted=yes (or Trusted: yes) from the listed source, install the repository's signing key under /etc/apt/keyrings and reference it with signed-by=; remove AllowUnauthenticated and AllowInsecureRepositories settings. On dnf and yum set gpgcheck=1 (and repo_gpgcheck=1 where supported) in each listed repository and import its key with rpm --import.",
 		Verify:    "grep -r 'trusted=yes' /etc/apt/ ; grep -r 'gpgcheck=0' /etc/yum.repos.d/ /etc/dnf/dnf.conf 2>/dev/null",
 		Refs:      []check.Ref{refAptSecure, refDnfConf, refNIST80040},
-		Standards: check.Standards{CWE: []string{"CWE-494", "CWE-345"}, OWASP: []string{"A08:2021"}, NIST: []string{"SI-7", "CM-14", "SA-12"}, CISTopic: "Package manager repositories and GPG keys are configured"},
+		Standards: check.Standards{CWE: []string{"CWE-494", "CWE-347"}, OWASP: []string{"A08:2021"}, NIST: []string{"SI-7", "CM-14", "SR-3", "SR-11"}, CISTopic: "Package manager repositories and GPG keys are configured"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			var bad []string
 			seen := 0
@@ -211,7 +211,7 @@ func init() {
 		Fix:       "For each listed repository, record who runs it and why it is needed; remove the ones nobody can justify (delete the file under /etc/apt/sources.list.d or /etc/yum.repos.d and apt-get update or dnf clean all). Keep the rest pinned to the packages they are for (apt preferences, dnf includepkgs).",
 		Verify:    "ls /etc/apt/sources.list.d/ /etc/yum.repos.d/ 2>/dev/null",
 		Refs:      []check.Ref{refSourcesLst, refNIST80040, {Title: "NIST SP 800-161 Rev. 1, Cybersecurity Supply Chain Risk Management Practices", URL: "https://csrc.nist.gov/pubs/sp/800/161/r1/upd1/final"}},
-		Standards: check.Standards{CWE: []string{"CWE-1357"}, OWASP: []string{"A08:2021"}, NIST: []string{"CM-8", "SR-3", "SA-12"}, CISTopic: "Software inventory: authorised repositories (CIS Controls v8 2.5)"},
+		Standards: check.Standards{CWE: []string{"CWE-1357"}, OWASP: []string{"A08:2021"}, NIST: []string{"CM-8", "SR-3", "SR-4"}, CISTopic: "Software inventory: authorised repositories (CIS Controls v8 2.5)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			hosts := map[string]string{}
 			var order []string
@@ -268,7 +268,7 @@ func init() {
 		CVSS:      "CVSS:3.1/AV:L/AC:H/PR:H/UI:N/S:U/C:L/I:L/A:N",
 		Summary:   "Checks that no more than three kernel versions are installed.",
 		Rationale: "Every installed kernel stays bootable from the boot menu, with every vulnerability it had. Old kernels also fill /boot until updates fail to install, which is a quiet way to stop receiving kernel patches. Keeping the running kernel plus one or two fallbacks is enough.",
-		Detection: "Counts kernel versions among installed packages: linux-image-<version> from /var/lib/dpkg/status and /var/lib/dpkg/info/*.list on Debian and Ubuntu, kernel and kernel-core from the allow-listed rpm -qa on the RHEL family. More than three fails. Skipped when no kernel package is installed (containers); Incomplete when no package database could be read.",
+		Detection: "Counts kernel versions among installed packages: linux-image-<version> packages whose /var/lib/dpkg/status entry reads 'install ok installed' on Debian and Ubuntu (the /var/lib/dpkg/info/*.list files are used only when the status file cannot be read, because removed but not purged packages keep them), kernel and kernel-core from the allow-listed rpm -qa on the RHEL family. More than three fails. Skipped when no kernel package is installed (containers); Incomplete when no package database could be read.",
 		Fix:       "Debian/Ubuntu: apt-get autoremove --purge  removes kernels outside the keep list. RHEL family: set installonly_limit=3 in /etc/dnf/dnf.conf and run  dnf remove --oldinstallonly . Never remove the running kernel (uname -r).",
 		Verify:    "dpkg -l 'linux-image-*' | grep '^ii'  or  rpm -q kernel kernel-core",
 		Refs:      []check.Ref{refNIST80040, {Title: "apt-get(8), Debian trixie manual pages (autoremove)", URL: "https://manpages.debian.org/trixie/apt/apt-get.8.en.html"}},
@@ -292,7 +292,7 @@ func init() {
 	check.Register(&check.Check{
 		ID: "HOST-PKG-005", Title: "Running Kernel Older Than Installed Kernel", Domain: check.DomainHost,
 		Severity: check.Medium, Category: check.CatPatch, Effort: check.EffortMedium,
-		CVSS:      "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+		CVSS:      "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:L/A:L",
 		Summary:   "Checks that the kernel in memory is the newest kernel installed, so kernel security fixes are actually in effect.",
 		Rationale: "A kernel update protects nothing until the machine boots into it. The package manager reports the update as installed, so the gap is invisible unless the running version is compared with the installed one. HOST-UPD-002 reads the Debian reboot marker; this check works on every distribution by comparing versions.",
 		Detection: "Runs the allow-listed command uname -r and compares it with the installed kernel versions (linux-image-<version> packages, or kernel and kernel-core from rpm -qa). If the newest installed version is newer than the running one, the check fails. Incomplete when the running version or the package list cannot be read; skipped when no kernel package is installed.",

@@ -133,7 +133,7 @@ func init() {
 		Fix:       "Add to /etc/docker/daemon.json:  \"no-new-privileges\": true, \"icc\": false, \"userns-remap\": \"default\", \"live-restore\": true  then restart Docker after testing your containers.",
 		Verify:    "cat /etc/docker/daemon.json ; docker info | grep -Ei 'security|userns'",
 		Refs:      []check.Ref{refDockerSec, refNIST190},
-		Standards: check.Standards{CWE: []string{"CWE-250", "CWE-269"}, NIST: []string{"CM-6", "AC-6"}, CISTopic: "Docker daemon configuration"},
+		Standards: check.Standards{CWE: []string{"CWE-250", "CWE-1188"}, NIST: []string{"CM-6", "AC-6"}, CISTopic: "Docker daemon configuration"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			t, complete, ok := readText(ctx, s, "/etc/docker/daemon.json")
 			if !ok {

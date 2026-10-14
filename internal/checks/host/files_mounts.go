@@ -65,7 +65,7 @@ var separateMountRules = []separateMountRule{
 		cvss:      "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:L",
 		summary:   "Checks that /var/tmp is its own mount (or a bind mount of /tmp) with nodev, nosuid and noexec.",
 		rationale: "/var/tmp is world-writable and survives reboots. On the root filesystem it can be filled to exhaust disk space, and it accepts planted device files and executables unless mounted with restricting options.",
-		fix:       "Mount /var/tmp as a separate filesystem, or bind-mount it onto /tmp:  /tmp /var/tmp none bind,nodev,nosuid,noexec 0 0  in /etc/fstab, then reboot or remount.",
+		fix:       "Mount /var/tmp as a separate filesystem, or bind-mount it onto /tmp:  /tmp /var/tmp none bind,nodev,nosuid,noexec 0 0  in /etc/fstab, then reboot or remount. Caution: /var/tmp is meant to survive reboots and some installers and databases run programs from it, so check what uses it before binding it to /tmp with noexec, and keep console access when editing /etc/fstab (a wrong line can stop the boot).",
 		paths:     []string{"/var/tmp"}, opts: []string{"nodev", "nosuid", "noexec"}, cwe: "CWE-276",
 	},
 	{
@@ -73,7 +73,7 @@ var separateMountRules = []separateMountRule{
 		cvss:      "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:L",
 		summary:   "Checks that user home directories live on their own mount with nodev (and nosuid where practical).",
 		rationale: "Users control the contents of /home. A separate mount stops a user filling the root filesystem, and nodev stops device files being created in a home directory to reach raw disks or memory.",
-		fix:       "Place /home on its own partition or logical volume and add nodev,nosuid to its options in /etc/fstab; remount with: mount -o remount /home",
+		fix:       "Place /home on its own partition or logical volume and add nodev,nosuid to its options in /etc/fstab; remount with: mount -o remount /home . Caution: moving /home to a new volume needs a backup, a maintenance window and console access; a wrong /etc/fstab line can stop the boot.",
 		paths:     []string{"/home"}, opts: []string{"nodev"}, cwe: "CWE-276",
 	},
 	{
@@ -81,8 +81,8 @@ var separateMountRules = []separateMountRule{
 		cvss:      "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:L",
 		summary:   "Checks that /var/log (or /var) is a separate filesystem so runaway logging cannot fill the root disk.",
 		rationale: "Logs grow under attacker influence (failed logins, scanner noise). When they share the root filesystem, filling them stops the whole server, and when the disk is full new security events are lost.",
-		fix:       "Place /var/log (and ideally /var/log/audit) on its own partition or logical volume, listed in /etc/fstab with nodev,nosuid,noexec.",
-		paths:     []string{"/var/log", "/var"}, opts: nil, cwe: "CWE-400",
+		fix:       "Place /var/log (and ideally /var/log/audit) on its own partition or logical volume, listed in /etc/fstab with nodev,nosuid,noexec. Caution: moving log directories needs a backup, a maintenance window and console access; stop the logging services while copying, and a wrong /etc/fstab line can stop the boot.",
+		paths:     []string{"/var/log", "/var"}, opts: nil, cwe: "CWE-770",
 	},
 }
 
@@ -215,7 +215,7 @@ func init() {
 		Fix:       "Decide who should own each listed file and apply  chown <user>:<group> <path>, or remove files that belonged to a deleted account after checking their contents.",
 		Verify:    "find /etc /usr/local /opt /srv /var/www /home -xdev \\( -nouser -o -nogroup \\)  should print nothing.",
 		Refs:      []check.Ref{refNIST800123, {Title: "passwd(5), Linux man-pages", URL: "https://man7.org/linux/man-pages/man5/passwd.5.html"}},
-		Standards: check.Standards{CWE: []string{"CWE-284"}, NIST: []string{"AC-2", "AC-6", "CM-6"}, CISTopic: "No unowned or ungrouped files (CIS Controls v8 3.3)"},
+		Standards: check.Standards{CWE: []string{"CWE-282"}, NIST: []string{"AC-2", "AC-6", "CM-6"}, CISTopic: "No unowned or ungrouped files (CIS Controls v8 3.3)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			uids, ok1 := idSet(ctx, s, "/etc/passwd", 2)
 			gids, ok2 := idSet(ctx, s, "/etc/group", 2)
@@ -269,7 +269,7 @@ func init() {
 		Summary:   "Lists set-user-ID and set-group-ID programs in the system binary directories that are not on the documented baseline of what distributions ship.",
 		Rationale: "Every SUID program is a door into another account, usually root. Programs such as nmap, vim, find, python or a custom helper with the SUID bit are a known route to instant root; the fewer unexplained SUID programs, the smaller that door.",
 		Detection: "Walks /bin, /sbin, /usr/bin, /usr/sbin, /usr/libexec and /usr/lib (metadata only, up to 20000 files per tree, symlinks not followed), keeps files with the SUID or SGID bit, and reports those whose file name is not in the baseline list kept in this check's source (passwd, sudo, su, mount, ping, ssh-keysign and about forty others). An empty inventory is reported as incomplete.",
-		Fix:       "For each listed program decide whether the bit is needed. Remove it with  chmod u-s,g-s <path>  or uninstall the package. Record the ones you keep so the next review is quick.",
+		Fix:       "For each listed program decide whether the bit is needed. Remove it with  chmod u-s,g-s <path>  or uninstall the package. Record the ones you keep so the next review is quick. Caution: programs such as passwd, sudo, su, mount and ping need their bit to work for normal users; removing it from those breaks password changes and administrator access.",
 		Verify:    "find /bin /sbin /usr/bin /usr/sbin /usr/libexec /usr/lib -xdev -type f -perm /6000  and compare with your record.",
 		Refs:      []check.Ref{refATT1548, refNIST800123},
 		Standards: check.Standards{CWE: []string{"CWE-250"}, NIST: []string{"AC-6", "CM-7"}, CISTopic: "Audit SUID and SGID executables (CIS Controls v8 4.1)"},
@@ -355,7 +355,7 @@ func init() {
 		Fix:       "chmod 600 /boot/System.map-* /boot/initrd* /boot/initramfs*  and, on Debian family systems, set  UMASK=0077  in /etc/initramfs-tools/initramfs.conf so new images are created private.",
 		Verify:    "stat -c '%a %n' /boot/System.map-* /boot/initrd*",
 		Refs:      []check.Ref{refKernelDocs, refNIST800123},
-		Standards: check.Standards{CWE: []string{"CWE-200", "CWE-732"}, NIST: []string{"AC-3", "AC-6"}, CISTopic: "Boot file permissions (CIS Controls v8 3.3)"},
+		Standards: check.Standards{CWE: []string{"CWE-497", "CWE-732"}, NIST: []string{"AC-3", "AC-6"}, CISTopic: "Boot file permissions (CIS Controls v8 3.3)"},
 		Run: func(_ context.Context, s sys.System) []check.Result {
 			var bad []string
 			seen := 0
@@ -390,10 +390,10 @@ func init() {
 		Summary:   "Checks that cron.allow and at.allow exist, are private to root, and that the deny lists are not relied upon instead.",
 		Rationale: "By default every local account may schedule jobs. A deny list only names known accounts; an allow list says exactly who may schedule, which is what least privilege asks for and what makes persistence by a compromised service account harder.",
 		Detection: "Stats /etc/cron.allow and /etc/at.allow (metadata only). For each scheduler that is installed (/etc/crontab or /etc/cron.d for cron, /etc/at.deny, /etc/at.allow or /var/spool/at for at), a missing allow file, an allow file not owned by root, or one readable or writable by group or others fails. A deny file present without an allow file is reported.",
-		Fix:       "Create the allow lists:  touch /etc/cron.allow /etc/at.allow && chmod 600 /etc/cron.allow /etc/at.allow && chown root:root /etc/cron.allow /etc/at.allow  then add one user name per line for the accounts that need scheduling, and remove /etc/cron.deny and /etc/at.deny.",
+		Fix:       "Create the allow lists:  touch /etc/cron.allow /etc/at.allow && chmod 600 /etc/cron.allow /etc/at.allow && chown root:root /etc/cron.allow /etc/at.allow  then add one user name per line for the accounts that need scheduling, and remove /etc/cron.deny and /etc/at.deny. Caution: once cron.allow exists, crontabs of users not listed stop running, so list every service and user account that has a crontab (ls /var/spool/cron/crontabs or /var/spool/cron) before creating it.",
 		Verify:    "stat -c '%a %U %n' /etc/cron.allow /etc/at.allow; ls /etc/cron.deny /etc/at.deny 2>&1",
 		Refs:      []check.Ref{refCrontab1, refAt1, refNIST800123},
-		Standards: check.Standards{CWE: []string{"CWE-284"}, NIST: []string{"AC-6", "CM-7"}, CISTopic: "Restrict cron and at to authorised users (CIS Controls v8 4.1)"},
+		Standards: check.Standards{CWE: []string{"CWE-862"}, NIST: []string{"AC-6", "CM-7"}, CISTopic: "Restrict cron and at to authorised users (CIS Controls v8 4.1)"},
 		Run: func(_ context.Context, s sys.System) []check.Result {
 			var out []check.Result
 			for _, sch := range []struct {

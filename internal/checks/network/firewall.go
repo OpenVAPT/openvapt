@@ -22,7 +22,7 @@ func init() {
 		Verify:    "ufw status verbose  or  firewall-cmd --list-all  or  nft list ruleset",
 		Refs: []check.Ref{{Title: "NIST SP 800-41 Rev. 1, Guidelines on Firewalls and Firewall Policy", URL: "https://csrc.nist.gov/pubs/sp/800/41/r1/final"},
 			{Title: "nftables wiki", URL: "https://wiki.nftables.org/wiki-nftables/index.php/Main_Page"}},
-		Standards: check.Standards{CWE: []string{"CWE-284"}, NIST: []string{"SC-7"}, CISTopic: "Host-based firewall configured"},
+		Standards: check.Standards{CWE: []string{"CWE-923"}, NIST: []string{"SC-7"}, CISTopic: "Host-based firewall configured"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			if out, err := s.Run(ctx, "ufw", "status", "verbose"); err == nil && strings.Contains(strings.ToLower(out), "status: active") {
 				l := strings.ToLower(out)

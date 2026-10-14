@@ -32,6 +32,7 @@ import (
 	_ "github.com/openvapt/openvapt/internal/checks/all"
 	"github.com/openvapt/openvapt/internal/engine"
 	"github.com/openvapt/openvapt/internal/lab"
+	"github.com/openvapt/openvapt/internal/redact"
 	"github.com/openvapt/openvapt/internal/report"
 	"github.com/openvapt/openvapt/internal/sign"
 	"github.com/openvapt/openvapt/internal/sys"
@@ -64,56 +65,12 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	var err error
-	switch os.Args[1] {
-	case "scan":
-		err = cmdScan(ctx, os.Args[2:])
-	case "demo":
-		err = cmdDemo(ctx, os.Args[2:])
-	case "checks", "list":
-		err = cmdChecks(os.Args[2:])
-	case "teach":
-		err = cmdTeach(ctx, os.Args[2:])
-	case "learn", "academy":
-		err = cmdLearn(os.Args[2:])
-	case "explain":
-		err = cmdExplain(os.Args[2:])
-	case "diff":
-		err = cmdDiff(os.Args[2:])
-	case "verify":
-		err = cmdVerify(os.Args[2:])
-	case "vulndb":
-		db, e := vulndb.Embedded()
-		if e != nil {
-			err = e
-		} else {
-			fmt.Println(db.Notice())
-			fmt.Printf("Fixture: %t\nAdvisories: %d\nAffected: %d\n", db.Header.Fixture, db.Header.Counts.Advisories, db.Header.Counts.Affected)
-			for _, src := range db.Header.Sources {
-				fmt.Printf("%s - %s - licence: %s\n", src.Name, src.URL, src.Licence)
-			}
-		}
-	case "terms":
-		fmt.Print(termsText())
-	case "version", "--version", "-v":
-		fmt.Printf("OpenVAPT %s (commit %s, %s/%s)\nChannel: %s\n%s\nhttps://openvapt.com\n",
-			version.Version, version.Commit, runtime.GOOS, runtime.GOARCH, version.ChannelName(), terms.Tagline)
-		if version.PreRelease() {
-			fmt.Println("This is a pre-release build: it may be incomplete or wrong and is used 100% at your own risk.")
-		}
-		if db, e := vulndb.Embedded(); e == nil {
-			fmt.Printf("Vulnerability data: snapshot %s (fixture: %t)\n", db.Header.Generated, db.Header.Fixture)
-			for _, src := range db.Header.Sources {
-				fmt.Printf("  %s - %s - licence: %s\n", src.Name, src.URL, src.Licence)
-			}
-		}
-	case "help", "-h", "--help":
-		usage(os.Stdout)
-	default:
+	c := lookup(os.Args[1])
+	if c == nil {
 		usage(os.Stderr)
 		os.Exit(2)
 	}
-	if err != nil {
+	if err := c.Run(ctx, os.Args[2:]); err != nil {
 		fmt.Fprintln(os.Stderr, "openvapt:", err)
 		code := 5
 		var ee *exitError
@@ -121,6 +78,33 @@ func main() {
 			code = ee.code
 		}
 		os.Exit(code)
+	}
+}
+
+func cmdVulndb() error {
+	db, err := vulndb.Embedded()
+	if err != nil {
+		return err
+	}
+	fmt.Println(db.Notice())
+	fmt.Printf("Fixture: %t\nAdvisories: %d\nAffected: %d\n", db.Header.Fixture, db.Header.Counts.Advisories, db.Header.Counts.Affected)
+	for _, src := range db.Header.Sources {
+		fmt.Printf("%s - %s - licence: %s\n", src.Name, src.URL, src.Licence)
+	}
+	return nil
+}
+
+func cmdVersion() {
+	fmt.Printf("OpenVAPT %s (commit %s, %s/%s)\nChannel: %s\n%s\nhttps://openvapt.com\n",
+		version.Version, version.Commit, runtime.GOOS, runtime.GOARCH, version.ChannelName(), terms.Tagline)
+	if version.PreRelease() {
+		fmt.Println("This is a pre-release build: it may be incomplete or wrong and is used 100% at your own risk.")
+	}
+	if db, e := vulndb.Embedded(); e == nil {
+		fmt.Printf("Vulnerability data: snapshot %s (fixture: %t)\n", db.Header.Generated, db.Header.Fixture)
+		for _, src := range db.Header.Sources {
+			fmt.Printf("  %s - %s - licence: %s\n", src.Name, src.URL, src.Licence)
+		}
 	}
 }
 
@@ -137,28 +121,29 @@ func usage(w io.Writer) {
 Free for your own personal or business use, 100% at your own risk. Not for sale. Not for providing services.
 
 Usage:
-  openvapt scan [flags]          Assess this machine and write a local report
-  openvapt demo [flags]          Scan the built-in simulated lab (vulnerable|hardened|practice --seed S)
-  openvapt checks [--json]       List every check
-  openvapt explain <CHECK-ID>    Show what a check does, why, how to fix it
-  openvapt learn [MODULE] [--quiz]  OpenVAPT Academy: learn VAPT from theory to application
-  openvapt teach                 Teacher toolkit: course plans, worksheets, rubric, practice lab keys
-  openvapt diff <old.json> <new.json>
-  openvapt verify <report.json> [--key-id ID]
-  openvapt vulndb             Show offline snapshot details
-  openvapt terms | version
-
+`)
+	for _, c := range commands {
+		if c.Hidden {
+			continue
+		}
+		syn := "openvapt " + strings.TrimSpace(c.Name+" "+c.Args)
+		if len(syn) > 34 {
+			fmt.Fprintf(w, "  %s\n  %-34s %s\n", syn, "", c.Summary)
+			continue
+		}
+		fmt.Fprintf(w, "  %-34s %s\n", syn, c.Summary)
+	}
+	fmt.Fprint(w, `
 Run "openvapt scan -h" for scan flags (--timeout bounds the whole scan, --fail-on sets the
-severity that returns exit code 3). Nothing is ever sent off this machine.
+severity that returns exit code 3, --suppress names a suppression file with a reason and an
+expiry for each accepted finding). Nothing is ever sent off this machine.
+"openvapt man" prints the manual page; "openvapt completion bash|zsh|fish" prints shell completion.
 
 Exit Codes (checked in this order, so 0 means every selected check reached a verdict):
-  0  completed: no finding at or above --fail-on (default high) and no coverage gap
-  2  invalid arguments or usage
-  3  findings at or above the --fail-on severity (default: critical or high)
-  4  incomplete coverage: a check could not observe enough to decide
-  5  internal error, a check ended with an error, or the scan was interrupted
-  6  the report could not be written
 `)
+	for _, e := range exitCodes {
+		fmt.Fprintf(w, "  %d  %s\n", e.Code, e.Meaning)
+	}
 }
 
 func splitList(s string) []string {
@@ -170,6 +155,7 @@ func splitList(s string) []string {
 
 type scanFlags struct {
 	out, formats, only, skip, baseline  string
+	suppress                            string
 	failOn                              string
 	dryRun, accept, noSign, quiet, demo bool
 	parallel                            int
@@ -179,6 +165,7 @@ type scanFlags struct {
 	formatList []string
 	old        *report.Report
 	failAt     check.Severity // lowest severity that returns exit 3; "" never does
+	sup        *report.Suppressions
 }
 
 // parseFailOn validates --fail-on: a severity name, or none.
@@ -199,6 +186,9 @@ func parseFailOn(s string) (check.Severity, error) {
 // when every selected check reached a verdict and nothing at or above
 // failAt failed.
 func exitCode(r *report.Report, failAt check.Severity) (int, string) {
+	if r.Scan.Checks == 0 && len(r.Findings) == 0 {
+		return 2, "no checks were run"
+	}
 	if r.Summary.Errors > 0 {
 		return 5, "one or more checks ended with an internal error"
 	}
@@ -210,7 +200,7 @@ func exitCode(r *report.Report, failAt check.Severity) (int, string) {
 	}
 	n := 0
 	for _, f := range r.Findings {
-		if f.Status == string(check.Fail) && check.Severity(f.Severity).Rank() <= failAt.Rank() {
+		if f.Status == string(check.Fail) && !f.FullySuppressed() && check.Severity(f.Severity).Rank() <= failAt.Rank() {
 			n++
 		}
 	}
@@ -273,12 +263,32 @@ func (f *scanFlags) prepare() error {
 	if f.timeout < 0 {
 		return usageErr("--timeout must be a positive duration such as 30m")
 	}
+	opts := f.engineOptions()
+	if bad := engine.Unmatched(opts.Only); len(bad) > 0 {
+		return usageErr("--only names no known check id or prefix: %s", strings.Join(bad, ", "))
+	}
+	if bad := engine.Unmatched(opts.Skip); len(bad) > 0 {
+		return usageErr("--skip names no known check id or prefix: %s", strings.Join(bad, ", "))
+	}
+	if len(engine.Select(opts)) == 0 {
+		return usageErr("--only and --skip together select zero checks; nothing would be assessed")
+	}
 	if f.baseline != "" {
 		old, err := report.Load(f.baseline)
 		if err != nil {
 			return usageErr("cannot use --baseline: %v", err)
 		}
 		f.old = old
+	}
+	if f.suppress != "" {
+		sup, err := report.LoadSuppressions(f.suppress, time.Now().UTC())
+		if err != nil {
+			return usageErr("cannot use --suppress: %v", err)
+		}
+		f.sup = sup
+		for _, e := range sup.Expired {
+			fmt.Fprintf(os.Stderr, "warning: suppression for %s expired on %s and is ignored\n", e.ID, e.Expires)
+		}
 	}
 	return nil
 }
@@ -308,14 +318,31 @@ func addScanFlags(fs *flag.FlagSet, f *scanFlags, defOut string) {
 	fs.IntVar(&f.parallel, "parallel", 4, fmt.Sprintf("number of checks to run at once (1 to %d)", engine.MaxParallel))
 	fs.DurationVar(&f.timeout, "timeout", 0, "bound the whole scan, for example 30m; checks still waiting when it passes are reported as errors (0 = no bound; each check always has its own 90s limit)")
 	fs.StringVar(&f.failOn, "fail-on", "high", "lowest failed severity that returns exit code 3: critical, high, medium, low, info or none")
+	fs.StringVar(&f.suppress, "suppress", "", "suppression file (JSON list with id, optional target, reason, expires); suppressed findings stay in the report and do not count toward --fail-on")
+}
+
+// scanFlagSet is the single definition of the scan flags, used by the
+// command, the man page and shell completion.
+func scanFlagSet(f *scanFlags) *flag.FlagSet {
+	fs := flag.NewFlagSet("scan", flag.ExitOnError)
+	addScanFlags(fs, f, "")
+	fs.BoolVar(&f.dryRun, "dry-run", false, "print every file, command and request the scan would use, then exit")
+	fs.BoolVar(&f.accept, "accept-terms", false, "confirm you have read and accept every acknowledgement in 'openvapt terms' (for automation)")
+	return fs
+}
+
+// demoFlagSet is the single definition of the demo flags.
+func demoFlagSet(f *scanFlags, which, seed *string) *flag.FlagSet {
+	fs := flag.NewFlagSet("demo", flag.ExitOnError)
+	fs.StringVar(which, "lab", "vulnerable", "which simulated server to scan: vulnerable, hardened or practice")
+	fs.StringVar(seed, "seed", "", "practice lab seed, for example a student number (with --lab practice)")
+	addScanFlags(fs, f, "")
+	return fs
 }
 
 func cmdScan(ctx context.Context, args []string) error {
-	fs := flag.NewFlagSet("scan", flag.ExitOnError)
 	var f scanFlags
-	addScanFlags(fs, &f, "")
-	fs.BoolVar(&f.dryRun, "dry-run", false, "print every file, command and request the scan would use, then exit")
-	fs.BoolVar(&f.accept, "accept-terms", false, "confirm you have read and accept every acknowledgement in 'openvapt terms' (for automation)")
+	fs := scanFlagSet(&f)
 	_ = fs.Parse(args)
 	if err := f.prepare(); err != nil {
 		return err
@@ -344,12 +371,10 @@ func cmdScan(ctx context.Context, args []string) error {
 }
 
 func cmdDemo(ctx context.Context, args []string) error {
-	fs := flag.NewFlagSet("demo", flag.ExitOnError)
 	var f scanFlags
-	var which string
-	fs.StringVar(&which, "lab", "vulnerable", "which simulated server to scan: vulnerable, hardened or practice")
-	seed := fs.String("seed", "", "practice lab seed, for example a student number (with --lab practice)")
-	addScanFlags(fs, &f, "")
+	var which, seedV string
+	seed := &seedV
+	fs := demoFlagSet(&f, &which, seed)
 	// The help text invites  demo hardened ; accept one positional lab name
 	// (before or after the flags) as a synonym for --lab and refuse anything
 	// else, so a typo never scans the vulnerable lab in silence.
@@ -405,6 +430,8 @@ func finish(r *report.Report, f scanFlags) error {
 			return err
 		}
 	}
+	r.ApplySuppressions(f.sup)
+	r.Scan.Command = safeCommandLine(os.Args)
 	if !f.noSign {
 		if path, err := sign.KeyPath(); err != nil {
 			fmt.Fprintln(os.Stderr, "warning: report not signed:", err)
@@ -457,8 +484,9 @@ func confirmTerms(in io.Reader, out io.Writer) bool {
 }
 
 func cmdChecks(args []string) error {
-	fs := flag.NewFlagSet("checks", flag.ExitOnError)
-	asJSON := fs.Bool("json", false, "print the full catalogue as JSON")
+	var asJSONV bool
+	asJSON := &asJSONV
+	fs := checksFlagSet(asJSON)
 	_ = fs.Parse(args)
 	all := check.All()
 	if *asJSON {
@@ -474,6 +502,12 @@ func cmdChecks(args []string) error {
 	}
 	fmt.Printf("\n%d checks. Run 'openvapt explain <ID>' for details.\n", len(all))
 	return nil
+}
+
+func checksFlagSet(asJSON *bool) *flag.FlagSet {
+	fs := flag.NewFlagSet("checks", flag.ExitOnError)
+	fs.BoolVar(asJSON, "json", false, "print the full catalogue as JSON")
+	return fs
 }
 
 func cmdExplain(args []string) error {
@@ -520,9 +554,9 @@ func cmdDiff(args []string) error {
 // verifyArgs accepts the report path before or after --key-id:
 // "verify report.json --key-id X" and "verify --key-id X report.json".
 func verifyArgs(args []string) (path, keyID string, err error) {
-	fs := flag.NewFlagSet("verify", flag.ContinueOnError)
-	fs.SetOutput(io.Discard)
-	k := fs.String("key-id", "", "expected signing key id (ask the report owner for it)")
+	var kV string
+	k := &kV
+	fs := verifyFlagSet(k)
 	if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
 		path, args = args[0], args[1:]
 	}
@@ -540,6 +574,13 @@ func verifyArgs(args []string) (path, keyID string, err error) {
 	return path, *k, nil
 }
 
+func verifyFlagSet(k *string) *flag.FlagSet {
+	fs := flag.NewFlagSet("verify", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+	fs.StringVar(k, "key-id", "", "expected signing key id (ask the report owner for it)")
+	return fs
+}
+
 func cmdVerify(args []string) error {
 	path, keyID, err := verifyArgs(args)
 	if err != nil {
@@ -555,4 +596,56 @@ func cmdVerify(args []string) error {
 	}
 	fmt.Println("A valid signature proves integrity only. It does not prove the machine is secure.")
 	return nil
+}
+
+// keptValues are flags whose values are check ids, formats or numbers and
+// are copied into the report's command line; every other value (paths,
+// seeds) is replaced with a placeholder.
+var keptValues = map[string]bool{"only": true, "skip": true, "format": true, "fail-on": true, "lab": true, "parallel": true, "timeout": true}
+
+// safeCommandLine rebuilds the command line for the report without file
+// paths, seeds or any free text.
+func safeCommandLine(args []string) string {
+	out := []string{"openvapt"}
+	expectValue := ""
+	for i, a := range args {
+		if i == 0 {
+			continue
+		}
+		if expectValue != "" {
+			if keptValues[expectValue] {
+				out = append(out, redact.String(a))
+			} else {
+				out = append(out, "<value>")
+			}
+			expectValue = ""
+			continue
+		}
+		if !strings.HasPrefix(a, "-") {
+			if i == 1 || a == "vulnerable" || a == "hardened" || a == "practice" {
+				out = append(out, a)
+			} else {
+				out = append(out, "<value>")
+			}
+			continue
+		}
+		name := strings.TrimLeft(a, "-")
+		if k, v, ok := strings.Cut(name, "="); ok {
+			if keptValues[k] {
+				out = append(out, "--"+k+"="+redact.String(v))
+			} else {
+				out = append(out, "--"+k+"=<value>")
+			}
+			continue
+		}
+		out = append(out, "--"+name)
+		if fl := scanFlagSet(&scanFlags{}).Lookup(name); fl != nil {
+			if bf, ok := fl.Value.(interface{ IsBoolFlag() bool }); !ok || !bf.IsBoolFlag() {
+				expectValue = name
+			}
+		} else if name == "lab" || name == "seed" {
+			expectValue = name
+		}
+	}
+	return strings.Join(out, " ")
 }

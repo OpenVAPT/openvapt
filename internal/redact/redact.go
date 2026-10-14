@@ -23,10 +23,27 @@ var rules = []struct {
 	// PEM private key blocks, complete or truncated (no END line).
 	{regexp.MustCompile(`-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z0-9 ]*PRIVATE KEY-----`), `[REDACTED PRIVATE KEY]`},
 	{regexp.MustCompile(`-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----[\s\S]*`), `[REDACTED PRIVATE KEY]`},
+	// OpenPGP secret key blocks, complete or truncated.
+	{regexp.MustCompile(`-----BEGIN PGP PRIVATE KEY BLOCK-----[\s\S]*?(?:-----END PGP PRIVATE KEY BLOCK-----|$)`), `[REDACTED PRIVATE KEY]`},
+	// PuTTY .ppk files: everything from the private part onwards.
+	{regexp.MustCompile(`Private-Lines:[\s\S]*`), `[REDACTED PRIVATE KEY]`},
+	{regexp.MustCompile(`(PuTTY-User-Key-File-\d+:)[\s\S]*`), `$1 [REDACTED PRIVATE KEY]`},
 	// OpenSSH private key body without its BEGIN line ("openssh-key-v1" in base64).
 	{regexp.MustCompile(`b3BlbnNzaC1rZXktdjE[A-Za-z0-9+/=]*`), `[REDACTED PRIVATE KEY]`},
 	// mysql, mysqldump and mysqladmin with the password glued to -p (-pSecret).
 	{regexp.MustCompile(`(\bmysql(?:dump|admin)?\b[^\n]*?\s-p)(?:'[^']*'|"[^"]*"|[^\s'"]+)`), `$1[REDACTED]`},
+	// sshpass -p <password>: mask the value, keep the flag.
+	{regexp.MustCompile(`(\bsshpass\b[^\n]*?\s-p\s*)(?:'[^']*'|"[^"]*"|[^\s'"]+)`), `$1[REDACTED]`},
+	// curl -u user:password and --user user:password.
+	{regexp.MustCompile(`((?:^|\s)(?:-u|--user)(?:\s+|=)['"]?[^\s:'"]+:)[^\s'"]+`), `$1[REDACTED]`},
+	// Postfix lookup tables with inline credentials: static:user:password.
+	{regexp.MustCompile(`(?i)(_maps\s*=\s*static:)\S+`), `$1[REDACTED]`},
+	// Laravel style keys: base64:<key material>.
+	{regexp.MustCompile(`\bbase64:[A-Za-z0-9+/]{16,}={0,2}`), `base64:[REDACTED]`},
+	// Azure storage connection strings and shared access signatures.
+	{regexp.MustCompile(`(?i)\b((?:Shared)?Access(?:Key|Signature)\s*=\s*)[^;\s"']+`), `$1[REDACTED]`},
+	{regexp.MustCompile(`(?i)\b(AccountKey\s*=\s*)[^;\s"']+`), `$1[REDACTED]`},
+	{regexp.MustCompile(`([?&;\s]sig=)[^&;\s"']+`), `$1[REDACTED]`},
 	// PHP define('DB_PASSWORD', 'value');
 	{regexp.MustCompile(`(?i)(define\s*\(\s*['"][^'"]*(?:` + secret + `|key)[^'"]*['"]\s*,\s*)(` + dq + `|` + sq + `)`), `$1'[REDACTED]'`},
 	// XML elements: <password>value</password>
@@ -39,8 +56,21 @@ var rules = []struct {
 	{regexp.MustCompile(`(?i)\bbearer\s+[A-Za-z0-9._~+/-]+=*`), `Bearer [REDACTED]`},
 	// URLs with embedded credentials: everything up to the last @ before the host.
 	{regexp.MustCompile(`([a-zA-Z][a-zA-Z0-9+.-]*://)[^/\s?#]*@`), `$1[REDACTED]@`},
+	// user:password@host without a scheme.
+	{regexp.MustCompile(`(^|[\s'"=(])([A-Za-z0-9._-]+):[^\s:@/'"]+@([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+|localhost)\b`), `$1$2:[REDACTED]@$3`},
+	// Slack incoming webhook URLs: the path is the credential.
+	// Anchored at a token boundary (start of text, whitespace, quote, = or
+	// a URL scheme), so only the real Slack host matches, never a longer name.
+	{regexp.MustCompile(`(^|[\s'"=(<]|https?://)hooks\.slack\.com/(services|workflows|triggers)/[A-Za-z0-9/_-]+`), `${1}hooks.slack.com/$2/[REDACTED]`},
 	// Well-known token shapes.
 	{regexp.MustCompile(`\b(?:AKIA|ASIA)[0-9A-Z]{16}\b`), `[REDACTED AWS KEY]`},
+	// A 40 character AWS secret access key next to its access key id.
+	{regexp.MustCompile(`(\[REDACTED AWS KEY\][\s,:;=|"']+)[A-Za-z0-9/+=]{40}`), `$1[REDACTED AWS SECRET]`},
+	{regexp.MustCompile(`\bnpm_[A-Za-z0-9]{36}\b`), `[REDACTED NPM TOKEN]`},
+	{regexp.MustCompile(`\bglsa_[A-Za-z0-9_]{32,}`), `[REDACTED GRAFANA TOKEN]`},
+	{regexp.MustCompile(`\bglc_[A-Za-z0-9+/=_-]{32,}`), `[REDACTED GRAFANA TOKEN]`},
+	{regexp.MustCompile(`\beyJrIjoi[A-Za-z0-9+/=]{20,}`), `[REDACTED GRAFANA TOKEN]`},
+	{regexp.MustCompile(`\bSG\.[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}`), `[REDACTED SENDGRID KEY]`},
 	{regexp.MustCompile(`\bgithub_pat_[A-Za-z0-9_]{20,}`), `[REDACTED GITHUB TOKEN]`},
 	{regexp.MustCompile(`\bgh[pousr]_[A-Za-z0-9]{20,}`), `[REDACTED GITHUB TOKEN]`},
 	{regexp.MustCompile(`\bglpat-[A-Za-z0-9_-]{20,}`), `[REDACTED GITLAB TOKEN]`},
@@ -65,7 +95,7 @@ var rules = []struct {
 // stay readable. The short word "auth" must be its own token separated by
 // _ . or - (basic_auth, basic-auth), so sshd and PAM settings such as
 // authenticationmethods, authorizedkeysfile or preauth keep their values.
-const secretKey = `[A-Z0-9_.-]*(?:pass(?:word|wd|phrase)?|pwd|secret(?:[_-]?key(?:[_-]?base)?)?|token|api[_-]?key|access[_-]?key|private[_-]?key|credential|salt)|(?:[A-Z0-9]+[_.-])*auth` // #nosec G101 -- key-name pattern used to find and redact secrets, not a credential
+const secretKey = `[A-Z0-9_.-]*(?:pass(?:word|wd|phrase)?|pwd|secret(?:[_-]?key(?:[_-]?base)?)?|token|api[_-]?key|access[_-]?key|private[_-]?key|credential|salt|app[_-]?key|account[_-]?key|authtok|masterauth)|(?:[A-Z0-9]+[_.-])*auth` // #nosec G101 -- key-name pattern used to find and redact secrets, not a credential
 
 // keyValue matches key = value, key: value, "key": "value" and
 // "key value" pairs whose key names a secret.
@@ -144,7 +174,7 @@ var bareNouns = map[string]bool{
 
 // notKeys are words that end in a secret key word but never carry one: the
 // sudoers NOPASSWD tag is followed by the commands it applies to.
-var notKeys = map[string]bool{"nopasswd": true}
+var notKeys = map[string]bool{"nopasswd": true, "sshpass": true}
 
 // credentialShaped reports whether a bare value could be a credential: it
 // holds a digit or a symbol other than the hyphen used in ordinary words.

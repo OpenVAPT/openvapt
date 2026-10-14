@@ -102,7 +102,7 @@ func auditRuleCheck(id, title, cvss string, sev check.Severity, summary, rationa
 		CVSS:      cvss,
 		Summary:   summary,
 		Rationale: rationale,
-		Detection: detection + " Reads the active lines of /etc/audit/rules.d/*.rules and /etc/audit/audit.rules; the audit log itself is never read.",
+		Detection: detection + " Reads the active lines of /etc/audit/rules.d/*.rules and /etc/audit/audit.rules; the audit log itself is never read. The loaded rule set is not read (auditctl is not on the read-only allow-list), so when the rules are in the files the allow-listed systemctl is-active auditd must report active for a Pass; otherwise the result is Incomplete, and the evidence says the loaded rules were not verified.",
 		Fix:       fix,
 		Verify:    verify,
 		Refs:      []check.Ref{refAuditctl, refNIST80092, refNIST80053},
@@ -118,12 +118,24 @@ func auditRuleCheck(id, title, cvss string, sev check.Severity, summary, rationa
 			if m := missing(lines); len(m) > 0 {
 				return []check.Result{check.FailR("audit rules", "Audit rules are missing", m...)}
 			}
-			return []check.Result{check.PassR("audit rules", "The required audit rules are present")}
+			// The loaded rule set (auditctl -l) is not read: auditctl is not
+			// on the allow-list. Rules on disk only take effect while auditd
+			// runs, so a Pass needs the daemon active.
+			const unverified = "loaded rules were not verified (auditctl -l is not run); the rule files on disk were read"
+			out, err := s.Run(ctx, "systemctl", "is-active", "auditd")
+			state := strings.TrimSpace(out)
+			if err != nil && state == "" {
+				return []check.Result{check.IncompleteR("audit rules", "The required rules are in the rule files, but whether auditd is running could not be confirmed (systemctl is-active auditd did not run)", unverified)}
+			}
+			if state != "active" {
+				return []check.Result{check.IncompleteR("audit rules", "The required rules are in the rule files, but auditd is "+state+", so they are not loaded", unverified, "systemctl is-active auditd: "+state)}
+			}
+			return []check.Result{check.PassR("audit rules", "The required audit rules are present in the rule files and auditd is active", unverified)}
 		},
 	})
 }
 
-var lowAudit = "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
+var lowAudit = "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:N"
 
 // remoteLog matches an rsyslog forwarding action: a selector followed by @host
 // or @@host, or the omfwd module.
@@ -316,10 +328,10 @@ func init() {
 		Summary:   "Checks that auditd is told what to do when its log file is full or the disk runs low, rather than silently dropping events.",
 		Rationale: "With max_log_file_action = ignore the log grows until the disk is full; with suspend auditing simply stops. An unset space_left_action means nobody is warned before that happens. Either way an attacker who fills the disk switches auditing off.",
 		Detection: "Reads max_log_file_action, space_left_action and admin_space_left_action from /etc/audit/auditd.conf. Each must be set and must not be ignore or suspend. Skipped when auditd is not installed; Incomplete when the file exists but cannot be read.",
-		Fix:       "In /etc/audit/auditd.conf set  max_log_file_action = keep_logs  (or rotate with enough num_logs),  space_left_action = email  (or syslog or exec), and  admin_space_left_action = halt  or  single  as policy requires, then systemctl restart auditd.",
+		Fix:       "In /etc/audit/auditd.conf set  max_log_file_action = keep_logs  (or rotate with enough num_logs),  space_left_action = email  (or syslog or exec), and  admin_space_left_action = halt  or  single  as policy requires, then systemctl restart auditd. Caution: admin_space_left_action = halt or single stops the server or drops it to single-user mode when the audit disk fills; choose it only where losing audit records is worse than downtime, and give /var/log/audit room and monitoring first.",
 		Verify:    "grep -E '^(max_log_file_action|space_left_action|admin_space_left_action)' /etc/audit/auditd.conf",
 		Refs:      []check.Ref{refAuditdConf, refNIST80092},
-		Standards: check.Standards{CWE: []string{"CWE-778", "CWE-400"}, OWASP: []string{"A09:2021"}, NIST: []string{"AU-4", "AU-5"}, CISTopic: "Audit log storage and full-disk actions (CIS Controls v8 8.3)"},
+		Standards: check.Standards{CWE: []string{"CWE-778"}, OWASP: []string{"A09:2021"}, NIST: []string{"AU-4", "AU-5"}, CISTopic: "Audit log storage and full-disk actions (CIS Controls v8 8.3)"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			text, st := readState(ctx, s, "/etc/audit/auditd.conf")
 			switch st {

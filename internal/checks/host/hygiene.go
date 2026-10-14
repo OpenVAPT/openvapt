@@ -397,7 +397,7 @@ func init() {
 		Fix:       "groupmod -g <new-gid> <group>  for one of each duplicate pair, then fix file ownership (find / -xdev -gid <old-gid>); remove or rename the duplicate name entries with vigr and vipw, which lock the files while editing.",
 		Verify:    "cut -d: -f3 /etc/group | sort | uniq -d ; cut -d: -f1 /etc/group /etc/passwd | sort | uniq -d  print nothing.",
 		Refs:      []check.Ref{refGroup5, refPasswd5},
-		Standards: check.Standards{CWE: []string{"CWE-286", "CWE-284"}, NIST: []string{"AC-2", "AC-3"}, CISTopic: "No duplicate GIDs, group names or user names"},
+		Standards: check.Standards{CWE: []string{"CWE-286"}, NIST: []string{"AC-2", "AC-3"}, CISTopic: "No duplicate GIDs, group names or user names"},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			gt, _, okG := readText(ctx, s, "/etc/group")
 			pt, _, okP := readText(ctx, s, "/etc/passwd")

@@ -78,9 +78,11 @@ type Standards struct {
 	CWE      []string `json:"cwe,omitempty"`       // e.g. "CWE-16"
 	OWASP    []string `json:"owasp,omitempty"`     // OWASP Top 10 2021, e.g. "A05:2021"
 	ASVS     []string `json:"asvs,omitempty"`      // OWASP ASVS 4.0.3 requirement ids
-	WSTG     []string `json:"wstg,omitempty"`      // OWASP Web Security Testing Guide test ids, e.g. "WSTG-CONF-04"
+	WSTG     []string `json:"wstg,omitempty"`      // OWASP WSTG v4.2 test ids, e.g. "WSTG-CONF-04"
 	NIST     []string `json:"nist,omitempty"`      // NIST SP 800-53 Rev. 5 controls
 	CISTopic string   `json:"cis_topic,omitempty"` // CIS Benchmark topic, paraphrased, never copied
+	CIS      []string `json:"cis_v8,omitempty"`    // CIS Controls v8 safeguard ids, e.g. "4.1", or "none"
+	CSF      []string `json:"csf_2,omitempty"`     // NIST CSF 2.0 subcategory ids, e.g. "PR.PS-01"
 }
 
 // Check is the definition of one vulnerability check.
@@ -129,6 +131,7 @@ func Register(c *Check) {
 		panic(fmt.Sprintf("check %q is missing required fields", c.ID))
 	}
 	applyLegacy(c)
+	applyFrameworks(c)
 	if c.Category == "" || CategoryByID(c.Category).ID == "" || c.Effort == "" {
 		panic(fmt.Sprintf("check %q must have a valid Category and Effort", c.ID))
 	}

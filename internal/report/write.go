@@ -133,18 +133,31 @@ func (r *Report) Markdown() string {
 	fmt.Fprintf(&b, "| Item | Value |\n|---|---|\n| Host | %s |\n| Operating System | %s |\n| Scan Time (UTC) | %s |\n| Run As Root | %v |\n| Tool | %s %s (%s, %s channel) |\n\n",
 		mdTable(r.Scan.Host), mdTable(r.Scan.OS), r.Scan.Started.Format("2006-01-02 15:04:05"), r.Scan.AsRoot, mdTable(r.Tool.Name), mdTable(r.Tool.Version), mdTable(short(r.Tool.Commit)), mdTable(r.Tool.Channel))
 	fmt.Fprintf(&b, "%s\n\n", mdText(r.Scan.VulnDB.Notice()))
-	fmt.Fprintf(&b, "## Executive Summary\n\n%s\n\n| Critical | High | Medium | Low | Passed | Incomplete | Skipped | Errors |\n|---|---|---|---|---|---|---|---|\n| %d | %d | %d | %d | %d | %d | %d | %d |\n\n",
-		mdText(r.Posture()),
-		s.Critical, s.High, s.Medium, s.Low, s.Passed, s.Incomplete, s.Skipped, s.Errors)
-	fmt.Fprintf(&b, "### Top 5 Risks\n\n| ID | Risk | Severity | Category |\n|---|---|---|---|\n")
-	for _, f := range r.TopRisks() {
-		fmt.Fprintf(&b, "| %s | %s | %s | %s |\n", mdTable(f.ID), mdTable(f.Title), mdTable(f.Severity), mdTable(string(f.Category)))
+	if n := r.SuppressionNotice(); n != "" {
+		fmt.Fprintf(&b, "%s\n\n", mdText(n))
+	}
+	ex := r.Executive()
+	fmt.Fprintf(&b, "## Executive Summary\n\n")
+	for _, p := range ex.Paragraphs {
+		fmt.Fprintf(&b, "%s\n\n", mdText(p))
+	}
+	fmt.Fprintf(&b, "| Critical | High | Medium | Low | Passed | Incomplete | Incomplete Targets | Skipped | Errors |\n|---|---|---|---|---|---|---|---|---|\n| %d | %d | %d | %d | %d | %d | %d | %d | %d |\n\n",
+		s.Critical, s.High, s.Medium, s.Low, s.Passed, s.Incomplete, s.IncompleteTargets, s.Skipped, s.Errors)
+	fmt.Fprintf(&b, "### Top 5 Risks\n\n| ID | Risk | Severity | CVSS | Why It Matters |\n|---|---|---|---|---|\n")
+	for _, t := range ex.Top {
+		fmt.Fprintf(&b, "| %s | %s | %s | %s | %s |\n", mdTable(t.ID), mdTable(t.Title), mdTable(t.Severity), mdTable(t.Score), mdTable(t.Why))
+	}
+	if len(ex.Gaps) > 0 {
+		fmt.Fprintf(&b, "\n### Notable Coverage Gaps\n\n")
+		for _, g := range ex.Gaps {
+			fmt.Fprintf(&b, "- %s\n", mdText(g))
+		}
 	}
 	fmt.Fprintf(&b, "\n## Risk Heat Map\n\n| Category | Critical | High | Medium | Low | Info |\n|---|---|---|---|---|---|\n")
 	for _, x := range r.HeatMap() {
 		fmt.Fprintf(&b, "| %s | %d | %d | %d | %d | %d |\n", mdTable(x.Category), x.Critical, x.High, x.Medium, x.Low, x.Info)
 	}
-	fmt.Fprintf(&b, "\n## Compliance Coverage\n\nCoverage is a mapping of automated checks, not certification of compliance.\n\n| Framework | Control or Category | Checks Run | Failed | Passed |\n|---|---|---|---|---|\n")
+	fmt.Fprintf(&b, "\n## Compliance Coverage\n\nCoverage is a mapping of automated checks, not certification of compliance.\n\n| Framework | Safeguard or Subcategory | Checks Run | Failed | Passed |\n|---|---|---|---|---|\n")
 	for _, x := range r.ComplianceCoverage() {
 		fmt.Fprintf(&b, "| %s | %s | %d | %d | %d |\n", mdTable(x.Framework), mdTable(x.Control), x.Checks, x.Failed, x.Passed)
 	}
@@ -157,23 +170,35 @@ func (r *Report) Markdown() string {
 		if f.Status != string(check.Fail) {
 			continue
 		}
-		fmt.Fprintf(&b, "### [%s] %s (%s)\n\nCategory: %s. Effort: %s.\n\n%s\n\n**Why it matters:** %s\n\n", strings.ToUpper(mdText(f.Severity)), mdText(f.Title), mdText(f.ID), mdText(string(f.Category)), mdText(string(f.Effort)), mdText(f.Summary), mdText(f.Rationale))
+		fmt.Fprintf(&b, "### \\[%s\\] %s (%s)\n\nCategory: %s. Effort: %s. Confidence: %s.\n\n%s\n\n**Why it matters:** %s\n\n", strings.ToUpper(mdText(f.Severity)), mdText(f.Title), mdText(f.ID), mdText(string(f.Category)), mdText(string(f.Effort)), mdText(f.Confidence), mdText(f.Summary), mdText(f.Rationale))
 		for _, res := range f.Results {
 			if res.Status != check.Fail {
 				continue
 			}
-			fmt.Fprintf(&b, "- **%s:** %s\n", mdText(res.Target), mdText(res.Message))
+			tag := ""
+			if s := f.SuppressionFor(res); s != nil {
+				tag = " (suppressed until " + mdText(s.Expires) + ")"
+			}
+			fmt.Fprintf(&b, "- **%s:** %s%s\n", mdText(res.Target), mdText(res.Message), tag)
 			for _, e := range res.Evidence {
-				fmt.Fprintf(&b, "  - `%s`\n", strings.ReplaceAll(mdText(e), "`", "'"))
+				fmt.Fprintf(&b, "  - %s\n", mdCode(e))
 			}
 		}
-		fmt.Fprintf(&b, "\n**Fix:** %s\n\n**Verify:** %s\n\n", mdText(f.Fix), mdText(f.Verify))
+		fmt.Fprintf(&b, "\n**Fix:** %s\n\n**Verify:** %s\n\n", mdText(f.Fix), mdCode(f.Verify))
+		fmt.Fprintf(&b, "%s\n\n", mdText(FalsePositiveHint))
 		if st := standardsLine(f.Standards); st != "" {
 			fmt.Fprintf(&b, "**Standards:** %s\n\n", mdText(st))
 		}
 		for _, m := range f.Academy {
-			fmt.Fprintf(&b, "**Learn:** %s: %s, %s (offline: `openvapt learn %s`)\n\n", mdText(m.ID), mdText(m.Title), m.URL, mdText(m.ID))
+			fmt.Fprintf(&b, "**Learn:** %s: %s, %s (offline: %s)\n\n", mdText(m.ID), mdText(m.Title), m.URL, mdCode("openvapt learn "+m.ID))
 		}
+	}
+	if r.Suppression != nil {
+		fmt.Fprintf(&b, "## Suppressed Findings\n\nThese failed results were accepted in the suppression file. They keep their Fail status and severity; only the --fail-on exit code ignores them.\n\n| ID | Severity | Target | Reason | Expires | Added By |\n|---|---|---|---|---|---|\n")
+		for _, x := range r.SuppressedRows() {
+			fmt.Fprintf(&b, "| %s | %s | %s | %s | %s | %s |\n", mdTable(x.ID), mdTable(x.Severity), mdTable(x.Target), mdTable(x.Reason), mdTable(x.Expires), mdTable(x.AddedBy))
+		}
+		b.WriteString("\n")
 	}
 	fmt.Fprintf(&b, "## Passed and Skipped Checks\n\n| ID | Title | Status |\n|---|---|---|\n")
 	for _, f := range r.Findings {
@@ -183,10 +208,11 @@ func (r *Report) Markdown() string {
 	}
 	fmt.Fprintf(&b, "\n## Coverage Gaps\n\nIncomplete, Error and Skipped checks do not establish that the affected area is secure.\n\n| ID | Status | Affected Area and Reason |\n|---|---|---|\n")
 	for _, f := range r.Findings {
-		if f.Status != string(check.Incomplete) && f.Status != string(check.Error) && f.Status != string(check.Skip) {
-			continue
-		}
+		whole := f.Status == string(check.Incomplete) || f.Status == string(check.Error) || f.Status == string(check.Skip)
 		for _, res := range f.Results {
+			if !whole && res.Status != check.Incomplete && res.Status != check.Error {
+				continue
+			}
 			fmt.Fprintf(&b, "| %s | %s | %s: %s |\n", mdTable(f.ID), mdTable(string(res.Status)), mdTable(res.Target), mdTable(res.Message))
 		}
 	}
@@ -223,17 +249,55 @@ func standardsLine(st check.Standards) string {
 	return strings.Join(parts, "; ")
 }
 
-func mdText(s string) string {
-	s = strings.Map(func(r rune) rune {
-		if r < 0x20 && r != '\t' {
+// mdClean turns control characters and line breaks into spaces.
+func mdClean(s string) string {
+	return strings.TrimSpace(strings.Map(func(r rune) rune {
+		if r < 0x20 || r == 0x7f {
 			return ' '
 		}
 		return r
-	}, s)
-	s = strings.NewReplacer("\r", " ", "\n", " ", "[", "\\[", "]", "\\]", "<", "&lt;", ">", "&gt;").Replace(s)
-	return strings.TrimSpace(s)
+	}, s))
 }
+
+// mdEscaper backslash-escapes every Markdown character that could start
+// emphasis, a heading, a link, raw HTML or a code span, so text taken from
+// files on the scanned machine renders literally.
+var mdEscaper = strings.NewReplacer(
+	`\`, `\\`, "`", "\\`", "*", `\*`, "_", `\_`, "#", `\#`, "[", `\[`, "]", `\]`,
+	"<", `\<`, ">", `\>`, "!", `\!`, "~", `\~`,
+	// Break GFM autolinks so a shared report never carries a clickable link
+	// chosen by a file on the scanned machine.
+	"://", `:\/\/`, "www.", `www\.`,
+)
+
+// mdText escapes prose for Markdown.
+func mdText(s string) string { return mdEscaper.Replace(mdClean(s)) }
+
+// mdTable escapes prose for a Markdown table cell.
 func mdTable(s string) string { return strings.ReplaceAll(mdText(s), "|", "\\|") }
+
+// mdCode renders s as an inline code span. Nothing is escaped inside: the
+// fence is one backtick longer than the longest backtick run in s, and a
+// space pads content that starts or ends with a backtick.
+func mdCode(s string) string {
+	s = mdClean(s)
+	longest, run := 0, 0
+	for _, r := range s {
+		if r == '`' {
+			run++
+			if run > longest {
+				longest = run
+			}
+		} else {
+			run = 0
+		}
+	}
+	fence := strings.Repeat("`", longest+1)
+	if strings.HasPrefix(s, "`") || strings.HasSuffix(s, "`") || s == "" {
+		s = " " + s + " "
+	}
+	return fence + s + fence
+}
 
 func short(c string) string {
 	if len(c) > 12 {
@@ -245,12 +309,20 @@ func short(c string) string {
 // PrintSummary writes a short console summary.
 func (r *Report) PrintSummary(w io.Writer) {
 	s := r.Summary
-	fmt.Fprintf(w, "\n  Checks run:  %d   Passed: %d   Failed: %d   Incomplete: %d   Skipped: %d   Errors: %d\n", r.Scan.Checks, s.Passed, s.Failed, s.Incomplete, s.Skipped, s.Errors)
+	fmt.Fprintf(w, "\n  Checks run:  %d   Passed: %d   Failed: %d   Incomplete: %d (plus %d targets)   Skipped: %d   Errors: %d\n", r.Scan.Checks, s.Passed, s.Failed, s.Incomplete, s.IncompleteTargets, s.Skipped, s.Errors)
 	fmt.Fprintf(w, "  Failed by severity:  Critical %d   High %d   Medium %d   Low %d\n", s.Critical, s.High, s.Medium, s.Low)
-	fmt.Fprintf(w, "  %s\n\n", r.Scan.VulnDB.Notice())
+	fmt.Fprintf(w, "  %s\n", r.Scan.VulnDB.Notice())
+	if n := r.SuppressionNotice(); n != "" {
+		fmt.Fprintf(w, "  %s\n", n)
+	}
+	fmt.Fprintln(w)
 	for _, f := range r.Findings {
 		if f.Status == string(check.Fail) {
-			fmt.Fprintf(w, "  %-9s %-13s %s\n", strings.ToUpper(f.Severity), f.ID, f.Title)
+			mark := ""
+			if f.FullySuppressed() {
+				mark = " (suppressed)"
+			}
+			fmt.Fprintf(w, "  %-9s %-13s %s%s\n", strings.ToUpper(f.Severity), f.ID, f.Title, mark)
 		}
 	}
 	for _, f := range r.Findings {

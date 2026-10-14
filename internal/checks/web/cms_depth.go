@@ -108,7 +108,7 @@ func init() {
 		Fix:       "Add to settings.php:  $settings['trusted_host_patterns'] = ['^www\\.example\\.com$', '^example\\.com$'];  then clear caches (drush cr). The status report page should no longer warn about trusted hosts.",
 		Verify:    "drush status-report | grep -i 'trusted host'",
 		Refs:      []check.Ref{refDrupalSettings, {Title: "OWASP WSTG-INPV-17, Testing for Host Header Injection", URL: "https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/07-Input_Validation_Testing/17-Testing_for_Host_Header_Injection/"}},
-		Standards: check.Standards{CWE: []string{"CWE-644", "CWE-20"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.4.1"}, WSTG: []string{"WSTG-INPV-17"}, NIST: []string{"CM-6", "SI-10"}},
+		Standards: check.Standards{CWE: []string{"CWE-644", "CWE-346"}, OWASP: []string{"A05:2021"}, ASVS: []string{"14.4.1"}, WSTG: []string{"WSTG-INPV-17"}, NIST: []string{"CM-6", "SI-10"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			trusted := regexp.MustCompile(`\$settings\[\s*['"]trusted_host_patterns['"]\s*\]\s*=`)
 			return cmsCheck(ctx, s, "Drupal", func(c collect.CMSConfig) []string {
@@ -240,7 +240,7 @@ func init() {
 		Fix:       "Add define('DISABLE_WP_CRON', true); to wp-config.php, run  */5 * * * * www-data php /var/www/<site>/wp-cron.php  from the system cron (or curl the URL from cron), and deny direct requests to wp-cron.php at the web server.",
 		Verify:    "curl -s -o /dev/null -w '%{http_code}' https://<site>/wp-cron.php  prints 403 or 404.",
 		Refs:      []check.Ref{refWPCron, refWPHardening},
-		Standards: check.Standards{CWE: []string{"CWE-400"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"CM-7", "SC-5"}},
+		Standards: check.Standards{CWE: []string{"CWE-770"}, OWASP: []string{"A05:2021"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"CM-7", "SC-5"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {
 				r, err := st.Get(ctx, s, "/wp-cron.php")
@@ -262,7 +262,7 @@ func init() {
 		Fix:       "Return 404 for author queries by id (a small redirect rule or a security plugin's user enumeration protection), and give administrators a nickname and display name that differ from the login name.",
 		Verify:    "curl -sI https://<site>/?author=1 | grep -i location  prints nothing or a 404 page.",
 		Refs:      []check.Ref{refWPBrute, refWPHardening},
-		Standards: check.Standards{CWE: []string{"CWE-200", "CWE-204"}, OWASP: []string{"A07:2021"}, WSTG: []string{"WSTG-IDNT-04"}, NIST: []string{"CM-6", "SI-11"}},
+		Standards: check.Standards{CWE: []string{"CWE-204"}, OWASP: []string{"A07:2021"}, WSTG: []string{"WSTG-IDNT-04"}, NIST: []string{"CM-6", "SI-11"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			return ForEachSite(ctx, s, func(st Site) check.Result {
 				r, err := st.Get(ctx, s, "/?author=1")
@@ -284,7 +284,7 @@ func init() {
 		Fix:       "Set $settings['update_free_access'] = FALSE; in settings.php (the default) and run updates as user 1 or with drush updatedb.",
 		Verify:    "grep update_free_access sites/default/settings.php  shows FALSE.",
 		Refs:      []check.Ref{refDrupalUpdate, {Title: "Drupal.org, Securing file permissions and ownership", URL: "https://www.drupal.org/docs/administering-a-drupal-site/security-in-drupal/securing-file-permissions-and-ownership"}},
-		Standards: check.Standards{CWE: []string{"CWE-306", "CWE-284"}, OWASP: []string{"A01:2021", "A05:2021"}, ASVS: []string{"4.3.2"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"AC-3", "CM-6"}},
+		Standards: check.Standards{CWE: []string{"CWE-306"}, OWASP: []string{"A01:2021", "A05:2021"}, ASVS: []string{"4.3.2"}, WSTG: []string{"WSTG-CONF-05"}, NIST: []string{"AC-3", "CM-6"}},
 		Run: func(ctx context.Context, s sys.System) []check.Result {
 			free := regexp.MustCompile(`(?i)\$settings\[\s*['"]update_free_access['"]\s*\]\s*=\s*TRUE`)
 			return cmsCheck(ctx, s, "Drupal", func(c collect.CMSConfig) []string {
