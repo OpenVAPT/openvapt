@@ -4,6 +4,10 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+_No changes recorded yet._
+
+## [v0.1.0-alpha.5] - 2026-10-14
+
 ### Stream: discovery (SEO, GEO, AEO, LLM parsing)
 
 - Website: an Atom feed of every release at /feed.xml (linked from every page and the footer), a web app manifest, PNG icons (favicon.ico, 192, 512, Apple touch) beside the SVG mark, codemeta.json for research-software catalogues, and an IndexNow key file with scripts/indexnow.sh to notify Bing, Yandex and other IndexNow engines after a deploy.

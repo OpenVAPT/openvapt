@@ -4,8 +4,8 @@
   "current": {
     "alpha": {
       "channel": "alpha",
-      "version": "v0.1.0-alpha.4",
-      "commit": "12bdadd31748edf5590864464dd841f01f0bff2c",
+      "version": "v0.1.0-alpha.5",
+      "commit": "a2e2d702715abe5015de53deb49042741685bf79",
       "date": "2026-10-14",
       "decision": "promoted automatically: every gate passed",
       "evidence": [
@@ -52,6 +52,17 @@
       "channel": "alpha",
       "version": "v0.1.0-alpha.4",
       "commit": "12bdadd31748edf5590864464dd841f01f0bff2c",
+      "date": "2026-10-14",
+      "decision": "promoted automatically: every gate passed",
+      "evidence": [
+        "CI Green: format, vet, race tests, static analysis, security and vulnerability scans",
+        "Lab Proof: every check fails on the vulnerable lab and passes on the hardened lab"
+      ]
+    },
+    {
+      "channel": "alpha",
+      "version": "v0.1.0-alpha.5",
+      "commit": "a2e2d702715abe5015de53deb49042741685bf79",
       "date": "2026-10-14",
       "decision": "promoted automatically: every gate passed",
       "evidence": [

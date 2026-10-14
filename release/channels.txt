@@ -1,2 +1,2 @@
 # OpenVAPT release channels: <channel> <version> <commit> <date>
-alpha v0.1.0-alpha.4 12bdadd31748edf5590864464dd841f01f0bff2c 2026-10-14
+alpha v0.1.0-alpha.5 a2e2d702715abe5015de53deb49042741685bf79 2026-10-14
