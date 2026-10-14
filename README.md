@@ -15,27 +15,19 @@ OpenVAPT runs read-only checks on the Linux machine it is installed on (and only
 
 ## Cite OpenVAPT
 
-Using OpenVAPT in research, teaching or a report? Please cite it, with the version you used. Run `openvapt cite` (or `openvapt cite --format bibtex`) to print the citation for your exact build; every report also ends with a How to Cite block. The author is the group author "OpenVAPT"; do not add personal names. OpenVAPT has no DOI yet.
+Using OpenVAPT in research, teaching or a report? Please cite it, with the version you used. The author is the group author "OpenVAPT"; do not add personal names. OpenVAPT has no DOI yet.
 
-APA 7:
+The citation always names the exact version, so take it from one of these (each is generated from the same source and kept current by the release pipeline):
 
-> OpenVAPT. (2026). OpenVAPT: An open academic vulnerability assessment tool (Version 0.1.0-alpha.2) [Computer software]. https://github.com/OpenVAPT/openvapt
+- **Your copy of the tool:** `openvapt cite` (APA) or `openvapt cite --format bibtex` (also ieee, harvard, mla, chicago, ris, csl, cff). Every report also ends with a How to Cite block for the version that produced it.
+- **GitHub:** the **Cite this repository** button on this page, generated from [CITATION.cff](CITATION.cff).
+- **Website:** [openvapt.com/cite.html](https://openvapt.com/cite.html), with one-click copy in 14 styles and .bib, .ris and CSL-JSON downloads.
 
-BibTeX:
+The general form (APA 7) is:
 
-```bibtex
-@software{openvapt_2026,
-  author       = {{OpenVAPT}},
-  title        = {{OpenVAPT: An Open Academic Vulnerability Assessment Tool}},
-  year         = {2026},
-  version      = {0.1.0-alpha.2},
-  url          = {https://github.com/OpenVAPT/openvapt},
-  note         = {Built by AI Cybersecurity Engineers. https://openvapt.com},
-  license      = {LicenseRef-OpenVAPT-SAL-1.3}
-}
-```
+> OpenVAPT. (Year). OpenVAPT: An open academic vulnerability assessment tool (Version X.Y.Z) [Computer software]. https://github.com/OpenVAPT/openvapt
 
-Every other style (IEEE, Harvard, MLA, Chicago, Vancouver, RIS, CSL-JSON) is on https://openvapt.com/cite.html and in [CITING.md](CITING.md); GitHub's "Cite this repository" button reads [CITATION.cff](CITATION.cff). A test keeps these lines identical to what the website, the CLI and the reports print.
+See [CITING.md](CITING.md) for when credit is required under the licence.
 
 ## Read and Accept Before Use
 
@@ -193,10 +185,6 @@ OpenVAPT Source-Available Licence 1.3 (`LicenseRef-OpenVAPT-SAL-1.3`, file [LICE
 
 ## Citing OpenVAPT
 
-Please cite OpenVAPT in any research paper, thesis, coursework, presentation, poster or academic project it helped, with the version you used. Ready-to-copy APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, BibLaTeX, RIS and CSL-JSON citations are in [CITING.md](CITING.md); GitHub's "Cite this repository" button reads [CITATION.cff](CITATION.cff).
-
-```
-OpenVAPT. (2026). OpenVAPT: An open academic vulnerability assessment tool (Version 0.1.0-alpha.2) [Computer software]. https://github.com/OpenVAPT/openvapt
-```
+See [Cite OpenVAPT](#cite-openvapt) above. Ready-to-copy APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, BibLaTeX, RIS and CSL-JSON citations are in [CITING.md](CITING.md), on [openvapt.com/cite.html](https://openvapt.com/cite.html) and from `openvapt cite`.
 
 Names of other projects and products in this repository (for example Lynis, OpenVAS, ZAP, WordPress, Apache Tomcat, Node.js and Django) identify them only. Their owners do not sponsor, endorse or have any connection with OpenVAPT.
