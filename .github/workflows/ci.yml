@@ -64,21 +64,12 @@ jobs:
       - name: Build Linux binaries
         run: make release
       - name: Installer lint (shellcheck)
-        run: shellcheck -s sh scripts/install.sh
-      - name: Installer end to end (verified install, tamper refusal)
-        run: |
-          set -eu
-          rel="$RUNNER_TEMP/rel/download/v0.0.0-alpha.0"; mkdir -p "$rel"
-          cp dist/release/openvapt_linux_* dist/release/SHA256SUMS "$rel/"
-          export OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel"
-          if sh scripts/install.sh --version v0.0.0-alpha.0 --dir "$RUNNER_TEMP/bin0" 2> "$RUNNER_TEMP/neg.err"; then echo "file:// accepted without OPENVAPT_ALLOW_FILE"; exit 1; fi
-          grep -q OPENVAPT_ALLOW_FILE "$RUNNER_TEMP/neg.err" || { echo "installer refused for another reason:"; cat "$RUNNER_TEMP/neg.err"; exit 1; }
-          export OPENVAPT_ALLOW_FILE=1
-          sh scripts/install.sh --version v0.0.0-alpha.0 --dir "$RUNNER_TEMP/bin"
-          "$RUNNER_TEMP/bin/openvapt" version
-          printf 'x' >> "$rel/openvapt_linux_amd64"
-          if sh scripts/install.sh --version v0.0.0-alpha.0 --dir "$RUNNER_TEMP/bin2"; then echo "tampered binary was installed"; exit 1; fi
-          test ! -e "$RUNNER_TEMP/bin2/openvapt"
+        run: shellcheck -s sh scripts/install.sh scripts/test-install.sh
+      - name: Installer end to end (channel fallback, Download Only, Download and Scan in a pty, --out, --dry-run, tamper refusal)
+        # The --run cases use a test double that shows the real acknowledgements,
+        # reads I ACCEPT from a scripted terminal (script -qec) and scans only the
+        # simulated lab in memory; the runner itself is never scanned.
+        run: sh scripts/test-install.sh dist/release/openvapt_linux_amd64
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "24"
