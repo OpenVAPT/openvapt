@@ -6,6 +6,10 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 _No changes recorded yet._
 
+## [v0.1.0-alpha.6] - 2026-10-15
+
+- No changelog entry was written for this build (commit e8fbd0343f26).
+
 ## [v0.1.0-alpha.5] - 2026-10-14
 
 ### Stream: discovery (SEO, GEO, AEO, LLM parsing)
