@@ -29,6 +29,8 @@ func labSnapshot(generated string) string {
 			adv("LAB-CVE-2020-11022", "CVE-2020-11022", "high", false, "npm", "jquery", "3.5.0"),
 			adv("LAB-CVE-2020-11022", "CVE-2020-11022", "high", false, "Packagist", "components/jquery", "3.5.0"),
 			adv("LAB-CVE-2019-17671", "CVE-2019-17671", "high", false, "WordPress:Core", "wordpress", "5.2.4"),
+			adv("LAB-CVE-2023-30861", "CVE-2023-30861", "high", false, "PyPI", "flask", "2.2.5"),
+			adv("LAB-CVE-2022-30123", "CVE-2022-30123", "critical", false, "RubyGems", "rack", "2.2.3.1"),
 		}}
 	s.Header.Counts = vulndb.Counts{Advisories: len(s.Advisories), Affected: len(s.Advisories)}
 	b, _ := json.Marshal(s)
@@ -43,6 +45,9 @@ func init() {
 		f.Infos["/var/www/shop/package-lock.json"] = sys.FileInfo{Path: "/var/www/shop/package-lock.json", Mode: 0o644, ModTime: time.Now().Add(-800 * 24 * time.Hour)}
 		// WordPress 5.2.1 core, read from wp-includes/version.php.
 		f.Files["/var/www/shop/wp-includes/version.php"] = "<?php\n$wp_version = '5.2.1';\n$wp_db_version = 44719;\n"
+		f.Files["/var/www/shop/api/requirements.txt"] = "Flask==2.0.1\n"
+		f.Files["/var/www/shop/admin/Gemfile.lock"] = "GEM\n  specs:\n    rack (2.2.3)\n\n"
+		lockInfo(f, 800, "/var/www/shop/api/requirements.txt", "/var/www/shop/admin/Gemfile.lock")
 		f.Infos["/var/www/shop/wp-includes/version.php"] = sys.FileInfo{Path: "/var/www/shop/wp-includes/version.php"}
 		f.Files[collect.LabSnapshotPath] = labSnapshot("2021-01-01")
 	}, func(f *sys.Fake) {
@@ -51,7 +56,18 @@ func init() {
 		f.Files["/var/www/shop/package-lock.json"] = "{\"lockfileVersion\":3,\"packages\":{\"node_modules/jquery\":{\"version\":\"3.7.1\"}}}"
 		f.Infos["/var/www/shop/package-lock.json"] = sys.FileInfo{Path: "/var/www/shop/package-lock.json", Mode: 0o644, ModTime: time.Now().Add(-30 * 24 * time.Hour)}
 		f.Files["/var/www/shop/wp-includes/version.php"] = "<?php\n$wp_version = '6.7.1';\n"
+		f.Files["/var/www/shop/api/requirements.txt"] = "Flask==3.0.3\n"
+		f.Files["/var/www/shop/admin/Gemfile.lock"] = "GEM\n  specs:\n    rack (3.1.8)\n\n"
+		lockInfo(f, 20, "/var/www/shop/api/requirements.txt", "/var/www/shop/admin/Gemfile.lock")
 		f.Infos["/var/www/shop/wp-includes/version.php"] = sys.FileInfo{Path: "/var/www/shop/wp-includes/version.php"}
 		f.Files[collect.LabSnapshotPath] = labSnapshot(time.Now().UTC().Format("2006-01-02"))
 	})
+}
+
+// lockInfo gives lab lockfiles metadata, so file walks list them and their
+// age can be read.
+func lockInfo(f *sys.Fake, days int, paths ...string) {
+	for _, p := range paths {
+		f.Infos[p] = sys.FileInfo{Path: p, Mode: 0o644, ModTime: time.Now().Add(-time.Duration(days) * 24 * time.Hour)}
+	}
 }

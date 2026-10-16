@@ -72,6 +72,18 @@ var csfFor = map[string][]string{
 	"16.2": {"ID.RA-08"}, "16.7": {"PR.PS-01"},
 }
 
+// asvsFill gives OWASP ASVS 4.0.3 requirement ids to web checks that do
+// not name one themselves. Only clear matches are listed (14.2.1 components
+// up to date, 14.3.2 debug modes off in production, 14.3.3 no version
+// details in responses, 2.2.1 anti-automation); a check without a clear ASVS requirement stays unmapped.
+var asvsFill = map[string][]string{
+	"WEB-CVE-001": {"14.2.1"}, "WEB-NODE-001": {"14.2.1"}, "WEB-CMS-008": {"14.2.1"},
+	"WEB-CMS-006": {"14.3.2"}, "WEB-CMS-009": {"14.3.2"}, "WEB-NODE-002": {"14.3.2"},
+	"WEB-NODE-003": {"14.3.2"}, "WEB-PY-004": {"14.3.2"}, "WEB-PY-005": {"14.3.2"},
+	"WEB-CMS-010": {"14.3.3"}, "WEB-CMS-011": {"14.3.3"},
+	"WEB-CMS-002": {"2.2.1"},
+}
+
 // cisOverride pins checks the category rule would place less precisely.
 var cisOverride = map[string]string{
 	"WEB-SEC-001":   "16.2",
@@ -86,6 +98,11 @@ var cisInTopic = regexp.MustCompile(`v8 (\d{1,2}\.\d{1,2})\b`)
 // applyFrameworks fills Standards.CIS and Standards.CSF when a check does
 // not set them itself.
 func applyFrameworks(c *Check) {
+	if len(c.Standards.ASVS) == 0 {
+		if ids, ok := asvsFill[c.ID]; ok {
+			c.Standards.ASVS = ids
+		}
+	}
 	if len(c.Standards.CIS) == 0 {
 		c.Standards.CIS = []string{deriveCIS(c)}
 	}

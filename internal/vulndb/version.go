@@ -1,6 +1,7 @@
 package vulndb
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -351,3 +352,125 @@ func WordPressCompare(a, b string) int {
 	}
 	return numericParts(anum, bnum)
 }
+
+// pep440 is a parsed Python (PEP 440) version: epoch, release numbers, a
+// pre-release phase and number, a post-release number and a dev number.
+type pep440 struct {
+	epoch     int
+	release   []int
+	phase     int // -1 dev-only, 0 alpha, 1 beta, 2 rc, 3 final
+	pre, post int
+	dev       int
+}
+
+var pep440Re = regexp.MustCompile(`^v?(?:(\d+)!)?(\d+(?:\.\d+)*)[-_.]?(?:(a|alpha|b|beta|c|rc|pre|preview)[-_.]?(\d*))?(?:(?:-(\d+))|(?:[-_.]?(?:post|rev|r)[-_.]?(\d*)))?(?:[-_.]?dev[-_.]?(\d*))?(?:\+.*)?$`)
+
+func parsePEP440(s string) (pep440, bool) {
+	m := pep440Re.FindStringSubmatch(strings.ToLower(strings.TrimSpace(s)))
+	if m == nil {
+		return pep440{}, false
+	}
+	n := func(x string) int { v, _ := strconv.Atoi(x); return v }
+	v := pep440{epoch: n(m[1]), phase: 3, post: -1, dev: 1 << 30}
+	for _, p := range strings.Split(m[2], ".") {
+		v.release = append(v.release, n(p))
+	}
+	switch m[3] {
+	case "a", "alpha":
+		v.phase = 0
+	case "b", "beta":
+		v.phase = 1
+	case "c", "rc", "pre", "preview":
+		v.phase = 2
+	}
+	v.pre = n(m[4])
+	if m[5] != "" {
+		v.post = n(m[5])
+	} else if strings.Contains(m[0], "post") || strings.Contains(m[0], "rev") || (m[6] != "" && m[3] == "") {
+		v.post = n(m[6])
+	}
+	if strings.Contains(m[0], "dev") {
+		v.dev = n(m[7])
+		if m[3] == "" && v.post < 0 {
+			v.phase = -1
+		}
+	}
+	return v, true
+}
+
+// PEP440Compare orders Python package versions (PyPI) by epoch, release,
+// pre-release, post-release and development release, as PEP 440 defines.
+// A version that does not parse falls back to plain numeric ordering.
+func PEP440Compare(a, b string) int {
+	x, okx := parsePEP440(a)
+	y, oky := parsePEP440(b)
+	if !okx || !oky {
+		return numericParts(a, b)
+	}
+	if x.epoch != y.epoch {
+		return sign(x.epoch - y.epoch)
+	}
+	for i := 0; i < len(x.release) || i < len(y.release); i++ {
+		var p, q int
+		if i < len(x.release) {
+			p = x.release[i]
+		}
+		if i < len(y.release) {
+			q = y.release[i]
+		}
+		if p != q {
+			return sign(p - q)
+		}
+	}
+	for _, d := range [][2]int{{x.phase, y.phase}, {x.pre, y.pre}, {x.post, y.post}, {x.dev, y.dev}} {
+		if d[0] != d[1] {
+			return sign(d[0] - d[1])
+		}
+	}
+	return 0
+}
+
+var gemSegment = regexp.MustCompile(`[0-9]+|[a-z]+`)
+
+// GemCompare orders RubyGems versions the way Gem::Version does: segments
+// split at dots and at letter-digit changes, numbers compare as numbers, and
+// a letter segment marks a pre-release, which sorts before a number.
+func GemCompare(a, b string) int {
+	x := gemSegment.FindAllString(strings.ToLower(a), -1)
+	y := gemSegment.FindAllString(strings.ToLower(b), -1)
+	for i := 0; i < len(x) || i < len(y); i++ {
+		p, q := "0", "0"
+		if i < len(x) {
+			p = x[i]
+		}
+		if i < len(y) {
+			q = y[i]
+		}
+		pn, pe := strconv.Atoi(p)
+		qn, qe := strconv.Atoi(q)
+		switch {
+		case pe == nil && qe == nil:
+			if pn != qn {
+				return sign(pn - qn)
+			}
+		case pe == nil:
+			return 1
+		case qe == nil:
+			return -1
+		default:
+			if c := strings.Compare(p, q); c != 0 {
+				return c
+			}
+		}
+	}
+	return 0
+}
+
+// PyPIName normalises a Python package name as PEP 503 does (lower case,
+// runs of "-", "_" and "." become one "-"), so names from lockfiles and
+// advisories compare equal.
+func PyPIName(n string) string {
+	return pypiSep.ReplaceAllString(strings.ToLower(strings.TrimSpace(n)), "-")
+}
+
+var pypiSep = regexp.MustCompile(`[-_.]+`)
