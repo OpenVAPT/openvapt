@@ -36,7 +36,7 @@ var appPorts = map[int]string{
 
 // sensitivePort names a data, administrative or application server port.
 func sensitivePort(p int) (string, bool) {
-	for _, m := range []map[int]string{dataPorts, controlPorts, managementPorts, codePorts, appPorts} {
+	for _, m := range []map[int]string{dataPorts, controlPorts, managementPorts, codePorts, appPorts, aiPorts} {
 		if n, ok := m[p]; ok {
 			return n, true
 		}

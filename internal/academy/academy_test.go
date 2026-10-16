@@ -205,10 +205,10 @@ func TestModulesInTeachingOrder(t *testing.T) {
 	for i := 1; i <= 3; i++ {
 		want = append(want, fmt.Sprintf("F%d", i))
 	}
-	for i := 1; i <= 22; i++ {
+	for i := 1; i <= 25; i++ {
 		want = append(want, fmt.Sprintf("P%d", i))
 	}
-	for i := 1; i <= 6; i++ {
+	for i := 1; i <= 8; i++ {
 		want = append(want, fmt.Sprintf("A%d", i))
 	}
 	if strings.Join(got, ",") != strings.Join(want, ",") {

@@ -337,8 +337,12 @@ func comparator(eco, kind string) func(string, string) int {
 		return DebianCompare
 	case strings.HasPrefix(eco, "AlmaLinux:"), strings.HasPrefix(eco, "Rocky Linux:"):
 		return RPMCompare
-	case eco == "npm":
+	case eco == "npm", eco == "Go", eco == "crates.io":
 		return SemverCompare
+	case eco == "PyPI":
+		return PEP440Compare
+	case eco == "RubyGems":
+		return GemCompare
 	case eco == "Packagist":
 		return ComposerCompare
 	case eco == "WordPress" || strings.HasPrefix(eco, "WordPress:"):

@@ -103,7 +103,7 @@ func WebInventory(ctx context.Context, s sys.System) ([]Installed, bool) {
 		for _, fi := range w.Files {
 			p := fi.Path
 			base := filepath.Base(p)
-			if base != "composer.lock" && base != "package-lock.json" && base != "version.php" && !strings.HasPrefix(base, "jquery") {
+			if base != "composer.lock" && base != "package-lock.json" && base != "version.php" && !strings.HasPrefix(base, "jquery") && !extraLockfiles[base] {
 				continue
 			}
 			if base == "version.php" && filepath.Base(filepath.Dir(p)) != "wp-includes" {
@@ -115,6 +115,12 @@ func WebInventory(ctx context.Context, s sys.System) ([]Installed, bool) {
 			r, e := sys.ReadFileNoFollow(ctx, s, p)
 			if e != nil || !r.Complete {
 				complete = false
+				continue
+			}
+			if extraLockfiles[base] {
+				items, ok := ParseLockfile(base, p, r.Data)
+				complete = complete && ok
+				out = append(out, items...)
 				continue
 			}
 			switch base {

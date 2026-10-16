@@ -2,7 +2,7 @@
 
 Generated from the code by `internal/sources` (regenerate with `go test ./internal/sources -update`); do not edit by hand. Every reference that any check or Academy module cites is listed here, grouped by publisher, with the publisher's terms and any credit line those terms ask for. OpenVAPT cites sources by title, identifier and link; it does not copy their text. Use of a source does not imply that its publisher endorses OpenVAPT.
 
-Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Academy modules.
+Totals: 289 distinct sources from 42 publishers, cited by 310 checks and 36 Academy modules.
 
 ## NIST (National Institute of Standards and Technology)
 
@@ -12,7 +12,7 @@ Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 | Source | Cited By |
 |---|---|
 | [NIST IR 7966, Security of Interactive and Automated Access Management Using Secure Shell (SSH)](https://csrc.nist.gov/pubs/ir/7966/final) | HOST-SSH-013 |
-| [NIST SP 800-115, Technical Guide to Information Security Testing and Assessment](https://csrc.nist.gov/pubs/sp/800/115/final) | Academy A1, Academy A3, Academy F2, NET-FW-006, NET-LSN-001 |
+| [NIST SP 800-115, Technical Guide to Information Security Testing and Assessment](https://csrc.nist.gov/pubs/sp/800/115/final) | Academy A1, Academy A3, Academy A7, Academy F2, Academy P23, NET-FW-006, NET-LSN-001 |
 | [NIST SP 800-119, Guidelines for the Secure Deployment of IPv6](https://csrc.nist.gov/pubs/sp/800/119/final) | NET-FW-002 |
 | [NIST SP 800-12 Rev. 1, An Introduction to Information Security](https://csrc.nist.gov/pubs/sp/800/12/r1/final) | Academy F1 |
 | [NIST SP 800-123, Guide to General Server Security](https://csrc.nist.gov/pubs/sp/800/123/final) | Academy P1, Academy P17, Academy P22, HOST-BOOT-001, HOST-BOOT-002, HOST-BOOT-006, HOST-FS-001, HOST-FS-003, HOST-FS-010, HOST-FS-011, HOST-FS-012, HOST-FS-013, HOST-FS-014, HOST-FS-015, HOST-FS-016, HOST-FS-017, HOST-FS-018, HOST-FS-019, HOST-FS-020, HOST-FS-022, HOST-SEC-001, HOST-SSH-001, HOST-SVC-001, HOST-SVC-002, HOST-SVC-003, HOST-SVC-004, HOST-SVC-005, HOST-SVC-006, HOST-SVC-007, HOST-SVC-008, HOST-SVC-009, HOST-SVC-010, HOST-SVC-011, HOST-SVC-012, HOST-SYSD-001, HOST-USR-010, NET-SVC-001 |
@@ -67,10 +67,11 @@ Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 ## OWASP Foundation
 
 - Terms: The cited OWASP projects are published under CC BY-SA 4.0. Cited by title, identifier and link; no text is copied.
-- Credit: References OWASP Top 10, ASVS, WSTG and Cheat Sheet Series, © OWASP Foundation, CC BY-SA 4.0.
+- Credit: References OWASP Top 10, ASVS, WSTG, Cheat Sheet Series and the OWASP Top 10 for Large Language Model Applications, © OWASP Foundation, CC BY-SA 4.0.
 
 | Source | Cited By |
 |---|---|
+| [OWASP Application Security Verification Standard (ASVS)](https://owasp.org/www-project-application-security-verification-standard/) | Academy A8 |
 | [OWASP Clickjacking Defense Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html) | WEB-HDR-003 |
 | [OWASP Content Security Policy Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html) | WEB-HDR-002 |
 | [OWASP Database Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html) | Academy P3, Academy P8, NET-DB-001 |
@@ -85,6 +86,7 @@ Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 | [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) | Academy P5, WEB-CK-001 |
 | [OWASP Top 10 2021, A05 Security Misconfiguration](https://top10.owasp.org/2021/A05_2021-Security_Misconfiguration/) | Academy P6 |
 | [OWASP Top 10 2021, A06 Vulnerable and Outdated Components](https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/) | WEB-APP-008 |
+| [OWASP Top 10 for Large Language Model Applications](https://genai.owasp.org/llm-top-10/) | Academy P24, NET-AI-001 |
 | [OWASP Transport Layer Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html) | WEB-CMS-016, WEB-TLS-001 |
 | [OWASP Vulnerable Dependency Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Vulnerable_Dependency_Management_Cheat_Sheet.html) | WEB-APP-008 |
 | [OWASP WSTG-CLNT-07, Testing Cross Origin Resource Sharing](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/11-Client-side_Testing/07-Testing_Cross_Origin_Resource_Sharing/) | WEB-COR-001 |
@@ -106,6 +108,7 @@ Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 
 | Source | Cited By |
 |---|---|
+| [CIS Critical Security Controls](https://www.cisecurity.org/controls) | Academy A8 |
 | [CIS Critical Security Controls v8, Control 5 (Account Management)](https://www.cisecurity.org/controls/account-management) | HOST-PWD-005 |
 | [CIS Docker Benchmark (referenced by recommendation number)](https://www.cisecurity.org/benchmark/docker) | Academy A5, HOST-CTR-005, HOST-CTR-006, HOST-CTR-007, HOST-CTR-008, HOST-CTR-010, HOST-CTR-012, HOST-CTR-013, HOST-CTR-015 |
 
@@ -150,7 +153,7 @@ Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 
 | Source | Cited By |
 |---|---|
-| [OASIS SARIF 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html) | Academy A3 |
+| [OASIS SARIF 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html) | Academy A3, Academy A7 |
 
 ## W3C
 
@@ -374,9 +377,10 @@ Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 | [Apache HTTP Server, SSLCipherSuite directive](https://httpd.apache.org/docs/2.4/mod/mod_ssl.html#sslciphersuite) | WEB-APA-006 |
 | [Apache HTTP Server, SSLProtocol directive](https://httpd.apache.org/docs/2.4/mod/mod_ssl.html#sslprotocol) | WEB-APA-005 |
 | [Apache HTTP Server, SSLUseStapling directive](https://httpd.apache.org/docs/2.4/mod/mod_ssl.html#sslusestapling) | WEB-APA-007 |
-| [Apache HTTP Server, Security Tips](https://httpd.apache.org/docs/2.4/misc/security_tips.html) | Academy P18, WEB-APA-004, WEB-APA-008 |
+| [Apache HTTP Server, Security Tips](https://httpd.apache.org/docs/2.4/misc/security_tips.html) | Academy P18, WEB-APA-004, WEB-APA-008, WEB-APA-011 |
 | [Apache HTTP Server, ServerTokens directive](https://httpd.apache.org/docs/2.4/mod/core.html#servertokens) | WEB-APA-001, WEB-HDR-007 |
 | [Apache HTTP Server, TraceEnable directive](https://httpd.apache.org/docs/2.4/mod/core.html#traceenable) | WEB-APA-002 |
+| [Apache HTTP Server, mod_reqtimeout](https://httpd.apache.org/docs/2.4/mod/mod_reqtimeout.html) | Academy P25, WEB-APA-011 |
 | [Apache HTTP Server, mod_status](https://httpd.apache.org/docs/2.4/mod/mod_status.html) | WEB-EXP-006 |
 | [Apache Tomcat 10.1 Configuration Reference, The AJP Connector](https://tomcat.apache.org/tomcat-10.1-doc/config/ajp.html) | WEB-TOM-004 |
 | [Apache Tomcat 10.1 Configuration Reference, The Server Component](https://tomcat.apache.org/tomcat-10.1-doc/config/server.html) | WEB-TOM-003 |
@@ -393,7 +397,7 @@ Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 |---|---|
 | [nginx documentation, ngx_http_autoindex_module](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html) | WEB-NGX-002 |
 | [nginx documentation, ngx_http_core_module](https://nginx.org/en/docs/http/ngx_http_core_module.html) | WEB-NGX-001, WEB-NGX-006, WEB-NGX-007 |
-| [nginx documentation, ngx_http_limit_req_module](https://nginx.org/en/docs/http/ngx_http_limit_req_module.html) | WEB-NGX-006 |
+| [nginx documentation, ngx_http_limit_req_module](https://nginx.org/en/docs/http/ngx_http_limit_req_module.html) | Academy P25, WEB-NGX-006 |
 | [nginx documentation, ngx_http_ssl_module](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) | Academy P18, WEB-NGX-003, WEB-NGX-005 |
 
 ## OpenSSL Project (documentation)
@@ -565,6 +569,15 @@ Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 | [Postfix, disable_vrfy_command](https://www.postfix.org/postconf.5.html#disable_vrfy_command) | NET-MAIL-003 |
 | [Samba smb.conf Manual](https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html) | NET-DB-009 |
 
+## AI Tooling Documentation (Project Jupyter, Ray)
+
+- Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
+
+| Source | Cited By |
+|---|---|
+| [Jupyter Server documentation, Security in the Jupyter Server](https://jupyter-server.readthedocs.io/en/latest/operators/security.html) | Academy P24, NET-AI-002 |
+| [Ray documentation, Security](https://docs.ray.io/en/latest/ray-security/index.html) | NET-AI-001 |
+
 ## Projects Hosted on GitHub (Publisher Named in Each Title)
 
 - Terms: Copyright of the publisher. Cited by title and link only; no text is copied.
@@ -573,6 +586,7 @@ Totals: 282 distinct sources from 41 publishers, cited by 307 checks and 31 Acad
 |---|---|
 | [Node.js Release Working Group, release schedule](https://github.com/nodejs/Release) | WEB-NODE-001 |
 | [OWASP ASVS 4.0.3, V14 Configuration](https://github.com/OWASP/ASVS/blob/v4.0.3/4.0/en/0x22-V14-Config.md) | Academy A6, WEB-APP-001, WEB-APP-002, WEB-APP-003 |
+| [Ollama FAQ, How do I configure Ollama server?](https://github.com/ollama/ollama/blob/main/docs/faq.md) | NET-AI-001 |
 | [OpenVAPT source code](https://github.com/OpenVAPT/openvapt) | Academy A4 |
 | [containerd documentation, Operations (configuration)](https://github.com/containerd/containerd/blob/main/docs/ops.md) | HOST-CTR-014 |
 | [containers.conf(5), Podman configuration](https://github.com/containers/common/blob/main/docs/containers.conf.5.md) | HOST-CTR-014 |
