@@ -352,8 +352,12 @@ func add(raw osvRecord, eco string, allow, kev map[string]bool, seen map[string]
 	}
 	var affected []vulndb.Affected
 	for _, a := range raw.Affected {
-		if allow[a.Package.Name] && a.Package.Ecosystem == eco {
-			affected = append(affected, vulndb.Affected{Ecosystem: eco, Package: a.Package.Name, Ranges: a.Ranges, Versions: a.Versions})
+		name := a.Package.Name
+		if eco == "PyPI" {
+			name = vulndb.PyPIName(name) // lockfiles and advisories spell names differently
+		}
+		if (allow[a.Package.Name] || allow[name]) && a.Package.Ecosystem == eco {
+			affected = append(affected, vulndb.Affected{Ecosystem: eco, Package: name, Ranges: a.Ranges, Versions: a.Versions})
 		}
 	}
 	if len(affected) == 0 {

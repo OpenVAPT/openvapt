@@ -42,9 +42,9 @@ var Publishers = []Publisher{
 	{"FIRST (Forum of Incident Response and Security Teams)", []string{"www.first.org"},
 		"The CVSS v3.1 scale and vector notation are applied; the specification text is not copied.",
 		"CVSS is owned by FIRST.Org, Inc. and is used under the terms FIRST publishes for public use of CVSS, with attribution and a link to https://www.first.org/cvss/. FIRST does not endorse OpenVAPT."},
-	{"OWASP Foundation", []string{"owasp.org", "cheatsheetseries.owasp.org", "top10.owasp.org", "wstg.owasp.org"},
+	{"OWASP Foundation", []string{"owasp.org", "cheatsheetseries.owasp.org", "top10.owasp.org", "wstg.owasp.org", "genai.owasp.org"},
 		"The cited OWASP projects are published under CC BY-SA 4.0. Cited by title, identifier and link; no text is copied.",
-		"References OWASP Top 10, ASVS, WSTG and Cheat Sheet Series, © OWASP Foundation, CC BY-SA 4.0."},
+		"References OWASP Top 10, ASVS, WSTG, Cheat Sheet Series and the OWASP Top 10 for Large Language Model Applications, © OWASP Foundation, CC BY-SA 4.0."},
 	{"Center for Internet Security (CIS)", []string{"www.cisecurity.org"},
 		"CIS Controls v8 is published by the Center for Internet Security, Inc. under CC BY-NC-ND 4.0. Referred to by Control number and link only; no CIS text is reproduced.",
 		"CIS Controls® is a trademark of the Center for Internet Security, Inc. Use does not imply endorsement by CIS."},
@@ -86,6 +86,7 @@ var Publishers = []Publisher{
 	{"Prometheus (The Linux Foundation)", []string{"prometheus.io"}, linkOnly, ""},
 	{"Databases and Data Services (MySQL, PostgreSQL, MongoDB, Redis, Memcached, Elastic)", []string{"dev.mysql.com", "www.postgresql.org", "www.mongodb.com", "redis.io", "docs.memcached.org", "www.elastic.co"}, linkOnly, ""},
 	{"Network Services (BIND 9, Samba, Postfix, Dovecot)", []string{"bind9.readthedocs.io", "www.samba.org", "www.postfix.org", "doc.dovecot.org"}, linkOnly, ""},
+	{"AI Tooling Documentation (Project Jupyter, Ray)", []string{"jupyter-server.readthedocs.io", "docs.ray.io"}, linkOnly, ""},
 	{"Projects Hosted on GitHub (Publisher Named in Each Title)", []string{"github.com"}, linkOnly, ""},
 }
 

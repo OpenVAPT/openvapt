@@ -10,3 +10,25 @@ nginx
 lodash
 express
 symfony/http-foundation
+# Python (PyPI, names in PEP 503 form)
+django
+flask
+werkzeug
+jinja2
+requests
+urllib3
+pillow
+pyyaml
+cryptography
+# Ruby (RubyGems)
+rails
+rack
+actionpack
+nokogiri
+# Go modules
+golang.org/x/net
+golang.org/x/crypto
+github.com/gin-gonic/gin
+# Rust (crates.io)
+hyper
+tokio

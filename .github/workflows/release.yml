@@ -105,7 +105,7 @@ jobs:
         if: steps.existing.outputs.exists == 'false'
         run: |
           go run ./cmd/vulndbgen -out internal/vulndb/data/snapshot.json.gz \
-            -ecosystems "Debian:11,Debian:12,Debian:13,Ubuntu:20.04:LTS,Ubuntu:22.04:LTS,Ubuntu:24.04:LTS,AlmaLinux:8,AlmaLinux:9,Rocky Linux:8,Rocky Linux:9,Packagist,npm" \
+            -ecosystems "Debian:11,Debian:12,Debian:13,Ubuntu:20.04:LTS,Ubuntu:22.04:LTS,Ubuntu:24.04:LTS,AlmaLinux:8,AlmaLinux:9,Rocky Linux:8,Rocky Linux:9,Packagist,npm,PyPI,RubyGems,Go,crates.io" \
             -packages docs/vulndb-packages.txt
           sha256sum internal/vulndb/data/snapshot.json.gz
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

@@ -35,7 +35,7 @@ func TestNoCheckFiresOnHardenedLab(t *testing.T) {
 // These checks have hardened fixtures, so they must reach a real Pass rather
 // than Skip on the hardened lab.
 func TestHardenedLabPassesNotSkips(t *testing.T) {
-	want := map[string]bool{"HOST-DKR-001": true, "NET-FW-002": true, "NET-SVC-003": true, "WEB-CMS-009": true}
+	want := map[string]bool{"HOST-DKR-001": true, "NET-FW-002": true, "NET-SVC-003": true, "WEB-CMS-009": true, "NET-AI-001": true, "NET-AI-002": true, "WEB-APA-011": true}
 	r := Run(context.Background(), lab.Hardened(), Options{})
 	for _, f := range r.Findings {
 		if want[f.ID] {
