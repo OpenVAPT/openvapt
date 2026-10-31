@@ -1,13 +1,17 @@
 # Scoring, Prioritising and Reporting
 
-## CVSS v3.1
+## Scoring With CVSS
 
-OpenVAPT gives each check a base vector. Keep the base score; adjust only the environmental metrics (Confidentiality, Integrity and Availability Requirements, and Modified Attack Vector when, for example, a service is reachable only on loopback) and write one line on why. Severity bands: 0.1-3.9 Low, 4.0-6.9 Medium, 7.0-8.9 High, 9.0-10.0 Critical. Calculator: https://www.first.org/cvss/calculator/3.1.
+OpenVAPT gives each check a base vector. Keep the base score; adjust only the environmental metrics (Confidentiality, Integrity and Availability Requirements, and Modified Attack Vector when, for example, a service is reachable only on loopback) and write one line on why. Severity bands: 0.1-3.9 Low, 4.0-6.9 Medium, 7.0-8.9 High, 9.0-10.0 Critical. Calculator: https://www.first.org/cvss/calculator/3.1. CVSS 4.0 (FIRST, 2023) is now published by NVD and many vendors; when a 4.0 vector exists for a CVE, quote it next to the 3.1 score rather than replacing it. EPSS (FIRST) gives the probability that a CVE is exploited in the next 30 days; use it with the CISA KEV catalogue to rank CVEs.
+
+## Remediation Deadlines
+
+ISO/IEC 27001:2022 Annex A 8.8 expects timely remediation. Suggest, and let the user set: Critical within 7 days, High within 30 days, Medium within 90 days, Low at the next maintenance window. Anything in CISA KEV is treated as Critical. Record the agreed date with each finding.
 
 ## Priority Order
 
 1. Reachable from the network without login (exposed database, admin panel, debug mode, `.git` or `.env` served).
-2. Known exploited vulnerabilities (in the CISA KEV catalogue) and end-of-life software.
+2. Known exploited vulnerabilities (in the CISA KEV catalogue, or a high EPSS score) and end-of-life software.
 3. Privilege boundaries: extra root accounts, broad sudo, SUID, docker group, root containers.
 4. Authentication strength: SSH passwords, no lockout, weak password policy.
 5. Hardening and defence in depth: sysctl, headers, banners, permissions.
@@ -26,6 +30,7 @@ Evidence:    <file:line or command and the relevant output, secrets REDACTED>
 Impact:      <one or two plain sentences>
 Fix:         <the change>
 Rollback:    <how to undo>
+Due:         <agreed remediation date>
 Verified:    <re-scan result, date>
 References:  <CWE, CIS, OWASP, vendor advisory>
 ```

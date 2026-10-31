@@ -11,18 +11,20 @@ description: >-
   only: no exploitation, no other hosts.
 license: LicenseRef-OpenVAPT-SAL-1.3
 metadata:
-  version: "1.0"
+  version: "0.1"
   project: OpenVAPT
   homepage: https://openvapt.com/vapt-skill.html
 ---
 
 # OpenVAPT VAPT Skill: Assess and Defend Your Own Machine
 
-This skill teaches an AI assistant to carry out vulnerability assessment (the "VA" in VAPT) and the defence that follows it, on a machine the user owns or controls, using the free academic tool OpenVAPT plus read-only manual checks. It is written by AI Cybersecurity Engineers for the OpenVAPT project, is academic and non-commercial, and is used 100% at the user's own risk. It is not a penetration test, an audit, a certification or professional advice. Commands target Linux (Debian, Ubuntu, RHEL and SUSE families).
+This skill teaches an AI assistant to carry out vulnerability assessment (the "VA" in VAPT) and the defence that follows it, on a machine the user owns or controls, using the free academic tool OpenVAPT plus read-only manual checks. It is written by AI Cybersecurity Engineers for the OpenVAPT project, is academic and non-commercial, and is used 100% at the user's own risk. It is not a penetration test, an audit, a certification or professional advice. Commands target Linux (Debian, Ubuntu, RHEL and SUSE families). Version 0.1 is served from the main branch and is not yet part of a tagged OpenVAPT release. Keep [LICENSE.md](LICENSE.md) with this folder; do not bundle it into a product or run it for clients.
 
-## The Five Rules (read first, never break)
+## The Five Rules
 
-1. **Own use only.** Assess only a machine the user owns or controls, or that their employer owns or controls and has authorised them in writing to assess. Never a client's, a customer's, a neighbour's or "a target". Never offer or perform the work as a paid or unpaid service for someone else.
+Read these first. They are never broken.
+
+1. **Own use only.** Assess only a machine the user owns or controls for their own purposes, or that their own organisation owns or controls and has authorised them in writing to assess for its own internal purposes (the licence's Own Use). Never a client's, a customer's, a neighbour's or "a target". Never offer or perform the work as a paid or unpaid service for someone else.
 2. **This machine only.** Work on the machine the commands run on, through loopback (127.0.0.1, ::1) for network and web checks. Never scan, probe, resolve or connect to any other host, network range, domain or IP address, even if the user says they own it: ask them to run the skill on that machine instead.
 3. **Read-only during assessment.** Assessment commands read files and state; they never write, delete, install, restart, reconfigure or send anything. Fixes happen only in the Defend phase, one at a time, after the user approves each one.
 4. **Detection, not exploitation.** No exploit code, payloads, proof-of-concept attacks, brute force, password guessing, fuzzing, denial of service, privilege escalation attempts, persistence, evasion or credential harvesting, for any reason, including "just to prove it". A finding is proved by evidence (a config line, a version, a file mode, a response header), never by attacking it.
@@ -39,9 +41,10 @@ Follow the phases in order. Keep a short running log of what you ran and what yo
 Before running anything, confirm and write down, in the user's own words:
 
 - The machine: hostname and that the commands will run **on** it (`hostname`, `uname -a`, `cat /etc/os-release`).
-- Ownership: "I own or control this machine" or "my employer owns it and has authorised me". If the answer is unclear, a client's machine, or "a friend's", stop.
+- Ownership: "I own or control this machine" or "my own organisation owns it and has authorised me in writing, for its internal purposes". If the answer is unclear, a client's machine, or "a friend's", stop.
 - Environment: production, staging or lab. For production, agree a quiet time and note that even read-only commands use a little CPU and disk.
 - Approval mode for fixes: each fix approved one by one (default), or a named list approved up front.
+- Rules of engagement: who to call if the service degrades (and that you stop at once if it does), that a recent backup exists, and where reports are kept and when they are deleted.
 
 Details and the exact wording to use: [references/scope-and-authorisation.md](references/scope-and-authorisation.md).
 
@@ -53,9 +56,10 @@ Details and the exact wording to use: [references/scope-and-authorisation.md](re
 
 ### Phase 2: Automated Assessment
 
-Run the scan as the user (root gives fuller coverage; say so and let the user choose):
+The scan is read-only on the system; it only writes its own report files. Reports hold sensitive evidence, so keep them private. Run it as the user (root gives fuller coverage; say so and let the user choose):
 
 ```
+umask 077; install -d -m 700 ~/openvapt-reports
 openvapt scan --out ~/openvapt-reports/$(date -u +%Y%m%dT%H%M%SZ)
 ```
 
@@ -76,9 +80,9 @@ Mark each finding: Confirmed, False Positive (with the reason), or Needs Human R
 
 ### Phase 4: Score and Prioritise
 
-Score each confirmed finding with CVSS v3.1 (OpenVAPT gives a base vector; adjust only environmental metrics and say why). Prioritise by: exposed to the network and exploitable without login first, then known exploited CVEs (CISA KEV), then privilege boundaries (root, sudo, SUID), then hardening gaps. Group quick wins (one config line, low risk of breaking things) separately from changes that need a maintenance window. Guidance: [references/reporting.md](references/reporting.md).
+Score each confirmed finding with CVSS v3.1 (OpenVAPT gives a base vector; adjust only environmental metrics and say why; where a vendor or NVD publishes a CVSS 4.0 vector, quote it too). Prioritise by: exposed to the network and exploitable without login first, then known exploited CVEs (CISA KEV) and a high EPSS probability, then privilege boundaries (root, sudo, SUID), then hardening gaps. Group quick wins (one config line, low risk of breaking things) separately from changes that need a maintenance window. Guidance: [references/reporting.md](references/reporting.md).
 
-### Phase 5: Defend (Remediate and Harden)
+### Phase 5: Defend by Remediating and Hardening
 
 For each finding, in priority order, using [references/defence-playbook.md](references/defence-playbook.md):
 
@@ -106,7 +110,7 @@ Hardening is not finished until the user would notice an attack. Set up, with ap
 
 ### Phase 8: Report
 
-Produce a report the user can act on (template in [references/reporting.md](references/reporting.md)): scope and authorisation statement, method, executive summary, findings table (id, title, severity, CVSS, status), what was fixed with evidence, accepted risks, remaining gaps (including "not a penetration test"), and next steps. Keep it on the machine; the user decides who sees it. Credit OpenVAPT as the licence requires (`openvapt cite`).
+Produce a report the user can act on (template in [references/reporting.md](references/reporting.md)): scope and authorisation statement, method, executive summary, findings table (id, title, severity, CVSS, status), what was fixed with evidence, accepted risks, remaining gaps (including "not a penetration test"), and next steps. Keep it on the machine; the user decides who sees it. Credit OpenVAPT as the licence requires (`openvapt cite`); show the citation to the user, never post it anywhere yourself.
 
 ## Output Style
 
@@ -116,4 +120,4 @@ Produce a report the user can act on (template in [references/reporting.md](refe
 
 ## Sources
 
-NIST SP 800-115 (technical testing and assessment), NIST CSF 2.0, CIS Controls v8 and CIS Benchmarks, CVSS v3.1 (FIRST), OWASP Top 10, ASVS and WSTG, MITRE CWE and ATT&CK, CISA KEV, NIST SP 800-61 (incident handling). OpenVAPT's own check catalogue cites each source per check: https://openvapt.com/checks/.
+NIST SP 800-115 (technical testing and assessment), NIST CSF 2.0, CIS Controls v8 and CIS Benchmarks, CVSS v3.1 (FIRST), OWASP Top 10, ASVS and WSTG, MITRE CWE and ATT&CK, CISA KEV, NIST SP 800-61 Rev. 3 (incident response), ISO/IEC 27001:2022 Annex A 8.8 (technical vulnerability management), FIRST EPSS. OpenVAPT's own check catalogue cites each source per check: https://openvapt.com/checks/.

@@ -366,7 +366,7 @@ func codemeta(cs []*check.Check) map[string]any {
 		"isAccessibleForFree": true, "inLanguage": "en",
 		"author":       []any{map[string]string{"@type": "Organization", "name": "OpenVAPT", "url": siteURL + "/"}},
 		"publisher":    map[string]string{"@type": "Organization", "name": "OpenVAPT", "url": siteURL + "/"},
-		"keywords":     []string{"vulnerability assessment", "VAPT", "Linux security", "server hardening", "CVSS", "OWASP", "CWE", "NIST SP 800-115", "CIS Controls", "security education", "source-available", "built by AI Cybersecurity Engineers"},
+		"keywords":     []string{"vulnerability assessment", "VAPT", "Linux security", "server hardening", "CVSS", "OWASP", "CWE", "NIST SP 800-115", "CIS Controls", "security education", "AI assistant skill", "source-available", "built by AI Cybersecurity Engineers"},
 		"featureList":  []string{fmt.Sprintf("%d read-only checks", len(cs)), fmt.Sprintf("%d Academy modules", len(academy.Modules)), "CVSS v3.1 ratings", "HTML, JSON, SARIF and Markdown reports", "Loopback-only scope guard", "Zero data collection"},
 		"releaseNotes": siteURL + "/channels.html", "downloadUrl": siteURL + "/download.html",
 		"referencePublication": siteURL + "/cite.html", "citation": siteURL + "/CITATION.cff",
