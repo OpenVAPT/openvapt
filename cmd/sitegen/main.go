@@ -267,7 +267,7 @@ func main() {
 		}
 		body = strings.ReplaceAll(body, "](references/", "]("+skillDir+"/references/")
 		skillHTML += `<section id="` + strings.TrimSuffix(filepath.Base(f), ".md") + `">` + markdown(body) + `</section>`
-		must(os.MkdirAll(filepath.Join(*outDir, skillDir, filepath.Dir(f)), 0o755))
+		must(os.MkdirAll(filepath.Join(*outDir, skillDir, filepath.Dir(f)), 0o755)) // #nosec G301 -- public website directory
 		must(os.WriteFile(filepath.Join(*outDir, skillDir, f), b, 0o644)) // #nosec G306 -- public website file
 	}
 	g.inputs = skillInputs
