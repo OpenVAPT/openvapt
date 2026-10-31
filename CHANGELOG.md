@@ -5,6 +5,7 @@ All notable changes are documented here. This project follows Semantic Versionin
 ## [Unreleased]
 
 - VAPT Skill for AI Assistants: `skills/openvapt-vapt/` (SKILL.md with scope gate, assessment, defence and reporting references), published at /vapt-skill.html with the raw files under /skills/openvapt-vapt/, linked from the footer, For Machines and AI, llms.txt and the sitemap.
+- VAPT skill audit round (four fresh reviewers): RHEL-family firewalld, authselect and SELinux steps; cache-only `dnf -C` so assessment never contacts mirrors; corrected `rpm -Va` filter; inventory, rules of engagement, CVSS 4.0 and EPSS notes, remediation deadlines (ISO/IEC 27001 A 8.8), NIST SP 800-61 Rev. 3 with volatile data and chain of custody; Own Use wording aligned with the licence; LICENSE.md travels with the folder; version 0.1. Page: contents, one section per document with in-page links, Title Case headings, longer title; FAQ entry; llms-full.txt summary; test `TestSkillPage`. WebMCP: script path uses the site base, llms.txt no longer claims forms or contact tools, CSP `connect-src 'self'` in root.htaccess so its same-origin reads work; `.md` served as UTF-8.
 - WebMCP: every page loads the read-only /webmcp.js; llms.txt gains a WebMCP (AI Assistant Tools) section.
 
 ## [v0.1.0-alpha.6] - 2026-10-15

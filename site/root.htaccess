@@ -23,6 +23,7 @@ AddType text/plain .cff
 # Sample reports and Markdown documents.
 AddType application/sarif+json .sarif
 AddType text/markdown .md
+AddCharset utf-8 .md
 # Web app manifest and the Atom feed.
 AddType application/manifest+json .webmanifest
 AddType application/atom+xml .atom
@@ -56,7 +57,7 @@ AddType application/atom+xml .atom
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
   Header always set Cross-Origin-Opener-Policy "same-origin"
   Header always set Cross-Origin-Resource-Policy "same-origin"
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; object-src 'none'"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; object-src 'none'"
   # Markdown twins of pages (checks/*.md, academy/*.md, faq.md, glossary.md)
   # and the sample Markdown reports are for readers, scripts and AI tools; the
   # HTML page is the one address search engines should index.

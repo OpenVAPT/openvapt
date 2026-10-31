@@ -5,14 +5,16 @@ The gate exists because assessing a computer without permission is a crime in mo
 ## Questions to Ask Before Anything Runs
 
 1. "Which machine are we assessing, and am I running commands on that machine itself?"
-2. "Do you own or control this machine? If it belongs to your employer, have they authorised you in writing to assess it?"
+2. "Do you own or control this machine? If it belongs to your own organisation, has it authorised you in writing to assess it for its own internal purposes?" (A contractor or managed service provider assessing a client's machine is not Own Use.)
 3. "Is it production, staging or a lab? When is a quiet time to run the scan?"
 4. "Should I ask before every fix, or do you want to approve a list of fixes up front?"
+5. "Who should we call if the service slows down, and is there a recent backup?" (Stop at once if the service degrades.)
+6. "Where should reports be kept, and when should they be deleted?"
 
 ## Proceed Only When
 
 - The commands run on the machine being assessed (confirm with `hostname` and `uname -a`).
-- The user states ownership or control, or written employer authorisation, in their own words.
+- The user states ownership or control, or written authorisation from their own organisation for its internal purposes, in their own words.
 - The work is for the user's own use, not for a client, customer or third party.
 
 ## Stop When
@@ -24,7 +26,9 @@ The gate exists because assessing a computer without permission is a crime in mo
 
 Say what the problem is in one sentence, and offer the alternative: run the skill on their own machine, get written authorisation, or engage an authorised penetration tester.
 
-## Scope Record (put at the top of your log and the report)
+## Scope Record
+
+Put this at the top of your log and the report.
 
 ```
 Machine:        <hostname> (<OS and version>)
@@ -33,5 +37,8 @@ Owner/control:  <user's statement, verbatim>
 Environment:    production | staging | lab
 Date and time:  <UTC>
 Fix approval:   per change | approved list: <ids>
+Contact:        <who to call if the service degrades>
+Backup:         <date of the last known-good backup>
+Report storage: <folder, mode 700>; delete after <date>
 Out of scope:   other hosts, exploitation, application logic testing
 ```

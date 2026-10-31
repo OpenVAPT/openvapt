@@ -252,27 +252,9 @@ func main() {
 
 	// The VAPT skill for AI assistants: one page rendered from SKILL.md and its
 	// references, plus the raw files so an assistant can install them as-is.
-	skillDir := "skills/openvapt-vapt"
-	skillHTML := `<div class="legal"><h1>VAPT Skill for AI Assistants</h1><p class="muted">Install: copy the folder <a href="skills/openvapt-vapt/SKILL.md">skills/openvapt-vapt</a> (SKILL.md and references/) into your assistant's skills folder, for example ~/.claude/skills/ or .claude/skills/ in a project. Source on <a href="` + repoURL + `/tree/main/skills/openvapt-vapt">GitHub</a>.</p>`
-	skillInputs := []string{layoutFile, "cmd/sitegen/markdown.go"}
-	for _, f := range []string{"SKILL.md", "references/scope-and-authorisation.md", "references/assessment-playbook.md", "references/defence-playbook.md", "references/reporting.md"} {
-		b, err := os.ReadFile(filepath.Join(skillDir, f)) // #nosec G304 -- fixed build-time paths
-		must(err)
-		skillInputs = append(skillInputs, filepath.Join(skillDir, f))
-		body := string(b)
-		if strings.HasPrefix(body, "---\n") {
-			if i := strings.Index(body[4:], "\n---\n"); i >= 0 {
-				body = body[4+i+5:]
-			}
-		}
-		body = strings.ReplaceAll(body, "](references/", "]("+skillDir+"/references/")
-		skillHTML += `<section id="` + strings.TrimSuffix(filepath.Base(f), ".md") + `">` + markdown(body) + `</section>`
-		must(os.MkdirAll(filepath.Join(*outDir, skillDir, filepath.Dir(f)), 0o755)) // #nosec G301 -- public website directory
-		must(os.WriteFile(filepath.Join(*outDir, skillDir, f), b, 0o644))           // #nosec G306 -- public website file
-	}
-	g.inputs = skillInputs
-	g.page("vapt-skill.html", "vapt-skill.html", "VAPT Skill for AI Assistants", "A free skill that teaches AI assistants to assess and defend your own Linux machine with OpenVAPT: read-only checks, CVSS, hardening, re-scan and report.", "machine",
-		template.HTML(skillHTML+`</div>`)) // #nosec G203 -- markdown() HTML-escapes all text first
+	skillHTML, skillInputs := renderSkill(*outDir)
+	g.inputs = append(skillInputs, layoutFile, "cmd/sitegen/markdown.go")
+	g.page("vapt-skill.html", "vapt-skill.html", "VAPT Skill for AI Assistants: Assess and Defend", "A free skill that teaches AI assistants to assess and defend your own Linux machine with OpenVAPT: scope gate, read-only checks, CVSS, fixes, re-scan, report.", "machine", skillHTML)
 
 	if len(g.problems) > 0 {
 		log.Fatalf("%d page(s) break the title or description length rules (title with suffix <= %d, description %d to %d characters); fix them above", len(g.problems), maxTitle, minDesc, maxDesc)
@@ -956,10 +938,8 @@ This site supports WebMCP (https://webmachinelearning.github.io/webmcp/), the W3
 - get_faq: the questions and answers published on the open page (FAQ structured data and FAQ items)
 - get_page_sections, read_page_section, search_page: outline, section text and search of the open page
 - go_to_section, open_site_page: scroll to a section or open another page on this same site
-- get_contact_options: published contact links (contact page, email, phone, WhatsApp)
-- list_page_dialogs, open_page_dialog: list and open the page's pop-up dialogs
 
-Public enquiry and demo forms also carry the declarative WebMCP attributes (toolname, tooldescription, toolparamdescription). An agent may fill a form in for the visitor to check, but the visitor always presses Submit. No tool sends data, submits a form, sets cookies or contacts any other website.` + "\n")
+openvapt.com has no forms, accounts or contact details. No tool sends data, submits anything, sets cookies or contacts any other website.` + "\n")
 	l.WriteString("\n## FAQ\n\n")
 	for _, f := range faqs {
 		l.WriteString("### " + f.Q + "\n" + f.A + "\n\n")
@@ -967,7 +947,7 @@ Public enquiry and demo forms also carry the declarative WebMCP attributes (tool
 	must(os.WriteFile(filepath.Join(*outDir, "llms.txt"), []byte(l.String()), 0o644)) // #nosec G306 -- public website file
 
 	var full strings.Builder
-	full.WriteString(l.String() + "\n## All checks\n\n")
+	full.WriteString(l.String() + "\n## VAPT Skill for AI Assistants\n\n" + siteURL + "/vapt-skill.html (source: " + siteURL + "/" + skillDir + "/SKILL.md). An Agent Skills folder that teaches an AI assistant to assess and defend a Linux machine the user owns or controls: a scope and authorisation gate, an OpenVAPT scan, read-only manual checks, CVSS v3.1 scoring with KEV and EPSS, remediation and hardening with backups and rollback, a re-scan to check each fix, detection and monitoring, incident first response and a report. Rules: own use only, this machine only over loopback, read-only assessment, no exploitation, secrets redacted, nothing leaves the machine. It reduces risk; it does not make a machine secure and is not a penetration test.\n\n## All checks\n\n")
 	for _, c := range cs {
 		fmt.Fprintf(&full, "### %s %s\n- Domain: %s, severity: %s, CVSS: %s\n- What: %s\n- Why: %s\n- How detected: %s\n- Fix: %s\n- Verify: %s\n- Source: %s/blob/%s/%s\n\n",
 			c.ID, c.Title, c.Domain, c.Severity, c.CVSS, c.Summary, c.Rationale, c.Detection, c.Fix, c.Verify, repoURL, commit, c.SourceFile)

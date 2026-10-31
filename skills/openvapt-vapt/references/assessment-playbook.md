@@ -6,14 +6,17 @@ Every command here only reads. Run them on the machine being assessed. Some need
 
 The matching OpenVAPT check prefix is shown in brackets so you can cross-check with `openvapt explain <ID>`.
 
-## 1. System and Patches [HOST-OS, HOST-PKG, HOST-UPD, HOST-CVE]
+## 1. System, Inventory and Patches [HOST-OS, HOST-PKG, HOST-UPD, HOST-CVE]
 
 ```
 cat /etc/os-release; uname -r
 # Debian/Ubuntu
+# Uses the local package lists only; they may be stale until the user runs apt update.
 apt list --upgradable 2>/dev/null | head -50
-# RHEL/Fedora/Alma/Rocky
-dnf check-update --security 2>/dev/null | head -50
+# RHEL/Fedora/Alma/Rocky: -C reads the local cache only (no download), which may also be stale
+dnf -C check-update --security 2>/dev/null | head -50
+# Software inventory (CIS Controls 1 and 2): keep a copy with the report
+dpkg -l 2>/dev/null | wc -l; rpm -qa 2>/dev/null | wc -l
 # Is the release still supported? Compare with the vendor's end-of-life page.
 ```
 Look for: end-of-life releases, pending security updates, kernel older than the installed package (reboot pending: `needrestart -r l` or compare `uname -r` with the newest installed kernel), automatic updates off.
@@ -92,7 +95,7 @@ docker inspect --format '{{.Name}} priv={{.HostConfig.Privileged}} user={{.Confi
 ```
 Look for: users in the docker group (equal to root), privileged containers, containers running as root, ports published on 0.0.0.0.
 
-## 9. Network, Loopback View [NET-LSN, NET-FW, NET-DB, NET-SVC, NET-MAIL, NET-DNS, NET-AI]
+## 9. Network as Seen From Loopback [NET-LSN, NET-FW, NET-DB, NET-SVC, NET-MAIL, NET-DNS, NET-AI]
 
 ```
 ss -tulpn                                   # what listens, on which address (IPv4 and IPv6)
@@ -125,13 +128,13 @@ Then read the server and app config files rather than probing:
 - nginx: `nginx -T 2>/dev/null | grep -E 'server_tokens|autoindex|ssl_protocols|add_header'` [WEB-NGX]
 - Apache: `apachectl -S; grep -rE 'ServerTokens|ServerSignature|Options .*Indexes|TraceEnable' /etc/apache2 /etc/httpd 2>/dev/null` [WEB-APA]
 - PHP: the web server's PHP settings, not the CLI's: `grep -Ei '^(display_errors|expose_php|allow_url_include|session.cookie_(secure|httponly|samesite))' /etc/php/*/fpm/php.ini /etc/php.ini 2>/dev/null` (`php -i` shows only the command-line configuration) [WEB-PHP]
-- Framework debug: `APP_DEBUG`, `DEBUG = True`, `NODE_ENV` in app env files (report the setting, redact every secret on the same file) [WEB-APP, WEB-PY, WEB-NODE]
+- Framework debug: read only the named keys, never the whole file, for example `grep -E '^(APP_DEBUG|APP_ENV|DEBUG|NODE_ENV)=' <app>/.env` [WEB-APP, WEB-PY, WEB-NODE]
 - CMS: core and plugin versions from files on disk, compared with vendor advisories [WEB-CMS, WEB-CVE]
 
 ## 11. Integrity and Stray Secrets [HOST-PKG, HOST-SEC]
 
 ```
-debsums -s 2>/dev/null || rpm -Va 2>/dev/null | grep -v '^.......T' | head -40   # changed package files
+debsums -s 2>/dev/null || rpm -Va 2>/dev/null | grep -v '^\.\.\.\.\.\.\.T' | head -40   # changed package files
 find / -xdev \( -name '.env' -o -name '*.sql' -o -name '*.bak' -o -name '*.key' -o -name 'id_rsa' \) -perm -o=r -type f 2>/dev/null | head
 ls -l /root/.bash_history /home/*/.bash_history 2>/dev/null
 ```

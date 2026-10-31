@@ -112,7 +112,7 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 
 ## VAPT Skill for AI Assistants
 
-[skills/openvapt-vapt](skills/openvapt-vapt/SKILL.md) is a free Agent Skills folder that teaches an AI assistant (Claude Code, OpenAI Codex, OpenCode and others that read SKILL.md) to assess and defend a machine you own or control: a scope and authorisation gate, an OpenVAPT scan, read-only manual checks, CVSS scoring, hardening with backups and rollback, a re-scan to prove each fix, detection and monitoring, and a report. It is detection and defence only: loopback only, no exploit code, no other hosts. Copy the folder into `~/.claude/skills/` or your project's `.claude/skills/`. Read it online at https://openvapt.com/vapt-skill.html.
+[skills/openvapt-vapt](skills/openvapt-vapt/SKILL.md) is a free Agent Skills folder that teaches an AI assistant (Claude Code, OpenAI Codex, OpenCode and others that read SKILL.md) to assess and defend a machine you own or control: a scope and authorisation gate, an OpenVAPT scan, read-only manual checks, CVSS scoring, hardening with backups and rollback, a re-scan to check each fix, detection and monitoring, and a report. It is detection and defence only: loopback only, no exploit code, no other hosts. Copy the folder into `~/.claude/skills/` or your project's `.claude/skills/` and keep its LICENSE.md with it. Own Use only: do not bundle it into a product or run it for clients or as a service. It helps reduce risk; it does not make a machine secure. Version 0.1 ships from the main branch and is not yet in a tagged release. Read it online at https://openvapt.com/vapt-skill.html.
 
 ## Commands
 
