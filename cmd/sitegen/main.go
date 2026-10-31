@@ -250,6 +250,30 @@ func main() {
 			template.HTML(`<div class="legal"><h1>`+template.HTMLEscapeString(l.title)+`</h1>`+note+markdown(string(b))+`</div>`)) // #nosec G203 -- markdown() HTML-escapes all text first
 	}
 
+	// The VAPT skill for AI assistants: one page rendered from SKILL.md and its
+	// references, plus the raw files so an assistant can install them as-is.
+	skillDir := "skills/openvapt-vapt"
+	skillHTML := `<div class="legal"><h1>VAPT Skill for AI Assistants</h1><p class="muted">Install: copy the folder <a href="skills/openvapt-vapt/SKILL.md">skills/openvapt-vapt</a> (SKILL.md and references/) into your assistant's skills folder, for example ~/.claude/skills/ or .claude/skills/ in a project. Source on <a href="` + repoURL + `/tree/main/skills/openvapt-vapt">GitHub</a>.</p>`
+	skillInputs := []string{layoutFile, "cmd/sitegen/markdown.go"}
+	for _, f := range []string{"SKILL.md", "references/scope-and-authorisation.md", "references/assessment-playbook.md", "references/defence-playbook.md", "references/reporting.md"} {
+		b, err := os.ReadFile(filepath.Join(skillDir, f)) // #nosec G304 -- fixed build-time paths
+		must(err)
+		skillInputs = append(skillInputs, filepath.Join(skillDir, f))
+		body := string(b)
+		if strings.HasPrefix(body, "---\n") {
+			if i := strings.Index(body[4:], "\n---\n"); i >= 0 {
+				body = body[4+i+5:]
+			}
+		}
+		body = strings.ReplaceAll(body, "](references/", "]("+skillDir+"/references/")
+		skillHTML += `<section id="` + strings.TrimSuffix(filepath.Base(f), ".md") + `">` + markdown(body) + `</section>`
+		must(os.MkdirAll(filepath.Join(*outDir, skillDir, filepath.Dir(f)), 0o755)) // #nosec G301 -- public website directory
+		must(os.WriteFile(filepath.Join(*outDir, skillDir, f), b, 0o644))           // #nosec G306 -- public website file
+	}
+	g.inputs = skillInputs
+	g.page("vapt-skill.html", "vapt-skill.html", "VAPT Skill for AI Assistants", "A free skill that teaches AI assistants to assess and defend your own Linux machine with OpenVAPT: read-only checks, CVSS, hardening, re-scan and report.", "machine",
+		template.HTML(skillHTML+`</div>`)) // #nosec G203 -- markdown() HTML-escapes all text first
+
 	if len(g.problems) > 0 {
 		log.Fatalf("%d page(s) break the title or description length rules (title with suffix <= %d, description %d to %d characters); fix them above", len(g.problems), maxTitle, minDesc, maxDesc)
 	}
@@ -917,11 +941,25 @@ func writeSEO(paths []string, mods map[string]string, cs []*check.Check) {
 	var l strings.Builder
 	l.WriteString("# OpenVAPT\n\n> OpenVAPT is a free, academic, non-commercial vulnerability assessment (VA) tool for Linux servers with source-available code, researched, developed and built entirely by AI Cybersecurity Engineers under human direction. AI Cybersecurity Engineers are AI systems (Claude by Anthropic, through Claude Code, and OpenAI Codex) acting in a cyber security engineering role. They are not people, not registered or professional engineers, and provide no professional engineering or security service. It runs read-only checks on the machine it is installed on (and only that machine) to identify weaknesses in the server, its network exposure and its websites, rates findings with CVSS v3.1 and proposes cited fixes. It is made for learning how a VAPT tool works. It is not a business, not a penetration testing service and collects no data.\n\n")
 	l.WriteString("Key facts:\n- Price: free. No account, no licence key.\n- Use: anyone in any country, including companies, may use it on machines they own or control, for their own use. It may not be sold or used to provide services.\n- Risk: a free gift provided as is, with no warranty; users carry 100% of the risk.\n- Licence: OpenVAPT Source-Available Licence 1.3 (LicenseRef-OpenVAPT-SAL-1.3): own use only, no services, no selling.\n- Platform: Linux. Single static Go binary, standard library only.\n- Scope: designed to be loopback-only, enforced in code. Detection only, no exploit code.\n- Standards: NIST SP 800-115, CVSS v3.1, OWASP Top 10 2021, OWASP ASVS 4.0.3, CWE, NIST SP 800-53.\n- Source: " + repoURL + "\n- Researched, developed and built entirely by AI Cybersecurity Engineers (Claude by Anthropic via Claude Code, with OpenAI Codex) under the owner's direction; not audited by a human security expert or reviewed by a human lawyer.\n- Third-party names identify those projects only; their owners do not sponsor, endorse or have any connection with OpenVAPT.\n\n## Docs\n\n")
-	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How It Is Built, With Code Citations"}, {"checks/", "Check Catalogue"}, {"standards.html", "Standards and Methodology"}, {"compare.html", "Comparison With Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What It Does Not Do"}, {"learn.html", "Lessons and Lab"}, {"teach.html", "For Teachers: Course Plans, Worksheets, Rubric, Practice Labs"}, {"legal/teaching.html", "Teaching Terms"}, {"download.html", "Download and Acknowledgements: Download Only, or Download and Scan in One Command"}, {"channels.html", "Release Channels and Promotion Gates"}, {"no-data.html", "No Data Collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}, {"legal/licence.html", "Licence"}, {"cite.html", "How to Cite OpenVAPT (APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, RIS, CSL-JSON)"}, {"legal/citing.html", "Citing OpenVAPT: Credit and Citation Guide"}, {"legal/credits.html", "Credits, Sources and Citations"}, {"legal/sources.html", "Every Source Cited, by Publisher"}, {"legal/governance.html", "Governance, Control and Assurance Framework"}, {"academy/", "OpenVAPT Academy: Free VAPT Course From Theory to Application"}, {"glossary.html", "VAPT Glossary"}, {"coverage.html", "Coverage Dashboard: Checks by Category, Severity and Framework"}, {"checks/catalogue.json", "Check Catalogue Dataset (JSON)"}, {"legal/ai-disclosure.html", "AI Disclosure"}, {"legal/agents.html", "AI Cybersecurity Engineer Policy"}, {".well-known/security.txt", "Security Contact (RFC 9116 security.txt)"}, {"machine-readable.html", "For Machines and AI: Every Data File (sitemap, feed, Markdown twins, datasets)"}, {"feed.xml", "Releases Feed (Atom)"}, {"codemeta.json", "Research Software Metadata (codemeta.json)"}, {"llms-full.txt", "Full Text for Models: every check and FAQ (llms-full.txt)"}} {
+	for _, p := range [][2]string{{"faq.html", "FAQ"}, {"how-it-works.html", "How It Is Built, With Code Citations"}, {"checks/", "Check Catalogue"}, {"standards.html", "Standards and Methodology"}, {"compare.html", "Comparison With Lynis, OpenSCAP, OpenVAS, Nuclei, Trivy, ZAP"}, {"limits.html", "What It Does Not Do"}, {"learn.html", "Lessons and Lab"}, {"teach.html", "For Teachers: Course Plans, Worksheets, Rubric, Practice Labs"}, {"legal/teaching.html", "Teaching Terms"}, {"download.html", "Download and Acknowledgements: Download Only, or Download and Scan in One Command"}, {"channels.html", "Release Channels and Promotion Gates"}, {"no-data.html", "No Data Collected"}, {"legal/eula.html", "EULA"}, {"legal/disclaimer.html", "Disclaimer"}, {"legal/privacy.html", "Privacy Policy"}, {"legal/licence.html", "Licence"}, {"cite.html", "How to Cite OpenVAPT (APA, IEEE, Harvard, MLA, Chicago, Vancouver, BibTeX, RIS, CSL-JSON)"}, {"legal/citing.html", "Citing OpenVAPT: Credit and Citation Guide"}, {"legal/credits.html", "Credits, Sources and Citations"}, {"legal/sources.html", "Every Source Cited, by Publisher"}, {"legal/governance.html", "Governance, Control and Assurance Framework"}, {"academy/", "OpenVAPT Academy: Free VAPT Course From Theory to Application"}, {"glossary.html", "VAPT Glossary"}, {"coverage.html", "Coverage Dashboard: Checks by Category, Severity and Framework"}, {"checks/catalogue.json", "Check Catalogue Dataset (JSON)"}, {"legal/ai-disclosure.html", "AI Disclosure"}, {"legal/agents.html", "AI Cybersecurity Engineer Policy"}, {".well-known/security.txt", "Security Contact (RFC 9116 security.txt)"}, {"machine-readable.html", "For Machines and AI: Every Data File (sitemap, feed, Markdown twins, datasets)"}, {"vapt-skill.html", "VAPT Skill for AI Assistants: assess and defend your own machine (SKILL.md)"}, {"skills/openvapt-vapt/SKILL.md", "VAPT Skill Source (Agent Skills SKILL.md)"}, {"feed.xml", "Releases Feed (Atom)"}, {"codemeta.json", "Research Software Metadata (codemeta.json)"}, {"llms-full.txt", "Full Text for Models: every check and FAQ (llms-full.txt)"}} {
 		l.WriteString("- [" + p[1] + "](" + siteURL + "/" + p[0] + ")\n")
 	}
 	l.WriteString("\n## Markdown Versions\n\nEvery check page, every Academy module, the FAQ and the glossary have a Markdown twin at the same address with .md instead of .html, for example " + siteURL + "/checks/HOST-SSH-001.md and " + siteURL + "/academy/f1.md. Each twin starts with front matter naming the canonical HTML page, the licence and the last change date.\n")
 	l.WriteString(llmsCite())
+	// WebMCP: pages load /webmcp.js (static/webmcp.js), read-only agent tools.
+	l.WriteString("\n" + `## WebMCP (AI Assistant Tools)
+
+This site supports WebMCP (https://webmachinelearning.github.io/webmcp/), the W3C draft that lets a website offer tools to an AI assistant running in the visitor's browser. Every public page loads /webmcp.js, which registers these read-only tools through document.modelContext:
+
+- get_site_overview: page title, description, structured data and this llms.txt summary
+- list_site_pages: public pages from /sitemap.xml, optionally filtered by keyword
+- get_faq: the questions and answers published on the open page (FAQ structured data and FAQ items)
+- get_page_sections, read_page_section, search_page: outline, section text and search of the open page
+- go_to_section, open_site_page: scroll to a section or open another page on this same site
+- get_contact_options: published contact links (contact page, email, phone, WhatsApp)
+- list_page_dialogs, open_page_dialog: list and open the page's pop-up dialogs
+
+Public enquiry and demo forms also carry the declarative WebMCP attributes (toolname, tooldescription, toolparamdescription). An agent may fill a form in for the visitor to check, but the visitor always presses Submit. No tool sends data, submits a form, sets cookies or contacts any other website.` + "\n")
 	l.WriteString("\n## FAQ\n\n")
 	for _, f := range faqs {
 		l.WriteString("### " + f.Q + "\n" + f.A + "\n\n")

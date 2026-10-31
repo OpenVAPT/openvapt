@@ -4,7 +4,8 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
-_No changes recorded yet._
+- VAPT Skill for AI Assistants: `skills/openvapt-vapt/` (SKILL.md with scope gate, assessment, defence and reporting references), published at /vapt-skill.html with the raw files under /skills/openvapt-vapt/, linked from the footer, For Machines and AI, llms.txt and the sitemap.
+- WebMCP: every page loads the read-only /webmcp.js; llms.txt gains a WebMCP (AI Assistant Tools) section.
 
 ## [v0.1.0-alpha.6] - 2026-10-15
 

@@ -110,6 +110,10 @@ curl -fsSL https://raw.githubusercontent.com/OpenVAPT/openvapt/main/scripts/inst
 
 **Optional verified binaries.** For machines without Go, each release publishes Linux binaries built only by GitHub Actions through the promotion workflow (promote.yml, after every channel gate passed), with `SHA256SUMS`, Sigstore signature bundles, build provenance, an SBOM and a source archive. See [docs/REPORT_SIGNING.md](docs/REPORT_SIGNING.md) for the `gh attestation verify` and `cosign verify-blob` commands. You can rebuild the same bytes yourself with `GOTOOLCHAIN=go1.26.9 make release VERSION=<tag>` using the same Go version, and compare checksums.
 
+## VAPT Skill for AI Assistants
+
+[skills/openvapt-vapt](skills/openvapt-vapt/SKILL.md) is a free Agent Skills folder that teaches an AI assistant (Claude Code, OpenAI Codex, OpenCode and others that read SKILL.md) to assess and defend a machine you own or control: a scope and authorisation gate, an OpenVAPT scan, read-only manual checks, CVSS scoring, hardening with backups and rollback, a re-scan to prove each fix, detection and monitoring, and a report. It is detection and defence only: loopback only, no exploit code, no other hosts. Copy the folder into `~/.claude/skills/` or your project's `.claude/skills/`. Read it online at https://openvapt.com/vapt-skill.html.
+
 ## Commands
 
 | Command | Purpose |
