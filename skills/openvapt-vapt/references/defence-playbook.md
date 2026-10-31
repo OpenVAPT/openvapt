@@ -21,7 +21,7 @@ Never lock the user out: before SSH or firewall changes, keep the current sessio
 - Lock unused accounts: `sudo usermod -L -s /usr/sbin/nologin <user>`.
 - Remove extra UID 0 accounts (after checking what uses them).
 - Narrow sudo: replace `ALL=(ALL) NOPASSWD: ALL` with the specific commands needed; edit only with `visudo -f /etc/sudoers.d/<file>`.
-- Lockout and password quality: never hand-edit `/etc/pam.d` (a mistake can lock everyone out, and on RHEL authselect overwrites hand edits). RHEL family: `sudo authselect enable-feature with-faillock`, then set `deny = 5` and `unlock_time = 900` in `/etc/security/faillock.conf`. Debian and Ubuntu: set the same in `/etc/security/faillock.conf` and enable the profile with `sudo pam-auth-update`. Password quality: `minlen = 14` in `/etc/security/pwquality.conf`. Keep a root session open and test a fresh login before closing it.
+- Lockout and password quality: never hand-edit `/etc/pam.d` (a mistake can lock everyone out, and on RHEL authselect overwrites hand edits). RHEL family: `sudo authselect enable-feature with-faillock`, then set `deny = 5` and `unlock_time = 900` in `/etc/security/faillock.conf`. Debian and Ubuntu: set the same in `/etc/security/faillock.conf`; these systems ship no faillock profile for `pam-auth-update`, so faillock needs a local profile in `/usr/share/pam-configs/` (check that `pam-auth-update` then lists it) before it takes effect. If unsure, leave lockout to fail2ban and say so. Password quality: `minlen = 14` in `/etc/security/pwquality.conf`. Keep a root session open and test a fresh login before closing it.
 - Remove users from the `docker` group unless they need root-equivalent access.
 
 ## 3. SSH

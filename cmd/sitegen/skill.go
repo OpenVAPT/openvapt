@@ -51,8 +51,12 @@ func renderSkill(outDir string) (template.HTML, []string) {
 		})
 		text = strings.ReplaceAll(text, "](LICENSE.md)", "]("+skillDir+"/LICENSE.md)")
 		var lines []string
+		fenced := false
 		for _, l := range strings.Split(text, "\n") {
-			if strings.HasPrefix(l, "#") {
+			if strings.HasPrefix(strings.TrimSpace(l), "```") {
+				fenced = !fenced
+			}
+			if !fenced && strings.HasPrefix(l, "#") {
 				l = "#" + l
 			}
 			lines = append(lines, l)

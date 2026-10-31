@@ -25,7 +25,7 @@ func TestSkillPage(t *testing.T) {
 			t.Errorf("section or contents link for %s missing", id)
 		}
 	}
-	for _, bad := range []string{"](references/", "name: openvapt-vapt", "license: LicenseRef"} {
+	for _, bad := range []string{"## RHEL", "## Uses the local", "](references/", "name: openvapt-vapt", "license: LicenseRef"} {
 		if strings.Contains(html, bad) {
 			t.Errorf("page contains %q", bad)
 		}
