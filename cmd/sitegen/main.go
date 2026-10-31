@@ -268,7 +268,7 @@ func main() {
 		body = strings.ReplaceAll(body, "](references/", "]("+skillDir+"/references/")
 		skillHTML += `<section id="` + strings.TrimSuffix(filepath.Base(f), ".md") + `">` + markdown(body) + `</section>`
 		must(os.MkdirAll(filepath.Join(*outDir, skillDir, filepath.Dir(f)), 0o755)) // #nosec G301 -- public website directory
-		must(os.WriteFile(filepath.Join(*outDir, skillDir, f), b, 0o644)) // #nosec G306 -- public website file
+		must(os.WriteFile(filepath.Join(*outDir, skillDir, f), b, 0o644))           // #nosec G306 -- public website file
 	}
 	g.inputs = skillInputs
 	g.page("vapt-skill.html", "vapt-skill.html", "VAPT Skill for AI Assistants", "A free skill that teaches AI assistants to assess and defend your own Linux machine with OpenVAPT: read-only checks, CVSS, hardening, re-scan and report.", "machine",
