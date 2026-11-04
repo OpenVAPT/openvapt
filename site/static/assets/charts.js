@@ -1,0 +1,125 @@
+// Charts (Apache ECharts, self-hosted). Data is embedded in the page as JSON,
+// generated from the check registry at build time. Nothing is fetched or stored.
+// The 369 KB library is loaded when the first chart scrolls near the viewport,
+// or at once on the coverage page, whose purpose is the charts (a script
+// element from this site, allowed by the CSP); the data
+// tables under each chart are in the page already, so nothing is lost if it
+// never loads.
+(function () {
+  var dataEl = document.getElementById('chart-data');
+  if (!dataEl) return;
+  var d = JSON.parse(dataEl.textContent);
+  var vendor = (document.currentScript && document.currentScript.getAttribute('data-vendor')) || 'assets/vendor/';
+  var vv = document.currentScript && document.currentScript.getAttribute('data-vendor-v');
+  var vq = vv ? '?v=' + vv : '';
+  var containers = Array.prototype.slice.call(document.querySelectorAll('[id^="chart-"]')).filter(function (el) { return el.id !== 'chart-data'; });
+  if (!containers.length) return;
+  var loaded = false;
+  function load() {
+    if (loaded) return;
+    loaded = true;
+    if (window.echarts) { render(); return; }
+    var s = document.createElement('script');
+    s.src = vendor + 'echarts.min.js' + vq;
+    s.defer = true;
+    s.onload = render;
+    document.head.appendChild(s);
+  }
+  // Pages that are about the charts (data-eager on the script tag) load the
+  // library at once; elsewhere it waits until a chart scrolls near the viewport.
+  var eager = !!(document.currentScript && document.currentScript.getAttribute('data-eager'));
+  if (eager || !window.IntersectionObserver) {
+    load();
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); load(); }
+    }, { rootMargin: '400px 0px' });
+    containers.forEach(function (el) { io.observe(el); });
+  }
+  function render() {
+  if (!window.echarts) return;
+  var font = { fontFamily: 'IBM Plex Sans, system-ui, sans-serif', color: '#4d4d4d' };
+  var sevColors = { Critical: '#cf1322', High: '#d4380d', Medium: '#d48806', Low: '#2f54eb', Info: '#8c8c8c' };
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var charts = [];
+
+  function mount(id, option) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var c = echarts.init(el, null, { renderer: 'svg' });
+    option.animation = !reduce;
+    option.textStyle = font;
+    c.setOption(option);
+    charts.push(c);
+  }
+
+  mount('chart-severity', {
+    grid: { left: 8, right: 24, top: 16, bottom: 8, containLabel: true },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    xAxis: { type: 'value', minInterval: 1, splitLine: { lineStyle: { color: '#ececec' } } },
+    yAxis: { type: 'category', inverse: true, data: d.severity.map(function (s) { return s.name; }), axisTick: { show: false } },
+    series: [{ type: 'bar', barWidth: 18, name: 'Checks', data: d.severity.map(function (s) {
+      return { value: s.value, itemStyle: { color: sevColors[s.name], borderRadius: [0, 4, 4, 0] } };
+    }), label: { show: true, position: 'right' } }]
+  });
+
+  mount('chart-domain', {
+    tooltip: { trigger: 'item' },
+    legend: { bottom: 0, icon: 'circle' },
+    color: ['#0d0d0d', '#8e8e96', '#0958d9'],
+    series: [{ type: 'pie', radius: ['48%', '72%'], center: ['50%', '44%'], name: 'Checks',
+      label: { formatter: '{b}\n{c}' }, itemStyle: { borderColor: '#fff', borderWidth: 2 }, data: d.domain }]
+  });
+
+  mount('chart-owasp', {
+    grid: { left: 8, right: 24, top: 16, bottom: 8, containLabel: true },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    xAxis: { type: 'value', minInterval: 1, splitLine: { lineStyle: { color: '#ececec' } } },
+    yAxis: { type: 'category', inverse: true, data: d.owasp.map(function (s) { return s.name; }), axisTick: { show: false } },
+    series: [{ type: 'bar', barWidth: 16, name: 'Checks', itemStyle: { color: '#0958d9', borderRadius: [0, 4, 4, 0] },
+      data: d.owasp.map(function (s) { return s.value; }), label: { show: true, position: 'right' } }]
+  });
+
+  var sevOrder = ['Critical', 'High', 'Medium', 'Low', 'Info'];
+  if (d.matrix && d.categories) {
+    mount('chart-catsev', {
+      grid: { left: 8, right: 24, top: 40, bottom: 8, containLabel: true },
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      legend: { top: 0, icon: 'roundRect' },
+      xAxis: { type: 'value', minInterval: 1, splitLine: { lineStyle: { color: '#ececec' } } },
+      yAxis: { type: 'category', inverse: true, data: d.categories, axisTick: { show: false } },
+      series: sevOrder.map(function (sv, i) {
+        return { name: sv, type: 'bar', stack: 'total', barWidth: 18, itemStyle: { color: sevColors[sv] },
+          emphasis: { focus: 'series' }, data: d.matrix.map(function (row) { return row[i]; }) };
+      })
+    });
+    var cells = [], max = 1;
+    d.matrix.forEach(function (row, y) { row.forEach(function (v, x) { cells.push([x, y, v]); if (v > max) max = v; }); });
+    mount('chart-heat', {
+      grid: { left: 8, right: 16, top: 8, bottom: 60, containLabel: true },
+      tooltip: { formatter: function (p) { return d.categories[p.value[1]] + '<br>' + sevOrder[p.value[0]] + ': ' + p.value[2]; } },
+      xAxis: { type: 'category', data: sevOrder, splitArea: { show: true } },
+      yAxis: { type: 'category', data: d.categories, inverse: true, splitArea: { show: true } },
+      visualMap: { min: 0, max: max, calculable: false, orient: 'horizontal', left: 'center', bottom: 0, inRange: { color: ['#eef2fb', '#6d8fd6', '#0958d9'] } },
+      series: [{ type: 'heatmap', data: cells, label: { show: true }, itemStyle: { borderColor: '#fff', borderWidth: 2 } }]
+    });
+  }
+  function hbar(id, items, color) {
+    if (!items) return;
+    mount(id, {
+      grid: { left: 8, right: 32, top: 8, bottom: 8, containLabel: true },
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      xAxis: { type: 'value', minInterval: 1, splitLine: { lineStyle: { color: '#ececec' } } },
+      yAxis: { type: 'category', inverse: true, data: items.map(function (s) { return s.name; }), axisTick: { show: false }, axisLabel: { width: 220, overflow: 'truncate' } },
+      series: [{ type: 'bar', barWidth: 14, itemStyle: { color: color, borderRadius: [0, 4, 4, 0] }, data: items.map(function (s) { return s.value; }), label: { show: true, position: 'right' } }]
+    });
+  }
+  hbar('chart-cis', d.cis, '#0958d9');
+  hbar('chart-csf', d.csf, '#3a3a40');
+
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function () { charts.forEach(function (c) { c.resize(); }); });
+    charts.forEach(function (c) { ro.observe(c.getDom()); });
+  }
+  }
+})();

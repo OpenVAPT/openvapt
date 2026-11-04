@@ -1,0 +1,83 @@
+{{define "content"}}{{$d := .Data}}
+<section class="hero">
+  <span class="tag tag-plain mb-6 whitespace-normal">Academic &middot; Non-Commercial &middot; Built by AI Cybersecurity Engineers &middot; Source-Available &middot; Free</span>
+  <h1>See Exactly How a Vulnerability Assessment Tool Works</h1>
+  <p class="lead mb-8">Read every line, then run it on your own Linux server to find, rate and fix weaknesses. Free for your own use, 100% at your own risk.</p>
+  <div class="flex flex-wrap gap-3">
+    <a class="btn btn-primary" href="how-it-works.html">{{icon "code-xml"}}Read the Code</a>
+    <a class="btn btn-default" href="download.html">{{icon "download"}}Download</a>
+  </div>
+</section>
+
+{{template "walkthrough" .}}
+
+<section class="mt-20 grid grid-cols-2 gap-8 border-y border-line-2 py-10 md:grid-cols-4">
+  <div><div class="stat-title">Checks, Each Cited</div><div class="stat-value">{{$d.Counts.total}}</div></div>
+  <div><div class="stat-title">Bytes Sent Off the Machine</div><div class="stat-value">0</div></div>
+  <div><div class="stat-title">Third-Party Go Modules</div><div class="stat-value">0</div></div>
+  <div><div class="stat-title">Machines in Scope</div><div class="stat-value">1</div></div>
+</section>
+
+<h2>Every Line Is Public</h2>
+<p class="lead">This excerpt is read from the repository when the site is built, so it always matches the commit in the footer.</p>
+<div class="min-w-0">{{template "cite" (index (index $d.Walkthrough 0).Cites 1)}}</div>
+
+<h2>What OpenVAPT Is, and Is Not</h2>
+<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+{{range $i, $p := $d.Pillars}}<div class="{{if ge $i 5}}rounded-card border border-red-3 bg-red-1 p-5{{else if eq $i 4}}rounded-card border border-blue-2 bg-blue-1 p-5{{else}}card p-5{{end}}">
+  <h3 class="mt-0 text-[17px]">{{$p.Title}}</h3><p class="m-0 text-[15px] text-ink-2">{{$p.Text}}</p></div>
+{{end}}
+<a href="download.html#acknowledge" class="card flex flex-col justify-between p-5 hover:no-underline hover:border-blue-5"><h3 class="mt-0 text-[17px] text-blue-7">Read and Accept Before Use</h3><p class="m-0 text-[15px] text-ink-2">Nine short statements every user accepts before downloading, and again before every scan.</p></a>
+</div>
+
+<h2>Learn VAPT From Theory to Application</h2>
+<div class="card-layer flex flex-wrap items-center justify-between gap-4">
+  <p class="m-0 max-w-[62ch] text-ink-2">The free OpenVAPT Academy has {{len $d.Modules}} modules across Foundations, Practitioner and Applied levels. Each one links theory to real checks, with a hands-on lab and a self-check quiz, online or offline with <code>openvapt learn</code>.</p>
+  <a class="btn btn-primary" href="academy/">{{icon "graduation-cap"}}Start the Academy</a>
+</div>
+
+<h2>What It Covers</h2>
+<div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+  <div class="card">
+    <div class="card-icon">{{icon "server"}}</div>
+    <h3>Server <span class="muted">({{$d.Counts.host}} Checks)</span></h3>
+    <p class="text-ink-2">Operating system support and pending security updates, SSH daemon settings, accounts and sudo rules, permissions on sensitive files and cron, SUID programs, kernel hardening, systemd service hardening, containers, logging, auditing and time sync.</p>
+  </div>
+  <div class="grid gap-6">
+    <div class="card">
+      <div class="card-icon">{{icon "network"}}</div>
+      <h3>Network <span class="muted">({{$d.Counts.network}})</span></h3>
+      <p class="m-0 text-ink-2">Listening ports read from the kernel, exposed databases and application servers, cleartext services, firewall rules compared with what is listening, TLS versions and certificates.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">{{icon "globe"}}</div>
+      <h3>Web Apps <span class="muted">({{$d.Counts.web}})</span></h3>
+      <p class="m-0 text-ink-2">Security headers, cookies, HTTPS redirects, exposed .git, .env and backups, directory listing, PHP, Tomcat, Node.js and Python settings, and WordPress, Joomla and Drupal hardening.</p>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-6"><div class="flex flex-wrap items-baseline justify-between gap-2"><h3 class="mt-0">Checks by Control Category and Severity</h3><a href="coverage.html">Open the Coverage Dashboard</a></div><div id="chart-catsev" class="h-[400px] w-full" role="img" aria-label="Stacked bar chart of checks per control category by severity"></div>{{chartTable $d.ChartData "matrix" "Checks by Control Category and Severity"}}</div>
+<script type="application/json" id="chart-data">{{json $d.ChartData}}</script>
+
+<h2>Identify, Evaluate, Fix, Verify</h2>
+<div class="steps">
+  <div class="step"><span class="step-dot">1</span><div><b>Identify</b><p>Read-only collectors examine configuration, the kernel and local websites.</p></div></div>
+  <div class="step"><span class="step-dot">2</span><div><b>Evaluate</b><p>Each finding gets a CVSS v3.1 rating, redacted evidence and the reason it matters.</p></div></div>
+  <div class="step"><span class="step-dot">3</span><div><b>Fix</b><p>Exact remediation steps citing OWASP, NIST, CWE and vendor manuals.</p></div></div>
+  <div class="step"><span class="step-dot">4</span><div><b>Verify</b><p>A command to confirm the fix, and a diff showing what changed between scans.</p></div></div>
+</div>
+
+<h2>See a Real Report</h2>
+<div class="card-layer flex flex-wrap items-center justify-between gap-4">
+  <p class="m-0 text-ink-2">Produced by the actual engine scanning a simulated, deliberately misconfigured server, and the same server after the fixes.</p>
+  <div class="flex flex-wrap gap-3">
+    <a class="btn btn-default" href="sample/vulnerable/report.html">{{icon "file-text"}}Vulnerable Server Report</a>
+    <a class="btn btn-default" href="sample/hardened/report.html">{{icon "circle-check"}}Hardened Server Report</a>
+  </div>
+</div>
+
+<h2>Built to Be Read</h2>
+<p>The website is generated from the source code. Each <a href="checks/">check page</a> shows the real file it lives in, with line numbers and a link to that exact commit on GitHub. The <a href="how-it-works.html">walkthrough</a> explains every module, and the <a href="standards.html">standards page</a> maps the work to NIST SP 800-115, CVSS, OWASP and CWE.</p>
+<div class="alert alert-warn mt-6" role="note">{{icon "triangle-alert"}}<span><strong>Your machine, your use, your risk.</strong> Anyone, individuals and companies alike, may download and use OpenVAPT free of charge on their own computers and servers, for their own personal or business use. You may not sell it or use it to provide services. You use it 100% at your own risk and accept every consequence. <a href="download.html#acknowledge">Read and accept the acknowledgements</a>.</span></div>
+{{end}}

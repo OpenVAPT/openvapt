@@ -1,0 +1,18 @@
+name: Documentation
+description: A page, README section, Academy module or help text is unclear, missing or wrong
+labels: [documentation]
+body:
+  - type: markdown
+    attributes:
+      value: "Never paste secrets, hostnames, IP addresses or full reports. Redact first."
+  - type: input
+    id: where
+    attributes: {label: Where, description: Page address, file path or command whose text you mean}
+    validations: {required: true}
+  - type: textarea
+    id: problem
+    attributes: {label: What Is Unclear, Missing or Wrong}
+    validations: {required: true}
+  - type: textarea
+    id: suggestion
+    attributes: {label: Suggested Wording, description: Optional. Plain English, no em dashes.}

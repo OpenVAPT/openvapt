@@ -1,0 +1,34 @@
+# Weekly, grouped update pull requests. Every GitHub Action stays pinned to a
+# full commit SHA (Dependabot updates the SHA and the version comment). Go
+# modules are not listed: the project has no third-party Go dependency and the
+# toolchain line in go.mod changes only with the owner's approval.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "03:00"
+      timezone: Etc/UTC
+    groups:
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(actions)"
+    labels: [dependencies]
+    open-pull-requests-limit: 2
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+      day: monday
+      time: "03:00"
+      timezone: Etc/UTC
+    groups:
+      site-npm:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(site)"
+    labels: [dependencies]
+    open-pull-requests-limit: 2

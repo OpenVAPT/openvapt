@@ -1,0 +1,188 @@
+name: promote
+# Moves one build up the release channels (Alpha > Beta > Release Candidate >
+# Stable) when, and only when, every gate in internal/channels passes. There
+# is no manual override: AGENTS.md section 5 forbids bypassing a gate.
+#
+#   plan     picks the most mature channel whose history, time and legal
+#            gates pass, and the exact commit that would be promoted
+#   verify   runs the full CI suite, the lab proof and the installer test on
+#            that exact commit
+#   release  publishes it (release.yml): binaries, checksums, Sigstore
+#            signatures, provenance, SBOM; pre-release for alpha, beta, rc
+#   record   re-checks every gate with the real evidence, appends the
+#            promotion to release/channels.json and release/channels.txt,
+#            points CITATION.cff at the release and turns the CHANGELOG.md
+#            [Unreleased] section into the section for this version
+on:
+  schedule:
+    - cron: "17 2 * * *" # daily
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: promote
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      target: ${{ steps.plan.outputs.target }}
+      commit: ${{ steps.plan.outputs.commit }}
+      version: ${{ steps.plan.outputs.version }}
+      signed: ${{ steps.signed.outputs.signed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: false
+      - name: Which current releases carry signatures, provenance and an SBOM
+        id: signed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          signed=""
+          # shellcheck disable=SC2013
+          for v in $(awk '!/^#/ && NF { print $2 }' release/channels.txt); do
+            echo "$v" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$' || continue
+            assets=$(gh release view "$v" --json assets -q '.assets[].name' 2>/dev/null || true)
+            ok=1
+            for a in openvapt_linux_amd64 openvapt_linux_arm64 openvapt_linux_amd64.sigstore.json openvapt_linux_arm64.sigstore.json SHA256SUMS sbom.cdx.json; do
+              echo "$assets" | grep -qx "$a" || { ok=0; break; }
+            done
+            [ "$ok" = 1 ] || continue
+            for arch in amd64 arm64; do
+              gh release download "$v" -p "openvapt_linux_$arch" -p "openvapt_linux_$arch.sigstore.json" -D "$RUNNER_TEMP/$v" || { ok=0; break; }
+              gh attestation verify "$RUNNER_TEMP/$v/openvapt_linux_$arch" --repo "$GITHUB_REPOSITORY" \
+                --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml" >/dev/null || { ok=0; break; }
+              test -s "$RUNNER_TEMP/$v/openvapt_linux_$arch.sigstore.json" || { ok=0; break; }
+            done
+            [ "$ok" = 1 ] || continue
+            signed="$signed,$v"
+          done
+          echo "signed=${signed#,}" >> "$GITHUB_OUTPUT"
+      - name: Plan
+        id: plan
+        env:
+          SIGNED: ${{ steps.signed.outputs.signed }}
+        run: |
+          # The newest commit that changed anything outside the files the
+          # record job writes (release/, CITATION.cff, CHANGELOG.md), so that
+          # recording a promotion never counts as a new build by itself
+          # (cmd/channel head, tested in cmd/channel/head_test.go).
+          head=$(go run ./cmd/channel head | sed -n 's/^head=//p')
+          go run ./cmd/channel plan --head "$head" --signed "$SIGNED"
+
+  verify:
+    needs: plan
+    if: needs.plan.outputs.target != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # Check out the default branch, then move to the planned commit only
+      # after proving it is on main, so no job-supplied ref is checked out
+      # directly (same pattern as release.yml).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Move to the planned commit
+        env:
+          COMMIT: ${{ needs.plan.outputs.commit }}
+        run: |
+          echo "$COMMIT" | grep -Eq '^[0-9a-f]{40}$' || { echo "bad commit $COMMIT"; exit 1; }
+          git merge-base --is-ancestor "$COMMIT" origin/main || { echo "commit $COMMIT is not on main"; exit 1; }
+          git checkout --quiet --detach "$COMMIT"
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: false
+      - name: Format
+        run: test -z "$(gofmt -l .)"
+      - name: Vet
+        run: go vet ./...
+      - name: Tests and lab proof (every check fails on the vulnerable lab and passes on the hardened lab)
+        run: go test -race ./...
+      - name: Staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
+      - name: Gosec
+        run: go run github.com/securego/gosec/v2/cmd/gosec@v2.22.0 -exclude=G204,G304 ./...
+      - name: Govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+      - name: Build Linux binaries
+        run: make release
+      - name: Installer end to end (verified install, tamper refusal)
+        run: |
+          set -eu
+          rel="$RUNNER_TEMP/rel/download/v0.0.0-alpha.0"; mkdir -p "$rel"
+          cp dist/release/openvapt_linux_* dist/release/SHA256SUMS "$rel/"
+          export OPENVAPT_BASE_URL="file://$RUNNER_TEMP/rel"
+          if sh scripts/install.sh --version v0.0.0-alpha.0 --dir "$RUNNER_TEMP/bin0"; then echo "file:// accepted without OPENVAPT_ALLOW_FILE"; exit 1; fi
+          export OPENVAPT_ALLOW_FILE=1
+          sh scripts/install.sh --version v0.0.0-alpha.0 --dir "$RUNNER_TEMP/bin"
+          "$RUNNER_TEMP/bin/openvapt" version
+          printf 'x' >> "$rel/openvapt_linux_amd64"
+          if sh scripts/install.sh --version v0.0.0-alpha.0 --dir "$RUNNER_TEMP/bin2"; then echo "tampered binary was installed"; exit 1; fi
+
+  release:
+    needs: [plan, verify]
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.plan.outputs.version }}
+      commit: ${{ needs.plan.outputs.commit }}
+
+  record:
+    needs: [plan, verify, release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The record is pushed over SSH with the RECORD_DEPLOY_KEY deploy key,
+    # the only bypass actor of the main-branch ruleset (ADR 0010). The
+    # workflow token itself needs no write access here.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          ssh-key: ${{ secrets.RECORD_DEPLOY_KEY }}
+          # Kept: this job pushes the record. It runs no third-party code
+          # beyond setup-go and the repository's own go run ./cmd/channel.
+          persist-credentials: true
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: false
+      - name: Re-check every gate with the verified evidence, record the promotion and push
+        env:
+          TARGET: ${{ needs.plan.outputs.target }}
+          COMMIT: ${{ needs.plan.outputs.commit }}
+          VERSION: ${{ needs.plan.outputs.version }}
+          SIGNED: ${{ needs.plan.outputs.signed }}
+        run: |
+          set -eu
+          git config user.name "OpenVAPT Release Agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # main may move while the pipeline runs: rebuild the record on the
+          # newest main and retry, so a published release is always recorded.
+          for attempt in 1 2 3 4 5; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            go run ./cmd/channel promote "$TARGET" --version "$VERSION" \
+              --commit "$COMMIT" --ci-green --lab-pass --installer-e2e --signed "$SIGNED"
+            git add release/channels.json release/channels.txt CITATION.cff CHANGELOG.md
+            # Signed off (DCO, CONTRIBUTING.md) so the ci DCO check accepts the record commit.
+            git commit -q -s -m "release: promote $VERSION to $TARGET"
+            if git push -q origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 10))
+          done
+          echo "could not record $VERSION after 5 attempts"; exit 1

@@ -1,0 +1,90 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    # The check run is named "ci": the main branch ruleset requires it
+    # (docs/adr/0010-branch-ruleset.md).
+    name: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: DCO (every commit in the range carries a Signed-off-by trailer)
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -eu
+          case "$EVENT" in
+          pull_request) range="$BASE..$HEAD_SHA" ;;
+          *) if echo "$BEFORE" | grep -Eq '^0{40}$' || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then range="$AFTER^..$AFTER"; else range="$BEFORE..$AFTER"; fi ;;
+          esac
+          bad=0; n=0
+          for c in $(git rev-list --no-merges "$range"); do
+            n=$((n + 1))
+            if grep -q "^$c " release/dco-exceptions.txt 2>/dev/null; then
+              echo "skip   $c (listed in release/dco-exceptions.txt)"; continue
+            fi
+            if git show -s --format=%B "$c" | grep -Eq '^Signed-off-by: .+ <[^<>@ ]+@[^<>@ ]+>$'; then
+              echo "ok     $c"
+            else
+              echo "::error::commit $c has no Signed-off-by trailer (git commit -s; see CONTRIBUTING.md)"; bad=1
+            fi
+          done
+          echo "checked $n commit(s) in $range"
+          exit $bad
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: false
+      - name: Format
+        run: test -z "$(gofmt -l .)"
+      - name: Vet
+        run: go vet ./...
+      - name: Tests (unit and lab)
+        run: go test -race ./...
+      - name: Staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...
+      - name: Gosec
+        run: go run github.com/securego/gosec/v2/cmd/gosec@v2.22.0 -exclude=G204,G304 ./...
+      - name: Govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+      - name: Build Linux binaries
+        run: make release
+      - name: Installer lint (shellcheck)
+        run: shellcheck -s sh scripts/install.sh scripts/test-install.sh
+      - name: Installer end to end (channel fallback, Download Only, Download and Scan in a pty, --out, --dry-run, tamper refusal)
+        # The --run cases use a test double that shows the real acknowledgements,
+        # reads I ACCEPT from a scripted terminal (script -qec) and scans only the
+        # simulated lab in memory; the runner itself is never scanned.
+        run: sh scripts/test-install.sh dist/release/openvapt_linux_amd64
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - name: Build website assets (self-hosted, install scripts disabled)
+        working-directory: site
+        run: npm ci --ignore-scripts && npm run build
+      - name: Vendored assets are up to date
+        run: git diff --exit-code -- site/icons site/static/assets
+      - name: Build website
+        run: go run ./cmd/sitegen -out dist/site
+      - name: Website collects no data
+        run: |
+          if grep -rEl "https?://(fonts\.googleapis|www\.google-analytics|googletagmanager|cdn\.|unpkg|jsdelivr)" dist/site; then exit 1; fi
+          if grep -rE "document\.cookie|localStorage|sessionStorage|navigator\.sendBeacon|fetch\(" dist/site/assets; then exit 1; fi
+      - name: No email addresses published (project-authored files only)
+        run: |
+          if git grep -IEoh "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}" -- . ':!site/static/assets/vendor' ':!site/package-lock.json' ':!.github/workflows/ci.yml' \
+            | grep -v -E "noreply|@openssh\.com|@v[0-9]|@[0-9]{4}\.|@[0-9]x\."; then exit 1; fi

@@ -1,0 +1,334 @@
+# Changelog
+
+All notable changes are documented here. This project follows Semantic Versioning and Conventional Commits.
+
+## [Unreleased]
+
+- Repository restarted with a clean history on 2026-11-04. Versions continue from v0.2.0; releases up to v0.1.0-alpha.6 are not published here.
+- EULA 2.6 and Privacy 1.8: list the new reads (Alpine package database, Kerberos configuration and keytab metadata, Docker image layer package lists, a bounded walk of /srv and /opt) the rpm source and module fields, and how network storage is read. Owner approved the wording in chat.
+
+- Medium and Low advisories added, summed up per package by the new HOST-CVE-004. The snapshot drops summaries and references, so it holds 86,674 advisories in 7.9 MB compressed in a test build, with AlmaLinux and Rocky Linux 10 and Alpine 3.20 to 3.24 added. Binaries are about 9 MB larger than alpha.6.
+- HOST-CVE findings no longer repeat one CVE published under several ids, show the fix for the range that applied, and name the installed package. Findings usually target the source package, so a suppression written for a binary name must be updated.
+- New checks HOST-MAL-001 and HOST-MAL-002 report a missing rootkit or malware scanner from the installed package list.
+- Alpine packages are matched from the apk database. Module streams are matched for Rocky and AlmaLinux where they are known. Lockfiles are also found under /srv and /opt.
+- New checks HOST-KRB-001 and HOST-KRB-002 (Kerberos encryption types, including included files, and keytab permissions) and HOST-CVE-005 (package lists in local Docker image layers, labelled heuristic). 316 checks.
+- Vulnerability snapshot: every package instead of a short list (375 advisories in alpha.6); AlmaLinux severities read from the summary; source package names matched, so OpenSSH and similar advisories are found; withdrawn records dropped; CVE aliases taken from upstream; an empty configured ecosystem fails the build.  Snapshots now load record by record (about 375 MB peak with the full snapshot, measured on arm64 macOS), and `openvapt version` reads only the header.
+- VAPT Skill for AI Assistants: `skills/openvapt-vapt/` (SKILL.md with scope gate, assessment, defence and reporting references), published at /vapt-skill.html with the raw files under /skills/openvapt-vapt/, linked from the footer, For Machines and AI, llms.txt and the sitemap.
+- VAPT skill audit round (four fresh reviewers): RHEL-family firewalld, authselect and SELinux steps; cache-only `dnf -C` so assessment never contacts mirrors; corrected `rpm -Va` filter; inventory, rules of engagement, CVSS 4.0 and EPSS notes, remediation deadlines (ISO/IEC 27001 A 8.8), NIST SP 800-61 Rev. 3 with volatile data and chain of custody; Own Use wording aligned with the licence; LICENSE.md travels with the folder; version 0.1. Page: contents, one section per document with in-page links, Title Case headings, longer title; FAQ entry; llms-full.txt summary; test `TestSkillPage`. WebMCP: script path uses the site base, llms.txt no longer claims forms or contact tools, CSP `connect-src 'self'` in root.htaccess so its same-origin reads work; `.md` served as UTF-8.
+- WebMCP: every page loads the read-only /webmcp.js; llms.txt gains a WebMCP (AI Assistant Tools) section.
+
+## [v0.1.0-alpha.6] - 2026-10-15
+
+- No changelog entry was written for this build (commit e8fbd0343f26).
+
+## [v0.1.0-alpha.5] - 2026-10-14
+
+### Stream: discovery (SEO, GEO, AEO, LLM parsing)
+
+- Website: an Atom feed of every release at /feed.xml (linked from every page and the footer), a web app manifest, PNG icons (favicon.ico, 192, 512, Apple touch) beside the SVG mark, codemeta.json for research-software catalogues, and an IndexNow key file with scripts/indexnow.sh to notify Bing, Yandex and other IndexNow engines after a deploy.
+- Website: a Markdown twin of every check page, every Academy module, the FAQ and the glossary (same address with .md), each with front matter naming the canonical page, licence and last change date; pages link them with rel="alternate" type="text/markdown" and a visible "Also available as plain Markdown" note; llms.txt explains the convention. The root .htaccess marks .md files noindex so the HTML stays the one indexed address.
+- Website: new page For Machines and AI (/machine-readable.html) listing every data file for search engines, AI answer engines, researchers and tools.
+- Website: structured data enriched. Organization logo as a 512 px PNG ImageObject; SoftwareApplication gains author, image, releaseNotes, softwareHelp, installUrl and softwareRequirements; TechArticle (checks) and LearningResource (modules) gain author, image, datePublished (first git commit), mainEntityOfPage, licence, keywords, section, level, time required and the Markdown encoding; FAQ and home gain SpeakableSpecification; every page carries hreflang en and x-default, a robots directive allowing full snippets and large image previews, and og:type article with published and modified times on check and module pages.
+- Repository: README badges and quick links, SUPPORT.md, extra GitHub topics.
+
+## [v0.1.0-alpha.4] - 2026-10-14
+
+### Stream: round3 fixes
+
+- Website: until the default release includes them, pages that mention `openvapt cite`, `--open` or the default `~/openvapt-reports` folder say they arrive in the next release and show what the current release does.
+- Under sudo with HOME kept, the default reports folder and its files are given back to the sudo user (checked against the user database); the base folder is checked to be a real folder owned by the expected user, and report files refuse links.
+- Installer: a non-HTTPS OPENVAPT_CHANNELS_URL or OPENVAPT_BASE_URL now stops with a clear reason; its next steps describe where reports go for the installed version.
+- report.md keeps URLs in the How to Cite block literal (fenced text); builds without a version are called "unreleased build" everywhere.
+- NIST SP 800-115 phases worded consistently (Planning, Discovery and Reporting; no Attack phase); walkthrough marks the trimmed pre-release warnings and names its last chapter Get Started; page citations label the access date.
+
+## [v0.1.0-alpha.3] - 2026-10-14
+### Stream: install paths
+
+- Installer: fixed the default install failing for everyone while no Stable release exists. Without `--channel` it now picks the most stable channel that has a release (Stable, then Release Candidate, Beta, Alpha) and warns, naming the channel, when that is a pre-release; a forced `--channel` without a release fails and lists the channels that have one.
+- Installer: two ways to start. Download Only (the default) installs, verifies and prints the next steps. Download and Scan (`--run`) then scans this machine interactively (acknowledgements and `I ACCEPT` read from the terminal, refused without one), writes all four signed reports to `~/openvapt-reports/<UTC time>/` (0700) or `--out DIR`, and prints the severity summary, the exit code and its meaning, every report path and how to open the HTML report. New `--sudo` (scan only), `--open` (desktop sessions only) and `--dry-run`.
+- CLI: `openvapt scan` without `--out` now writes to a new folder `~/openvapt-reports/<UTC time>/` (0700, never reused) instead of the current directory; `--out` is unchanged and `demo` keeps its current-directory default. Every scan and demo ends with a Reports block listing each file and how to open the HTML report. New `--open` opens report.html with `/usr/bin/xdg-open`, only in a desktop session and never as root.
+- Website: the download page offers Download Only and Download and Scan as accessible tabs, each with a copy-ready command, the steps, sample output, where reports go and time and permission notes, mapped to the NIST SP 800-115 phases; manual binary links and verification steps follow the channel record. Two new FAQ entries; the walkthrough matches the new commands and output.
+- Tests: scripts/test-install.sh covers channel fallback, Download Only, `--run` without a terminal, Download and Scan in a scripted terminal (accept and cancel), `--out`, `--dry-run` and checksum refusal, using a test double that scans only the simulated lab; CI runs it.
+- EULA section 8.6 and Privacy Policy section 3: factual additions describing the default report folder and `--open`.
+### Stream: cite
+
+- Citation: new internal/cite package is the single source of every citation; the website, `openvapt cite`, every report and the README render from it, and tests keep them identical and free of personal names.
+- Website: a Cite pill in the header (in-flow disclosure panel, never an overlay) and a Cite OpenVAPT disclosure in the footer of every page, with APA, IEEE, Harvard, MLA, Chicago and BibTeX, Copy buttons with a spoken Copied confirmation, .bib, .ris, CITATION.cff and CSL-JSON downloads, and Cite This Check or Cite This Module on check and Academy pages. Printed pages end with the APA citation.
+- Website: How to Cite page gains a recommended APA citation with a Copy APA button, and notes on version, access date and the absence of a DOI. llms.txt gains a How to Cite section; FAQ gains How Do I Cite OpenVAPT?
+- CLI: `openvapt cite [--format apa|ieee|harvard|mla|chicago|bibtex|ris|csl|cff] [--check ID] [--module ID]` prints the citation for the exact build ("unreleased build" for builds from source); every scan and demo ends with a one-line request to cite.
+- Reports: every HTML and Markdown report ends with a How to Cite block (report reference line, APA, BibTeX, licence credit line); JSON gains a `citation` field and SARIF run properties carry the same block.
+- README: Cite OpenVAPT section near the top with APA and BibTeX, test-checked against CITATION.cff.
+
+### Website redesign and walkthrough
+
+- Website: a calmer, near-monochrome visual language. White canvas, near-black ink and soft greys with one restrained blue accent, very large headings with tight tracking, hairline borders, pill buttons and navigation, 16px cards and 24px media frames, a lighter footer, and recoloured ECharts and AG Grid themes. IBM Plex stays the only typeface. Light theme only, no sticky or fixed elements, every page, URL, notice, structured data block and zero-data rule unchanged.
+- Website: new animated walkthrough, "See It Run on Your Machine", on the home page (loops), How It's Built and Download (above the acknowledgement gate). It is labelled as a simulated walkthrough using the built-in demo lab and is built only from real output: the installer messages, the `openvapt scan` acknowledgement prompt, `openvapt demo --format html,md --no-sign` on the vulnerable lab (307 checks, Critical 14, High 71, Medium 88, Low 123, exit code 3), its HTML report (HOST-SSH-001 finding card), `openvapt explain HOST-SSH-001` and `openvapt learn`; trimmed lines are marked. Seven chapters with Play, Pause, Replay and chapter buttons, polite live captions, a text transcript, pausing when off-screen or when the tab is hidden, and static stills under reduced motion. Self-hosted `walkthrough.js`, no storage, no network, CSP unchanged.
+- Website: four more Lucide icons vendored by the existing script (play, pause, rotate-ccw, mouse-pointer-2).
+### Fix: vulnerability data sources (2026-10-14)
+- The release snapshot no longer requests a WordPress export: OSV publishes none, and the request failed the release build. WordPress core is still inventoried and WEB-CVE-001 reports it Incomplete, never Pass; README, CREDITS, THIRD_PARTY_NOTICES and docs/VULNDB.md now say so. A test checks every configured ecosystem against OSV's published list.
+
+### Stream: r2-cvss
+
+- CVSS v3.1 vectors of 18 host checks for detective gaps and local-only weaknesses (audit, journal, logging, time sync, SSH log level, martian logging, file integrity monitoring, rootless Docker, running kernel behind installed kernel) now use a local attack vector; severities are unchanged, and the report Methodology explains the rule (A2-09).
+
+### Stream: r2-redact-report
+
+- Redaction now masks PGP and PuTTY private keys, Laravel APP_KEY, Redis masterauth, SSSD ldap_default_authtok, Postfix static: maps, curl -u and --user, sshpass -p values, Azure AccountKey and SAS signatures, Slack webhook URLs, Grafana, SendGrid and npm tokens, user:password@host, and AWS secret keys next to their key id (A2-01).
+- `--only` or `--skip` values that match no check, or a selection of zero checks, now exit 2 with a usage error; a report with zero checks never exits 0 (A2-02).
+- Markdown reports show evidence in code spans sized to the content with no HTML entities, and escape Markdown syntax and autolinks in prose (A2-10).
+- The executive summary in HTML and Markdown is now built from the data: scope, counts, top 5 risks by severity then CVSS with a one-line reason, coverage gaps, suppressions, snapshot age and the main limitation (A2-11).
+- Reports count Incomplete targets inside passed or failed checks (`incomplete_targets`, matching SARIF), give every finding a confidence level (high, medium or low) in all formats, and link each failed finding to the False Positive form and the suppression docs (A2-12).
+- SARIF adds `invocations` (success, start and end time, a command line without paths or seeds) and `partialFingerprints` per result (A2-12).
+### Stream: standards
+
+- NIST SP 800-53 SA-12 (withdrawn in Rev. 5) replaced by SR-3, SR-4 and SR-11 on HOST-PKG-002 and HOST-PKG-003.
+- WSTG references pinned to v4.2 links and labelled "WSTG v4.2" on the site.
+- 86 CWE mappings that MITRE marks Discouraged replaced with specific weaknesses (CWE v4.20); 4 checks without a CWE now carry one.
+- Every check maps to a CIS Controls v8 safeguard (`cis_v8`) and NIST CSF 2.0 subcategories (`csf_2`); the coverage page and catalogue.json count per safeguard and subcategory.
+- HOST-PWD-003 now requires a minimum password length of 15 (NIST SP 800-63B-4 single-factor minimum).
+- New test rejects withdrawn 800-53 controls, Discouraged CWEs, empty CWE and CIS references without a safeguard id.
+### Stream: checks-fp
+
+- Installed packages on Debian and Ubuntu come from /var/lib/dpkg/status entries marked "install ok installed"; a package removed but not purged no longer counts (HOST-SVC-002..012, HOST-PKG-004, HOST-PKG-005).
+- Container detection (/.dockerenv, /run/.containerenv, /proc/1/cgroup, /proc/self/mountinfo, container= in /proc/1/environ): boot, Secure Boot, kernel module, non-namespaced kernel parameter, host mount, time sync, host firewall and auditd checks are Skipped with "this setting belongs to the host", and the report's Limitations say the scan ran in a container.
+- NET-DB-014 and NET-DB-015 judge the default by server flavour and version: pass with a note on MySQL 8.0 and later, fail on MariaDB and MySQL before 8.0, Incomplete when unknown.
+- NET-MAIL-002 and NET-MAIL-003 pass with a note when Postfix inet_interfaces is loopback only; NET-DB-023 passes with a note when Redis binds loopback only with protected-mode on.
+- HOST-KRN-022 passes with a note when AppArmor restricts unprivileged user namespaces (Ubuntu 23.10 and later); HOST-KRN-025 passes with a note when the IPv6 default route was learned from a router advertisement; HOST-KRN-027 passes with a note when kdump is enabled.
+- HOST-PAM-002 is Skipped when no pam_faillock exists, so HOST-PWD-004 alone reports a missing lockout (PWD-004 covers deny, PAM-002 covers unlock_time).
+- HOST-AUD-002..007 need auditd active for a Pass (Incomplete otherwise) and say the loaded rules were not verified; HOST-CTR-010 reads dockerd flags from docker.service drop-ins and is Incomplete when daemon.json cannot be read.
+- HOST-USR-002 rescored to a local attack vector, 7.8 High (Critical only together with HOST-SSH-003).
+- Caution sentences added to Fix text that could lock users out or break services (kernel parameters, PAM, mounts, cron.allow, SUID removal, auditd, Secure Boot, module blocking, firewall, mail and database TLS, legacy service removal).
+
+### Stream: cli-suppress
+
+- `--suppress <file>` for scan and demo: accepted findings need a reason and an expiry (at most 365 days); they stay visible in every report format, carry a SARIF external suppression, and do not count toward `--fail-on`.
+- `openvapt man` prints a manual page generated from the command table; `make man` writes `openvapt.1`.
+- `openvapt completion bash|zsh|fish` prints shell completion generated from the same command and flag definitions.
+- Help, the man page and the README now share one exit code table, checked by a test.
+### Stream: academy-quizzes (2026-10-14)
+- Academy: every module quiz now has at least five questions with four options, plausible distractors and an explanation; the 21 original modules (F1 to F3, P1 to P14, A1 to A4) gained new questions and the newer modules gained options.
+- Academy: long sentences are split so none runs over 30 words (original modules aim for 25 or fewer); tests enforce quiz depth, distinct options, answer ranges and sentence length for every module.
+- Academy fact fixes: P2 now says RFC 9142 deprecates SHA-1 key exchange (it does not cover MACs); P7 states NIST SP 800-63B-4's 15-character minimum for single-factor passwords (8 with another factor); A4 points to the lab fixtures in internal/lab instead of only lab.go.
+
+### Fix: asset cache busting (2026-10-14)
+- The site's own CSS and JavaScript links carry a content hash (`?v=`), and the chart and catalogue loaders add a hash of the vendored libraries, so the new cache headers can never serve a stale stylesheet or script after a deploy. Found by browser-testing the live site at phone width.
+
+### Stream: worldwide audience (owner instruction 2026-10-14)
+- OpenVAPT is stated to be open to anyone, in any country: EULA 2.5 (section 22, acknowledgements 1.8 statement 8 names computer misuse laws from several regions as examples, liability cap USD 1 or its equivalent instead of RM1), Disclaimer 1.8, Privacy 1.7 (section 6 written for worldwide data protection laws), Teaching 1.4, SECURITY.md accepts reports in any language, security.txt lists English only.
+- Academy F2, the teaching plan, the teach and limits pages, ADR 0001 and AGENTS.md name laws from several regions instead of Malaysian law only; Malaysian law still governs the Agreement because that is where the licensor is.
+- New FAQ entry "Who Can Use OpenVAPT, and in Which Countries?"; README, llms.txt and JSON-LD (audience: Worldwide) say the same.
+- Two fresh-context AI legal reviews approved the revision (release/legal-review.json).
+- Licence 1.3 (clarified before any release carried it) states it is offered to anyone in any country (section 14) and names fair dealing and fair use under the user's own copyright law (section 13). AGENTS.md 1.5 adds duty 6.13 (worldwide audience); CLAUDE.md, GOVERNANCE.md, CONTRIBUTING.md and GCA say the same. Dependabot schedules run on UTC. GitHub repository and organisation profiles say "anyone in any country" and "Worldwide".
+
+### Stream: website verification fixes (2026-10-14 review, 14-verify-website)
+- Check catalogue: the search box and the Domain, Category and Severity selects now filter the plain table on every screen width (and before the grid loads), keep the "N of 307 checks" counter current and show a "No checks match" row; on wide screens AG Grid takes over the same controls as before.
+- Academy: modules are listed in teaching order (F1 to F3, P1 to P22, A1 to A6) on the website, in `openvapt learn` and in the worksheets, whatever file defines them; a test enforces the order.
+- Academy: P17 to P22, A5 and A6 name the modules to read first; a test requires every Practitioner and Applied module to have prerequisites.
+- Phone notice: Read More becomes Read Less while open and the one-line summary is hidden so no sentence is shown twice.
+- Coverage page: the chart library loads at once instead of waiting for the charts to scroll into view.
+- For Teachers: the four overview cards are "Jump to" links to their sections instead of repeated headings.
+- Site .htaccess: 403 responses show the 404 page; the /tools/ carve-outs are marked for removal with the tools/ folder.
+
+### Stream: software verification fixes (2026-10-14 review, 11-verify-software)
+- CI: six unused symbols removed (staticcheck U1000) and the `secretKey` redaction pattern annotated for gosec G101, so the Staticcheck and Gosec steps pass again under the pinned toolchain.
+- WEB-NGX-003, WEB-APA-005 and NET-MAIL-002 now read the system crypto library floor (`/etc/crypto-policies/config`, `openssl.cnf` MinProtocol with its `.include` files) and report Pass naming the floor when it already refuses TLS 1.0 and 1.1, instead of a High from a directive that cannot take effect; WEB-NGX-003 skips when no server block is served over TLS.
+- HOST-FS-016: the SUID baseline gains the sssd helpers (krb5_child, ldap_child, proxy_child, selinux_child) and other RHEL 9 / Alma 9 defaults, with the package sources cited in the code; a RHEL-shaped unit test added.
+- Redaction: secret key words must end the key, so `password_encryption = md5`, `server_tokens off`, `authorization = disabled`, "password directive" and cipher names stay readable while DB_PASSWORD, requirepass, secret_key_base and Authorization headers are still masked; tests added for every case.
+- HOST-SEC-001: the credential assignment pattern no longer crosses a newline.
+- WEB-APA-010 is Low and fails only when a document root actually holds .git, .svn, .hg or .env; NET-DB-016 and NET-DB-020 pass with a note when MySQL or PostgreSQL binds loopback only; WEB-APA-002 and WEB-APA-004 cite CWE-1188 instead of the category entry CWE-16.
+- `openvapt demo hardened` (positional lab name) now works, and extra positionals are a usage error instead of silently scanning the vulnerable lab.
+- EULA section 8.1 and PRIVACY section 3 (now 1.6) list the files and folders the new check families read; release/legal-review.json hashes refreshed.
+- SOURCES.md: OpenSSL Project added as a publisher.
+
+### Stream: software (2026-10-14 review, Wave 1 "honest results")
+- CVE checks are honest about their data: when the binary embeds only the test fixture snapshot (a plain source build), HOST-CVE-001, HOST-CVE-002, HOST-CVE-003 and WEB-CVE-001 report Incomplete with evidence naming the fixture, never Pass. New `make vulndb` target generates the real snapshot into the embed path; README and docs/VULNDB.md explain it.
+- WordPress core is matched: `wp-includes/version.php` is inventoried as OSV ecosystem `WordPress:Core`, a WordPress version comparator was added, and cmd/vulndbgen and the release workflow fetch the WordPress:Core export. WEB-CVE-001 reports Incomplete, not Pass, for an inventoried ecosystem the snapshot has no advisories for.
+- Every CVE finding names its matcher in the evidence: "exact version", "range" or "heuristic" (version read from a file header). The snapshot is decoded once and indexed by ecosystem and package.
+- Every report header (HTML, Markdown, JSON `scan.vulndb`, console summary) shows the vulnerability snapshot date, age in days and advisory count, with a warning (not a failure) when it is older than 90 days.
+- Every finding in HTML, Markdown and JSON names the Academy module(s) that teach it, with the module page address; `openvapt explain <ID>` prints them with the offline `openvapt learn` command.
+- New scan flags: `--fail-on <severity>` (critical, high, medium, low, info or none; default high keeps today's behaviour) and `--timeout <duration>` bounding the whole scan (checks still waiting are reported as errors). `--parallel` is limited to 32. Exit codes are documented in `openvapt --help` and README.
+- False positive fixed: HOST-SSH-001 no longer reports High for an unset PermitRootLogin on a non-root scan; OpenSSH 7.0 and later default to prohibit-password and pass with that noted, older releases fail, an unknown version is Incomplete.
+- False positives fixed in the network port heuristics: NET-SVC-002 (Critical) covers only control planes and remote desktops (Docker API, Kubernetes API, kubelet, etcd, VNC, RDP); new NET-SVC-004 (Medium) covers management panels and monitoring exporters; SNMP is rated once, by NET-SVC-001; the Docker API and etcd leave the data-service list of NET-DB-001. NET-APP-001 (High) keeps only debugger and control ports (Node.js inspector, Tomcat AJP and shutdown, PHP-FPM, Jupyter); new NET-APP-002 (Medium) covers plain application HTTP ports and notes whether a web server fronts them. Every socket finding records how it is bound (all interfaces, private or public address).
+- False positive fixed: WEB-EXP-006 passes, with the directive as evidence, when the status page location is restricted to local clients (Require local, Require ip 127.0.0.1, allow 127.0.0.1 with deny all), because the scan itself requests from 127.0.0.1; otherwise it fails and says so.
+- False negative fixed: WEB-TLS-001 passes only when port 80 refuses the connection; a timeout or other error is Incomplete.
+- False negative fixed: virtual host schemes are decided per `<VirtualHost>` or `server {}` block, a name on both :80 and :443 is judged once over https, and a configured site that does not answer is reported Incomplete instead of disappearing from the report.
+- False positive fixed: WEB-CMS-001 counts /readme.html only when it carries WordPress's own readme signature and version line.
+- False positive fixed: NET-DB-006 accepts localhost and ::1 as loopback and quotes the actual -l, -U, OPTIONS and UDP_PORT values; option files such as memcached.conf are no longer split at IPv6 colons.
+- False positive fixed: plain archives and certificates (*.tar.gz, *.tgz, *.tar, *.7z, *.pem, *.crt) move from WEB-DOC-001 (High) to the new WEB-DOC-003 (Medium, review), with files under download folders noted as expected; backups, dumps and private keys stay High.
+- Over-redaction fixed: the redactor treats "auth" as a whole key token, so sshd and PAM keywords (authenticationmethods, authorizedkeysfile, preauth) keep their values in reports.
+- HOST-PKG-001 counts only advisory id lines in dnf and yum output.
+- Hardening: allow-listed commands are resolved only in /usr/sbin, /usr/bin, /sbin and /bin (never through the caller's PATH); command output is capped at 8 MiB with a 5 second WaitDelay; `--baseline`, `diff` and `verify` read report files through one bounded, regular-file-only reader.
+- Reports: the Markdown report lists OWASP Top 10, ASVS, WSTG and NIST SP 800-53 mappings; the Limitations text distinguishes Skipped from Incomplete; demo and practice reports no longer record the operator's root status.
+- Tests: exit-code mapping, `verify` argument order and the terms prompt; table tests for every check touched; an engine test that every registered check reaches Pass (not Skip or Incomplete) on the hardened lab; the simulated labs carry their own snapshot so they behave the same with any embedded snapshot.
+### Stream: pipeline
+- Promote: a commit that only records a promotion (release/, CITATION.cff, CHANGELOG.md) is no longer treated as a new build, so a record commit never becomes the next alpha and the beta soak clock is not reset every day (`cmd/channel head`, with tests that reproduce the fault).
+- Release: the binaries are built twice on two separate runners from the same commit and the same vulnerability snapshot, built once and shared; publishing stops if the two builds differ. The Makefile builds with `-trimpath -buildvcs=false`, `CGO_ENABLED=0` and fixed ldflags, so `make release VERSION=<tag> COMMIT=<sha>` reproduces a published binary.
+- Release: the SBOM is CycloneDX JSON with the main component named by the release tag (checked before upload); SHA256SUMS, the vulnerability snapshot and the SBOM carry Sigstore bundles and build provenance alongside the binaries; tags are annotated; release notes hold only the changes of that version and state how to verify the assets.
+- Changelog: `cmd/channel promote` turns the [Unreleased] section into the released version's section (keep-a-changelog style) and opens a fresh [Unreleased]; the record commit is signed off.
+- CI: every commit in a push or pull request must carry a Signed-off-by trailer (DCO), with historical exceptions listed by hash and reason in release/dco-exceptions.txt; the check run is named `ci`; every job has a timeout.
+- Added .github/dependabot.yml (weekly, grouped: GitHub Actions and the site's npm packages), a CodeQL workflow for Go and the workflow files (pinned by commit), .github/CODEOWNERS naming the maintainers team for pipeline, safety-boundary and legal paths, and ADR 0007 with the main branch ruleset.
+- CITATION.cff: the `license` key is removed because CFF 1.2.0 accepts only SPDX identifiers there; `license-url` points at LICENSE. New issue forms: Documentation, Factual Error, Teaching Feedback.
+### Stream: website
+- Website: `.htaccess` now redirects every non-apex host and plain HTTP to https://openvapt.com, sends Cache-Control per asset class (pages and crawler files no-cache, fonts and vendored libraries one year immutable, site CSS, scripts and images one week), declares UTF-8 in every text Content-Type, turns the server signature off, compresses SARIF, Markdown, BibTeX and RIS, redirects `/index.html` to the directory form, and serves `/.well-known/security.txt` (RFC 9116, with `/security.txt` redirecting to it). The `/beta/` 410 is unchanged. Owner approval is still required before the file is deployed.
+- Website: ECharts (369 KB) and AG Grid (425 KB with styles) load only when a chart or the catalogue scrolls near the viewport; below 640 px the catalogue keeps its static table and never loads the grid. Every chart has a View as Table disclosure built from the same data, so the numbers are reachable without a mouse or scripts.
+- Website: on phones the two notices collapse into one strip with both leads and a Read More control; the navigation fits two rows. Catalogue table hides the Category and CWE columns below 640 px and keeps check ids on one line.
+- Website: `og:image` (a 1200x630 PNG drawn from the site tokens and IBM Plex, `site/scripts/og-image.py`) and `summary_large_image` cards; per-page sitemap `lastmod` and JSON-LD `dateModified` from the last git commit of each page's inputs; distinct meta descriptions for the three HOST-CVE pages; download page shows the newest released version in its tag examples; cite page heading order fixed; Title Case for the severity statistics and the promotion history channel names; `robots.txt` no longer names the admin path; `llms.txt` lists the Academy, glossary, coverage dashboard, catalogue dataset, AI disclosure, policy and security.txt.
+- Website: `/checks/catalogue.json`, a machine-readable dataset of every check (ids, titles, severity, CVSS, category with CIS and NIST CSF mapping, CWE, OWASP, ASVS, WSTG, NIST SP 800-53, Academy modules, source permalink) with a licence and credit line, a Dataset section on the catalogue page and Dataset JSON-LD.
+- Website: module pages show Read First prerequisites and print as handouts (print stylesheet keeps theory, key terms, lab, questions, references and the credit line). The teachers page adds a handouts table with prerequisites, a Lab Recipe (simulated lab and practice lab marked Exists, a virtual machine lab image marked Planned) and Classroom Use Terms pointing at Teaching With OpenVAPT.
+- Website: new `cmd/sitecheck` verifies a built site (every local link resolves, required SEO and security files exist, no long dashes or banned phrases); `make site` builds the assets and the site and runs it.
+- Academy: two new Practitioner modules, P15 Access Control: Accounts, Sudo and Logins and P16 Logging, Auditing and Time, each with objectives, four or five sections, a five-question quiz with four options, lab steps and public references; P1 hands the logging, time and intrusion prevention checks to P16. Every module has prerequisites (shown by `openvapt learn`, the worksheets and the website, with a test that each comes earlier in the course) and an In Summary section. Precision fixes: SHA-1 MACs are deprecated by RFC 9142; NIST SP 800-63B-4 requires 8 characters and rate limiting while OpenVAPT recommends 12; the PTES reference uses its HTTPS edition. Long sentences shortened in F2 and P7. Eleven glossary terms added. Course plans teach P15 and P16; SOURCES.md regenerated (23 modules).
+### Stream: coverage, kernel, filesystem and boot
+- 34 new host checks, detection only and read-only, each with a lab pair and Academy coverage: HOST-KRN-019 to HOST-KRN-031 (SysRq, protected FIFOs and regular files, user namespaces, IPv6 source routing and router advertisements, secure redirects, bogus ICMP errors, kexec, userfaultfd, TTY line discipline autoload, BPF JIT hardening, io_uring), HOST-FS-010 to HOST-FS-022 (/var/tmp, /home and /var/log as separate mounts, noexec on temporary filesystems, world-writable files and directories outside /etc, unowned files, SUID/SGID inventory against a documented baseline, boot file permissions, cron and at allow lists, cron file modes, shell umask, account database backups) and the new HOST-BOOT family 001 to 008 (GRUB password, Secure Boot state, filesystem and USB storage module blacklists, module loading restrictions, file integrity monitoring, prelink, core dumps). Every check returns Incomplete when a file it needs exists but cannot be read.
+- Academy module P15, Kernel, Filesystem and Boot Hardening (Practitioner), taught in week 4 of the semester course, with seven new glossary terms.
+### Stream: coverage web servers, databases, mail and DNS
+- 17 web server hardening checks read from the nginx and Apache configuration trees (includes followed only under /etc/nginx, /etc/apache2 and /etc/httpd): WEB-NGX-001 to WEB-NGX-007 (server_tokens, autoindex, ssl_protocols, ssl_ciphers, OCSP stapling and session tickets, request limits, hidden-file deny) and WEB-APA-001 to WEB-APA-010 (ServerTokens and ServerSignature, TraceEnable, Options Indexes, AllowOverride All, SSLProtocol, SSLCipherSuite, SSLUseStapling, ModSecurity or mod_evasive presence, FileETag inode, repository and .env file deny). Each returns Skip when the server is absent and Incomplete when it is installed but unreadable or when a version-dependent default cannot be decided.
+- 10 database depth checks, configuration files only, no database connection: NET-DB-014 to NET-DB-018 (MySQL or MariaDB symbolic links, secure_file_priv, require_secure_transport, log_error, skip-name-resolve), NET-DB-019 to NET-DB-022 (PostgreSQL md5 or password methods, ssl, log_connections, password_encryption) and NET-DB-023 (Redis dangerous commands renamed or restricted by ACL).
+- 6 mail and DNS checks: NET-MAIL-001 to NET-MAIL-004 (Postfix STARTTLS and certificate, TLS protocol floor, VRFY; Dovecot ssl = required) and NET-DNS-001 to NET-DNS-002 (BIND version string, DNSSEC validation).
+- Lab: the simulated server now runs nginx beside Apache with Debian-style include trees, plus the matching database, mail and DNS option files, in internal/lab/fixtures_servers_db_mail.go.
+- Academy: new Practitioner modules P15 "Web Server Hardening: nginx and Apache" and P16 "Database, Mail and DNS Hardening" with six new glossary terms; the fourteen-week course teaches both in weeks 10 and 11. SOURCES.md gains publisher entries for nginx.org, ssl-config.mozilla.org and coreruleset.org.
+### Stream: coverage (audit, PAM, packages, services)
+- 36 new host checks, detection only and read-only, each with a lab pair and Academy coverage: HOST-AUD-001 to 011 (auditd enabled at boot, audit rules for identity files, logins, time changes, kernel modules and privileged commands, immutable rules, audit log permissions, auditd full-disk actions, journald persistence and compression, remote log forwarding), HOST-PAM-001 to 009 (pam_pwquality enforced with dictionary check, faillock unlock_time, pam_wheel for su, password history, PASS_MIN_DAYS, PASS_WARN_AGE (Info), useradd INACTIVE, root PATH integrity, TMOUT), HOST-PKG-002 to 006 (repository signature checks, third-party repositories (Info), retained kernels, running kernel older than installed, package list refresh) and HOST-SVC-002 to 012 (Telnet, r-services and finger, TFTP, FTP, NIS, Avahi and CUPS, NFS and rpcbind, DHCP and DNS, Samba, SNMP and Squid, inetd super-servers installed or enabled at boot). Every check returns Incomplete when its evidence exists but cannot be read.
+- Academy modules P21 "Audit Logging and Monitoring Depth" and P22 "Authentication Policy and Package Hygiene" (Practitioner) with eleven new glossary terms; both join week 4 of the semester course.
+- Lab: the vulnerable server now has an audit daemon with no useful rules, a password stack that never calls pam_pwquality, a root PATH starting with the current directory, an unsigned personal package archive, five kernels and a dozen legacy services installed; the hardened server has each fix. login.defs gains PASS_MIN_DAYS and PASS_WARN_AGE in both labs.
+- No new allow-listed commands: the checks read files and use the existing systemctl is-enabled, uname -r and rpm -qa entries.
+### Stream: containers, frameworks, CMS and hygiene (coverage 5c/5d/5e)
+- 11 new container runtime checks HOST-CTR-005 to HOST-CTR-015: unbounded container logs, userland proxy, default ulimits, Docker socket permissions and docker group membership, rootless mode indicator (Info), insecure registries and debug or experimental daemon flags, seccomp or AppArmor disabled (daemon and per container), containers without memory or PID limits, containers running as root on a writable root filesystem, containerd TCP API without TLS and Podman unconfined defaults, Docker Content Trust not set. All read daemon.json, hostconfig.json, config.v2.json and runtime configuration files; no container command is run.
+- 10 new application framework checks WEB-APP-001 to WEB-APP-010: Laravel APP_DEBUG and APP_KEY, .env world-readable, Symfony dev environment, Rails master.key and secrets.yml exposure, Rails force_ssl, Spring Boot actuator exposure (properties and a loopback probe of /actuator/env), Flask debug in code (Low, heuristic), dependency lock files older than a year (Info), .git stored inside a web root, Laravel and Symfony cache or storage folders world-writable.
+- 8 new CMS checks WEB-CMS-012 to WEB-CMS-019: Drupal core past end of life, Drupal trusted_host_patterns missing, Joomla core past end of life, Magento not in production mode, Ghost url on plain HTTP, WordPress wp-cron.php reachable (Info), WordPress /?author=1 redirect, Drupal update_free_access.
+- 7 new cross-cutting hygiene checks: HOST-SEC-001 secrets in world-readable files (bounded read, pattern labels only), HOST-SSH-013 authorized_keys options and modes, HOST-CRON-001 cron jobs running world-writable programs, HOST-CRON-002 world-writable or relative entries in cron's PATH, HOST-USR-008 duplicate GIDs and names, HOST-USR-009 passwd and shadow consistency, HOST-USR-010 home directory permissions.
+- Lab: vulnerable and hardened fixtures for every new check (internal/lab/fixtures_containers_apps.go); the vulnerable shop gains Laravel, Symfony, Rails, Spring Boot, Flask, Ghost, Drupal 8, Joomla 3 and Magento developer-mode installs.
+- Academy: new modules A5 Container Runtime Hardening Depth, A6 Application Framework and CMS Configuration (Applied) and P15 Secrets, Cron and Account Hygiene (Practitioner), ten new glossary terms, and the semester course teaches them in weeks 10 and 11.
+- sys.FileInfo gains ModTime (used by WEB-APP-008); SOURCES.md lists the Laravel, Symfony, Rails, Spring, Adobe Commerce and Ghost documentation publishers.
+### Stream: Legal (2026-10-14, AI legal reviewer, an AI system, not a human lawyer; every item approved by the owner in chat on 2026-10-14)
+- Acknowledgements 1.7 (`terms.Version`): statement 1 now names every document that forms the agreement (EULA, Disclaimer, Acceptable Use Policy, Licence, Teaching With OpenVAPT, Citing OpenVAPT); new statement 10 confirms age or guardian acceptance and authority to bind an organisation. EULA.md, README.md and the website download gate carry the same ten statements word for word; a new test checks that the EULA states the acknowledgements version the tool shows.
+- EULA 2.4: states acknowledgements 1.7 (the earlier text said 1.5 while the tool showed 1.6), refers to licence 1.3, describes OpenAI Codex's role accurately (section 9), discloses the embedded vulnerability advisory data in release builds (section 10). No right or obligation changed.
+- OpenVAPT Source-Available Licence 1.3 (`LicenseRef-OpenVAPT-SAL-1.3`): DISCLAIMER.md travels with shared copies (section 3.4); contributors authorise the licensor to accept the EULA's contributor protections on their behalf (section 10(d)); section 15 names the commit that introduced each version. Every reference updated: NOTICE, LICENSING.md 2.3, ACCEPTABLE_USE.md 1.6, TEACHING.md 1.3, CITING.md 1.1, CITATION.cff, CONTRIBUTING.md, CREDITS.md, README, install.sh, terms.go pillar, FAQ, llms text, cite, compare, teach, contribute and footer text, worksheet credit line, ADR 0005.
+- Disclaimer 1.7, README and FAQ: OpenAI Codex also built parts of the code to Claude's specification (network, data-service and TLS checks, the report redesign, the vulnerability matching engine), matching AI-DISCLOSURE.md.
+- Acceptable Use Policy 1.6: users under 18 need a parent or guardian to accept the EULA for them in their own name, matching the EULA and TEACHING.md.
+- Third-party notices: new section on the vulnerability advisory data embedded in release builds (OSV ecosystem exports, GitHub Advisory Database CC BY 4.0, distribution security teams' terms, CISA KEV as a US Government work); `cmd/vulndbgen` and the fixture snapshot record per-source licence statements instead of "check source"; `openvapt version` prints the snapshot sources; docs/VULNDB.md and CREDITS.md match.
+- Website legal pages: versioned documents say that the version travelling with a copy governs that copy and that earlier versions are in the Git history.
+- AGENTS.md 1.4: publishing versus pushing (2.7, 3.9); EULA section 8 and PRIVACY section 3 stay in sync with collector, path and command changes (3.11, 6.2); the AI legal reviewer never approves its own drafting in the same run (6.2); self-describing legal review record (5.8); third-party vulnerability handling (6.10); confidentiality of real scan output (6.11); personal data in issues (6.12); model deprecation (7.1, 6.7); click-through terms (3.12). Governance, Control and Assurance Framework 1.1 replaces "no business use" with the licence's Own Use wording (I4, G1).
+- release/legal-review.json: new fields `accepted_high_risks` (names the two owner-accepted High risks) and `documents` (SHA-256 of every legal document reviewed); the channels page shows the accepted count beside "open High legal risks"; a unit test fails when a reviewed document changes without a new review. Gate semantics unchanged.
+- AI-DISCLOSURE.md and CONTRIBUTORS.md: Claude Fable 5.1 recorded as the AI legal reviewer for this bundle; release promotion commits by the GitHub Actions bot carry no model trailer; the three Codex merge commits lacking a DCO sign-off and the earlier author name are recorded as known exceptions.
+- SECURITY.md: acknowledgement aim within 7 days; "latest minor release" defined while no stable release exists; the non-GitHub reporting path is recorded as an open owner decision; points to security.txt.
+- Decision records 0007 (release channels and gates), 0008 (GitHub-only contact), 0009 (single-owner continuity) added.
+- CHANGELOG: the licence 1.2 entry now records that the owner approved it in chat and it was published on 2026-10-13, replacing the stale "awaiting owner approval".
+
+### Website
+- How to Cite OpenVAPT (cite.html) redesigned around CITING.md: credit required versus citation requested, a Copy a Citation card with a keyboard-accessible style switcher (APA 7, IEEE, Harvard, MLA 9, Chicago, Vancouver, BibTeX, BibLaTeX, RIS, CSL-JSON, Plain Text, Slide or Poster, Code Header, Teaching Credit), version and commit filled from the build, a When to Cite table, version and commit citing, Academy, module and check patterns, and "Use does not imply endorsement". The unsupported claim that archived releases may receive a DOI is removed. Copy buttons use the clipboard with a select-all fallback and announce "Copied" to screen readers; access dates show the reader's date.
+- Every check page and Academy module page ends with a Cite This Page box (APA 7 and BibTeX with the page's exact address and version).
+- sitegen writes CITATION.cff, openvapt.bib, openvapt.ris and openvapt.json (CSL-JSON) to the site root, renders CITING.md as legal/citing.html, links it from the footer, cite, teach, download and Academy pages, and supports fenced code blocks in legal Markdown. Cite page JSON-LD adds SoftwareSourceCode with creditText; llms.txt lists the cite pages.
+- Licence identifier updated to 1.2 (`LicenseRef-OpenVAPT-SAL-1.2`) in sitegen, the FAQ, terms.go (terms version 1.6; acknowledgements unchanged), the worksheet credit line, install.sh, and the compare, teach, contribute and footer text. `openvapt teach` prints a citing note.
+
+### Legal
+- Citation and credit (owner request in chat, 2026-10-13; drafted by the AI legal reviewer, an AI system, not a human lawyer; approved by the owner in chat and published on main on 2026-10-13, commit 09eac2b): OpenVAPT Source-Available Licence 1.2 (`LicenseRef-OpenVAPT-SAL-1.2`) adds the definitions of OpenVAPT Material and Credit and a Credit condition (section 5.4): copying, quoting, sharing, adapting or presenting OpenVAPT Material in any medium requires credit in a reasonable manner, with no suggestion of endorsement; CITING.md now travels with shared copies. Citation for running the tool, reporting results, or using ideas and facts is requested, not required, and fair dealing is untouched. New CITING.md 1.0 with APA 7, IEEE, Harvard, MLA 9, Chicago, Vancouver, BibTeX (@software, @misc), BibLaTeX, RIS, CSL-JSON, plain text, slide, poster, spoken, acknowledgements and source code credit lines. CITATION.cff: author "OpenVAPT", abstract, licence identifier 1.2, fuller keywords. TEACHING.md 1.2 (new section 11 on citing; credit line refers to licence 1.2), EULA 2.3 (section 6.4 summary; acknowledgements unchanged), LICENSING.md 2.2, NOTICE, README, CONTRIBUTING, ACCEPTABLE_USE, CREDITS and ADR 0005 updated to 1.2. Code and website references to licence 1.1 are listed for the engineer to update.
+
+### Governance
+- One public site (owner decision in chat, 2026-10-13): everything is published at https://openvapt.com/ for every channel. Privacy Policy 1.5 replaces the internal /beta/ preview paragraph with this; no data practice changed. AGENTS.md 1.3 clarifies that the stable gate needs release/legal-review.json for that exact stable candidate version (no rule changed). Governance, Control and Assurance Framework status notes: terminology test and internal findings register now listed as existing.
+- Legal (2026-10-13, AI legal reviewer, an AI system, not a human lawyer): the owner accepted in chat the personal risk that OpenVAPT is a project name and not a registered legal entity, approved the public website launch (indexed, with pre-release banners) and chose to publish answer keys in every channel. `release/legal-review.json` now covers v0.1.0-alpha.2 with `open_high_risks: 0` (entity risk accepted, not closed) and `public_launch_approved: true`. EULA 2.2, Disclaimer 1.6, Privacy Policy 1.4 and NOTICE state that OpenVAPT is built by AI Cybersecurity Engineers under the direction of one human owner, who is the licensor in law and bears residual risk; no right or obligation changed. Teaching With OpenVAPT 1.1 states that answer keys are public and how to set fair graded work. GOVERNANCE.md, CITATION.cff authors and the Governance, Control and Assurance Framework status notes updated to match (no control changed).
+- Adopted the Governance, Control and Assurance Framework 1.0 (GOVERNANCE-CONTROL-ASSURANCE.md), effective 2026-10-13, approved by the owner in chat and reviewed by the AI legal reviewer (an AI system, not a human lawyer). AGENTS.md bumped to 1.2 and incorporates it by reference (new section 11, precedence unchanged). Added the docs/TASK-CARD.md template, a GOVERNANCE.md pointer and a plain-English summary in AI-DISCLOSURE.md.
+
+### Security
+- Workflows: every checkout uses `persist-credentials: false` except the promote record job, which pushes and runs only setup-go and `go run ./cmd/channel`; Go comes from the `toolchain go1.26.9` line in go.mod (`check-latest: false`).
+- Release: full `go test -race ./...` on the shipped build; the release is created as a draft, every asset is uploaded and re-verified against SHA256SUMS, then it is published. A re-run on an existing release fails unless all expected assets are present and match SHA256SUMS, so record never runs on an incomplete release. A leftover draft from an interrupted run stops the release with instructions; it is never published or deleted automatically. Provenance attests both binaries explicitly.
+- Promote: the signed gate now requires and verifies the arm64 binary and its Sigstore bundle as well as amd64.
+- vulndbgen: KEV matching over ID, aliases and OSV `upstream` (Debian records); conservative CVSS v4 and Ubuntu priority severities; HTTPS-only streamed downloads with a 1 GiB cap, redirect refusal and timeouts; one ecosystem at a time; oversized records, too many records and parse failures above 1% fail the build.
+- Installer: HTTPS only with TLS 1.2 or newer across redirects for curl and wget; `file://` only with `OPENVAPT_ALLOW_FILE=1`; `OPENVAPT_REQUIRE_SIGNATURE=1` makes a missing cosign fatal; strict version format; channel names validated before use or display. Release verification with `gh attestation verify` documented in docs/REPORT_SIGNING.md.
+- Release: the release workflow is split into a `build` job without write access and a `publish` job (`needs: build`) that holds the write token, approved by the owner; it first runs at the next release.
+- cmd/channel: updating CITATION.cff fails if its version or date line is missing; table tests for channel precedence.
+
+### Report Signing (2026-10-13)
+- Signature format `openvapt.sign/2`: the signature covers the canonical JSON of the report without its integrity block, and `report.json` is written as exactly that JSON with the block added. `openvapt verify` decodes the file strictly (unknown fields, duplicate keys and letter case variants are refused), requires it to match the canonical JSON byte for byte (one trailing newline allowed) and caps it at 64 MiB. Reports with the older `openvapt.report/2` schema give "cannot verify: signed with an older report format" instead of a false tamper result. See docs/REPORT_SIGNING.md.
+- Reports are written unsigned, with a warning, when there is no per-user configuration folder; the key is never kept in a shared folder such as /tmp. The key folder and key must not be symlinks, must be owned by the effective user and must deny group and other access; new keys are created exclusively without following symlinks.
+
+### Scanner Safety (2026-10-13)
+- Files are opened with O_NONBLOCK (a FIFO or device cannot stall the scan) and with O_NOFOLLOW where a symlink must not be followed; every check runs under its own timeout.
+
+### Check Metadata and Severity (2026-10-13)
+- HOST-PWD-005 (forced periodic password rotation) is now Info, citing NIST SP 800-63B-4, which says verifiers should not require periodic password changes.
+- CWE, NIST SP 800-53, OWASP ASVS, OWASP WSTG and OWASP Top 10 mappings corrected across checks, including a specific CWE for each data service check.
+- End of support tables: new rows for Fedora 42, Ubuntu 25.10 and 26.04 LTS, Ubuntu interim releases 20.10 to 23.04, CentOS Stream 9, RHEL, Rocky and AlmaLinux 10, Oracle Linux 7 to 9 and Amazon Linux 1. A release older than the oldest row of its distribution (and PHP below 5.6) now fails as past end of support instead of being unknown.
+
+### Check Logic Fixes (2026-10-13)
+- End of support table re-verified against each vendor's published dates: Fedora 42 2026-05-27, Fedora 44 2027-06-02, CentOS Stream 10 2030-05-31, AlmaLinux 8 2029-05-31; Ubuntu 16.04, 23.04, 23.10, 25.04 and 25.10 dates corrected; Oracle Linux 10 added.
+- HOST-KRN-005: on Docker hosts a trailing RETURN rule in DOCKER-USER no longer causes a false fail.
+- sshd Match evaluation: Match user and group names keep their letter case, and a Group is represented by its primary-group members as well as the members listed in /etc/group.
+- SSH: the parser accepts `Key=value`, applies first value wins across Include files (relative paths resolved against /etc/ssh), keeps settings after a Match line from overriding global values, and applies OpenSSH defaults for unset forwarding and password keywords.
+- Kernel: per-interface sysctl rules require `all`, `default` and every interface to hold the hardened value (interface names with dots such as VLANs are read directly); a kernel without IPv6 is no longer an unreadable input.
+- Firewall: a port-less accept rule (ufw, nftables, iptables) is treated as admitting every port unless it only matches return traffic or a protocol without ports; ufw's own boilerplate chain is excluded.
+- Web: header and cookie checks skip a site whose home page answers with a redirect; HSTS max-age accepted as a token or quoted string; framing evaluates CSP frame-ancestors before X-Frame-Options; Referrer-Policy uses the last recognised token; cookies being cleared and anti-CSRF token cookies are no longer flagged for missing HttpOnly.
+- Accounts: lockout requires pam_faillock with both preauth and authfail and reads deny from the module line, then faillock.conf, then the default of 3 (pam_tally2 needs an explicit deny); service accounts are judged against UID_MIN from /etc/login.defs.
+- Files: world-writable directories without the sticky bit are found without following symlinks.
+- TLS: ECDSA keys below 256 bits are reported as weak, alongside RSA below 2048 bits.
+
+### Website (2026-10-13)
+- Accessibility and SEO: heading order fixed (card headings are real h2 elements), canonical and og:url emitted once per page and omitted on the 404 page, WebSite structured data, long Academy navigation labels truncate instead of overflowing, Title Case fixes.
+- Build assertions: sitegen fails when a page title (with suffix) or meta description breaks the length rules, and when it cannot resolve the git commit for pinned source links (unless `-allow-unpinned` is passed).
+- Governance pages published: legal/governance.html (Governance, Control and Assurance Framework) and legal/agents.html (AI Cybersecurity Engineer Policy).
+- One public site for every channel (owner decision, 2026-10-13): openvapt.com/beta/ is retired and it no longer exists (every /beta/ URL answers 410 Gone, with no redirect), and every link uses its exact final URL, so alpha, beta, rc and stable are all visible at https://openvapt.com/.
+- Redirects: HTTP to HTTPS and www.openvapt.com to openvapt.com (301).
+- Repository Markdown links that point to files not published on the site now link to the file on GitHub instead of a missing page.
+- Release wording: releases are described as built only through promote.yml after every channel gate passed, not from signed tags; the download page and README document `OPENVAPT_REQUIRE_SIGNATURE=1` and HTTPS-only downloads, and pin the cosign identity to release.yml on main.
+
+### Tests (2026-10-13)
+- `internal/sources` TestTerminology fails the build if public text calls OpenVAPT "open source" or "non-profit", or uses "AI-generated" or "AI agents", unless the line plainly negates or quotes the phrase or names a third party.
+
+### Deferred (2026-10-13)
+- None open. The release job split is done (see Security) and HOST-KRN-005 is container-aware (see Added).
+
+### Docs
+- SOURCES.md: generated by the new `internal/sources` package from every check and Academy reference (165 sources, 31 publishers), grouped by publisher with terms, credit lines and the checks citing each; published at legal/sources.html. Tests fail if it goes stale or a check cites an unrecorded publisher.
+- CREDITS.md: section 7 now points to SOURCES.md; new 7b credit lines for MITRE, FIRST, CIS, OWASP, NIST and IETF (reviewed by the AI legal reviewer, 0 open high risks); added CIS Controls v8, NIST CSF 2.0, OWASP WSTG and MITRE ATT&CK to the standards table; exact pinned GitHub Actions versions.
+- CITATION.cff: version corrected to 0.1.0-alpha.2 and repository URL capitalisation; `cmd/channel promote` now updates it automatically and a test enforces it.
+- CREDITS.md: file-by-file inventory of every third-party file (upstream path, copyright, licence, SHA-256); cite ZRender, d3.js, Feather and Tailwind preflight, which are bundled inside shipped files; publish their licence texts.
+
+### Audit and Fixes (Claude, with three independent AI review passes)
+- Severity now always matches the check's own CVSS v3.1 vector: a shared calculator (internal/check/cvss.go, tested against FIRST reference scores) is enforced at registration; 56 overstated or wrong vectors corrected and 12 severities adjusted to their honest scores.
+- Release pipeline: release.yml runs only from promote.yml (no gate bypass by tag push), re-runs the tests and installer test on exactly the shipped binaries, states the embedded snapshot checksum, covers every asset in SHA256SUMS, is safe to re-run, and pins every action to a commit; the record step retries on a moving main and refuses a version that differs from the published one; channel outputs are validated; promotion requires the exact tested commit and the same release cycle.
+- Installer: signature identity pinned to release.yml on main, Ctrl-C stops it, help works when piped, clear error when HOME is unset, Windows line endings tolerated.
+- Check accuracy: negated iptables and nftables sources and ports, nftables comments and loopback rules, ufw rules on lo, systemd drop-ins ordered across all directories including /run, commented-out WordPress define() lines ignored, Django's last DEBUG assignment honoured, --inspect-port no longer reported as the inspector.
+- Teacher toolkit: openvapt teach (course plans, worksheets and answer keys, rubric, practice-lab answer keys with --only and --skip), seeded practice labs (openvapt demo --lab practice --seed), For Teachers page, printable worksheets and keys for every module, TEACHING.md.
+- Website: Title Case fixes, noindex on sample reports, clearer channel gate wording, CITATION.cff version.
+
+### Release Channels
+- One codebase and one website with four channels: Alpha, Beta, Release Candidate and Stable. Promotion is decided by evidence gates in internal/channels (CI, lab proof, soak time, AI legal review of the exact build, installer test, signing, provenance and SBOM, public release sign-off), run daily by .github/workflows/promote.yml; every promotion is recorded in release/channels.json (Claude).
+- `openvapt version`, every report and the website show the channel; pre-release builds carry a warning. The installer takes `--channel` (Stable by default). The website is indexed since the owner approved the public launch on 2026-10-13 (recorded in release/legal-review.json), and every page carries a pre-release banner until a Stable release exists. New Release Channels page.
+
+### Licence and Legal (2026-10-13)
+- Licence version 1.1 (`LicenseRef-OpenVAPT-SAL-1.1`): release v0.1.0-alpha.1 was published under version 1.0, so the widened Teaching grant is a new version rather than an edit of 1.0. Version 1.1 adds the Teaching With OpenVAPT terms and their conditions and leaves every other term unchanged; licence section 15 records the history. A student's own machine is that student's Own Use, not Teaching.
+- Relicensed before any release from PolyForm Noncommercial 1.0.0 with an Additional Permission to the self-contained OpenVAPT Source-Available Licence 1.0 (`LicenseRef-OpenVAPT-SAL-1.0`): only Own Use is licensed, and providing any service, paid or unpaid, is not licensed for anyone. ADDITIONAL-PERMISSION.md removed. Free Teaching (simulated lab or the institution's own authorised machines) is licensed and is not a service.
+- Pre-release warning for alpha, beta and rc builds in the licence, EULA, Disclaimer, Acceptable Use Policy, README and website.
+- TEACHING.md 1.0, Teaching With OpenVAPT terms; licence Teaching definition and grant aligned; EULA 2.1, Acceptable Use Policy 1.5, Licence summary 2.1.
+- Terminology: OpenVAPT is described as researched, developed and built by AI Cybersecurity Engineers under human direction.
+- EULA 2.0, Disclaimer 1.4, Acceptable Use Policy 1.3, Licence summary 2.0, acknowledgements 1.3: gift framing, no relationship or duty, release of claims, no reliance, read-down liability limit, non-affiliation notice for third-party names, installer risk notice.
+
+### Coverage Expansion: Services, Firewall Correlation, Application Stacks and CMS
+- 31 new checks, 165 in total (Claude): systemd service hardening HOST-SYSD-001 to 005 (root services, sandboxing, writable unit files and programs, secrets in Environment=); firewall versus listener correlation NET-FW-003 to 006 (sensitive ports open to anywhere, stale rules, Docker bypassing the host firewall, exposure map) and NET-APP-001 (application server ports exposed directly); Apache Tomcat WEB-TOM-001 to 005 (Manager restriction, default credentials, shutdown port, AJP Ghostcat, sample apps); Node.js WEB-NODE-001 to 003 (end of life, inspector, production mode); Python WEB-PY-001 to 005 (Django DEBUG, ALLOWED_HOSTS, generated SECRET_KEY, Flask/Werkzeug debugger, development servers); CMS WEB-CMS-004 to 011 (configuration permissions, WordPress debug display, file editor and automatic updates, Joomla debug and version manifest, Drupal changelog).
+- New read-only collectors for systemd units with drop-ins, ufw, nftables and iptables allow rules, Tomcat installations, Django settings and CMS configuration; `node --version` added to the read-only command allow-list.
+- Academy modules P11 (systemd), P12 (firewall policy versus listeners), P13 (Tomcat, Node.js, Python) and P14 (CMS hardening), seven new glossary terms; vulnerable and hardened labs extended so every new check is proven both ways.
+
+### Vulnerability Management and Containers
+- Offline vulnerability matching: HOST-CVE-001 to 003 and WEB-CVE-001, Debian and RPM version comparison, inventory of OS packages and web libraries, release-time snapshot from OSV and CISA KEV (OpenAI Codex, GPT-6; reviewed and corrected by Claude).
+- Docker and Kubernetes host checks HOST-CTR-001 to 004 and HOST-K8S-001 to 003; Academy modules P9 and P10 (Claude).
+
+### Redesign to Professional Standards
+- Control-category framework: every check belongs to one of ten categories mapped to CIS Controls v8 and NIST CSF 2.0, with a remediation effort and OWASP WSTG ids where applicable (Claude).
+- 123 checks (from 58): 47 server and web checks by Claude; 18 network, data-service and TLS checks by OpenAI Codex.
+- Report schema v3 with executive summary, risk heat map, framework coverage and prioritised remediation plan (OpenAI Codex).
+- Coverage Dashboard, category and standard filters in the catalogue, Academy modules P7 and P8 (Claude).
+
+### Security and Fixes (contributed by OpenAI Codex, reviewed by Claude)
+- Independent code review by OpenAI Codex (17 findings) and fixes for all 16 code findings: exclusive private report writing, exact command allow-list, SSH Match evaluation, Incomplete status instead of false passes, stricter firewall, HSTS, CSP and TLS checks, certificate chain verification, vhost include parsing, Debian LTS dates, Markdown escaping.
+- New checks HOST-SSH-007 (forwarding and tunnels) and HOST-SSH-008 (login grace and authentication methods), documented exit codes, report schema v2, coverage-gap summaries, docs/REPORT_SIGNING.md.
+
+### Added (contributed by Claude)
+- OpenVAPT Academy (15 modules, glossary, `openvapt learn`), FAQ and comparison pages, structured data, acknowledgement gate, AI disclosure, credits, contributors, revised legal documents.
+
+### Added
+- First public build of OpenVAPT: 58 read-only checks across server, network and web apps.
+- Loopback-only scope guard, read-only command allow-list, dry-run recorder.
+- Reports in HTML, JSON, SARIF 2.1.0 and Markdown, with methodology and limitations; report diff; Ed25519 report signing.
+- Simulated vulnerable and hardened lab servers (`openvapt demo`) used by the test suite.
+- Website generator that cites the source of every check.
+- HOST-KRN-005 (IP forwarding) now detects a container runtime or Kubernetes node read-only (runtime sockets, /etc/kubernetes, or docker0, cni0, cbr0 or flannel.1 in /sys/class/net). There forwarding is required, so the check passes with context when the forward path is filtered (FORWARD policy DROP, nftables forward policy drop, or DOCKER-USER DROP/REJECT rules), fails when forwarded traffic is accepted by default, and is incomplete when the policy cannot be read. New lab variant `lab.ContainerHost()`.
+- The sshd allow-list now also permits `sshd -T -C user=<u>,host=localhost,addr=<a>` built only from validated Match User, Group and Address values (user names `^[a-z_][a-z0-9_-]{0,31}$`, canonical IP literals or the first address of a CIDR, a Group represented by its first member in /etc/group, at most 8 extra contexts, no shell). Risky values found this way are reported as conditional Match findings. Still read-only: sshd only evaluates its configuration.

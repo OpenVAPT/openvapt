@@ -1,0 +1,16 @@
+name: New Check Proposal
+description: Suggest a new read-only check
+labels: [new-check]
+body:
+  - type: textarea
+    id: weakness
+    attributes: {label: Weakness and Why It Matters}
+    validations: {required: true}
+  - type: textarea
+    id: detection
+    attributes: {label: How It Can Be Detected Read-Only on the Local Machine}
+    validations: {required: true}
+  - type: textarea
+    id: refs
+    attributes: {label: Public References (OWASP, NIST, CWE, Vendor Docs)}
+    validations: {required: true}

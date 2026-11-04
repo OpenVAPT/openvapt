@@ -1,0 +1,25 @@
+name: Factual Error
+description: A check, Academy module, standard mapping, date or citation states something that is not true
+labels: [factual-error]
+body:
+  - type: markdown
+    attributes:
+      value: "Every check and module cites a public source. Point at the statement and at the source that contradicts it. Never paste secrets, hostnames or IP addresses."
+  - type: input
+    id: where
+    attributes: {label: Check ID, Module or Page, description: For example HOST-SSH-003, Academy P12, or a page address}
+    validations: {required: true}
+  - type: textarea
+    id: statement
+    attributes: {label: The Statement as Written}
+    validations: {required: true}
+  - type: textarea
+    id: correction
+    attributes: {label: What Is Correct, and the Public Source That Shows It, description: A link to a vendor, NIST, OWASP, CIS, IETF or MITRE page, with the relevant sentence quoted briefly}
+    validations: {required: true}
+  - type: dropdown
+    id: effect
+    attributes:
+      label: Effect
+      options: [Wrong result on a real machine, Wrong severity or standard mapping, Wrong teaching content, Wrong date or version, Other]
+    validations: {required: true}

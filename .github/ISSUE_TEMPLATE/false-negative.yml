@@ -1,0 +1,12 @@
+name: False Negative
+description: A check missed a real problem
+labels: [false-negative]
+body:
+  - type: input
+    id: check
+    attributes: {label: Check ID}
+    validations: {required: true}
+  - type: textarea
+    id: details
+    attributes: {label: The Configuration That Should Have Failed (Redacted)}
+    validations: {required: true}
