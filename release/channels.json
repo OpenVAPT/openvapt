@@ -1,6 +1,30 @@
 {
   "schema": "openvapt.channels/1",
   "next": "v0.2.0",
-  "current": {},
-  "history": []
+  "current": {
+    "alpha": {
+      "channel": "alpha",
+      "version": "v0.2.0-alpha.1",
+      "commit": "1fbe584fd749b6da8fb0a1dfd602e35c512fd5cf",
+      "date": "2026-11-04",
+      "decision": "promoted automatically: every gate passed",
+      "evidence": [
+        "CI Green: format, vet, race tests, static analysis, security and vulnerability scans",
+        "Lab Proof: every check fails on the vulnerable lab and passes on the hardened lab"
+      ]
+    }
+  },
+  "history": [
+    {
+      "channel": "alpha",
+      "version": "v0.2.0-alpha.1",
+      "commit": "1fbe584fd749b6da8fb0a1dfd602e35c512fd5cf",
+      "date": "2026-11-04",
+      "decision": "promoted automatically: every gate passed",
+      "evidence": [
+        "CI Green: format, vet, race tests, static analysis, security and vulnerability scans",
+        "Lab Proof: every check fails on the vulnerable lab and passes on the hardened lab"
+      ]
+    }
+  ]
 }

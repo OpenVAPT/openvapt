@@ -4,6 +4,10 @@ All notable changes are documented here. This project follows Semantic Versionin
 
 ## [Unreleased]
 
+_No changes recorded yet._
+
+## [v0.2.0-alpha.1] - 2026-11-04
+
 - Repository restarted with a clean history on 2026-11-04. Versions continue from v0.2.0; releases up to v0.1.0-alpha.6 are not published here.
 - EULA 2.6 and Privacy 1.8: list the new reads (Alpine package database, Kerberos configuration and keytab metadata, Docker image layer package lists, a bounded walk of /srv and /opt) the rpm source and module fields, and how network storage is read. Owner approved the wording in chat.
 
